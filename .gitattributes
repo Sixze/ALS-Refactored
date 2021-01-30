@@ -1,3 +1,0 @@
-**/Content/** filter=lfs diff=lfs merge=lfs -text lockable
-**/Binaries/** filter=lfs diff=lfs merge=lfs -text
-**/Build/** filter=lfs diff=lfs merge=lfs -text
