@@ -1,0 +1,119 @@
+﻿#pragma once
+
+#include "Engine/DataAsset.h"
+#include "Engine/DataTable.h"
+#include "State/Enumerations/AlsGait.h"
+#include "State/Enumerations/AlsRotationMode.h"
+#include "State/Enumerations/AlsStance.h"
+
+#include "AlsMovementCharacterSettings.generated.h"
+
+class UCurveVector;
+class UCurveFloat;
+
+USTRUCT(BlueprintType)
+struct FAlsMovementGaitSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	float WalkSpeed{175};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	float RunSpeed{375};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	float SprintSpeed{650};
+
+	// Gait amount to acceleration, deceleration and ground friction curve.
+	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveVector* AccelerationAndDecelerationAndGroundFrictionCurve;
+
+	// Gait amount to rotation speed curve.
+	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* RotationSpeedCurve;
+
+	float GetSpeedForGait(const EAlsGait Gait) const
+	{
+		switch (Gait)
+		{
+			case EAlsGait::Running:
+				return RunSpeed;
+
+			case EAlsGait::Sprinting:
+				return SprintSpeed;
+
+			case EAlsGait::Walking:
+				return WalkSpeed;
+
+			default:
+				checkNoEntry();
+				return 0;
+		}
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FAlsMovementStanceSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsMovementGaitSettings Standing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsMovementGaitSettings Crouching;
+
+	const FAlsMovementGaitSettings* GetMovementGaitSettingsForStance(const EAlsStance Stance) const
+	{
+		switch (Stance)
+		{
+			case EAlsStance::Standing:
+				return &Standing;
+
+			case EAlsStance::Crouching:
+				return &Crouching;
+
+			default:
+				checkNoEntry();
+				return nullptr;
+		}
+	}
+};
+
+UCLASS(Blueprintable, BlueprintType)
+class UAlsMovementCharacterSettings : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsMovementStanceSettings LookingDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsMovementStanceSettings VelocityDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsMovementStanceSettings Aiming;
+
+	const FAlsMovementStanceSettings* GetMovementStanceSettingsForRotationMode(const EAlsRotationMode RotationMode) const
+	{
+		switch (RotationMode)
+		{
+			case EAlsRotationMode::LookingDirection:
+				return &LookingDirection;
+
+			case EAlsRotationMode::VelocityDirection:
+				return &VelocityDirection;
+
+			case EAlsRotationMode::Aiming:
+				return &Aiming;
+
+			default:
+				checkNoEntry();
+				return nullptr;
+		}
+	}
+};
