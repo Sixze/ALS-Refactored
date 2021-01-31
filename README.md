@@ -1,5 +1,5 @@
 # Advanced Locomotion System V4 Refactored
-![Image](https://github.com/Sixze/ALSRefactored/raw/main/Resources/Readme_Content_2.gif)
+![Image](https://github.com/Sixze/ALSRefactored/raw/main/Screenshots/Readme_Content_2.gif)
 
 Completely refactored and bug fixed version of the C++ port of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26**.
 
@@ -28,7 +28,7 @@ Completely refactored and bug fixed version of the C++ port of [Advanced Locomot
 ```
 - Enable plugin in your project, generate visual studio project files and build. Your project needs to be a C++ project to build the plugin. Unfortunately, BP projects are not supported at the moment.
 - Launch the project, and enable plugin content viewer as seen below. This will show contents of the plugin in your content browser:
-![image](https://github.com/Sixze/ALSRefactored/raw/main/Resources/Readme_Content_1.png)
+![image](https://github.com/Sixze/ALSRefactored/raw/main/Screenshots/Readme_Content_1.png)
 
 ## License & Contribution
 **Source code** of the plugin is licensed under MIT license, and other developers are encouraged to fork the repository, open issues & pull requests to help the development.
