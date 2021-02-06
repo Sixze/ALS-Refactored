@@ -22,15 +22,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Trace Channels", meta = (BlueprintThreadSafe))
 	static ECollisionChannel AlsClimbableChannel()
 	{
-		return ECC_GameTraceChannel2;
+		return ECC_GameTraceChannel1;
 	}
 
 	// Collision Profiles
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Collision Profiles", meta = (BlueprintThreadSafe))
-	static FName AlsCharacterProfile()
+	static FName AlsPawnProfile()
 	{
-		return TEXT("AlsCharacter");
+		return TEXT("AlsPawn");
 	}
 
 	// Bones
@@ -336,7 +336,7 @@ struct FAlsPropertyAccessConstants
 	// Collision Profiles
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AlsCharacterProfile{UAlsConstants::AlsCharacterProfile()};
+	FName AlsPawnProfile{UAlsConstants::AlsPawnProfile()};
 
 	// Bones
 

@@ -19,7 +19,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	bUseControllerRotationYaw = false;
 
-	GetCapsuleComponent()->SetCollisionProfileName(UAlsConstants::AlsCharacterProfile(), false);
+	GetCapsuleComponent()->SetCollisionProfileName(UAlsConstants::AlsPawnProfile(), false);
 
 	GetMesh()->SetRelativeLocation_Direct({0, 0, -90});
 	GetMesh()->SetRelativeRotation_Direct({0, -90, 0});
@@ -1055,7 +1055,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// 	                 FQuat::Identity, FColor::Blue, false, 5);
 	// #endif
 
-	if (GetWorld()->SweepTestByProfile(SweepTestLocation, SweepTestLocation, FQuat::Identity, UAlsConstants::AlsCharacterProfile(),
+	if (GetWorld()->SweepTestByProfile(SweepTestLocation, SweepTestLocation, FQuat::Identity, UAlsConstants::AlsPawnProfile(),
 	                                   FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), CapsuleHalfHeight),
 	                                   {TEXT("AlsBaseCharacter::TryStartMantling (Free space sweep)"), false, this}))
 	{

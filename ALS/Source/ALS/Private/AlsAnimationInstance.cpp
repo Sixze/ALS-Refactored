@@ -894,7 +894,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 
 	FHitResult Hit;
 	GetWorld()->SweepSingleByProfile(Hit, CapsuleLocation, CapsuleLocation + TraceVector, FQuat::Identity,
-	                                 Constants.AlsCharacterProfile,
+	                                 Constants.AlsPawnProfile,
 	                                 FCollisionShape::MakeCapsule(CharacterCapsule->GetScaledCapsuleRadius(),
 	                                                              CharacterCapsule->GetScaledCapsuleHalfHeight()),
 	                                 {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, Character});
