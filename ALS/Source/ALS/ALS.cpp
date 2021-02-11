@@ -2,4 +2,4 @@
 
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, ALS);
+IMPLEMENT_MODULE(FDefaultModuleImpl, ALS);

@@ -1,4 +1,4 @@
-﻿#include "Modifier/AlsAnimationModifier_CalculateRotationYawSpeed.h"
+﻿#include "AlsAnimationModifier_CalculateRotationYawSpeed.h"
 
 #include "Animation/AnimSequence.h"
 #include "Utility/AlsConstants.h"
