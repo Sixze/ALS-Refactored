@@ -5,7 +5,7 @@
 #include "AlsAnimationModifier_CopyCurves.generated.h"
 
 UCLASS(meta = (DisplayName = "Als Copy Curves Animation Modifier"))
-class ALS_API UAlsAnimationModifier_CopyCurves : public UAnimationModifier
+class ALSEDITOR_API UAlsAnimationModifier_CopyCurves : public UAnimationModifier
 {
 	GENERATED_BODY()
 

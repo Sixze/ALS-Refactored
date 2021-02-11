@@ -1,4 +1,4 @@
-﻿#include "Modifier/AlsAnimationModifier_CopyCurves.h"
+﻿#include "AlsAnimationModifier_CopyCurves.h"
 
 #include "Animation/AnimSequence.h"
 

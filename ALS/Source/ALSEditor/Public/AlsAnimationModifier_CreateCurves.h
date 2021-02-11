@@ -6,7 +6,7 @@
 #include "AlsAnimationModifier_CreateCurves.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsAnimationCurveKey
+struct ALSEDITOR_API FAlsAnimationCurveKey
 {
 	GENERATED_BODY()
 
@@ -18,7 +18,7 @@ struct FAlsAnimationCurveKey
 };
 
 USTRUCT(BlueprintType)
-struct FAlsAnimationCurve
+struct ALSEDITOR_API FAlsAnimationCurve
 {
 	GENERATED_BODY()
 
@@ -36,7 +36,7 @@ struct FAlsAnimationCurve
 };
 
 UCLASS(meta = (DisplayName = "Als Create Curves Animation Modifier"))
-class ALS_API UAlsAnimationModifier_CreateCurves : public UAnimationModifier
+class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifier
 {
 	GENERATED_BODY()
 

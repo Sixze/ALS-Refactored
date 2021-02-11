@@ -6,7 +6,7 @@
 #include "AlsAnimationModifier_CreateLayeringCurves.generated.h"
 
 UCLASS(meta = (DisplayName = "Als Create Layering Curves Animation Modifier"))
-class ALS_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimationModifier
+class ALSEDITOR_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimationModifier
 {
 	GENERATED_BODY()
 

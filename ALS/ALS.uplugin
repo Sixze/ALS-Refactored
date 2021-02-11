@@ -21,6 +21,11 @@
 			"Name": "ALS",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ALSEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }

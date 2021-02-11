@@ -6,6 +6,9 @@ public class ALS : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "NetCore", "Engine", "AnimationModifiers" });
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core", "CoreUObject", "NetCore", "Engine"
+		});
 	}
 }
