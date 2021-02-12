@@ -3,7 +3,7 @@
 #include "AlsRagdollingAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsRagdollingAnimationState
+struct ALS_API FAlsRagdollingAnimationState
 {
 	GENERATED_BODY()
 

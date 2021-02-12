@@ -5,7 +5,7 @@
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct FAlsInAirSettings
+struct ALS_API FAlsInAirSettings
 {
 	GENERATED_BODY()
 

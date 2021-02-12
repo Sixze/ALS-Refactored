@@ -3,7 +3,7 @@
 #include "AlsLocomotionAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsLocomotionAnimationState
+struct ALS_API FAlsLocomotionAnimationState
 {
 	GENERATED_BODY()
 

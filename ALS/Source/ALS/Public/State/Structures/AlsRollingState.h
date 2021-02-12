@@ -3,7 +3,7 @@
 #include "AlsRollingState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsRollingState
+struct ALS_API FAlsRollingState
 {
 	GENERATED_BODY()
 

@@ -5,7 +5,7 @@
 class UAnimSequenceBase;
 
 USTRUCT(BlueprintType)
-struct FAlsDynamicTransitionSettings
+struct ALS_API FAlsDynamicTransitionSettings
 {
 	GENERATED_BODY()
 

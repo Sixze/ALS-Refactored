@@ -781,7 +781,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime, const FA
 		switch (RotationMode)
 		{
 			case EAlsRotationMode::VelocityDirection:
-				RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, 500,
+				RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, 800,
 				                                CalculateActorRotationSpeed(GaitSettings));
 				break;
 

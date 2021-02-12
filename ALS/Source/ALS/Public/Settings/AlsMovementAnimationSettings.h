@@ -5,7 +5,7 @@
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct FAlsMovementAnimationSettings
+struct ALS_API FAlsMovementAnimationSettings
 {
 	GENERATED_BODY()
 

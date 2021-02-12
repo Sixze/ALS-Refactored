@@ -3,7 +3,7 @@
 #include "AlsLeanState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsLeanState
+struct ALS_API FAlsLeanState
 {
 	GENERATED_BODY()
 

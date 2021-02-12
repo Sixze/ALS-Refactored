@@ -22,7 +22,7 @@ uint8 FAlsSavedMove::GetCompressedFlags() const
 }
 
 void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, FVector const& NewAcceleration,
-                               class FNetworkPredictionData_Client_Character& Data)
+                               FNetworkPredictionData_Client_Character& Data)
 {
 	Super::SetMoveFor(Character, NewDeltaTime, NewAcceleration, Data);
 
@@ -40,7 +40,7 @@ FSavedMovePtr FAlsNetworkPredictionData::AllocateNewMove()
 	return MakeShared<FAlsSavedMove>();
 }
 
-class FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
+FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
 {
 	if (ClientPredictionData == nullptr)
 	{

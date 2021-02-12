@@ -3,7 +3,7 @@
 #include "AlsRotateInPlaceSettings.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsRotateInPlaceSettings
+struct ALS_API FAlsRotateInPlaceSettings
 {
 	GENERATED_BODY()
 

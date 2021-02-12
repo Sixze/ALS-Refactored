@@ -3,7 +3,7 @@
 #include "AlsRagdollingSettings.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsRagdollingSettings
+struct ALS_API FAlsRagdollingSettings
 {
 	GENERATED_BODY()
 
