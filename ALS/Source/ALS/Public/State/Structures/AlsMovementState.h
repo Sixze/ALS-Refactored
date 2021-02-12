@@ -14,7 +14,7 @@ enum class EAlsHipsDirection : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsVelocityBlendState
+struct ALS_API FAlsVelocityBlendState
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ struct FAlsVelocityBlendState
 };
 
 USTRUCT(BlueprintType)
-struct FAlsMovementState
+struct ALS_API FAlsMovementState
 {
 	GENERATED_BODY()
 

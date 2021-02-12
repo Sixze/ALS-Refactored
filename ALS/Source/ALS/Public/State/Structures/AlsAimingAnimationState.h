@@ -3,7 +3,7 @@
 #include "AlsAimingAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsAimingAnimationState
+struct ALS_API FAlsAimingAnimationState
 {
 	GENERATED_BODY()
 

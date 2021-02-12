@@ -3,7 +3,7 @@
 #include "AlsTurnInPlaceState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsTurnInPlaceState
+struct ALS_API FAlsTurnInPlaceState
 {
 	GENERATED_BODY()
 

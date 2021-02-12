@@ -5,7 +5,7 @@
 class UAnimSequenceBase;
 
 USTRUCT(BlueprintType)
-struct FAlsTurnInPlaceSettings
+struct ALS_API FAlsTurnInPlaceSettings
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ struct FAlsTurnInPlaceSettings
 };
 
 USTRUCT(BlueprintType)
-struct FAlsGeneralTurnInPlaceSettings
+struct ALS_API FAlsGeneralTurnInPlaceSettings
 {
 	GENERATED_BODY()
 

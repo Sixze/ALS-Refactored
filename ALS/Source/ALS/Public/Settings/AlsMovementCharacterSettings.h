@@ -12,7 +12,7 @@ class UCurveVector;
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct FAlsMovementGaitSettings
+struct ALS_API FAlsMovementGaitSettings
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,7 @@ struct FAlsMovementGaitSettings
 };
 
 USTRUCT(BlueprintType)
-struct FAlsMovementStanceSettings
+struct ALS_API FAlsMovementStanceSettings
 {
 	GENERATED_BODY()
 

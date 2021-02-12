@@ -7,7 +7,7 @@ class UCurveVector;
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct FAlsMantlingSettings
+struct ALS_API FAlsMantlingSettings
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ struct FAlsMantlingSettings
 };
 
 USTRUCT(BlueprintType)
-struct FAlsMantlingTraceSettings
+struct ALS_API FAlsMantlingTraceSettings
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ struct FAlsMantlingTraceSettings
 };
 
 USTRUCT(BlueprintType)
-struct FAlsGeneralMantlingSettings
+struct ALS_API FAlsGeneralMantlingSettings
 {
 	GENERATED_BODY()
 

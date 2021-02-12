@@ -5,7 +5,7 @@
 #include "AlsRagdollingCharacterState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsRagdollingCharacterState
+struct ALS_API FAlsRagdollingCharacterState
 {
 	GENERATED_BODY()
 

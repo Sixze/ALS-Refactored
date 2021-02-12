@@ -6,7 +6,7 @@ class UAnimMontage;
 class UCurveVector;
 
 USTRUCT(BlueprintType)
-struct FAlsMantlingState
+struct ALS_API FAlsMantlingState
 {
 	GENERATED_BODY()
 

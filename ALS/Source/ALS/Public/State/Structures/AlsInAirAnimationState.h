@@ -3,7 +3,7 @@
 #include "AlsInAirAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsInAirAnimationState
+struct ALS_API FAlsInAirAnimationState
 {
 	GENERATED_BODY()
 

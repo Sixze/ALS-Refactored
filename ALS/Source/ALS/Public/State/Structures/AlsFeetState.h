@@ -3,7 +3,7 @@
 #include "AlsFeetState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsFootLockState
+struct ALS_API FAlsFootLockState
 {
 	GENERATED_BODY()
 
@@ -21,7 +21,7 @@ struct FAlsFootLockState
 };
 
 USTRUCT(BlueprintType)
-struct FAlsFootOffsetState
+struct ALS_API FAlsFootOffsetState
 {
 	GENERATED_BODY()
 
@@ -33,7 +33,7 @@ struct FAlsFootOffsetState
 };
 
 USTRUCT(BlueprintType)
-struct FAlsFeetState
+struct ALS_API FAlsFeetState
 {
 	GENERATED_BODY()
 

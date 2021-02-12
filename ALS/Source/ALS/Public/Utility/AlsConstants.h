@@ -321,7 +321,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FAlsPropertyAccessConstants
+struct ALS_API FAlsPropertyAccessConstants
 {
 	GENERATED_BODY()
 

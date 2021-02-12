@@ -3,7 +3,7 @@
 #include "AlsLayeringState.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAlsLayeringState
+struct ALS_API FAlsLayeringState
 {
 	GENERATED_BODY()
 
