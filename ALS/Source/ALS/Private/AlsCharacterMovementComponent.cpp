@@ -30,6 +30,7 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 	if (IsValid(CharacterMovement))
 	{
 		bMovementSettingsChangeRequested = CharacterMovement->IsMovementSettingsChangeRequested();
+		MaxSpeed = CharacterMovement->GetCustomMaxWalkSpeed();
 	}
 }
 
