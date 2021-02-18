@@ -66,28 +66,28 @@ private:
 	AAlsCharacter* Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsStance Stance;
+	FAlsStance Stance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsGait Gait;
+	FAlsGait Gait;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsRotationMode RotationMode;
+	FAlsRotationMode RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsOverlayMode OverlayMode;
+	FAlsOverlayMode OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsLocomotionMode LocomotionMode;
+	FAlsLocomotionMode LocomotionMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsLocomotionAction LocomotionAction;
+	FAlsLocomotionAction LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsMovementDirection MovementDirection;
+	FAlsMovementDirection MovementDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	EAlsGroundedEntryMode GroundedEntryMode;
+	FAlsGroundedEntryMode GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	bool bDynamicTransitionsAllowed{true};

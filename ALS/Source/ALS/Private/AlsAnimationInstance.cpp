@@ -37,12 +37,12 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshAiming(DeltaTime);
 	RefreshFeet(DeltaTime);
 
-	if (PreviousLocomotionMode == EAlsLocomotionMode::Ragdolling && LocomotionMode != EAlsLocomotionMode::Ragdolling)
+	if (PreviousLocomotionMode.IsRagdolling() && !LocomotionMode.IsRagdolling())
 	{
 		StopRagdolling();
 	}
 
-	if (LocomotionMode == EAlsLocomotionMode::Grounded)
+	if (LocomotionMode.IsGrounded())
 	{
 		if (LocomotionState.bMoving)
 		{
@@ -83,7 +83,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.bHasInputAcceleration = Character->GetLocomotionState().bHasInputAcceleration;
 
-	if (LocomotionState.bHasInputAcceleration && RotationMode == EAlsRotationMode::VelocityDirection)
+	if (LocomotionState.bHasInputAcceleration && RotationMode.IsVelocityDirection())
 	{
 		// Get the delta between the current acceleration rotation and character rotation and map it to a range
 		// from 0 to 1. This value is used in the aiming to make the character look toward the current acceleration.
@@ -107,7 +107,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	// Allow movement animations if character is moving.
 
-	if (!LocomotionState.bMoving || LocomotionMode != EAlsLocomotionMode::Grounded)
+	if (!LocomotionState.bMoving || !LocomotionMode.IsGrounded())
 	{
 		return;
 	}
@@ -150,7 +150,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	// since the start of the sprint, otherwise set the sprint relative acceleration to zero.This is
 	// necessary in order to apply the acceleration animation only at the beginning of the sprint.
 
-	if (Gait == EAlsGait::Sprinting)
+	if (Gait.IsSprinting())
 	{
 		LocomotionState.SprintTime += DeltaTime;
 		LocomotionState.SprintRelativeAccelerationAmount = LocomotionState.SprintTime < 0.5f
@@ -232,14 +232,14 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	AimingState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped({0, 180}, {0.5, 0}, FMath::Abs(AimingState.SmoothYawAngle));
 	AimingState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped({0, 180}, {0.5, 1}, FMath::Abs(AimingState.SmoothYawAngle));
 
-	if (RotationMode == EAlsRotationMode::Aiming)
+	if (RotationMode.IsAiming())
 	{
 		// Individual rotations for 3 spine bones and pelvis.
 
 		AimingState.SpineRotation.Yaw = FMath::ClampAngle(AimingState.YawAngle / 4, -70 / 4.0f, 70 / 4.0f);
 	}
 
-	if (RotationMode != EAlsRotationMode::VelocityDirection)
+	if (!RotationMode.IsVelocityDirection())
 	{
 		AimingState.PitchAmount = FMath::GetMappedRangeValueClamped({-90, 90}, {1, 0}, AimingState.PitchAngle);
 	}
@@ -257,7 +257,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(Constants.FootPlantedCurve), -1.0f, 1.0f);
 
-	if (LocomotionMode == EAlsLocomotionMode::InAir)
+	if (LocomotionMode.IsInAir())
 	{
 		ResetFootOffset(FeetState.OffsetLeft, DeltaTime);
 		ResetFootOffset(FeetState.OffsetRight, DeltaTime);
@@ -266,7 +266,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		return;
 	}
 
-	if (LocomotionMode == EAlsLocomotionMode::Ragdolling)
+	if (LocomotionMode.IsRagdolling())
 	{
 		return;
 	}
@@ -337,7 +337,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, co
 	// Use the delta between the current and last updated rotation to find
 	// how much the foot should be rotated to remain planted on the ground.
 
-	if (LocomotionMode == EAlsLocomotionMode::Grounded)
+	if (LocomotionMode.IsGrounded())
 	{
 		RotationDifference = LocomotionState.ActorRotation - Character->GetCharacterMovement()->GetLastUpdateRotation();
 		RotationDifference.Normalize();
@@ -467,7 +467,7 @@ EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
 	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera
 	// during the looking direction / aiming modes, and is used in the cycle blending to blend to the appropriate directional states.
 
-	if (Gait == EAlsGait::Sprinting || RotationMode == EAlsRotationMode::VelocityDirection)
+	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
 	{
 		return EAlsMovementDirection::Forward;
 	}
@@ -551,7 +551,7 @@ float UAlsAnimationInstance::CalculateWalkRunBlendAmount() const
 {
 	// Calculate the walk run blend. This value is used within the blend spaces to blend between walking and running.
 
-	return Gait == EAlsGait::Walking ? 0 : 1;
+	return Gait.IsWalking() ? 0 : 1;
 }
 
 float UAlsAnimationInstance::CalculateStandingPlayRate() const
@@ -612,7 +612,7 @@ void UAlsAnimationInstance::PlayTransitionFromStandingIdleOnly(UAnimSequenceBase
                                                                const float BlendOutTime,
                                                                const float PlayRate, const float StartTime)
 {
-	if (!LocomotionState.bMoving && Stance == EAlsStance::Standing)
+	if (!LocomotionState.bMoving && Stance.IsStanding())
 	{
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}
@@ -684,7 +684,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 {
 	// Rotate in place is allowed only if the character is standing still and aiming.
 
-	if (LocomotionState.bMoving || RotationMode != EAlsRotationMode::Aiming)
+	if (LocomotionState.bMoving || !RotationMode.IsAiming())
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -737,7 +737,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 {
 	// Turn in place is allowed only if transitions are allowed, the character standing still and looking at the camera.
 
-	if (LocomotionState.bMoving || !LocomotionState.bTransitionsAllowed || RotationMode != EAlsRotationMode::LookingDirection)
+	if (LocomotionState.bMoving || !LocomotionState.bTransitionsAllowed || !RotationMode.IsLookingDirection())
 	{
 		TurnInPlaceState.ActivationDelayTime = 0;
 		return;
@@ -780,7 +780,7 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	// Choose settings on the turn angle and stance.
 
 	FAlsTurnInPlaceSettings Settings;
-	if (Stance == EAlsStance::Standing)
+	if (Stance.IsStanding())
 	{
 		if (FMath::Abs(TurnAngle) < TurnInPlaceSettings.Turn180AngleThreshold)
 		{
@@ -848,7 +848,7 @@ void UAlsAnimationInstance::OnJumpResetTimerEnded()
 
 void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 {
-	if (LocomotionMode != EAlsLocomotionMode::InAir)
+	if (!LocomotionMode.IsInAir())
 	{
 		return;
 	}

@@ -1096,6 +1096,8 @@ void AAlsCharacter::ServerStartMantling_Implementation(UPrimitiveComponent* Targ
                                                        const EAlsMantlingType MantlingType)
 {
 	MulticastStartMantling(TargetPrimitive, TargetLocation, TargetRotation, MantlingHeight, MantlingType);
+
+	ForceNetUpdate();
 }
 
 void AAlsCharacter::MulticastStartMantling_Implementation(UPrimitiveComponent* TargetPrimitive, const FVector& TargetLocation,
@@ -1458,6 +1460,8 @@ bool AAlsCharacter::TryStopRagdolling()
 void AAlsCharacter::ServerStopRagdolling_Implementation()
 {
 	MulticastStopRagdolling();
+
+	ForceNetUpdate();
 }
 
 void AAlsCharacter::MulticastStopRagdolling_Implementation()
@@ -1540,6 +1544,8 @@ UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
 	MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
+
+	ForceNetUpdate();
 }
 
 void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
