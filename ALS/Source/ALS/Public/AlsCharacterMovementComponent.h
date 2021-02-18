@@ -47,6 +47,8 @@ public:
 
 	bool IsMovementSettingsChangeRequested() const;
 
+	float GetCustomMaxWalkSpeed() const;
+
 	void SetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
 
 protected:
@@ -64,4 +66,9 @@ private:
 inline bool UAlsCharacterMovementComponent::IsMovementSettingsChangeRequested() const
 {
 	return bMovementSettingsChangeRequested;
+}
+
+inline float UAlsCharacterMovementComponent::GetCustomMaxWalkSpeed() const
+{
+	return CustomMaxWalkSpeed;
 }

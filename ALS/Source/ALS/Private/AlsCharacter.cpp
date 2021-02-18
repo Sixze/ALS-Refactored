@@ -68,6 +68,8 @@ void AAlsCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	bEnableNetworkOptimizations = !IsNetMode(NM_Standalone);
+
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
@@ -322,17 +324,17 @@ void AAlsCharacter::RefreshGait(const FAlsMovementGaitSettings& GaitSettings)
 
 	// Use the max allowed gait to update the movement settings.
 
-	if (IsNetMode(NM_Standalone))
-	{
-		// Use curves for movement.
-
-		RefreshGaitSettingsStandalone(MaxAllowedGait, GaitSettings);
-	}
-	else
+	if (bEnableNetworkOptimizations)
 	{
 		// Don't use curves for movement.
 
 		RefreshGaitSettingsNetworked(MaxAllowedGait, GaitSettings);
+	}
+	else
+	{
+		// Use curves for movement.
+
+		RefreshGaitSettingsStandalone(MaxAllowedGait, GaitSettings);
 	}
 }
 
@@ -756,7 +758,8 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime, const FA
 	{
 		// Rolling.
 
-		if (RollingSettings.bSmoothRotateToInputAccelerationDuringRoll && LocomotionState.bHasInputAcceleration)
+		if (/** !bEnableNetworkOptimizations && */ RollingSettings.bSmoothRotateToInputAccelerationDuringRoll &&
+		                                           LocomotionState.bHasInputAcceleration)
 		{
 			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle,
 			                                                                   LocomotionState.InputAccelerationYawAngle,
