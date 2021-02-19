@@ -8,10 +8,11 @@ FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() c
 	return FString::Format(TEXT("Als Set Root Motion Scale: {0}"), {TranslationScale});
 }
 
-void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation, float TotalDuration)
+void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation,
+                                                         float TotalDuration)
 {
 	auto* Character{Cast<ACharacter>(Component->GetOwner())};
-	if (IsValid(Character))
+	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		Character->SetAnimRootMotionTranslationScale(TranslationScale);
 	}
@@ -20,7 +21,7 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent*
 void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation)
 {
 	auto* Character{Cast<ACharacter>(Component->GetOwner())};
-	if (IsValid(Character))
+	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		Character->SetAnimRootMotionTranslationScale(1);
 	}
