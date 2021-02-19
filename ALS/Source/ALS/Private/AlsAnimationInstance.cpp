@@ -7,6 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/AlsMath.h"
 
+const FCollisionObjectQueryParams UAlsAnimationInstance::GroundPredictionObjectQueryParameters{
+	ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Destructible)
+};
+
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -103,7 +107,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	// The transitions allowed curve is modified within certain states, so that is transition allowed will be true while in those states.
 
-	LocomotionState.bTransitionsAllowed = GetCurveValue(Constants.TransitionsAllowedCurve) > 0.9f;
+	LocomotionState.bTransitionsAllowed = GetCurveValue(Constants.TransitionsAllowedCurve) >= 0.99f;
 
 	// Allow movement animations if character is moving.
 
@@ -384,7 +388,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetSta
 	GetWorld()->LineTraceSingleByChannel(Hit,
 	                                     FootLockBoneLocation + FVector{0, 0, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLockBoneLocation - FVector{0, 0, FeetSettings.IkTraceDistanceDownward},
-	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), false, Character});
+	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), true, Character});
 
 	auto TargetRotationOffset{FRotator::ZeroRotator};
 
@@ -893,11 +897,11 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	const auto TraceVector{VelocityDirection * FMath::GetMappedRangeValueClamped({0, -4000}, {50, 2000}, InAirState.VerticalVelocity)};
 
 	FHitResult Hit;
-	GetWorld()->SweepSingleByProfile(Hit, CapsuleLocation, CapsuleLocation + TraceVector, FQuat::Identity,
-	                                 Constants.AlsPawnProfile,
-	                                 FCollisionShape::MakeCapsule(CharacterCapsule->GetScaledCapsuleRadius(),
-	                                                              CharacterCapsule->GetScaledCapsuleHalfHeight()),
-	                                 {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, Character});
+	GetWorld()->SweepSingleByObjectType(Hit, CapsuleLocation, CapsuleLocation + TraceVector, FQuat::Identity,
+	                                    GroundPredictionObjectQueryParameters,
+	                                    FCollisionShape::MakeCapsule(CharacterCapsule->GetScaledCapsuleRadius(),
+	                                                                 CharacterCapsule->GetScaledCapsuleHalfHeight()),
+	                                    {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, Character});
 
 	if (!Character->GetCharacterMovement()->IsWalkable(Hit))
 	{

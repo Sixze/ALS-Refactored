@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/EngineTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AlsConstants.generated.h"
@@ -15,22 +14,6 @@ public:
 	static FName FinalRagdollPose()
 	{
 		return TEXT("FinalRagdollPose");
-	}
-
-	// Trace Channels
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Trace Channels", meta = (BlueprintThreadSafe))
-	static ECollisionChannel AlsClimbableChannel()
-	{
-		return ECC_GameTraceChannel1;
-	}
-
-	// Collision Profiles
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Collision Profiles", meta = (BlueprintThreadSafe))
-	static FName AlsPawnProfile()
-	{
-		return TEXT("AlsPawn");
 	}
 
 	// Bones
@@ -327,16 +310,6 @@ struct ALS_API FAlsPropertyAccessConstants
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FinalRagdollPose{UAlsConstants::FinalRagdollPose()};
-
-	// Trace Channels
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<ECollisionChannel> AlsClimbableChannel{UAlsConstants::AlsClimbableChannel()};
-
-	// Collision Profiles
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AlsPawnProfile{UAlsConstants::AlsPawnProfile()};
 
 	// Bones
 

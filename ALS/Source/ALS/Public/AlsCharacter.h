@@ -112,6 +112,8 @@ private:
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
+	static const FCollisionObjectQueryParams MantlingAndRagdollObjectQueryParameters;
+
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
