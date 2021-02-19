@@ -128,6 +128,8 @@ private:
 
 	FTimerHandle JumpResetTimer;
 
+	static const FCollisionObjectQueryParams GroundPredictionObjectQueryParameters;
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 
