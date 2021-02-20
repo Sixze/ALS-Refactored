@@ -701,9 +701,10 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 		LocomotionState.VelocityYawAngle = LocomotionState.Velocity.ToOrientationRotator().Yaw;
 	}
 
-	// Character is moving if has speed and current acceleration, or if the speed is greater than 150.
+	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
 
-	LocomotionState.bMoving = LocomotionState.bHasSpeed && LocomotionState.bHasInputAcceleration || LocomotionState.Speed > 150;
+	LocomotionState.bMoving = LocomotionState.bHasSpeed &&
+	                          LocomotionState.bHasInputAcceleration || LocomotionState.Speed > MovingSpeedThreshold;
 }
 
 void AAlsCharacter::SetAiming(const bool bNewAiming)
