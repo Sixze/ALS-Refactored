@@ -254,10 +254,13 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.IkLeftAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
 	FeetState.IkRightAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
 
-	RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, DeltaTime,
-	                Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
-	RefreshFootLock(FeetState.LockRight, FeetState.IkRightAmount, DeltaTime,
-	                Constants.FootRightLockVirtualBone, Constants.FootRightLockCurve);
+	if (FeetSettings.bEnableFootLocking)
+	{
+		RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, DeltaTime,
+		                Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
+		RefreshFootLock(FeetState.LockRight, FeetState.IkRightAmount, DeltaTime,
+		                Constants.FootRightLockVirtualBone, Constants.FootRightLockCurve);
+	}
 
 	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(Constants.FootPlantedCurve), -1.0f, 1.0f);
 
