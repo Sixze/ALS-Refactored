@@ -17,6 +17,8 @@ private:
 
 	void InputMoveRight(float Value);
 
+	void InputLookUp(float Value);
+
 	void InputSprintPressed();
 
 	void InputSprintReleased();
