@@ -9,7 +9,7 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AAlsCharacterExample::InputMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AAlsCharacterExample::InputMoveRight);
-	PlayerInputComponent->BindAxis("LookUpward", this, &AAlsCharacterExample::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &AAlsCharacterExample::InputLookUp);
 	PlayerInputComponent->BindAxis("LookRight", this, &AAlsCharacterExample::AddControllerYawInput);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAlsCharacterExample::InputSprintPressed);
@@ -41,6 +41,11 @@ void AAlsCharacterExample::InputMoveRight(const float Value)
 {
 	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw + 90), 0},
 	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue("MoveForward")));
+}
+
+void AAlsCharacterExample::InputLookUp(const float Value)
+{
+	AAlsCharacterExample::AddControllerPitchInput(-Value);
 }
 
 void AAlsCharacterExample::InputSprintPressed()
