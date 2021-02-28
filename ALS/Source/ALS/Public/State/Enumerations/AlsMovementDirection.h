@@ -40,32 +40,32 @@ public:
 		*this = InitialMovementDirection;
 	}
 
-	FORCEINLINE bool IsForward() const
+	bool IsForward() const
 	{
 		return bForward;
 	}
 
-	FORCEINLINE bool IsBackward() const
+	bool IsBackward() const
 	{
 		return bBackward;
 	}
 
-	FORCEINLINE bool IsLeft() const
+	bool IsLeft() const
 	{
 		return bLeft;
 	}
 
-	FORCEINLINE bool IsRight() const
+	bool IsRight() const
 	{
 		return bRight;
 	}
 
-	FORCEINLINE operator EAlsMovementDirection() const
+	operator EAlsMovementDirection() const
 	{
 		return MovementDirection;
 	}
 
-	FORCEINLINE void operator=(const EAlsMovementDirection NewMovementDirection)
+	void operator=(const EAlsMovementDirection NewMovementDirection)
 	{
 		MovementDirection = NewMovementDirection;
 

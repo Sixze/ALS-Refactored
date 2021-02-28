@@ -66,6 +66,9 @@ private:
 	AAlsCharacter* Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
+	bool bDynamicTransitionsAllowed{true};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	FAlsStance Stance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
@@ -88,9 +91,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	FAlsGroundedEntryMode GroundedEntryMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	bool bDynamicTransitionsAllowed{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	FAlsLocomotionAnimationState LocomotionState;

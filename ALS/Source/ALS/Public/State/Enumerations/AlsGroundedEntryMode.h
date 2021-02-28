@@ -32,22 +32,22 @@ public:
 		*this = InitialGroundedEntryMode;
 	}
 
-	FORCEINLINE bool IsDefault() const
+	bool IsDefault() const
 	{
 		return bDefault;
 	}
 
-	FORCEINLINE bool IsFromRoll() const
+	bool IsFromRoll() const
 	{
 		return bFromRoll;
 	}
 
-	FORCEINLINE operator EAlsGroundedEntryMode() const
+	operator EAlsGroundedEntryMode() const
 	{
 		return GroundedEntryMode;
 	}
 
-	FORCEINLINE void operator=(const EAlsGroundedEntryMode NewGroundedEntryMode)
+	void operator=(const EAlsGroundedEntryMode NewGroundedEntryMode)
 	{
 		GroundedEntryMode = NewGroundedEntryMode;
 

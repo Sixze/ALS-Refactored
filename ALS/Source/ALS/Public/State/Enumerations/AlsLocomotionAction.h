@@ -40,32 +40,32 @@ public:
 		*this = InitialLocomotionAction;
 	}
 
-	FORCEINLINE bool IsNone() const
+	bool IsNone() const
 	{
 		return bNone;
 	}
 
-	FORCEINLINE bool IsMantling() const
+	bool IsMantling() const
 	{
 		return bMantling;
 	}
 
-	FORCEINLINE bool IsRolling() const
+	bool IsRolling() const
 	{
 		return bRolling;
 	}
 
-	FORCEINLINE bool IsGettingUp() const
+	bool IsGettingUp() const
 	{
 		return bGettingUp;
 	}
 
-	FORCEINLINE operator EAlsLocomotionAction() const
+	operator EAlsLocomotionAction() const
 	{
 		return LocomotionAction;
 	}
 
-	FORCEINLINE void operator=(const EAlsLocomotionAction NewLocomotionAction)
+	void operator=(const EAlsLocomotionAction NewLocomotionAction)
 	{
 		LocomotionAction = NewLocomotionAction;
 

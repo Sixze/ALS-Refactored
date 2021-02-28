@@ -10,12 +10,6 @@ class ALS_API UAlsConstants : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Other", meta = (BlueprintThreadSafe))
-	static FName FinalRagdollPose()
-	{
-		return TEXT("FinalRagdollPose");
-	}
-
 	// Bones
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", meta = (BlueprintThreadSafe))
@@ -307,9 +301,6 @@ USTRUCT(BlueprintType)
 struct ALS_API FAlsPropertyAccessConstants
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FinalRagdollPose{UAlsConstants::FinalRagdollPose()};
 
 	// Bones
 

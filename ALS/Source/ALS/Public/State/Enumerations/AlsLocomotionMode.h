@@ -40,32 +40,32 @@ public:
 		*this = InitialLocomotionMode;
 	}
 
-	FORCEINLINE bool IsGrounded() const
+	bool IsGrounded() const
 	{
 		return bGrounded;
 	}
 
-	FORCEINLINE bool IsInAir() const
+	bool IsInAir() const
 	{
 		return bInAir;
 	}
 
-	FORCEINLINE bool IsMantling() const
+	bool IsMantling() const
 	{
 		return bMantling;
 	}
 
-	FORCEINLINE bool IsRagdolling() const
+	bool IsRagdolling() const
 	{
 		return bRagdolling;
 	}
 
-	FORCEINLINE operator EAlsLocomotionMode() const
+	operator EAlsLocomotionMode() const
 	{
 		return LocomotionMode;
 	}
 
-	FORCEINLINE void operator=(const EAlsLocomotionMode NewLocomotionMode)
+	void operator=(const EAlsLocomotionMode NewLocomotionMode)
 	{
 		LocomotionMode = NewLocomotionMode;
 

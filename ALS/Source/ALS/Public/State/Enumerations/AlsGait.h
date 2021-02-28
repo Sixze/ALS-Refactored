@@ -36,27 +36,27 @@ public:
 		*this = InitialGait;
 	}
 
-	FORCEINLINE bool IsWalking() const
+	bool IsWalking() const
 	{
 		return bWalking;
 	}
 
-	FORCEINLINE bool IsRunning() const
+	bool IsRunning() const
 	{
 		return bRunning;
 	}
 
-	FORCEINLINE bool IsSprinting() const
+	bool IsSprinting() const
 	{
 		return bSprinting;
 	}
 
-	FORCEINLINE operator EAlsGait() const
+	operator EAlsGait() const
 	{
 		return Gait;
 	}
 
-	FORCEINLINE void operator=(const EAlsGait NewGait)
+	void operator=(const EAlsGait NewGait)
 	{
 		Gait = NewGait;
 
