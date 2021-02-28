@@ -36,27 +36,27 @@ public:
 		*this = InitialRotationMode;
 	}
 
-	FORCEINLINE bool IsLookingDirection() const
+	bool IsLookingDirection() const
 	{
 		return bLookingDirection;
 	}
 
-	FORCEINLINE bool IsVelocityDirection() const
+	bool IsVelocityDirection() const
 	{
 		return bVelocityDirection;
 	}
 
-	FORCEINLINE bool IsAiming() const
+	bool IsAiming() const
 	{
 		return bAiming;
 	}
 
-	FORCEINLINE operator EAlsRotationMode() const
+	operator EAlsRotationMode() const
 	{
 		return RotationMode;
 	}
 
-	FORCEINLINE void operator=(const EAlsRotationMode NewRotationMode)
+	void operator=(const EAlsRotationMode NewRotationMode)
 	{
 		RotationMode = NewRotationMode;
 

@@ -947,7 +947,7 @@ void UAlsAnimationInstance::StopRagdolling()
 {
 	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
-	SavePoseSnapshot(Constants.FinalRagdollPose);
+	SnapshotPose(RagdollingState.FinalRagdollPose);
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName CurveName) const

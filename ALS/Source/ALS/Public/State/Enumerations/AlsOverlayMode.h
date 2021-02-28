@@ -76,77 +76,77 @@ public:
 		*this = InitialOverlayMode;
 	}
 
-	FORCEINLINE bool IsDefault() const
+	bool IsDefault() const
 	{
 		return bDefault;
 	}
 
-	FORCEINLINE bool IsMasculine() const
+	bool IsMasculine() const
 	{
 		return bMasculine;
 	}
 
-	FORCEINLINE bool IsFeminine() const
+	bool IsFeminine() const
 	{
 		return bFeminine;
 	}
 
-	FORCEINLINE bool IsInjured() const
+	bool IsInjured() const
 	{
 		return bInjured;
 	}
 
-	FORCEINLINE bool IsHandsTied() const
+	bool IsHandsTied() const
 	{
 		return bHandsTied;
 	}
 
-	FORCEINLINE bool IsM4() const
+	bool IsM4() const
 	{
 		return bM4;
 	}
 
-	FORCEINLINE bool IsPistolOneHanded() const
+	bool IsPistolOneHanded() const
 	{
 		return bPistolOneHanded;
 	}
 
-	FORCEINLINE bool IsPistolTwoHanded() const
+	bool IsPistolTwoHanded() const
 	{
 		return bPistolTwoHanded;
 	}
 
-	FORCEINLINE bool IsBow() const
+	bool IsBow() const
 	{
 		return bBow;
 	}
 
-	FORCEINLINE bool IsTorch() const
+	bool IsTorch() const
 	{
 		return bTorch;
 	}
 
-	FORCEINLINE bool IsBinoculars() const
+	bool IsBinoculars() const
 	{
 		return bBinoculars;
 	}
 
-	FORCEINLINE bool IsBox() const
+	bool IsBox() const
 	{
 		return bBox;
 	}
 
-	FORCEINLINE bool IsBarrel() const
+	bool IsBarrel() const
 	{
 		return bBarrel;
 	}
 
-	FORCEINLINE operator EAlsOverlayMode() const
+	operator EAlsOverlayMode() const
 	{
 		return OverlayMode;
 	}
 
-	FORCEINLINE void operator=(const EAlsOverlayMode NewOverlayMode)
+	void operator=(const EAlsOverlayMode NewOverlayMode)
 	{
 		OverlayMode = NewOverlayMode;
 

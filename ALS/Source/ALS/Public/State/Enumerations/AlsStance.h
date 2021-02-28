@@ -32,22 +32,22 @@ public:
 		*this = InitialStance;
 	}
 
-	FORCEINLINE bool IsStanding() const
+	bool IsStanding() const
 	{
 		return bStanding;
 	}
 
-	FORCEINLINE bool IsCrouching() const
+	bool IsCrouching() const
 	{
 		return bCrouching;
 	}
 
-	FORCEINLINE operator EAlsStance() const
+	operator EAlsStance() const
 	{
 		return Stance;
 	}
 
-	FORCEINLINE void operator=(const EAlsStance NewStance)
+	void operator=(const EAlsStance NewStance)
 	{
 		Stance = NewStance;
 
