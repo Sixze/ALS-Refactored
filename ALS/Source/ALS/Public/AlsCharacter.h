@@ -55,10 +55,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
 	UAlsMovementCharacterSettings* MovementSettings;
 
-	// We won't use curve based movement and a few other features on networked games.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, meta = (AllowPrivateAccess))
-	bool bEnableNetworkOptimizations;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, meta = (AllowPrivateAccess))
 	EAlsStance DesiredStance;
 
