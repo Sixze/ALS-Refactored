@@ -39,6 +39,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 
+	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
+
 	MantlingTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("MantlingTimeline"));
 	MantlingTimeline->SetLooping(false);
 	MantlingTimeline->SetTimelineLengthMode(TL_TimelineLength);
@@ -120,10 +122,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	{
 		case EAlsLocomotionMode::Grounded:
 		{
-			const auto& GaitSettings{GetGaitSettings()};
-
-			RefreshGait(GaitSettings);
-			RefreshGroundedActorRotation(DeltaTime, GaitSettings);
+			RefreshGait();
+			RefreshGroundedActorRotation(DeltaTime);
 		}
 		break;
 
@@ -300,11 +300,6 @@ void AAlsCharacter::ServerSetDesiredGait_Implementation(const EAlsGait NewGait)
 	SetDesiredGait(NewGait);
 }
 
-const FAlsMovementGaitSettings& AAlsCharacter::GetGaitSettings() const
-{
-	return *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(Stance);
-}
-
 void AAlsCharacter::SetGait(const EAlsGait NewGait)
 {
 	if (Gait != NewGait)
@@ -318,56 +313,18 @@ void AAlsCharacter::SetGait(const EAlsGait NewGait)
 
 void AAlsCharacter::OnGaitChanged_Implementation(EAlsGait PreviousGait) {}
 
-void AAlsCharacter::RefreshGait(const FAlsMovementGaitSettings& GaitSettings)
+void AAlsCharacter::RefreshGait()
 {
 	const auto MaxAllowedGait{CalculateMaxAllowedGait()};
 
-	SetGait(CalculateActualGait(MaxAllowedGait, GaitSettings));
+	SetGait(CalculateActualGait(MaxAllowedGait));
 
-	// Use the max allowed gait to update the movement settings.
+	// Pass current gait settings through to the movement component and update the character
+	// max walk speed to the configured speeds based on the currently max allowed gait.
 
-	if (bEnableNetworkOptimizations)
-	{
-		// Don't use curves for movement.
-
-		RefreshGaitSettingsNetworked(MaxAllowedGait, GaitSettings);
-	}
-	else
-	{
-		// Use curves for movement.
-
-		RefreshGaitSettingsStandalone(MaxAllowedGait, GaitSettings);
-	}
-}
-
-bool AAlsCharacter::CanSprint() const
-{
-	// Determine if the character is currently able to sprint based on the rotation mode and input acceleration
-	// rotation. If the character is in the looking direction rotation mode, only allow sprinting if there
-	// is full input acceleration amount and it is faced forward relative to the camera + or - 50 degrees.
-
-	if (!LocomotionState.bHasInputAcceleration || RotationMode == EAlsRotationMode::Aiming)
-	{
-		return false;
-	}
-
-	const auto bHasFullInputAccelerationAmount{LocomotionState.InputAccelerationAmount > 0.9};
-
-	if (RotationMode == EAlsRotationMode::VelocityDirection)
-	{
-		return bHasFullInputAccelerationAmount;
-	}
-
-	if (RotationMode == EAlsRotationMode::LookingDirection)
-	{
-		const auto YawAngleDifference{
-			FRotator::NormalizeAxis(LocomotionState.InputAccelerationYawAngle - AimingState.SmoothRotation.Yaw)
-		};
-
-		return bHasFullInputAccelerationAmount && FMath::Abs(YawAngleDifference) < 50;
-	}
-
-	return false;
+	AlsCharacterMovement->RefreshGait(
+		MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(Stance),
+		MaxAllowedGait);
 }
 
 EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
@@ -398,84 +355,52 @@ EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 	return DesiredGait;
 }
 
-EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait, const FAlsMovementGaitSettings& GaitSettings) const
+EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
 {
 	// Get the new gait. This is calculated by the actual movement of the character, and so it can be
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 
-	if (LocomotionState.Speed > GaitSettings.RunSpeed + 10)
+	if (LocomotionState.Speed > AlsCharacterMovement->GetGaitSettings().RunSpeed + 10)
 	{
 		return MaxAllowedGait == EAlsGait::Sprinting
 			       ? EAlsGait::Sprinting
 			       : EAlsGait::Running;
 	}
 
-	return LocomotionState.Speed >= GaitSettings.WalkSpeed + 10
+	return LocomotionState.Speed >= AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10
 		       ? EAlsGait::Running
 		       : EAlsGait::Walking;
 }
 
-float AAlsCharacter::CalculateGaitAmount(const FAlsMovementGaitSettings& GaitSettings) const
+bool AAlsCharacter::CanSprint() const
 {
-	// Map the character's current speed to the configured movement speeds ranging from 0 to 3,
-	// where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting. This allows us to vary
-	// the movement speeds but still use the mapped range in calculations for consistent results.
+	// Determine if the character is currently able to sprint based on the rotation mode and input acceleration
+	// rotation. If the character is in the looking direction rotation mode, only allow sprinting if there
+	// is full input acceleration amount and it is faced forward relative to the camera + or - 50 degrees.
 
-	if (LocomotionState.Speed <= GaitSettings.WalkSpeed)
+	if (!LocomotionState.bHasInputAcceleration || RotationMode == EAlsRotationMode::Aiming)
 	{
-		return FMath::GetMappedRangeValueClamped({0, GaitSettings.WalkSpeed}, {0, 1}, LocomotionState.Speed);
+		return false;
 	}
 
-	if (LocomotionState.Speed <= GaitSettings.RunSpeed)
+	const auto bHasFullInputAccelerationAmount{LocomotionState.InputAccelerationAmount > 0.9};
+
+	if (RotationMode == EAlsRotationMode::VelocityDirection)
 	{
-		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, {1, 2},
-		                                         LocomotionState.Speed);
+		return bHasFullInputAccelerationAmount;
 	}
 
-	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2, 3},
-	                                         LocomotionState.Speed);
-}
-
-void AAlsCharacter::RefreshGaitSettingsNetworked(const EAlsGait MaxAllowedGait,
-                                                 const FAlsMovementGaitSettings& GaitSettings) const
-{
-	const auto NewMaxSpeed{GaitSettings.GetSpeedForGait(MaxAllowedGait)};
-
-	// Update the character max walk speed to the configured speeds based on the currently max allowed gait.
-
-	if (IsLocallyControlled() || HasAuthority())
+	if (RotationMode == EAlsRotationMode::LookingDirection)
 	{
-		if (GetCharacterMovement()->MaxWalkSpeed != NewMaxSpeed)
-		{
-			Cast<UAlsCharacterMovementComponent>(GetCharacterMovement())->SetCustomMaxWalkSpeed(NewMaxSpeed);
-		}
+		const auto YawAngleDifference{
+			FRotator::NormalizeAxis(LocomotionState.InputAccelerationYawAngle - AimingState.SmoothRotation.Yaw)
+		};
+
+		return bHasFullInputAccelerationAmount && FMath::Abs(YawAngleDifference) < 50;
 	}
-	else
-	{
-		GetCharacterMovement()->MaxWalkSpeed = NewMaxSpeed;
-	}
-}
 
-void AAlsCharacter::RefreshGaitSettingsStandalone(const EAlsGait MaxAllowedGait,
-                                                  const FAlsMovementGaitSettings& GaitSettings) const
-{
-	// Update the character max walk speed to the configured speeds based on the currently max allowed gait.
-
-	Cast<UAlsCharacterMovementComponent>(GetCharacterMovement())->SetCustomMaxWalkSpeed(
-		GaitSettings.GetSpeedForGait(MaxAllowedGait));
-
-	// Update the acceleration, deceleration, and ground friction using the movement
-	// curve. This allows for fine control over movement behavior at each speed.
-
-	const auto AccelerationAndDecelerationAndGroundFriction{
-		GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(
-			CalculateGaitAmount(GaitSettings))
-	};
-
-	GetCharacterMovement()->MaxAcceleration = AccelerationAndDecelerationAndGroundFriction.X;
-	GetCharacterMovement()->BrakingDecelerationWalking = AccelerationAndDecelerationAndGroundFriction.Y;
-	GetCharacterMovement()->GroundFriction = AccelerationAndDecelerationAndGroundFriction.Z;
+	return false;
 }
 
 void AAlsCharacter::SetDesiredRotationMode(const EAlsRotationMode NewMode)
@@ -755,7 +680,7 @@ void AAlsCharacter::RefreshAiming(const float DeltaTime)
 	AimingState.YawSpeed = FMath::Abs((AimingState.SmoothRotation.Yaw - AimingState.PreviousSmoothYawAngle) / DeltaTime);
 }
 
-void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime, const FAlsMovementGaitSettings& GaitSettings)
+void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 {
 	if (LocomotionAction == EAlsLocomotionAction::Rolling)
 	{
@@ -788,7 +713,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime, const FA
 		{
 			case EAlsRotationMode::VelocityDirection:
 				RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, 800,
-				                                CalculateActorRotationSpeed(GaitSettings));
+				                                CalculateActorRotationSpeed());
 				break;
 
 			case EAlsRotationMode::LookingDirection:
@@ -800,7 +725,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime, const FA
 							  UAlsConstants::RotationYawOffsetCurve())
 				};
 
-				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500, CalculateActorRotationSpeed(GaitSettings));
+				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500, CalculateActorRotationSpeed());
 			}
 			break;
 
@@ -887,13 +812,13 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	}
 }
 
-float AAlsCharacter::CalculateActorRotationSpeed(const FAlsMovementGaitSettings& GaitSettings) const
+float AAlsCharacter::CalculateActorRotationSpeed() const
 {
 	// Calculate the rotation speed by using the rotation speed curve in the movement gait settings. Using
 	// the curve in conjunction with the gait amount gives you a high level of control over the rotation
 	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
 
-	return GaitSettings.RotationSpeedCurve->GetFloatValue(CalculateGaitAmount(GaitSettings)) *
+	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
 	       FMath::GetMappedRangeValueClamped({0, 300}, {1, 3}, AimingState.YawSpeed);
 }
 
