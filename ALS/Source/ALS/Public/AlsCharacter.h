@@ -22,6 +22,7 @@
 
 #include "AlsCharacter.generated.h"
 
+class UAlsCharacterMovementComponent;
 class UTimelineComponent;
 
 UCLASS()
@@ -30,6 +31,9 @@ class ALS_API AAlsCharacter : public ACharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	UAlsCharacterMovementComponent* AlsCharacterMovement;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	UTimelineComponent* MantlingTimeline;
 
@@ -185,8 +189,6 @@ public:
 	EAlsGait GetGait() const;
 
 private:
-	const FAlsMovementGaitSettings& GetGaitSettings() const;
-
 	void SetGait(EAlsGait NewGait);
 
 protected:
@@ -194,19 +196,13 @@ protected:
 	void OnGaitChanged(EAlsGait PreviousGait);
 
 private:
-	void RefreshGait(const FAlsMovementGaitSettings& GaitSettings);
-
-	bool CanSprint() const;
+	void RefreshGait();
 
 	EAlsGait CalculateMaxAllowedGait() const;
 
-	EAlsGait CalculateActualGait(EAlsGait MaxAllowedGait, const FAlsMovementGaitSettings& GaitSettings) const;
+	EAlsGait CalculateActualGait(EAlsGait MaxAllowedGait) const;
 
-	float CalculateGaitAmount(const FAlsMovementGaitSettings& GaitSettings) const;
-
-	void RefreshGaitSettingsNetworked(EAlsGait MaxAllowedGait, const FAlsMovementGaitSettings& GaitSettings) const;
-
-	void RefreshGaitSettingsStandalone(EAlsGait MaxAllowedGait, const FAlsMovementGaitSettings& GaitSettings) const;
+	bool CanSprint() const;
 
 	// Desired Rotation Mode
 
@@ -317,13 +313,13 @@ private:
 	// Rotation
 
 private:
-	void RefreshGroundedActorRotation(float DeltaTime, const FAlsMovementGaitSettings& GaitSettings);
+	void RefreshGroundedActorRotation(float DeltaTime);
 
 	void RefreshAimingActorRotation(float DeltaTime);
 
 	void RefreshInAirActorRotation(float DeltaTime);
 
-	float CalculateActorRotationSpeed(const FAlsMovementGaitSettings& GaitSettings) const;
+	float CalculateActorRotationSpeed() const;
 
 	void RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed);
 

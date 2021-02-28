@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Settings/AlsMovementCharacterSettings.h"
 
 #include "AlsCharacterMovementComponent.generated.h"
 
@@ -38,27 +39,47 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	bool bMovementSettingsChangeRequested{true};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	float CustomMaxWalkSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
+	FAlsMovementGaitSettings GaitSettings;
 
 public:
 	UAlsCharacterMovementComponent();
 
-	bool IsMovementSettingsChangeRequested() const;
+	virtual float GetMaxAcceleration() const override;
 
-	float GetCustomMaxWalkSpeed() const;
-
-	void SetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
+	virtual float GetMaxBrakingDeceleration() const override;
 
 protected:
-	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
+	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
 
 	virtual void OnMovementUpdated(float DeltaTime, const FVector& OldLocation, const FVector& OldVelocity) override;
 
+public:
+	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
+
+protected:
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 
+public:
+	bool IsMovementSettingsChangeRequested() const;
+
+	const FAlsMovementGaitSettings& GetGaitSettings() const;
+
+	float GetCustomMaxWalkSpeed() const;
+
+	void RefreshGait(const FAlsMovementGaitSettings* NewGaitSettings, EAlsGait MaxAllowedGait);
+
+	float CalculateGaitAmount() const;
+
 private:
+	void SetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
+
 	UFUNCTION(Server, Reliable)
 	void ServerSetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
 };
@@ -66,6 +87,11 @@ private:
 inline bool UAlsCharacterMovementComponent::IsMovementSettingsChangeRequested() const
 {
 	return bMovementSettingsChangeRequested;
+}
+
+inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const
+{
+	return GaitSettings;
 }
 
 inline float UAlsCharacterMovementComponent::GetCustomMaxWalkSpeed() const
