@@ -7,10 +7,13 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("LookUpMouse", this, &AAlsCharacterExample::InputLookUpMouse);
+	PlayerInputComponent->BindAxis("LookRightMouse", this, &AAlsCharacterExample::InputLookRightMouse);
+	PlayerInputComponent->BindAxis("LookUp", this, &AAlsCharacterExample::InputLookUp);
+	PlayerInputComponent->BindAxis("LookRight", this, &AAlsCharacterExample::InputLookRight);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AAlsCharacterExample::InputMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AAlsCharacterExample::InputMoveRight);
-	PlayerInputComponent->BindAxis("LookUp", this, &AAlsCharacterExample::InputLookUp);
-	PlayerInputComponent->BindAxis("LookRight", this, &AAlsCharacterExample::AddControllerYawInput);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAlsCharacterExample::InputSprintPressed);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAlsCharacterExample::InputSprintReleased);
@@ -31,21 +34,36 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("Ragdoll", IE_Pressed, this, &AAlsCharacterExample::RagdollPressedAction);
 }
 
+void AAlsCharacterExample::InputLookUpMouse(const float Value)
+{
+	AAlsCharacterExample::AddControllerPitchInput(-Value);
+}
+
+void AAlsCharacterExample::InputLookRightMouse(const float Value)
+{
+	AAlsCharacterExample::AddControllerYawInput(Value);
+}
+
+void AAlsCharacterExample::InputLookUp(const float Value)
+{
+	AAlsCharacterExample::AddControllerPitchInput(-Value * LookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AAlsCharacterExample::InputLookRight(const float Value)
+{
+	AAlsCharacterExample::AddControllerYawInput(Value * LookRightRate * GetWorld()->GetDeltaSeconds());
+}
+
 void AAlsCharacterExample::InputMoveForward(const float Value)
 {
-	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw), 0},
+	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw), 0.0f},
 	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue("MoveRight")));
 }
 
 void AAlsCharacterExample::InputMoveRight(const float Value)
 {
-	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw + 90), 0},
+	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw + 90.0f), 0.0f},
 	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue("MoveForward")));
-}
-
-void AAlsCharacterExample::InputLookUp(const float Value)
-{
-	AAlsCharacterExample::AddControllerPitchInput(-Value);
 }
 
 void AAlsCharacterExample::InputSprintPressed()

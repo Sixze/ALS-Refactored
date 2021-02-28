@@ -9,15 +9,27 @@ class ALS_API AAlsCharacterExample : public AAlsCharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	float LookUpRate{45.0f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	float LookRightRate{90.0f};
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
+	void InputLookUpMouse(float Value);
+
+	void InputLookRightMouse(float Value);
+
+	void InputLookUp(float Value);
+
+	void InputLookRight(float Value);
+
 	void InputMoveForward(float Value);
 
 	void InputMoveRight(float Value);
-
-	void InputLookUp(float Value);
 
 	void InputSprintPressed();
 
