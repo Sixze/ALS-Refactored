@@ -9,10 +9,16 @@ class ALS_API AAlsCharacterExample : public AAlsCharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	float LookUpMouseSensitivity{1.0f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	float LookRightMouseSensitivity{1.0f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
 	float LookUpRate{45.0f};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", meta = (AllowPrivateAccess, ClampMin = 0))
 	float LookRightRate{90.0f};
 
 protected:

@@ -9,6 +9,7 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAxis("LookUpMouse", this, &AAlsCharacterExample::InputLookUpMouse);
 	PlayerInputComponent->BindAxis("LookRightMouse", this, &AAlsCharacterExample::InputLookRightMouse);
+
 	PlayerInputComponent->BindAxis("LookUp", this, &AAlsCharacterExample::InputLookUp);
 	PlayerInputComponent->BindAxis("LookRight", this, &AAlsCharacterExample::InputLookRight);
 
@@ -36,12 +37,12 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
 {
-	AAlsCharacterExample::AddControllerPitchInput(-Value);
+	AAlsCharacterExample::AddControllerPitchInput(-Value * LookUpMouseSensitivity);
 }
 
 void AAlsCharacterExample::InputLookRightMouse(const float Value)
 {
-	AAlsCharacterExample::AddControllerYawInput(Value);
+	AAlsCharacterExample::AddControllerYawInput(Value * LookRightMouseSensitivity);
 }
 
 void AAlsCharacterExample::InputLookUp(const float Value)
