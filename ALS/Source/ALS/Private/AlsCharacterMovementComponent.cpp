@@ -49,8 +49,8 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 		auto* MutableThis{const_cast<UAlsCharacterMovementComponent*>(this)};
 
 		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData(*this);
-		MutableThis->ClientPredictionData->MaxSmoothNetUpdateDist = 92;
-		MutableThis->ClientPredictionData->NoSmoothNetUpdateDist = 140;
+		MutableThis->ClientPredictionData->MaxSmoothNetUpdateDist = 92.0f;
+		MutableThis->ClientPredictionData->NoSmoothNetUpdateDist = 140.0f;
 	}
 
 	return ClientPredictionData;
@@ -58,23 +58,28 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 
 UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 {
-	MaxAcceleration = 1500;
-	BrakingFrictionFactor = 0;
-	CrouchedHalfHeight = 56;
+	MaxAcceleration = 1500.0f;
+	BrakingFrictionFactor = 0.0f;
+	CrouchedHalfHeight = 56.0f;
 	bRunPhysicsWithNoController = true;
 
-	MinAnalogWalkSpeed = 25;
+	MinAnalogWalkSpeed = 25.0f;
 	bCanWalkOffLedgesWhenCrouching = true;
-	PerchRadiusThreshold = 20;
-	PerchAdditionalHeight = 0;
-	LedgeCheckThreshold = 0;
+	PerchRadiusThreshold = 20.0f;
+	PerchAdditionalHeight = 0.0f;
+	LedgeCheckThreshold = 0.0f;
 
-	AirControl = 0.15;
-	BrakingDecelerationFlying = 1000;
+	AirControl = 0.15f;
+	BrakingDecelerationFlying = 1000.0f;
 
 	NavAgentProps.bCanCrouch = true;
 	NavAgentProps.bCanFly = true;
 	bUseAccelerationForPaths = true;
+
+	// https://unrealengine.hatenablog.com/entry/2019/01/16/231404
+
+	FallingLateralFriction = 1.0f;
+	JumpOffJumpZFactor = 0.0f;
 }
 
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
@@ -142,15 +147,15 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 
 	if (Speed <= GaitSettings.WalkSpeed)
 	{
-		return FMath::GetMappedRangeValueClamped({0, GaitSettings.WalkSpeed}, {0, 1}, Speed);
+		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, {0.0f, 1.0f}, Speed);
 	}
 
 	if (Speed <= GaitSettings.RunSpeed)
 	{
-		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, {1, 2}, Speed);
+		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, {1.0f, 2.0f}, Speed);
 	}
 
-	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2, 3}, Speed);
+	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
 }
 
 void UAlsCharacterMovementComponent::SetCustomMaxWalkSpeed(const float NewMaxWalkSpeed)
