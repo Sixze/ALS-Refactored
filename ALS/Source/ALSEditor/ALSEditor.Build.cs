@@ -8,7 +8,7 @@ public class ALSEditor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "NetCore", "Engine", "AnimationModifiers", "ALS"
+			"Core", "CoreUObject", "Engine", "AnimationModifiers", "ALS"
 		});
 	}
 }
