@@ -82,11 +82,11 @@ void AAlsCharacter::BeginPlay()
 	}
 
 	FOnTimelineFloat TimelineUpdated{};
-	TimelineUpdated.BindDynamic(this, &AAlsCharacter::OnMantlingTimelineUpdated);
+	TimelineUpdated.BindDynamic(this, &ThisClass::OnMantlingTimelineUpdated);
 	MantlingTimeline->AddInterpFloat(GeneralMantlingSettings.TimelineCurve, TimelineUpdated);
 
 	FOnTimelineEvent TimelineFinished{};
-	TimelineFinished.BindDynamic(this, &AAlsCharacter::OnMantlingTimelineEnded);
+	TimelineFinished.BindDynamic(this, &ThisClass::OnMantlingTimelineEnded);
 	MantlingTimeline->SetTimelineFinishedFunc(TimelineFinished);
 
 	// Update states to use the initial desired values.
@@ -886,7 +886,7 @@ void AAlsCharacter::OnLandedNetworked()
 
 	GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInputAcceleration ? 0.5 : 3.0;
 
-	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &AAlsCharacter::OnLandedGroundFrictionReset, 0.5, false);
+	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5, false);
 }
 
 void AAlsCharacter::OnLandedGroundFrictionReset() const
