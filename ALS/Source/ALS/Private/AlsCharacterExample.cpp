@@ -7,32 +7,32 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("LookUpMouse", this, &AAlsCharacterExample::InputLookUpMouse);
-	PlayerInputComponent->BindAxis("LookRightMouse", this, &AAlsCharacterExample::InputLookRightMouse);
+	PlayerInputComponent->BindAxis("LookUpMouse", this, &ThisClass::InputLookUpMouse);
+	PlayerInputComponent->BindAxis("LookRightMouse", this, &ThisClass::InputLookRightMouse);
 
-	PlayerInputComponent->BindAxis("LookUp", this, &AAlsCharacterExample::InputLookUp);
-	PlayerInputComponent->BindAxis("LookRight", this, &AAlsCharacterExample::InputLookRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &ThisClass::InputLookUp);
+	PlayerInputComponent->BindAxis("LookRight", this, &ThisClass::InputLookRight);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AAlsCharacterExample::InputMoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AAlsCharacterExample::InputMoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::InputMoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::InputMoveRight);
 
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAlsCharacterExample::InputSprintPressed);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAlsCharacterExample::InputSprintReleased);
-	PlayerInputComponent->BindAction("Sprint", IE_DoubleClick, this, &AAlsCharacterExample::InputRoll);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ThisClass::InputSprintPressed);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ThisClass::InputSprintReleased);
+	PlayerInputComponent->BindAction("Sprint", IE_DoubleClick, this, &ThisClass::InputRoll);
 
-	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &AAlsCharacterExample::InputWalk);
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAlsCharacterExample::InputCrouch);
+	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ThisClass::InputWalk);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::InputCrouch);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AAlsCharacterExample::InputJumpPressed);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AAlsCharacterExample::InputJumpReleased);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::InputJumpPressed);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ThisClass::InputJumpReleased);
 
-	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AAlsCharacterExample::InputAimPressed);
-	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AAlsCharacterExample::InputAimReleased);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ThisClass::InputAimPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ThisClass::InputAimReleased);
 
-	PlayerInputComponent->BindAction("RotateToVelocityDirection", IE_Pressed, this, &AAlsCharacterExample::VelocityDirectionPressedAction);
-	PlayerInputComponent->BindAction("RotateToLookDirection", IE_Pressed, this, &AAlsCharacterExample::LookingDirectionPressedAction);
+	PlayerInputComponent->BindAction("RotateToVelocityDirection", IE_Pressed, this, &ThisClass::VelocityDirectionPressedAction);
+	PlayerInputComponent->BindAction("RotateToLookDirection", IE_Pressed, this, &ThisClass::LookingDirectionPressedAction);
 
-	PlayerInputComponent->BindAction("Ragdoll", IE_Pressed, this, &AAlsCharacterExample::RagdollPressedAction);
+	PlayerInputComponent->BindAction("Ragdoll", IE_Pressed, this, &ThisClass::RagdollPressedAction);
 }
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)

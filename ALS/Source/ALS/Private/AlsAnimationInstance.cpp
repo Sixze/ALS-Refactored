@@ -600,7 +600,7 @@ void UAlsAnimationInstance::ActivatePivot()
 
 	if (MovementState.bPivotActive)
 	{
-		GetWorld()->GetTimerManager().SetTimer(PivotResetTimer, this, &UAlsAnimationInstance::OnPivotResetTimerEnded, 0.1, false);
+		GetWorld()->GetTimerManager().SetTimer(PivotResetTimer, this, &ThisClass::OnPivotResetTimerEnded, 0.1, false);
 	}
 }
 
@@ -845,7 +845,7 @@ void UAlsAnimationInstance::Jump()
 	InAirState.bJumped = true;
 	InAirState.JumpPlayRate = UAlsMath::LerpClamped(1.2, 1.5, LocomotionState.Speed / 600);
 
-	GetWorld()->GetTimerManager().SetTimer(JumpResetTimer, this, &UAlsAnimationInstance::OnJumpResetTimerEnded, 0.1, false);
+	GetWorld()->GetTimerManager().SetTimer(JumpResetTimer, this, &ThisClass::OnJumpResetTimerEnded, 0.1, false);
 }
 
 void UAlsAnimationInstance::OnJumpResetTimerEnded()
