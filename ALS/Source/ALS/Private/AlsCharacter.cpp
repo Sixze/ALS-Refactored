@@ -626,8 +626,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
 
-	LocomotionState.bMoving = LocomotionState.bHasSpeed &&
-	                          LocomotionState.bHasInputAcceleration || LocomotionState.Speed > MovingSpeedThreshold;
+	LocomotionState.bMoving = LocomotionState.bHasInputAcceleration || LocomotionState.Speed > MovingSpeedThreshold;
 }
 
 void AAlsCharacter::SetAiming(const bool bNewAiming)
