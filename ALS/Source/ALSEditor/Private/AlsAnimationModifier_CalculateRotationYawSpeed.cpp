@@ -21,12 +21,11 @@ void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAn
 	{
 		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBone(), i, false, CurrentPoseTransform);
 
-		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBone(), i + (Sequence->RateScale >= 0 ? 1 : -1), false,
-		                                                NextPoseTransform);
+		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBone(), i + (Sequence->RateScale >= 0.0f ? 1 : -1),
+		                                                false, NextPoseTransform);
 
 		UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, UAlsConstants::RotationYawSpeedCurve(), Sequence->GetTimeAtFrame(i),
 		                                             (NextPoseTransform.Rotator().Yaw - CurrentPoseTransform.Rotator().Yaw) *
-		                                             FMath::Abs(Sequence->RateScale) *
-		                                             FrameRate);
+		                                             FMath::Abs(Sequence->RateScale) * FrameRate);
 	}
 }

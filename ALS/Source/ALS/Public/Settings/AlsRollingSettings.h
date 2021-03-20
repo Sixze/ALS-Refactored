@@ -22,5 +22,5 @@ struct ALS_API FAlsRollingSettings
 
 	// If player landed with a speed greater than specified value, switch to roll state.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand"))
-	float RollingOnLandSpeedThreshold{600};
+	float RollingOnLandSpeedThreshold{600.0f};
 };

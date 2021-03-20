@@ -29,7 +29,7 @@ struct ALS_API FAlsAimingAnimationState
 	float SmoothPitchAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float SmoothYawAmount{0.5};
+	float SmoothYawAmount{0.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 0.5))
 	float SmoothYawLeftAmount;
@@ -41,5 +41,5 @@ struct ALS_API FAlsAimingAnimationState
 	FRotator SpineRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float PitchAmount{0.5};
+	float PitchAmount{0.5f};
 };

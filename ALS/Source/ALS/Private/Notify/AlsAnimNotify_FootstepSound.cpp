@@ -4,6 +4,7 @@
 #include "Components/AudioComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Utility/AlsMath.h"
 
 FString UAlsAnimNotify_FootstepSound::GetNotifyName_Implementation() const
 {
@@ -26,7 +27,7 @@ void UAlsAnimNotify_FootstepSound::Notify(USkeletalMeshComponent* Component, UAn
 	auto ResultVolumeMultiplier{VolumeMultiplier};
 	if (!bIgnoreFootstepSoundBlockCurve)
 	{
-		ResultVolumeMultiplier *= 1 - FMath::Clamp(AnimInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()), 0.0f, 1.0f);
+		ResultVolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 	}
 
 	auto* Audio{

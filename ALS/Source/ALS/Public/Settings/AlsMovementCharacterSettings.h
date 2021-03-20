@@ -17,13 +17,13 @@ struct ALS_API FAlsMovementGaitSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float WalkSpeed{175};
+	float WalkSpeed{175.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float RunSpeed{375};
+	float RunSpeed{375.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float SprintSpeed{650};
+	float SprintSpeed{650.0f};
 
 	// Gait amount to acceleration, deceleration and ground friction curve.
 	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
@@ -50,7 +50,7 @@ struct ALS_API FAlsMovementGaitSettings
 
 			default:
 				checkNoEntry();
-				return 0;
+				return 0.0f;
 		}
 	}
 };

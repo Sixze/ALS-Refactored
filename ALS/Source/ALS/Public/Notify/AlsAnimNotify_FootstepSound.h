@@ -26,10 +26,10 @@ private:
 	USoundBase* Sound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
-	float VolumeMultiplier{1};
+	float VolumeMultiplier{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
-	float PitchMultiplier{1};
+	float PitchMultiplier{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
 	bool bIgnoreFootstepSoundBlockCurve;

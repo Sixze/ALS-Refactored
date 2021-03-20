@@ -10,13 +10,13 @@ struct ALS_API FAlsGeneralSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float InputAccelerationYawAmountInterpolationSpeed{8};
+	float InputAccelerationYawAmountInterpolationSpeed{8.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float AimingSmoothRotationInterpolationSpeed{10};
+	float AimingSmoothRotationInterpolationSpeed{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float LeanInterpolationSpeed{4};
+	float LeanInterpolationSpeed{4.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* RotationYawOffsetForwardCurve;

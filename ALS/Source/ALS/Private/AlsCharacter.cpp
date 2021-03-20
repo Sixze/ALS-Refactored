@@ -23,8 +23,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	bUseControllerRotationYaw = false;
 
-	GetMesh()->SetRelativeLocation_Direct({0, 0, -90});
-	GetMesh()->SetRelativeRotation_Direct({0, -90, 0});
+	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -90.0f});
+	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
 
 	// Required for the flail animation to work correctly when ragdolling.
 
@@ -358,14 +358,14 @@ EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 
-	if (LocomotionState.Speed > AlsCharacterMovement->GetGaitSettings().RunSpeed + 10)
+	if (LocomotionState.Speed > AlsCharacterMovement->GetGaitSettings().RunSpeed + 10.0f)
 	{
 		return MaxAllowedGait == EAlsGait::Sprinting
 			       ? EAlsGait::Sprinting
 			       : EAlsGait::Running;
 	}
 
-	return LocomotionState.Speed >= AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10
+	return LocomotionState.Speed >= AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10.0f
 		       ? EAlsGait::Running
 		       : EAlsGait::Walking;
 }
@@ -381,7 +381,7 @@ bool AAlsCharacter::CanSprint() const
 		return false;
 	}
 
-	const auto bHasFullInputAccelerationAmount{LocomotionState.InputAccelerationAmount > 0.9};
+	const auto bHasFullInputAccelerationAmount{LocomotionState.InputAccelerationAmount > 0.9f};
 
 	if (RotationMode == EAlsRotationMode::VelocityDirection)
 	{
@@ -394,7 +394,7 @@ bool AAlsCharacter::CanSprint() const
 			FRotator::NormalizeAxis(LocomotionState.InputAccelerationYawAngle - AimingState.SmoothRotation.Yaw)
 		};
 
-		return bHasFullInputAccelerationAmount && FMath::Abs(YawAngleDifference) < 50;
+		return bHasFullInputAccelerationAmount && FMath::Abs(YawAngleDifference) < 50.0f;
 	}
 
 	return false;
@@ -607,7 +607,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	{
 		LocomotionState.SmoothMaxAcceleration = AlsCharacterMovement->GetMaxAcceleration() > SMALL_NUMBER
 			                                        ? AlsCharacterMovement->GetMaxAcceleration()
-			                                        : LocomotionState.SmoothMaxAcceleration / 2;
+			                                        : LocomotionState.SmoothMaxAcceleration * 0.5f;
 	}
 
 	// Determine if the character has movement input by getting its input acceleration amount. The
@@ -632,7 +632,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	const auto NewAcceleration{(LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime};
 	LocomotionState.Acceleration = NewAcceleration.SizeSquared() > SMALL_NUMBER || IsLocallyControlled()
 		                               ? NewAcceleration
-		                               : LocomotionState.Acceleration / 2;
+		                               : LocomotionState.Acceleration * 0.5f;
 
 	// Determine if the character is moving by getting it's speed. The speed equals the length
 	// of the horizontal velocity, so it does not take vertical movement into account. If the
@@ -640,7 +640,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	// might be useful to know the last orientation of movement even after the character has stopped.
 
 	LocomotionState.Speed = LocomotionState.Velocity.Size2D();
-	LocomotionState.bHasSpeed = LocomotionState.Speed > 1;
+	LocomotionState.bHasSpeed = LocomotionState.Speed > 1.0f;
 
 	if (LocomotionState.bHasSpeed)
 	{
@@ -692,7 +692,7 @@ void AAlsCharacter::RefreshAiming(const float DeltaTime)
 	// Interpolate aiming rotation to current control rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	AimingState.SmoothRotation = FMath::RInterpTo(AimingState.SmoothRotation, AimingRotation, DeltaTime, 30);
+	AimingState.SmoothRotation = FMath::RInterpTo(AimingState.SmoothRotation, AimingRotation, DeltaTime, 30.0f);
 
 	// Set the yaw speed by comparing the current and previous aiming yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
@@ -711,10 +711,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		{
 			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle,
 			                                                                   LocomotionState.InputAccelerationYawAngle,
-			                                                                   DeltaTime, 100);
+			                                                                   DeltaTime, 100.0f);
 		}
 
-		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10);
+		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10.0f);
 		return;
 	}
 
@@ -732,7 +732,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		switch (RotationMode)
 		{
 			case EAlsRotationMode::VelocityDirection:
-				RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, 800,
+				RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, 800.0f,
 				                                CalculateActorRotationSpeed());
 				break;
 
@@ -745,12 +745,12 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 							  UAlsConstants::RotationYawOffsetCurve())
 				};
 
-				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500, CalculateActorRotationSpeed());
+				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500.0f, CalculateActorRotationSpeed());
 			}
 			break;
 
 			case EAlsRotationMode::Aiming:
-				RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000, 20);
+				RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
 				break;
 		}
 
@@ -763,7 +763,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	{
 		if (LocomotionState.bHasInputAcceleration)
 		{
-			RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000, 20);
+			RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
 		}
 		else
 		{
@@ -789,7 +789,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	}
 	else
 	{
-		AddActorWorldRotation({0, RotationYawSpeed * DeltaTime, 0});
+		AddActorWorldRotation({0.0f, RotationYawSpeed * DeltaTime, 0.0f});
 	}
 
 	RefreshSmoothLocationAndRotation();
@@ -803,10 +803,10 @@ void AAlsCharacter::RefreshAimingActorRotation(const float DeltaTime)
 
 	const auto YawAngleDifference{FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)};
 
-	if (FMath::Abs(YawAngleDifference) > 70)
+	if (FMath::Abs(YawAngleDifference) > 70.0f)
 	{
-		RefreshActorRotation(AimingState.SmoothRotation.Yaw + (YawAngleDifference > 0 ? -70 : 70),
-		                     DeltaTime, 20);
+		RefreshActorRotation(AimingState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f),
+		                     DeltaTime, 20.0f);
 	}
 }
 
@@ -816,7 +816,7 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	{
 		// Rolling.
 
-		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10);
+		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10.0f);
 		return;
 	}
 
@@ -824,11 +824,11 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	{
 		case EAlsRotationMode::VelocityDirection:
 		case EAlsRotationMode::LookingDirection:
-			RefreshActorRotation(InAirState.TargetYawAngle, DeltaTime, 5);
+			RefreshActorRotation(InAirState.TargetYawAngle, DeltaTime, 5.0f);
 			break;
 
 		case EAlsRotationMode::Aiming:
-			RefreshActorRotation(AimingState.SmoothRotation.Yaw, DeltaTime, 15);
+			RefreshActorRotation(AimingState.SmoothRotation.Yaw, DeltaTime, 15.0f);
 			InAirState.TargetYawAngle = LocomotionState.SmoothRotation.Yaw;
 			break;
 	}
@@ -841,12 +841,12 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
 
 	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
-	       FMath::GetMappedRangeValueClamped({0, 300}, {1, 3}, AimingState.YawSpeed);
+	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, AimingState.YawSpeed);
 }
 
 void AAlsCharacter::RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed)
 {
-	LocomotionState.TargetActorRotation = {0, TargetYawAngle, 0};
+	LocomotionState.TargetActorRotation = {0.0f, TargetYawAngle, 0.0f};
 
 	SetActorRotation(FMath::RInterpTo(GetActorRotation(), LocomotionState.TargetActorRotation, DeltaTime, RotationSpeed));
 
@@ -859,7 +859,7 @@ void AAlsCharacter::RefreshActorRotationExtraSmooth(const float TargetYawAngle, 
 	// Interpolate the target actor rotation for extra smooth rotation behavior.
 
 	LocomotionState.TargetActorRotation = FMath::RInterpConstantTo(LocomotionState.TargetActorRotation,
-	                                                               {0, TargetYawAngle, 0},
+	                                                               {0.0f, TargetYawAngle, 0.0f},
 	                                                               DeltaTime, TargetRotationSpeed);
 
 	SetActorRotation(FMath::RInterpTo(GetActorRotation(), LocomotionState.TargetActorRotation, DeltaTime, ActorRotationSpeed));
@@ -879,7 +879,7 @@ void AAlsCharacter::OnJumpedNetworked()
 {
 	// Set the new in air target actor rotation to the velocity rotation if speed is greater than 100.
 
-	InAirState.TargetYawAngle = LocomotionState.Speed > 100
+	InAirState.TargetYawAngle = LocomotionState.Speed > 100.0f
 		                            ? LocomotionState.VelocityYawAngle
 		                            : LocomotionState.SmoothRotation.Yaw;
 
@@ -912,14 +912,14 @@ void AAlsCharacter::OnLandedNetworked()
 		return;
 	}
 
-	AlsCharacterMovement->BrakingFrictionFactor = LocomotionState.bHasInputAcceleration ? 0.5 : 3.0;
+	AlsCharacterMovement->BrakingFrictionFactor = LocomotionState.bHasInputAcceleration ? 0.5f : 3.0f;
 
-	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5, false);
+	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
 }
 
 void AAlsCharacter::OnLandedGroundFrictionReset() const
 {
-	AlsCharacterMovement->BrakingFrictionFactor = 0;
+	AlsCharacterMovement->BrakingFrictionFactor = 0.0f;
 }
 
 bool AAlsCharacter::TryStartMantlingGrounded()
@@ -940,7 +940,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 	const auto CapsuleBottomLocation{
-		LocomotionState.SmoothLocation - LocomotionState.SmoothRotation.RotateVector(FVector::UpVector) * (CapsuleHalfHeight + 2)
+		LocomotionState.SmoothLocation - LocomotionState.SmoothRotation.RotateVector(FVector::UpVector) * (CapsuleHalfHeight + 2.0f)
 	};
 
 	// Trace forward to find a object the character cannot walk on.
@@ -953,12 +953,12 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			: LocomotionState.SmoothRotation.Vector()
 	};
 
-	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * 30};
-	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.GetMax() + TraceSettings.LedgeHeight.GetMin()) / 2;
+	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * 30.0f};
+	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.GetMax() + TraceSettings.LedgeHeight.GetMin()) * 0.5f;
 
 	const auto ForwardTraceEnd{ForwardTraceStart + ForwardTraceDirection * TraceSettings.ReachDistance};
 
-	const auto ForwardTraceCapsuleHalfHeight{(TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) / 2 + 1};
+	const auto ForwardTraceCapsuleHalfHeight{(TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * 0.5f + 1.0f};
 
 	FHitResult Hit;
 	GetWorld()->SweepSingleByObjectType(Hit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
@@ -990,10 +990,10 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	auto DownwardTraceEnd{ForwardTraceImpactPoint};
 	DownwardTraceEnd.Z = CapsuleBottomLocation.Z;
-	DownwardTraceEnd -= ForwardTraceImpactNormal * 15;
+	DownwardTraceEnd -= ForwardTraceImpactNormal * 15.0f;
 
 	auto DownwardTraceStart{DownwardTraceEnd};
-	DownwardTraceStart.Z += TraceSettings.LedgeHeight.GetMax() + TraceSettings.TraceRadiusDownward + 1;
+	DownwardTraceStart.Z += TraceSettings.LedgeHeight.GetMax() + TraceSettings.TraceRadiusDownward + 1.0f;
 
 	GetWorld()->SweepSingleByObjectType(Hit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
 	                                    FCollisionShape::MakeSphere(TraceSettings.TraceRadiusDownward),
@@ -1007,11 +1007,11 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
-	FVector SweepTestLocation{Hit.Location.X, Hit.Location.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2};
+	FVector SweepTestLocation{Hit.Location.X, Hit.Location.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2.0f};
 
 	// #if ENABLE_DRAW_DEBUG
 	// 	DrawDebugCapsule(Capsule->GetWorld(), SweepTestLocation, CapsuleHalfHeight, Capsule->GetScaledCapsuleRadius(),
-	// 	                 FQuat::Identity, FColor::Blue, false, 5);
+	// 	                 FQuat::Identity, FColor::Blue, false, 5.0f);
 	// #endif
 
 	if (GetWorld()->SweepTestByObjectType(SweepTestLocation, SweepTestLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
@@ -1023,7 +1023,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		return false;
 	}
 
-	const auto TargetRotation{(ForwardTraceImpactNormal * FVector{-1, -1, 0}).ToOrientationRotator()};
+	const auto TargetRotation{(ForwardTraceImpactNormal * FVector{-1.0f, -1.0f, 0.0f}).ToOrientationRotator()};
 
 	const auto MantlingHeight{SweepTestLocation.Z - LocomotionState.SmoothLocation.Z};
 
@@ -1036,7 +1036,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 	else
 	{
-		MantlingType = MantlingHeight > 125
+		MantlingType = MantlingHeight > 125.0f
 			               ? EAlsMantlingType::High
 			               : EAlsMantlingType::Low;
 	}
@@ -1116,8 +1116,8 @@ void AAlsCharacter::StartMantling(const FAlsMantlingParameters& Parameters)
 	// Configure the mantling timeline so that it is the same length as the interpolation and
 	// correction curve minus the starting position, and plays at the same speed as the animation.
 
-	float MinTime{0};
-	float MaxTime{0};
+	auto MinTime{0.0f};
+	auto MaxTime{0.0f};
 	MantlingState.InterpolationAndCorrectionCurve->GetTimeRange(MinTime, MaxTime);
 
 	MantlingTimeline->SetTimelineLength(MaxTime - MantlingState.StartTime);
@@ -1280,7 +1280,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 		SetRagdollTargetLocation(GetMesh()->GetSocketLocation(UAlsConstants::PelvisBone()));
 	}
 
-	RagdollingState.PullForce = 0;
+	RagdollingState.PullForce = 0.0f;
 
 	if (IsNetMode(NM_DedicatedServer))
 	{
@@ -1303,7 +1303,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	// Stop any active montages.
 
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.2);
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
 
 	OnRagdollingStarted();
 }
@@ -1336,17 +1336,17 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 	RagdollingState.RootBoneVelocity = RootBoneVelocity.SizeSquared() > SMALL_NUMBER || IsLocallyControlled()
 		                                   ? RootBoneVelocity
-		                                   : RagdollingState.RootBoneVelocity / 2;
+		                                   : RagdollingState.RootBoneVelocity * 0.5f;
 
 	// Use the velocity to scale the ragdoll's joint strength for physical animation.
 
-	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(RagdollingState.RootBoneVelocity.Size() / 1000) * 25000,
-	                                          0, 0, false);
+	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(RagdollingState.RootBoneVelocity.Size() / 1000.0f) * 25000.0f,
+	                                          0.0f, 0.0f, false);
 
 	// Disable Gravity if falling faster than -4000 to prevent continual
 	// acceleration. This also prevents the ragdoll from going through the floor.
 
-	GetMesh()->SetEnableGravity(RagdollingState.RootBoneVelocity.Z > -4000);
+	GetMesh()->SetEnableGravity(RagdollingState.RootBoneVelocity.Z > -4000.0f);
 
 	RefreshRagdollingActorTransform(DeltaTime);
 }
@@ -1377,17 +1377,17 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 
 	if (RagdollingState.bGrounded)
 	{
-		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 2;
+		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 2.0f;
 	}
 
 	if (!IsLocallyControlled())
 	{
-		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, 750, DeltaTime, 0.6);
+		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, 750.0f, DeltaTime, 0.6f);
 
 		const auto RagdollSpeedSquared{FVector2D{RagdollingState.RootBoneVelocity.X, RagdollingState.RootBoneVelocity.Y}.SizeSquared()};
 
 		const auto PullForceSocketName{
-			RagdollSpeedSquared > 300 * 300
+			RagdollSpeedSquared > 300.0f * 300.0f
 				? UAlsConstants::Spine03Bone()
 				: UAlsConstants::PelvisBone()
 		};
@@ -1400,9 +1400,11 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 
 	const auto PelvisRotation{PelvisTransform.Rotator()};
 
-	RagdollingState.bFacedUpward = PelvisRotation.Roll < 0;
+	RagdollingState.bFacedUpward = PelvisRotation.Roll < 0.0f;
 
-	SetActorLocationAndRotation(NewActorLocation, {0, RagdollingState.bFacedUpward ? PelvisRotation.Yaw - 180 : PelvisRotation.Yaw, 0});
+	SetActorLocationAndRotation(NewActorLocation, {
+		                            0.0f, RagdollingState.bFacedUpward ? PelvisRotation.Yaw - 180.0f : PelvisRotation.Yaw, 0.0f
+	                            });
 
 	RefreshSmoothLocationAndRotation();
 
@@ -1445,7 +1447,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 	// Re-enable replicate movement and if the host is a dedicated server set animation tick option back to default.
 
 	SetReplicateMovement(true);
-	AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = 0;
+	AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
 
 	if (IsNetMode(NM_DedicatedServer))
 	{
@@ -1458,8 +1460,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 	if (RagdollingState.bGrounded)
 	{
 		AlsCharacterMovement->SetMovementMode(MOVE_Walking);
-		GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1,
-		                                           EMontagePlayReturnType::MontageLength, 0, true);
+		GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
+		                                           EMontagePlayReturnType::MontageLength, 0.0f, true);
 	}
 	else
 	{

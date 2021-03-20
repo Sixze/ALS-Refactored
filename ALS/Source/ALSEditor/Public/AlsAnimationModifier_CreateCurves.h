@@ -31,7 +31,7 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FAlsAnimationCurveKey> Keys
 	{
-		{0, 0}
+		{0, 0.0f}
 	};
 };
 

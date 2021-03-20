@@ -56,7 +56,7 @@ struct ALS_API FAlsLayeringState
 	float LegsBlendAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float PoseStandingBlendAmount{1};
+	float PoseStandingBlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
 	float PoseCrouchingBlendAmount;
