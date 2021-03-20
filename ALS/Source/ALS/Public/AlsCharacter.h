@@ -37,7 +37,7 @@ private:
 	UTimelineComponent* MantlingTimeline;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess, ClampMin = 0))
-	float MovingSpeedThreshold{150};
+	float MovingSpeedThreshold{150.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
 	bool bRotateToVelocityWhenSprinting;
@@ -433,7 +433,7 @@ private:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void TryStartRolling(float PlayRate = 1);
+	void TryStartRolling(float PlayRate = 1.0f);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")

@@ -198,21 +198,21 @@ private:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2, float BlendOutTime = 0.2, float PlayRate = 1,
-	                    float StartTime = 0);
+	void PlayTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
+	                    float PlayRate = 1.0f, float StartTime = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, float BlendInTime = 0.2, float BlendOutTime = 0.2,
-	                                        float PlayRate = 1, float StartTime = 0);
+	void PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
+	                                        float PlayRate = 1.0f, float StartTime = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void StopTransitionAndTurnInPlaceSlotAnimations(float BlendOutTime = 0.2);
+	void StopTransitionAndTurnInPlaceSlotAnimations(float BlendOutTime = 0.2f);
 
 private:
 	void RefreshDynamicTransitions();
 
-	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2, float BlendOutTime = 0.2, float PlayRate = 1,
-	                           float StartTime = 0, float AllowanceDelayTime = 0);
+	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
+	                           float PlayRate = 1.0f, float StartTime = 0.0f, float AllowanceDelayTime = 0.0f);
 
 	void OnDynamicTransitionAllowanceTimerEnded();
 
@@ -226,7 +226,7 @@ private:
 private:
 	void RefreshTurnInPlace(float DeltaTime);
 
-	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1, float StartTime = 0, bool bAllowRestartIfPlaying = false);
+	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartIfPlaying = false);
 
 	// Jump
 

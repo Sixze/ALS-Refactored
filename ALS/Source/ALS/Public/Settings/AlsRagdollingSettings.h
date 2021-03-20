@@ -12,5 +12,5 @@ struct ALS_API FAlsRagdollingSettings
 
 	// If player landed with a speed greater than specified value, then start ragdolling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bStartRagdollingOnLand"))
-	float RagdollingOnLandSpeedThreshold{1000};
+	float RagdollingOnLandSpeedThreshold{1000.0f};
 };

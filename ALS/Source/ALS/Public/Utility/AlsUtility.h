@@ -19,5 +19,5 @@ public:
 
 inline float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName CurveName)
 {
-	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0;
+	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;
 }

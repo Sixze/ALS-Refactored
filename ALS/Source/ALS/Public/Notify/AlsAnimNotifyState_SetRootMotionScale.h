@@ -13,7 +13,7 @@ class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess, ClampMin = 0))
-	float TranslationScale{1};
+	float TranslationScale{1.0f};
 
 protected:
 	virtual FString GetNotifyName_Implementation() const override;

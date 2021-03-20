@@ -23,6 +23,6 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* C
 	auto* Character{Cast<ACharacter>(Component->GetOwner())};
 	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
-		Character->SetAnimRootMotionTranslationScale(1);
+		Character->SetAnimRootMotionTranslationScale(1.0f);
 	}
 }

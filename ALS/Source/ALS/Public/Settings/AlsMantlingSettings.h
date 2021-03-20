@@ -19,16 +19,16 @@ struct ALS_API FAlsMantlingSettings
 	UCurveVector* InterpolationAndCorrectionAmountsCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector StartRelativeLocation{-65, 0, -200};
+	FVector StartRelativeLocation{-65.0f, 0.0f, -200.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	FVector2D ReferenceHeight{125, 200};
+	FVector2D ReferenceHeight{125.0f, 200.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 0))
-	FVector2D PlayRate{1.2, 1.2};
+	FVector2D PlayRate{1.2f, 1.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	FVector2D StartTime{0.6, 0};
+	FVector2D StartTime{0.6f, 0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -37,16 +37,16 @@ struct ALS_API FAlsMantlingTraceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	FVector2D LedgeHeight{50, 250};
+	FVector2D LedgeHeight{50.0f, 250.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float ReachDistance{75};
+	float ReachDistance{75.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float TraceRadiusForward{30};
+	float TraceRadiusForward{30.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float TraceRadiusDownward{30};
+	float TraceRadiusDownward{30.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -59,11 +59,11 @@ struct ALS_API FAlsGeneralMantlingSettings
 
 	// If a dynamic object has a speed bigger than this value, then do not start mantling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TargetPrimitiveSpeedThreshold{10};
+	float TargetPrimitiveSpeedThreshold{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMantlingTraceSettings GroundedTrace;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsMantlingTraceSettings InAirTrace{{50, 150}, 70};
+	FAlsMantlingTraceSettings InAirTrace{{50.0f, 150.0f}, 70.0f};
 };

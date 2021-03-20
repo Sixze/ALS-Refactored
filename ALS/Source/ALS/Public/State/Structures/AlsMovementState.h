@@ -49,10 +49,10 @@ struct ALS_API FAlsMovementState
 	float WalkRunBlendAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float StandingPlayRate{1};
+	float StandingPlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float CrouchingPlayRate{1};
+	float CrouchingPlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPivotActive;

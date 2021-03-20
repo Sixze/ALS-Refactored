@@ -10,7 +10,7 @@ struct ALS_API FAlsDynamicTransitionSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float FootIkDistanceThreshold{8};
+	float FootIkDistanceThreshold{8.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimSequenceBase* TransitionLeftAnimation;

@@ -13,16 +13,16 @@ struct ALS_API FAlsFeetSettings
 	bool bDisableFootLock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float FootHeight{13.5};
+	float FootHeight{13.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float IkVerticalCorrection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float IkTraceDistanceUpward{50};
+	float IkTraceDistanceUpward{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float IkTraceDistanceDownward{45};
+	float IkTraceDistanceDownward{45.0f};
 
 	// Forward and backward velocity blend amount to foot ik root bone scale curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

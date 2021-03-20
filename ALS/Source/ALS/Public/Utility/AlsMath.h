@@ -13,8 +13,8 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr float RadToDeg{180 / PI};
-	static constexpr float DegToRad{PI / 180};
+	static constexpr float RadToDeg{57.295779513082320876798154814105170332405472466564321549160243861f};
+	static constexpr float DegToRad{0.0174532925199432957692369076848861271344287188854172545609719144f};
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float Clamp01(float Value);
@@ -53,14 +53,14 @@ public:
 
 inline float UAlsMath::Clamp01(const float Value)
 {
-	if (Value <= 0)
+	if (Value <= 0.0f)
 	{
-		return 0;
+		return 0.0f;
 	}
 
-	if (Value >= 1)
+	if (Value >= 1.0f)
 	{
-		return 1;
+		return 1.0f;
 	}
 
 	return Value;
@@ -74,12 +74,12 @@ inline float UAlsMath::LerpClamped(const float A, const float B, const float Alp
 inline float UAlsMath::AngleInterpolateConstantTo(const float CurrentAngle, float const TargetAngle,
                                                   const float DeltaTime, const float InterpolationSpeed)
 {
-	if (DeltaTime <= 0 || CurrentAngle == TargetAngle)
+	if (DeltaTime <= 0.0f || CurrentAngle == TargetAngle)
 	{
 		return CurrentAngle;
 	}
 
-	if (InterpolationSpeed <= 0)
+	if (InterpolationSpeed <= 0.0f)
 	{
 		// If no interpolation speed, then jump to target value.
 		return TargetAngle;
@@ -92,7 +92,7 @@ inline float UAlsMath::AngleInterpolateConstantTo(const float CurrentAngle, floa
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
-	if (MagnitudeSquared <= 1)
+	if (MagnitudeSquared <= 1.0f)
 	{
 		return Vector;
 	}
