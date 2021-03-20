@@ -11,10 +11,10 @@ struct ALS_API FAlsRollingSettings
 	bool bCrouchOnStart{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRotateToInputAccelerationOnStart{true};
+	bool bRotateToInputOnStart{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bSmoothRotateToInputAccelerationDuringRoll{false};
+	bool bSmoothRotateToInputDuringRoll{false};
 
 	// If player landed with a specified speed, switch to roll state.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

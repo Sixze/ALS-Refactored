@@ -30,6 +30,10 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetMesh()->bUpdateJointsFromAnimation = true;
 
+	// Uncomment the line of code below if you have noticeable foot lock issues on simulated proxies.
+
+	// GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+
 	// If this option is enabled, then it can cause problems with animation curves (for example, aiming will not work correctly).
 	// https://answers.unrealengine.com/questions/1001006/view.html
 
@@ -56,7 +60,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredRotationMode, Parameters);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, OverlayMode, Parameters);
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputAcceleration, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputDirection, Parameters);
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bAiming, Parameters);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, AimingRotation, Parameters);
@@ -96,7 +100,7 @@ void AAlsCharacter::BeginPlay()
 
 	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
-	LocomotionState.InputAccelerationYawAngle = LocomotionState.SmoothRotation.Yaw;
+	LocomotionState.InputYawAngle = LocomotionState.SmoothRotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.SmoothRotation.Yaw;
 
 	AimingState.SmoothRotation = AimingRotation;
@@ -372,29 +376,23 @@ EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
 
 bool AAlsCharacter::CanSprint() const
 {
-	// Determine if the character is currently able to sprint based on the rotation mode and input acceleration
-	// rotation. If the character is in the looking direction rotation mode, only allow sprinting if there
-	// is full input acceleration amount and it is faced forward relative to the camera + or - 50 degrees.
+	// Determine if the character is currently able to sprint based on the rotation mode and input
+	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
+	// if there is input and it is faced forward relative to the camera + or - 50 degrees.
 
-	if (!LocomotionState.bHasInputAcceleration || RotationMode == EAlsRotationMode::Aiming)
+	if (!LocomotionState.bHasInput || RotationMode == EAlsRotationMode::Aiming)
 	{
 		return false;
 	}
 
-	const auto bHasFullInputAccelerationAmount{LocomotionState.InputAccelerationAmount > 0.9f};
-
 	if (RotationMode == EAlsRotationMode::VelocityDirection)
 	{
-		return bHasFullInputAccelerationAmount;
+		return true;
 	}
 
 	if (RotationMode == EAlsRotationMode::LookingDirection)
 	{
-		const auto YawAngleDifference{
-			FRotator::NormalizeAxis(LocomotionState.InputAccelerationYawAngle - AimingState.SmoothRotation.Yaw)
-		};
-
-		return bHasFullInputAccelerationAmount && FMath::Abs(YawAngleDifference) < 50.0f;
+		return FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f;
 	}
 
 	return false;
@@ -561,13 +559,13 @@ void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction Pre
 
 void AAlsCharacter::OnLocomotionActionChanged_Implementation(EAlsLocomotionAction PreviousAction) {}
 
-void AAlsCharacter::SetInputAcceleration(const FVector& NewInputAcceleration)
+void AAlsCharacter::SetInputDirection(const FVector& NewInputDirection)
 {
-	if (InputAcceleration != NewInputAcceleration)
+	if (InputDirection != NewInputDirection)
 	{
-		InputAcceleration = NewInputAcceleration;
+		InputDirection = NewInputDirection;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, InputAcceleration, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, InputDirection, this);
 	}
 }
 
@@ -599,33 +597,17 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (GetLocalRole() > ROLE_SimulatedProxy)
 	{
-		SetInputAcceleration(AlsCharacterMovement->GetCurrentAcceleration());
-
-		LocomotionState.SmoothMaxAcceleration = AlsCharacterMovement->GetMaxAcceleration();
+		SetInputDirection(AlsCharacterMovement->GetCurrentAcceleration() / AlsCharacterMovement->GetMaxAcceleration());
 	}
-	else
+
+	// If the character has input, update the input yaw angle.
+
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > SMALL_NUMBER;
+
+	if (LocomotionState.bHasInput)
 	{
-		LocomotionState.SmoothMaxAcceleration = AlsCharacterMovement->GetMaxAcceleration() > SMALL_NUMBER
-			                                        ? AlsCharacterMovement->GetMaxAcceleration()
-			                                        : LocomotionState.SmoothMaxAcceleration * 0.5f;
+		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle(FVector2D{InputDirection});
 	}
-
-	// Determine if the character has movement input by getting its input acceleration amount. The
-	// input acceleration amount is equal to the current input acceleration divided by the max
-	// acceleration so that it has a range from 0 to 1, 1 being the maximum possible amount of input,
-	// and 0 being none. If the character has movement input, update the input acceleration rotation.
-
-	LocomotionState.InputAccelerationAmount = InputAcceleration.Size() / LocomotionState.SmoothMaxAcceleration;
-	LocomotionState.bHasInputAcceleration = LocomotionState.InputAccelerationAmount > SMALL_NUMBER;
-
-	if (LocomotionState.bHasInputAcceleration)
-	{
-		LocomotionState.InputAccelerationYawAngle = InputAcceleration.ToOrientationRotator().Yaw;
-	}
-
-	// These values represent how the capsule is moving as well as how it wants to move, and
-	// therefore are essential for any data driven animation system. They are also used throughout
-	// the system for various functions, so I found it is easiest to manage them all in one place.
 
 	LocomotionState.Velocity = GetVelocity();
 
@@ -644,12 +626,12 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasSpeed)
 	{
-		LocomotionState.VelocityYawAngle = LocomotionState.Velocity.ToOrientationRotator().Yaw;
+		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle(FVector2D{LocomotionState.Velocity});
 	}
 
 	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
 
-	LocomotionState.bMoving = LocomotionState.bHasInputAcceleration || LocomotionState.Speed > MovingSpeedThreshold;
+	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > MovingSpeedThreshold;
 }
 
 void AAlsCharacter::SetAiming(const bool bNewAiming)
@@ -706,11 +688,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	{
 		// Rolling.
 
-		if (/** IsNetMode(NM_Standalone) && */ RollingSettings.bSmoothRotateToInputAccelerationDuringRoll &&
-		                                       LocomotionState.bHasInputAcceleration)
+		if (/** IsNetMode(NM_Standalone) && */ RollingSettings.bSmoothRotateToInputDuringRoll && LocomotionState.bHasInput)
 		{
 			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle,
-			                                                                   LocomotionState.InputAccelerationYawAngle,
+			                                                                   LocomotionState.InputYawAngle,
 			                                                                   DeltaTime, 100.0f);
 		}
 
@@ -761,7 +742,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 	if (RotationMode == EAlsRotationMode::Aiming)
 	{
-		if (LocomotionState.bHasInputAcceleration)
+		if (LocomotionState.bHasInput)
 		{
 			RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
 		}
@@ -912,7 +893,7 @@ void AAlsCharacter::OnLandedNetworked()
 		return;
 	}
 
-	AlsCharacterMovement->BrakingFrictionFactor = LocomotionState.bHasInputAcceleration ? 0.5f : 3.0f;
+	AlsCharacterMovement->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
 
 	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
 }
@@ -946,8 +927,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Trace forward to find a object the character cannot walk on.
 
 	const auto ForwardTraceDirection{
-		LocomotionState.InputAccelerationAmount >= KINDA_SMALL_NUMBER
-			? InputAcceleration / LocomotionState.SmoothMaxAcceleration
+		LocomotionState.bHasInput
+			? InputDirection
 			: LocomotionState.bHasSpeed
 			? LocomotionState.Velocity.GetUnsafeNormal2D()
 			: LocomotionState.SmoothRotation.Vector()
@@ -1492,8 +1473,8 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
 	    LocomotionAction == EAlsLocomotionAction::None)
 	{
-		StartRolling(PlayRate, RollingSettings.bRotateToInputAccelerationOnStart && LocomotionState.bHasInputAcceleration
-			                       ? LocomotionState.InputAccelerationYawAngle
+		StartRolling(PlayRate, RollingSettings.bRotateToInputOnStart && LocomotionState.bHasInput
+			                       ? LocomotionState.InputYawAngle
 			                       : LocomotionState.SmoothRotation.Yaw);
 	}
 }
