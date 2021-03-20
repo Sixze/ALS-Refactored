@@ -11,11 +11,14 @@ struct ALS_API FAlsRotateInPlaceSettings
 	float AimingYawAngleThreshold{50};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float MaxFootLockAimingYawSpeed{540};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
 	FVector2D ReferenceAimingYawSpeed{90, 270};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
 	FVector2D PlayRate{1.15, 3};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDisableFootLock;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, EditCondition = "!bDisableFootLock"))
+	float MaxFootLockAimingYawSpeed{540};
 };

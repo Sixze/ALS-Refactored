@@ -15,26 +15,26 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Character = Cast<AAlsCharacter>(GetOwningActor());
+	AlsCharacter = Cast<AAlsCharacter>(GetOwningActor());
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!IsValid(Character) || DeltaTime <= SMALL_NUMBER)
+	if (!IsValid(AlsCharacter) || DeltaTime <= SMALL_NUMBER)
 	{
 		return;
 	}
 
 	const auto PreviousLocomotionMode{LocomotionMode};
 
-	Stance = Character->GetStance();
-	Gait = Character->GetGait();
-	RotationMode = Character->GetRotationMode();
-	OverlayMode = Character->GetOverlayMode();
-	LocomotionMode = Character->GetLocomotionMode();
-	LocomotionAction = Character->GetLocomotionAction();
+	Stance = AlsCharacter->GetStance();
+	Gait = AlsCharacter->GetGait();
+	RotationMode = AlsCharacter->GetRotationMode();
+	OverlayMode = AlsCharacter->GetOverlayMode();
+	LocomotionMode = AlsCharacter->GetLocomotionMode();
+	LocomotionAction = AlsCharacter->GetLocomotionAction();
 
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
@@ -76,16 +76,12 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 1);
 	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 2);
 
-	const auto* CharacterMovement{Character->GetCharacterMovement()};
+	LocomotionState.bHasSpeed = AlsCharacter->GetLocomotionState().bHasSpeed;
+	LocomotionState.Speed = AlsCharacter->GetLocomotionState().Speed;
+	LocomotionState.Velocity = AlsCharacter->GetLocomotionState().Velocity;
+	LocomotionState.VelocityYawAngle = AlsCharacter->GetLocomotionState().VelocityYawAngle;
 
-	LocomotionState.ActorRotation = Character->GetActorRotation();
-
-	LocomotionState.bHasSpeed = Character->GetLocomotionState().bHasSpeed;
-	LocomotionState.Speed = Character->GetLocomotionState().Speed;
-	LocomotionState.Velocity = Character->GetLocomotionState().Velocity;
-	LocomotionState.VelocityYawAngle = Character->GetLocomotionState().VelocityYawAngle;
-
-	LocomotionState.bHasInputAcceleration = Character->GetLocomotionState().bHasInputAcceleration;
+	LocomotionState.bHasInputAcceleration = AlsCharacter->GetLocomotionState().bHasInputAcceleration;
 
 	if (LocomotionState.bHasInputAcceleration && RotationMode.IsVelocityDirection())
 	{
@@ -93,7 +89,8 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 		// from 0 to 1. This value is used in the aiming to make the character look toward the current acceleration.
 
 		const auto InputAccelerationYawAngle{
-			FRotator::NormalizeAxis(Character->GetLocomotionState().InputAccelerationYawAngle - LocomotionState.ActorRotation.Yaw)
+			FRotator::NormalizeAxis(
+				AlsCharacter->GetLocomotionState().InputAccelerationYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)
 		};
 
 		const auto InputAccelerationYawAmount{(InputAccelerationYawAngle / 180 + 1) / 2};
@@ -103,7 +100,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 		                                                              GeneralSettings.InputAccelerationYawAmountInterpolationSpeed);
 	}
 
-	LocomotionState.bMoving = Character->GetLocomotionState().bMoving;
+	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
 
 	// The transitions allowed curve is modified within certain states, so that is transition allowed will be true while in those states.
 
@@ -120,20 +117,22 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	// relative to the actor rotation. It is normalized to a range of -1 to 1 so that -1 equals the max
 	// braking deceleration, and 1 equals the max acceleration of the character movement component.
 
-	const auto Acceleration{Character->GetLocomotionState().Acceleration};
+	const auto Acceleration{AlsCharacter->GetLocomotionState().Acceleration};
+
+	const auto* CharacterMovement{AlsCharacter->GetCharacterMovement()};
 
 	if ((Acceleration | LocomotionState.Velocity) > 0)
 	{
 		const auto MaxAcceleration{CharacterMovement->GetMaxAcceleration()};
 
-		LocomotionState.RelativeAccelerationAmount = LocomotionState.ActorRotation.UnrotateVector(
+		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
 			UAlsMath::ClampMagnitude01(Acceleration / MaxAcceleration));
 	}
 	else
 	{
 		const auto MaxBrakingDeceleration{CharacterMovement->GetMaxBrakingDeceleration()};
 
-		LocomotionState.RelativeAccelerationAmount = LocomotionState.ActorRotation.UnrotateVector(
+		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
 			UAlsMath::ClampMagnitude01(Acceleration / MaxBrakingDeceleration));
 	}
 
@@ -142,7 +141,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	// The curves allow for fine control over how the offset behaves for each movement direction.
 
 	const auto RotationYawOffset{
-		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - Character->GetAimingState().SmoothRotation.Yaw)
+		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - AlsCharacter->GetAimingState().SmoothRotation.Yaw)
 	};
 
 	LocomotionState.RotationYawOffsetForward = GeneralSettings.RotationYawOffsetForwardCurve->GetFloatValue(RotationYawOffset);
@@ -207,14 +206,14 @@ void UAlsAnimationInstance::RefreshLayering()
 
 void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 {
-	AimingState.Rotation = Character->GetAimingState().SmoothRotation;
+	AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
 
-	const auto AimingRotation{AimingState.Rotation - LocomotionState.ActorRotation};
+	const auto AimingRotation{AimingState.Rotation - AlsCharacter->GetLocomotionState().SmoothRotation};
 
 	AimingState.YawAngle = FRotator::NormalizeAxis(AimingRotation.Yaw);
 	AimingState.PitchAngle = FRotator::NormalizeAxis(AimingRotation.Pitch);
 
-	AimingState.YawSpeed = Character->GetAimingState().YawSpeed;
+	AimingState.YawSpeed = AlsCharacter->GetAimingState().YawSpeed;
 
 	// Interpolate the aiming rotation value to achieve smooth aiming rotation changes. Interpolating
 	// the rotation before calculating the angle ensures the value is not affected by changes in
@@ -223,7 +222,7 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	AimingState.SmoothRotation = FMath::RInterpTo(AimingState.SmoothRotation, AimingState.Rotation, DeltaTime,
 	                                              GeneralSettings.AimingSmoothRotationInterpolationSpeed);
 
-	const auto AimingSmoothRotation{AimingState.SmoothRotation - LocomotionState.ActorRotation};
+	const auto AimingSmoothRotation{AimingState.SmoothRotation - AlsCharacter->GetLocomotionState().SmoothRotation};
 
 	AimingState.SmoothYawAngle = FRotator::NormalizeAxis(AimingSmoothRotation.Yaw);
 	AimingState.SmoothPitchAngle = FRotator::NormalizeAxis(AimingSmoothRotation.Pitch);
@@ -254,7 +253,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.IkLeftAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
 	FeetState.IkRightAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
 
-	if (FeetSettings.bEnableFootLocking)
+	if (!FeetSettings.bDisableFootLock)
 	{
 		RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, DeltaTime,
 		                Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
@@ -346,7 +345,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, co
 
 	if (LocomotionMode.IsGrounded())
 	{
-		RotationDifference = LocomotionState.ActorRotation - Character->GetCharacterMovement()->GetLastUpdateRotation();
+		RotationDifference = AlsCharacter->GetLocomotionState().SmoothRotation - AlsCharacter->GetLocomotionState().PreviousSmoothRotation;
 		RotationDifference.Normalize();
 	}
 	else
@@ -391,11 +390,11 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetSta
 	GetWorld()->LineTraceSingleByChannel(Hit,
 	                                     FootLockBoneLocation + FVector{0, 0, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLockBoneLocation - FVector{0, 0, FeetSettings.IkTraceDistanceDownward},
-	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), true, Character});
+	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), true, AlsCharacter});
 
 	auto TargetRotationOffset{FRotator::ZeroRotator};
 
-	if (Character->GetCharacterMovement()->IsWalkable(Hit))
+	if (AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
 	{
 		// Find the difference in location from the impact location and the expected (flat) floor location. These values
 		// are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
@@ -508,7 +507,9 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	// actor in each direction (normalized so that diagonals equal 0.5 for each direction), and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
-	const auto RelativeVelocityDirection{LocomotionState.ActorRotation.UnrotateVector(LocomotionState.Velocity.GetSafeNormal())};
+	const auto RelativeVelocityDirection{
+		AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(LocomotionState.Velocity.GetSafeNormal())
+	};
 
 	const auto RelativeDirection = RelativeVelocityDirection /
 	                               (FMath::Abs(RelativeVelocityDirection.X) +
@@ -713,38 +714,48 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 		                                                 UAlsMath::Clamp01(FMath::Abs(AimingState.YawAngle / 180)));
 	}
 
-	if (RotateInPlaceState.bRotatingLeft || RotateInPlaceState.bRotatingRight)
+	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
-		// If rotating too fast, then disable the foot lock, or else the legs begin to twist into a spiral.
-
-		RotateInPlaceState.bDisableFootLock = AimingState.YawSpeed > RotateInPlaceSettings.MaxFootLockAimingYawSpeed;
-
-		// If the character should be rotating, set the play rate to scale with the aiming yaw speed.
-		// This makes the character rotate faster when moving the camera faster.
-
-		const auto PlayRateFromYawSpeed{
-			FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceAimingYawSpeed,
-			                                  RotateInPlaceSettings.PlayRate,
-			                                  AimingState.YawSpeed)
-		};
-
-		if (RotateInPlaceState.InitialPlayRate > PlayRateFromYawSpeed)
-		{
-			RotateInPlaceState.PlayRate = RotateInPlaceState.InitialPlayRate;
-		}
-		else
-		{
-			RotateInPlaceState.InitialPlayRate = 0;
-			RotateInPlaceState.PlayRate = PlayRateFromYawSpeed;
-		}
+		return;
 	}
+
+	// If the character should be rotating, set the play rate to scale with the aiming yaw speed.
+	// This makes the character rotate faster when moving the camera faster.
+
+	const auto PlayRateFromYawSpeed{
+		FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceAimingYawSpeed,
+		                                  RotateInPlaceSettings.PlayRate,
+		                                  AimingState.YawSpeed)
+	};
+
+	if (RotateInPlaceState.InitialPlayRate > PlayRateFromYawSpeed)
+	{
+		RotateInPlaceState.PlayRate = RotateInPlaceState.InitialPlayRate;
+	}
+	else
+	{
+		RotateInPlaceState.InitialPlayRate = 0;
+		RotateInPlaceState.PlayRate = PlayRateFromYawSpeed;
+	}
+
+	// If rotating too fast, then disable the foot lock, or else the legs begin to twist into a spiral.
+
+	RotateInPlaceState.bDisableFootLock = RotateInPlaceSettings.bDisableFootLock ||
+	                                      AimingState.YawSpeed > RotateInPlaceSettings.MaxFootLockAimingYawSpeed;
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 {
 	// Turn in place is allowed only if transitions are allowed, the character standing still and looking at the camera.
 
-	if (LocomotionState.bMoving || !LocomotionState.bTransitionsAllowed || !RotationMode.IsLookingDirection())
+	if (LocomotionState.bMoving || !RotationMode.IsLookingDirection())
+	{
+		TurnInPlaceState.ActivationDelayTime = 0;
+		TurnInPlaceState.bDisableFootLock = false;
+		return;
+	}
+
+	if (!LocomotionState.bTransitionsAllowed)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0;
 		return;
@@ -758,6 +769,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	    FMath::Abs(AimingState.YawAngle) <= TurnInPlaceSettings.AimingYawAngleThreshold)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0;
+		TurnInPlaceState.bDisableFootLock = false;
 		return;
 	}
 
@@ -782,7 +794,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const float PlayRateScale, const float StartTime,
                                              const bool bAllowRestartIfPlaying)
 {
-	const auto TurnAngle{FRotator::NormalizeAxis(TargetYawAngle - LocomotionState.ActorRotation.Yaw)};
+	const auto TurnAngle{FRotator::NormalizeAxis(TargetYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)};
 
 	// Choose settings on the turn angle and stance.
 
@@ -838,6 +850,8 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	{
 		TurnInPlaceState.PlayRate = Settings.PlayRate * PlayRateScale;
 	}
+
+	TurnInPlaceState.bDisableFootLock = TurnInPlaceSettings.bDisableFootLock;
 }
 
 void UAlsAnimationInstance::Jump()
@@ -890,23 +904,23 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 		return 0;
 	}
 
-	const auto* CharacterCapsule{Character->GetCapsuleComponent()};
-	const auto CapsuleLocation{CharacterCapsule->GetComponentLocation()};
+	const auto* Capsule{AlsCharacter->GetCapsuleComponent()};
+	const auto SweepStartLocation{AlsCharacter->GetLocomotionState().SmoothLocation};
 
 	auto VelocityDirection{LocomotionState.Velocity};
 	VelocityDirection.Z = FMath::Clamp(InAirState.VerticalVelocity, -4000.0f, -200.0f);
 	VelocityDirection.Normalize();
 
-	const auto TraceVector{VelocityDirection * FMath::GetMappedRangeValueClamped({0, -4000}, {50, 2000}, InAirState.VerticalVelocity)};
+	const auto SweepVector{VelocityDirection * FMath::GetMappedRangeValueClamped({0, -4000}, {50, 2000}, InAirState.VerticalVelocity)};
 
 	FHitResult Hit;
-	GetWorld()->SweepSingleByObjectType(Hit, CapsuleLocation, CapsuleLocation + TraceVector, FQuat::Identity,
+	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity,
 	                                    GroundPredictionObjectQueryParameters,
-	                                    FCollisionShape::MakeCapsule(CharacterCapsule->GetScaledCapsuleRadius(),
-	                                                                 CharacterCapsule->GetScaledCapsuleHalfHeight()),
-	                                    {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, Character});
+	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
+	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
+	                                    {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, AlsCharacter});
 
-	if (!Character->GetCharacterMovement()->IsWalkable(Hit))
+	if (!AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
 	{
 		return 0;
 	}
@@ -922,7 +936,7 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 	// smoothly reverse the leaning direction when transitioning from moving upwards to moving downwards.
 
 	const auto RelativeVelocity{
-		LocomotionState.ActorRotation.UnrotateVector(LocomotionState.Velocity) / 350 *
+		AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(LocomotionState.Velocity) / 350 *
 		InAirSettings.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 

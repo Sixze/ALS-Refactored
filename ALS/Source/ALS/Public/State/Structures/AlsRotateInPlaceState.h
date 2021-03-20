@@ -13,12 +13,12 @@ struct ALS_API FAlsRotateInPlaceState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bRotatingRight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDisableFootLock;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
 	float InitialPlayRate{1};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
 	float PlayRate{1};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDisableFootLock;
 };

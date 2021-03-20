@@ -1,9 +1,33 @@
 ﻿#pragma once
 
+#include "Engine/EngineTypes.h"
+#include "State/Enumerations/AlsMantlingType.h"
+
 #include "AlsMantlingState.generated.h"
 
 class UAnimMontage;
 class UCurveVector;
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsMantlingParameters
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPrimitiveComponent* TargetPrimitive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector_NetQuantize TargetLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator TargetRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MantlingHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAlsMantlingType MantlingType;
+};
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMantlingState
@@ -36,4 +60,7 @@ struct ALS_API FAlsMantlingState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector AnimationOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ENetworkSmoothingMode PreviousNetworkSmoothingMode;
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Settings/AlsMovementCharacterSettings.h"
 #include "Settings/AlsRagdollingSettings.h"
@@ -9,7 +8,6 @@
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
-#include "State/Enumerations/AlsMantlingType.h"
 #include "State/Enumerations/AlsOverlayMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
@@ -22,6 +20,7 @@
 
 #include "AlsCharacter.generated.h"
 
+enum class EAlsMantlingType : uint8;
 class UAlsCharacterMovementComponent;
 class UTimelineComponent;
 
@@ -282,6 +281,10 @@ public:
 private:
 	void SetInputAcceleration(const FVector& NewInputAcceleration);
 
+	FTransform CalculateSmoothTransform() const;
+
+	void RefreshSmoothLocationAndRotation();
+
 	void RefreshLocomotion(float DeltaTime);
 
 	// Aiming
@@ -352,23 +355,19 @@ private:
 	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
 	UFUNCTION(Server, Reliable)
-	void ServerStartMantling(UPrimitiveComponent* TargetPrimitive, const FVector& TargetLocation, const FRotator& TargetRotation,
-	                         float MantlingHeight, EAlsMantlingType MantlingType);
+	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartMantling(UPrimitiveComponent* TargetPrimitive, const FVector& TargetLocation, const FRotator& TargetRotation,
-	                            float MantlingHeight, EAlsMantlingType MantlingType);
+	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
 
-	void StartMantling(UPrimitiveComponent* TargetPrimitive, const FVector& TargetLocation, const FRotator& TargetRotation,
-	                   float MantlingHeight, EAlsMantlingType MantlingType);
+	void StartMantling(const FAlsMantlingParameters& Parameters);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	FAlsMantlingSettings SelectMantlingSettings(EAlsMantlingType MantlingType);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnMantlingStarted(UPrimitiveComponent* TargetPrimitive, const FVector& TargetLocation, const FRotator& TargetRotation,
-	                       float MantlingHeight, EAlsMantlingType MantlingType);
+	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
 	UFUNCTION()

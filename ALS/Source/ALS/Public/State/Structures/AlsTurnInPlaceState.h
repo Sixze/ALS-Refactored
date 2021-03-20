@@ -12,4 +12,7 @@ struct ALS_API FAlsTurnInPlaceState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
 	float PlayRate{1};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDisableFootLock;
 };

@@ -20,9 +20,6 @@ struct ALS_API FAlsLocomotionAnimationState
 	float GaitSprintingAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator ActorRotation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasInputAcceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
