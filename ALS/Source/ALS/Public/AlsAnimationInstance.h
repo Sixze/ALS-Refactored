@@ -63,7 +63,7 @@ private:
 	FAlsInAirSettings InAirSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
-	AAlsCharacter* Character;
+	AAlsCharacter* AlsCharacter;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, meta = (AllowPrivateAccess))
 	bool bDynamicTransitionsAllowed{true};

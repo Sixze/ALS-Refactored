@@ -39,6 +39,9 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 180, DisplayName="Turn 180 Angle Threshold"))
 	float Turn180AngleThreshold{130.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDisableFootLock;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName="Standing Turn 90 Left"))
 	FAlsTurnInPlaceSettings StandingTurn90Left;
 

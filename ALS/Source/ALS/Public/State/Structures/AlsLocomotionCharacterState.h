@@ -8,6 +8,15 @@ struct ALS_API FAlsLocomotionCharacterState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector SmoothLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator SmoothRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator PreviousSmoothRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator TargetActorRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

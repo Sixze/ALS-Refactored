@@ -4,8 +4,8 @@
 
 float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float OtherAxisValue)
 {
-	// GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::Format(TEXT("Vale: {0}, OtherAxis: {1} Result: {2}"), {
-	// 	                                                                     Value, OtherAxis, FMath::Clamp(AxisValue *
+	// GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString::Format(TEXT("Value: {0}, OtherAxis: {1} Result: {2}"), {
+	// 	                                                                     AxisValue, OtherAxisValue, FMath::Clamp(AxisValue *
 	// 			                                                                     FMath::GetMappedRangeValueClamped({0, 0.6f},
 	// 				                                                                     {1, 1.2f},
 	// 				                                                                     FMath::Abs(OtherAxisValue)),
