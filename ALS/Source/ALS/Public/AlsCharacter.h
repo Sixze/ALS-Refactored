@@ -83,7 +83,7 @@ private:
 	EAlsLocomotionAction LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, meta = (AllowPrivateAccess))
-	FVector InputAcceleration;
+	FVector_NetQuantizeNormal InputDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, meta = (AllowPrivateAccess))
 	FAlsLocomotionCharacterState LocomotionState;
@@ -104,7 +104,7 @@ private:
 	FAlsMantlingState MantlingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, meta = (AllowPrivateAccess))
-	FVector RagdollTargetLocation;
+	FVector_NetQuantize RagdollTargetLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, meta = (AllowPrivateAccess))
 	FAlsRagdollingCharacterState RagdollingState;
@@ -274,12 +274,12 @@ protected:
 	// Locomotion
 
 public:
-	const FVector& GetInputAcceleration() const;
+	const FVector& GetInputDirection() const;
 
 	const FAlsLocomotionCharacterState& GetLocomotionState() const;
 
 private:
-	void SetInputAcceleration(const FVector& NewInputAcceleration);
+	void SetInputDirection(const FVector& NewInputAcceleration);
 
 	FTransform CalculateSmoothTransform() const;
 
@@ -449,9 +449,9 @@ private:
 	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 };
 
-inline const FVector& AAlsCharacter::GetInputAcceleration() const
+inline const FVector& AAlsCharacter::GetInputDirection() const
 {
-	return InputAcceleration;
+	return InputDirection;
 }
 
 inline const FAlsLocomotionCharacterState& AAlsCharacter::GetLocomotionState() const

@@ -20,16 +20,10 @@ struct ALS_API FAlsLocomotionCharacterState
 	FRotator TargetActorRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasInputAcceleration;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float InputAccelerationAmount;
+	bool bHasInput;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
-	float InputAccelerationYawAngle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
-	float SmoothMaxAcceleration;
+	float InputYawAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Acceleration;

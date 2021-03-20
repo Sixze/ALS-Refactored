@@ -31,7 +31,7 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Compo
 
 	auto bStopMontage{false};
 
-	if (bCheckInputAcceleration && Character->GetLocomotionState().bHasInputAcceleration)
+	if (bCheckInputAcceleration && Character->GetLocomotionState().bHasInput)
 	{
 		bStopMontage = true;
 	}

@@ -81,23 +81,22 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.Velocity = AlsCharacter->GetLocomotionState().Velocity;
 	LocomotionState.VelocityYawAngle = AlsCharacter->GetLocomotionState().VelocityYawAngle;
 
-	LocomotionState.bHasInputAcceleration = AlsCharacter->GetLocomotionState().bHasInputAcceleration;
+	LocomotionState.bHasInput = AlsCharacter->GetLocomotionState().bHasInput;
 
-	if (LocomotionState.bHasInputAcceleration && RotationMode.IsVelocityDirection())
+	if (LocomotionState.bHasInput && RotationMode.IsVelocityDirection())
 	{
-		// Get the delta between the current acceleration rotation and character rotation and map it to a range
-		// from 0 to 1. This value is used in the aiming to make the character look toward the current acceleration.
+		// Get the delta between the current input yaw angle and character rotation and map it to a range
+		// from 0 to 1. This value is used in the aiming to make the character look toward the current input.
 
-		const auto InputAccelerationYawAngle{
+		const auto InputYawAngle{
 			FRotator::NormalizeAxis(
-				AlsCharacter->GetLocomotionState().InputAccelerationYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)
+				AlsCharacter->GetLocomotionState().InputYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)
 		};
 
-		const auto InputAccelerationYawAmount{(InputAccelerationYawAngle / 180.0f + 1.0f) * 0.5f};
+		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
 
-		LocomotionState.InputAccelerationYawAmount = FMath::FInterpTo(LocomotionState.InputAccelerationYawAmount,
-		                                                              InputAccelerationYawAmount, DeltaTime,
-		                                                              GeneralSettings.InputAccelerationYawAmountInterpolationSpeed);
+		LocomotionState.InputYawAmount = FMath::FInterpTo(LocomotionState.InputYawAmount, InputYawAmount,
+		                                                  DeltaTime, GeneralSettings.InputYawAmountInterpolationSpeed);
 	}
 
 	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
@@ -123,17 +122,13 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	if ((Acceleration | LocomotionState.Velocity) > 0.0f)
 	{
-		const auto MaxAcceleration{CharacterMovement->GetMaxAcceleration()};
-
 		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
-			UAlsMath::ClampMagnitude01(Acceleration / MaxAcceleration));
+			UAlsMath::ClampMagnitude01(Acceleration / CharacterMovement->GetMaxAcceleration()));
 	}
 	else
 	{
-		const auto MaxBrakingDeceleration{CharacterMovement->GetMaxBrakingDeceleration()};
-
 		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
-			UAlsMath::ClampMagnitude01(Acceleration / MaxBrakingDeceleration));
+			UAlsMath::ClampMagnitude01(Acceleration / CharacterMovement->GetMaxBrakingDeceleration()));
 	}
 
 	// Set the rotation yaw offsets. These values influence the rotation yaw offset curve in the
