@@ -15,6 +15,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
 	EAlsGroundedEntryMode Mode;
 
+public:
+	UAlsAnimNotify_SetGroundedEntryMode();
+
 protected:
 	virtual FString GetNotifyName_Implementation() const override;
 

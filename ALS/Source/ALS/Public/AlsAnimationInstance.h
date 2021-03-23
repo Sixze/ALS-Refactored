@@ -149,11 +149,10 @@ private:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	void RefreshFootLock(FAlsFootLockState& FootLockState, float FootIkAmount, float DeltaTime, FName FootLockBoneName,
-	                     FName FootLockCurveName) const;
+	void RefreshFootLock(FAlsFootLockState& FootLockState, float FootIkAmount, FName FootLockBoneName, FName FootLockCurveName) const;
 
-	void RefreshFootOffset(FAlsFootOffsetState& FootOffsetState, float FootIkAmount, float DeltaTime, FName FootLockBoneName,
-	                       FVector& TargetLocationOffset) const;
+	void RefreshFootOffset(FAlsFootOffsetState& FootOffsetState, float FootIkAmount, FName FootLockBoneName,
+	                       FVector& TargetLocationOffset, float DeltaTime) const;
 
 	static void ResetFootOffset(FAlsFootOffsetState& FootOffsetState, float DeltaTime);
 

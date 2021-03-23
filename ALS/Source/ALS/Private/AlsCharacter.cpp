@@ -98,7 +98,6 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshSmoothLocationAndRotation();
 
-	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
 	LocomotionState.InputYawAngle = LocomotionState.SmoothRotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.SmoothRotation.Yaw;
@@ -591,8 +590,6 @@ void AAlsCharacter::RefreshSmoothLocationAndRotation()
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 {
-	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
-
 	RefreshSmoothLocationAndRotation();
 
 	if (GetLocalRole() > ROLE_SimulatedProxy)
@@ -695,7 +692,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 			                                                                   DeltaTime, 100.0f);
 		}
 
-		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10.0f);
+		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 15.0f);
 		return;
 	}
 
@@ -1050,6 +1047,7 @@ void AAlsCharacter::StartMantling(const FAlsMantlingParameters& Parameters)
 	// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
 
 	MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
+
 	AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
 	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
@@ -1200,6 +1198,8 @@ void AAlsCharacter::OnMantlingTimelineUpdated(float BlendInTime)
 	};
 
 	SetActorLocationAndRotation(ResultTransform.GetLocation(), ResultTransform.GetRotation());
+
+	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 
 	RefreshSmoothLocationAndRotation();
 
@@ -1368,7 +1368,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 		const auto RagdollSpeedSquared{FVector2D{RagdollingState.RootBoneVelocity.X, RagdollingState.RootBoneVelocity.Y}.SizeSquared()};
 
 		const auto PullForceSocketName{
-			RagdollSpeedSquared > 300.0f * 300.0f
+			RagdollSpeedSquared > FMath::Square(300.0f)
 				? UAlsConstants::Spine03Bone()
 				: UAlsConstants::PelvisBone()
 		};

@@ -19,7 +19,7 @@ private:
 	float BlendOutTime{0.25f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
-	bool bCheckInputAcceleration{true};
+	bool bCheckInput{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
 	bool bCheckLocomotionMode{true};
@@ -38,6 +38,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess, EditCondition = "bCheckRotationMode"))
 	EAlsRotationMode RotationModeEquals{EAlsRotationMode::Aiming};
+
+public:
+	UAlsAnimNotifyState_EarlyBlendOut();
 
 protected:
 	virtual FString GetNotifyName_Implementation() const override;

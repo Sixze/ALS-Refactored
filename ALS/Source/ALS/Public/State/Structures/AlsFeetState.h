@@ -8,9 +8,6 @@ struct ALS_API FAlsFootLockState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bUseFootLockCurve;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Location;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

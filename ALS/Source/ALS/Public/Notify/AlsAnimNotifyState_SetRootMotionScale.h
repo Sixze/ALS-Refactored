@@ -15,6 +15,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess, ClampMin = 0))
 	float TranslationScale{1.0f};
 
+public:
+	UAlsAnimNotifyState_SetRootMotionScale();
+
 protected:
 	virtual FString GetNotifyName_Implementation() const override;
 

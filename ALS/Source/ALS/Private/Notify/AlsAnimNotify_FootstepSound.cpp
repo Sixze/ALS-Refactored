@@ -13,6 +13,8 @@ FString UAlsAnimNotify_FootstepSound::GetNotifyName_Implementation() const
 
 void UAlsAnimNotify_FootstepSound::Notify(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation)
 {
+	Super::Notify(Component, Animation);
+
 	if (!IsValid(Sound))
 	{
 		return;
