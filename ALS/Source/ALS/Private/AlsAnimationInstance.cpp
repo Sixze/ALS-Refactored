@@ -252,10 +252,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	if (!FeetSettings.bDisableFootLock)
 	{
-		RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, DeltaTime,
-		                Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
-		RefreshFootLock(FeetState.LockRight, FeetState.IkRightAmount, DeltaTime,
-		                Constants.FootRightLockVirtualBone, Constants.FootRightLockCurve);
+		RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
+		RefreshFootLock(FeetState.LockRight, FeetState.IkRightAmount, Constants.FootRightLockVirtualBone, Constants.FootRightLockCurve);
 	}
 
 	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(Constants.FootPlantedCurve), -1.0f, 1.0f);
@@ -277,15 +275,15 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	auto TargetFootLeftLocationOffset{FVector::ZeroVector};
 	auto TargetFootRightLocationOffset{FVector::ZeroVector};
 
-	RefreshFootOffset(FeetState.OffsetLeft, FeetState.IkLeftAmount, DeltaTime,
-	                  Constants.FootLeftLockVirtualBone, TargetFootLeftLocationOffset);
-	RefreshFootOffset(FeetState.OffsetRight, FeetState.IkRightAmount, DeltaTime,
-	                  Constants.FootRightLockVirtualBone, TargetFootRightLocationOffset);
+	RefreshFootOffset(FeetState.OffsetLeft, FeetState.IkLeftAmount, Constants.FootLeftLockVirtualBone,
+	                  TargetFootLeftLocationOffset, DeltaTime);
+	RefreshFootOffset(FeetState.OffsetRight, FeetState.IkRightAmount, Constants.FootRightLockVirtualBone,
+	                  TargetFootRightLocationOffset, DeltaTime);
 
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
-void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, const float FootIkAmount, const float DeltaTime,
+void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, const float FootIkAmount,
                                             const FName FootLockBoneName, const FName FootLockCurveName) const
 {
 	if (FootIkAmount <= SMALL_NUMBER)
@@ -293,81 +291,34 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, co
 		return;
 	}
 
-	// float NewFootLockAmount;
-	//
-	// if (FootLockState.bUseFootLockCurve)
-	// {
-	// 	FootLockState.bUseFootLockCurve = FMath::Abs(GetCurveValue(Constants.RotationYawSpeedCurve)) <= KINDA_SMALL_NUMBER ||
-	// 	                                  Character->GetLocalRole() != ROLE_AutonomousProxy;
-	// 	NewFootLockAmount = GetCurveValue(FootLockCurveName);
-	// }
-	// else
-	// {
-	// 	FootLockState.bUseFootLockCurve = GetCurveValue(FootLockCurveName) >= 0.99f;
-	// 	NewFootLockAmount = 0.0f;
-	// }
-
 	const auto NewFootLockAmount{GetCurveValue(FootLockCurveName)};
+
+	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 1.0f};
+	const auto bNewAmountIsMoreThanPrevious{NewFootLockAmount > FootLockState.Amount};
 
 	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it
 	// so that the foot can only blend out of the locked position or lock to a new position, and never blend in.
 
-	if (NewFootLockAmount >= 0.99f || NewFootLockAmount < FootLockState.Amount)
-	{
-		FootLockState.Amount = NewFootLockAmount;
-	}
-
-	const auto OwningComponent{GetOwningComponent()};
-
-	// If the foot lock amount equals 1, save the new lock location and rotation in component space as the target.
-
-	if (FootLockState.Amount >= 0.99f)
-	{
-		const auto Transform{OwningComponent->GetSocketTransform(FootLockBoneName, RTS_Component)};
-		FootLockState.Location = Transform.GetLocation();
-		FootLockState.Rotation = Transform.Rotator();
-	}
-
-	// If the foot lock amount is not equals 0, update the offsets to keep the foot planted in place while the capsule moves.
-
-	if (FootLockState.Amount <= SMALL_NUMBER)
+	if (!bNewAmountIsEqualOne && bNewAmountIsMoreThanPrevious)
 	{
 		return;
 	}
 
-	FRotator RotationDifference;
+	FootLockState.Amount = NewFootLockAmount;
 
-	// Use the delta between the current and last updated rotation to find
-	// how much the foot should be rotated to remain planted on the ground.
+	// If the new foot lock amount equals 1 and the previous is less than 1, save the new lock location and rotation.
 
-	if (LocomotionMode.IsGrounded())
+	if (bNewAmountIsEqualOne && bNewAmountIsMoreThanPrevious)
 	{
-		RotationDifference = AlsCharacter->GetLocomotionState().SmoothRotation - AlsCharacter->GetLocomotionState().PreviousSmoothRotation;
-		RotationDifference.Normalize();
+		const auto FootTransform{GetOwningComponent()->GetSocketTransform(FootLockBoneName)};
+
+		FootLockState.Location = FootTransform.GetLocation();
+		FootLockState.Rotation = FootTransform.Rotator();
 	}
-	else
-	{
-		RotationDifference = FRotator::ZeroRotator;
-	}
-
-	// Get the distance traveled between frames relative to the mesh rotation
-	// to find how much the foot should be offset to remain planted on the ground.
-
-	const auto LocationDifference{OwningComponent->GetComponentRotation().UnrotateVector(LocomotionState.Velocity * DeltaTime)};
-
-	// Subtract the location difference from the current local location and rotate
-	// it by the rotation difference to keep the foot planted in component space.
-
-	FootLockState.Location = (FootLockState.Location - LocationDifference).RotateAngleAxis(RotationDifference.Yaw, FVector::DownVector);
-
-	// Subtract the rotation difference from the current rotation to get the new local rotation.
-
-	FootLockState.Rotation = {FootLockState.Rotation - RotationDifference};
-	FootLockState.Rotation.Normalize();
 }
 
-void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetState, const float FootIkAmount, const float DeltaTime,
-                                              const FName FootLockBoneName, FVector& TargetLocationOffset) const
+void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetState, const float FootIkAmount, const FName FootLockBoneName,
+                                              FVector& TargetLocationOffset, const float DeltaTime) const
 {
 	if (FootIkAmount <= SMALL_NUMBER)
 	{
@@ -642,24 +593,17 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 
 	const auto OwningComponent{GetOwningComponent()};
 
-	auto FootLockBoneLocation{
-		OwningComponent->GetSocketTransform(Constants.FootLeftLockVirtualBone, RTS_Component).GetLocation()
-	};
-
-	auto FootBoneLocation{
-		OwningComponent->GetSocketTransform(Constants.FootLeftVirtualBone, RTS_Component).GetLocation()
-	};
-
-	if (FVector::DistSquared(FootBoneLocation, FootLockBoneLocation) > FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
+	if (FVector::DistSquared(OwningComponent->GetSocketTransform(Constants.FootLeftVirtualBone).GetLocation(),
+	                         OwningComponent->GetSocketTransform(Constants.FootLeftLockVirtualBone).GetLocation()) >
+	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionRightAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
-	FootLockBoneLocation = OwningComponent->GetSocketTransform(Constants.FootRightLockVirtualBone, RTS_Component).GetLocation();
-	FootBoneLocation = OwningComponent->GetSocketTransform(Constants.FootRightVirtualBone, RTS_Component).GetLocation();
-
-	if (FVector::DistSquared(FootBoneLocation, FootLockBoneLocation) > FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
+	if (FVector::DistSquared(OwningComponent->GetSocketTransform(Constants.FootRightVirtualBone).GetLocation(),
+	                         OwningComponent->GetSocketTransform(Constants.FootRightLockVirtualBone).GetLocation()) >
+	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionLeftAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 	}

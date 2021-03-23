@@ -279,7 +279,7 @@ public:
 	const FAlsLocomotionCharacterState& GetLocomotionState() const;
 
 private:
-	void SetInputDirection(const FVector& NewInputAcceleration);
+	void SetInputDirection(const FVector& NewInputDirection);
 
 	FTransform CalculateSmoothTransform() const;
 
@@ -363,7 +363,7 @@ private:
 	void StartMantling(const FAlsMantlingParameters& Parameters);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	FAlsMantlingSettings SelectMantlingSettings(EAlsMantlingType MantlingType);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -413,7 +413,7 @@ private:
 	void StopRagdollingImplementation();
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	UAnimMontage* SelectGetUpMontage(bool bRagdollFacedUpward);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -436,7 +436,7 @@ public:
 	void TryStartRolling(float PlayRate = 1.0f);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	UAnimMontage* SelectRollMontage();
 
 private:

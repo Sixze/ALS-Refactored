@@ -15,6 +15,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
 	EAlsLocomotionAction Action;
 
+public:
+	UAlsAnimNotifyState_SetLocomotionAction();
+
 protected:
 	virtual FString GetNotifyName_Implementation() const override;
 
