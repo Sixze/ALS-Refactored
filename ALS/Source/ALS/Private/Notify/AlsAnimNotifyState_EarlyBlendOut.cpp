@@ -40,22 +40,18 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Compo
 
 	if (bCheckInput && Character->GetLocomotionState().bHasInput)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("bHasInput"));
 		bStopMontage = true;
 	}
 	else if (bCheckLocomotionMode && Character->GetLocomotionMode() == LocomotionModeEquals)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("LocomotionModeEquals"));
 		bStopMontage = true;
 	}
 	else if (bCheckStance && Character->GetStance() == StanceEquals)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("StanceEquals"));
 		bStopMontage = true;
 	}
 	else if (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("RotationModeEquals"));
 		bStopMontage = true;
 	}
 
