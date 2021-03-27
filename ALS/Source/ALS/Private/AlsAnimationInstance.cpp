@@ -247,21 +247,18 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 {
-	FeetState.IkLeftAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
-	FeetState.IkRightAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
-
-	if (!FeetSettings.bDisableFootLock)
-	{
-		RefreshFootLock(FeetState.LockLeft, FeetState.IkLeftAmount, Constants.FootLeftLockVirtualBone, Constants.FootLeftLockCurve);
-		RefreshFootLock(FeetState.LockRight, FeetState.IkRightAmount, Constants.FootRightLockVirtualBone, Constants.FootRightLockCurve);
-	}
-
 	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(Constants.FootPlantedCurve), -1.0f, 1.0f);
+
+	FeetState.Left.IkAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
+	FeetState.Right.IkAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
+
+	RefreshFootLock(FeetState.Left, Constants.FootLeftVirtualBone, Constants.FootLeftLockCurve);
+	RefreshFootLock(FeetState.Right, Constants.FootRightVirtualBone, Constants.FootRightLockCurve);
 
 	if (LocomotionMode.IsInAir())
 	{
-		ResetFootOffset(FeetState.OffsetLeft, DeltaTime);
-		ResetFootOffset(FeetState.OffsetRight, DeltaTime);
+		ResetFootOffset(FeetState.Left, DeltaTime);
+		ResetFootOffset(FeetState.Right, DeltaTime);
 
 		RefreshPelvisOffset(DeltaTime, FVector::ZeroVector, FVector::ZeroVector);
 		return;
@@ -273,71 +270,72 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	}
 
 	auto TargetFootLeftLocationOffset{FVector::ZeroVector};
-	auto TargetFootRightLocationOffset{FVector::ZeroVector};
+	RefreshFootOffset(FeetState.Left, TargetFootLeftLocationOffset, DeltaTime);
 
-	RefreshFootOffset(FeetState.OffsetLeft, FeetState.IkLeftAmount, Constants.FootLeftLockVirtualBone,
-	                  TargetFootLeftLocationOffset, DeltaTime);
-	RefreshFootOffset(FeetState.OffsetRight, FeetState.IkRightAmount, Constants.FootRightLockVirtualBone,
-	                  TargetFootRightLocationOffset, DeltaTime);
+	auto TargetFootRightLocationOffset{FVector::ZeroVector};
+	RefreshFootOffset(FeetState.Right, TargetFootRightLocationOffset, DeltaTime);
 
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
-void UAlsAnimationInstance::RefreshFootLock(FAlsFootLockState& FootLockState, const float FootIkAmount,
-                                            const FName FootLockBoneName, const FName FootLockCurveName) const
+void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName FootBoneName, const FName FootLockCurveName) const
 {
-	if (FootIkAmount <= SMALL_NUMBER)
+	if (FootState.IkAmount <= SMALL_NUMBER)
 	{
 		return;
 	}
 
-	const auto NewFootLockAmount{GetCurveValue(FootLockCurveName)};
+	const auto FootTransform{GetSkelMeshComponent()->GetSocketTransform(FootBoneName)};
+	const auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
+
+	if (FeetSettings.bDisableFootLock || NewFootLockAmount <= 0.0f)
+	{
+		FootState.LockAmount = 0.0f;
+
+		FootState.LockLocation = FootTransform.GetLocation();
+		FootState.LockRotation = FootTransform.Rotator();
+
+		FootState.FinalLocation = FootState.LockLocation;
+		FootState.FinalRotation = FootState.LockRotation;
+		return;
+	}
 
 	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 1.0f};
-	const auto bNewAmountIsMoreThanPrevious{NewFootLockAmount > FootLockState.Amount};
+	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
 	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it
 	// so that the foot can only blend out of the locked position or lock to a new position, and never blend in.
 
-	if (!bNewAmountIsEqualOne && bNewAmountIsMoreThanPrevious)
+	if (bNewAmountIsEqualOne || bNewAmountIsLessThanPrevious)
 	{
-		return;
+		FootState.LockAmount = NewFootLockAmount;
+
+		// If the new foot lock amount equals 1 and the previous is less than 1, save the new lock location and rotation.
+
+		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
+		{
+			FootState.LockLocation = FootTransform.GetLocation();
+			FootState.LockRotation = FootTransform.Rotator();
+		}
 	}
 
-	FootLockState.Amount = NewFootLockAmount;
-
-	// If the new foot lock amount equals 1 and the previous is less than 1, save the new lock location and rotation.
-
-	if (bNewAmountIsEqualOne && bNewAmountIsMoreThanPrevious)
-	{
-		const auto FootTransform{GetOwningComponent()->GetSocketTransform(FootLockBoneName)};
-
-		FootLockState.Location = FootTransform.GetLocation();
-		FootLockState.Rotation = FootTransform.Rotator();
-	}
+	FootState.FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
+	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(),
+	                                       FootState.LockRotation.Quaternion(),
+	                                       FootState.LockAmount).Rotator();
 }
 
-void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetState, const float FootIkAmount, const FName FootLockBoneName,
-                                              FVector& TargetLocationOffset, const float DeltaTime) const
+void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const
 {
-	if (FootIkAmount <= SMALL_NUMBER)
-	{
-		FootOffsetState.Location = FVector::ZeroVector;
-		FootOffsetState.Rotation = FRotator::ZeroRotator;
-		return;
-	}
-
-	const auto OwningComponent{GetOwningComponent()};
-
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
-	auto FootLockBoneLocation{OwningComponent->GetSocketLocation(FootLockBoneName)};
-	FootLockBoneLocation.Z = OwningComponent->GetSocketLocation(Constants.RootBone).Z;
+	auto FootLocation{FootState.FinalLocation};
+	FootLocation.Z = GetSkelMeshComponent()->GetSocketLocation(Constants.RootBone).Z;
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     FootLockBoneLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
-	                                     FootLockBoneLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
+	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
+	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
 	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), true, AlsCharacter});
 
 	auto TargetRotationOffset{FRotator::ZeroRotator};
@@ -349,7 +347,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetSta
 
 		TargetLocationOffset = Hit.ImpactPoint +
 		                       Hit.ImpactNormal * FeetSettings.FootHeight -
-		                       FootLockBoneLocation;
+		                       FootLocation;
 
 		TargetLocationOffset.Z -= FeetSettings.FootHeight;
 
@@ -359,23 +357,38 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootOffsetState& FootOffsetSta
 		TargetRotationOffset.Roll = UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.Y});
 	}
 
-	const auto CorrectedLocationOffset{TargetLocationOffset + FVector{0.0f, 0.0f, FeetSettings.IkVerticalCorrection}};
+	auto CorrectedLocationOffset = TargetLocationOffset;
+	CorrectedLocationOffset.Z += FeetSettings.IkVerticalCorrection;
 
 	// Interpolate the current location offset to the new target value. Interpolate at
 	// different speeds based on whether the new target is above or below the current one.
 
-	FootOffsetState.Location = FMath::VInterpTo(FootOffsetState.Location, CorrectedLocationOffset, DeltaTime,
-	                                            FootOffsetState.Location.Z > CorrectedLocationOffset.Z ? 30.0f : 15.0f);
+	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, CorrectedLocationOffset, DeltaTime,
+	                                            FootState.OffsetLocation.Z > CorrectedLocationOffset.Z ? 30.0f : 15.0f);
 
 	// Interpolate the current rotation offset to the new target value.
 
-	FootOffsetState.Rotation = FMath::RInterpTo(FootOffsetState.Rotation, TargetRotationOffset, DeltaTime, 30.0f);
+	FootState.OffsetRotation = FMath::RInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, 30.0f);
+
+	FootState.FinalLocation += FootState.OffsetLocation;
+
+	if (!FootState.OffsetRotation.IsZero())
+	{
+		FootState.FinalRotation = (FootState.OffsetRotation.Quaternion() * FootState.FinalRotation.Quaternion()).Rotator();
+	}
 }
 
-void UAlsAnimationInstance::ResetFootOffset(FAlsFootOffsetState& FootOffsetState, const float DeltaTime)
+void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime)
 {
-	FootOffsetState.Location = FMath::VInterpTo(FootOffsetState.Location, FVector::ZeroVector, DeltaTime, 15.0f);
-	FootOffsetState.Rotation = FMath::RInterpTo(FootOffsetState.Rotation, FRotator::ZeroRotator, DeltaTime, 15.0f);
+	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, FVector::ZeroVector, DeltaTime, 15.0f);
+	FootState.OffsetRotation = FMath::RInterpTo(FootState.OffsetRotation, FRotator::ZeroRotator, DeltaTime, 15.0f);
+
+	FootState.FinalLocation += FootState.OffsetLocation;
+
+	if (!FootState.OffsetRotation.IsZero())
+	{
+		FootState.FinalRotation = (FootState.OffsetRotation.Quaternion() * FootState.FinalRotation.Quaternion()).Rotator();
+	}
 }
 
 void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVector& TargetFootLeftLocationOffset,
@@ -383,11 +396,11 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 {
 	// Calculate the pelvis offset amount by finding the average foot ik weight. If the amount is 0, clear the offset.
 
-	FeetState.PelvisOffsetAmount = (FeetState.IkLeftAmount + FeetState.IkRightAmount) * 0.5f;
+	FeetState.PelvisOffsetAmount = (FeetState.Left.IkAmount + FeetState.Right.IkAmount) * 0.5f;
 
 	if (FeetState.PelvisOffsetAmount <= SMALL_NUMBER)
 	{
-		FeetState.PelvisLocationOffset = FVector::ZeroVector;
+		FeetState.PelvisOffsetLocation = FVector::ZeroVector;
 		return;
 	}
 
@@ -402,8 +415,8 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 	// Interpolate the current location offset to the new target value. Interpolate at
 	// different speeds based on whether the new target is above or below the current one.
 
-	FeetState.PelvisLocationOffset = FMath::VInterpTo(FeetState.PelvisLocationOffset, TargetOffset, DeltaTime,
-	                                                  TargetOffset.Z > FeetState.PelvisLocationOffset.Z ? 10.0f : 15.0f);
+	FeetState.PelvisOffsetLocation = FMath::VInterpTo(FeetState.PelvisOffsetLocation, TargetOffset, DeltaTime,
+	                                                  TargetOffset.Z > FeetState.PelvisOffsetLocation.Z ? 10.0f : 15.0f);
 }
 
 float UAlsAnimationInstance::CalculateFootIkRootScaleAmount() const
@@ -488,7 +501,7 @@ float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 	// while still matching the animation speed to the movement speed, preventing the character from needing to play a half walk + half
 	// run blend. The curves are used to map the stride amount to the speed for maximum control.
 
-	const auto Speed{LocomotionState.Speed / GetOwningComponent()->GetComponentScale().Z};
+	const auto Speed{LocomotionState.Speed / GetSkelMeshComponent()->GetComponentScale().Z};
 
 	const auto StandingStrideBlend{
 		FMath::Lerp(MovementSettings.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
@@ -529,7 +542,7 @@ float UAlsAnimationInstance::CalculateStandingPlayRate() const
 		            LocomotionState.GaitSprintingAmount)
 	};
 
-	return FMath::Clamp(WalkRunSprintSpeedAmount / MovementState.StrideBlendAmount / GetOwningComponent()->GetComponentScale().Z, 0.0f,
+	return FMath::Clamp(WalkRunSprintSpeedAmount / MovementState.StrideBlendAmount / GetSkelMeshComponent()->GetComponentScale().Z, 0.0f,
 	                    3.0f);
 }
 
@@ -539,7 +552,7 @@ float UAlsAnimationInstance::CalculateCrouchingPlayRate() const
 	// to be separate from the standing play rate to improve the blend from crouching to standing while in motion.
 
 	return FMath::Clamp(LocomotionState.Speed / MovementSettings.AnimatedCrouchSpeed /
-	                    MovementState.StrideBlendAmount / GetOwningComponent()->GetComponentScale().Z,
+	                    MovementState.StrideBlendAmount / GetSkelMeshComponent()->GetComponentScale().Z,
 	                    0.0f, 2.0f);
 }
 
@@ -586,23 +599,21 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 		return;
 	}
 
-	// Check each foot to see if the location difference between the foot look bone and its desired / target location (determined
-	// via a virtual bone) exceeds a threshold. If it does, play an additive transition animation on that foot. The currently
-	// set transition plays the second half of a 2 foot transition animation, so that only a single foot moves. Because only
-	// the foot look bone can be locked, the separate virtual bone allows the system to know its desired location when locked.
+	// Check each foot to see if the location difference between the foot look and its desired / target location
+	// (determined via a virtual bone) exceeds a threshold. If it does, play an additive transition animation on
+	// that foot. The currently set transition plays the second half of a 2 foot transition animation, so that only
+	// a single foot moves. The separate virtual bone allows the system to know its desired location when locked.
 
-	const auto OwningComponent{GetOwningComponent()};
+	const auto SkeletalMesh{GetSkelMeshComponent()};
 
-	if (FVector::DistSquared(OwningComponent->GetSocketTransform(Constants.FootLeftVirtualBone).GetLocation(),
-	                         OwningComponent->GetSocketTransform(Constants.FootLeftLockVirtualBone).GetLocation()) >
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Constants.FootLeftVirtualBone), FeetState.Left.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionRightAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
-	if (FVector::DistSquared(OwningComponent->GetSocketTransform(Constants.FootRightVirtualBone).GetLocation(),
-	                         OwningComponent->GetSocketTransform(Constants.FootRightLockVirtualBone).GetLocation()) >
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Constants.FootRightVirtualBone), FeetState.Right.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionLeftAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
@@ -895,7 +906,7 @@ void UAlsAnimationInstance::RefreshRagdolling()
 	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
 
 	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(
-		GetOwningComponent()->GetPhysicsLinearVelocity(Constants.RootBone).Size() / 1000.0f
+		GetSkelMeshComponent()->GetPhysicsLinearVelocity(Constants.RootBone).Size() / 1000.0f
 	);
 }
 

@@ -3,54 +3,39 @@
 #include "AlsFeetState.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsFootLockState
+struct ALS_API FAlsFootState
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Location;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator Rotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float Amount;
-};
+	float IkAmount;
 
-USTRUCT(BlueprintType)
-struct ALS_API FAlsFootOffsetState
-{
-	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	float LockAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Location;
+	FVector LockLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator Rotation;
+	FRotator LockRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector OffsetLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator OffsetRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector FinalLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator FinalRotation;
 };
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsFeetState
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float IkLeftAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float IkRightAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsFootLockState LockLeft;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsFootLockState LockRight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsFootOffsetState OffsetLeft;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsFootOffsetState OffsetRight;
 
 	// Choose whether a foot is planted or about to plant when stopping using the foot planted animation
 	// curve. A value less than 0.5 means the foot is planted, and a value more than 0.5 means the
@@ -59,13 +44,19 @@ struct ALS_API FAlsFeetState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -1, ClampMax = 1))
 	float FootPlanted;
 
-	// Pelvis
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsFootState Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PelvisLocationOffset;
+	FAlsFootState Right;
+
+	// Pelvis
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
 	float PelvisOffsetAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector PelvisOffsetLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
 	float IkRootScaleAmount;

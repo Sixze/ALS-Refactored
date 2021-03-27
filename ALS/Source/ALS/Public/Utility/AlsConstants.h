@@ -43,27 +43,15 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static FName FootLeftLockVirtualBone()
-	{
-		return TEXT("VB ik_foot_l_lock");
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static FName FootRightLockVirtualBone()
-	{
-		return TEXT("VB ik_foot_r_lock");
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName FootLeftVirtualBone()
 	{
-		return TEXT("VB foot_l");
+		return TEXT("VB ik_foot_l");
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName FootRightVirtualBone()
 	{
-		return TEXT("VB foot_r");
+		return TEXT("VB ik_foot_r");
 	}
 
 	// Animation Slots
@@ -318,12 +306,6 @@ struct ALS_API FAlsPropertyAccessConstants
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName GunRightVirtualBone{UAlsConstants::GunRightVirtualBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootLeftLockVirtualBone{UAlsConstants::FootLeftLockVirtualBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootRightLockVirtualBone{UAlsConstants::FootRightLockVirtualBone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FootLeftVirtualBone{UAlsConstants::FootLeftVirtualBone()};
