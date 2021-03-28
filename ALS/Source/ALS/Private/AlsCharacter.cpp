@@ -558,8 +558,10 @@ void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction Pre
 
 void AAlsCharacter::OnLocomotionActionChanged_Implementation(EAlsLocomotionAction PreviousAction) {}
 
-void AAlsCharacter::SetInputDirection(const FVector& NewInputDirection)
+void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
+	NewInputDirection = NewInputDirection.GetSafeNormal();
+
 	if (InputDirection != NewInputDirection)
 	{
 		InputDirection = NewInputDirection;
@@ -1044,11 +1046,14 @@ void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingPara
 
 void AAlsCharacter::StartMantling(const FAlsMantlingParameters& Parameters)
 {
-	// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
+	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	{
+		// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
 
-	MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
+		MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
 
-	AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+		AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+	}
 
 	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 
