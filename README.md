@@ -1,7 +1,7 @@
 # Advanced Locomotion System Refactored
 ![Image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/Readme_Screenshots_02.gif)
 
-Completely refactored and bug fixed version of the C++ port of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26**.
+Completely refactored and bug fixed version of the community version of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26**.
 
 ## Supported Platforms
 - Windows
@@ -10,7 +10,7 @@ Completely refactored and bug fixed version of the C++ port of [Advanced Locomot
 *Mac, Android, IOS, and console builds are not tested and supported at the moment. Use the plugin on those platforms with your own risk.*
 
 ## Features
-- Based on latest marketplace release (V4) of Advanced Locomotion System
+- Based on latest marketplace release.
 - Fully implemented in C++
 - Full replication support with low bandwidth usage
 - Plugin structure

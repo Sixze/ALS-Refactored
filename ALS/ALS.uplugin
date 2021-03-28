@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
-	"Version": 2,
-	"VersionName": "4.1",
+	"Version": 3,
+	"VersionName": "4.2",
 	"FriendlyName": "Advanced Locomotion System Refactored",
-	"Description": "Completely refactored and bug fixed version of the C++ port of Advanced Locomotion System V4.",
+	"Description": "Completely refactored and bug fixed version of the community version of Advanced Locomotion System V4.",
 	"Category": "Animation",
 	"CreatedBy": "Sixze",
 	"CreatedByURL": "https://github.com/Sixze",
