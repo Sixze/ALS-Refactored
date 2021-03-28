@@ -279,7 +279,7 @@ public:
 	const FAlsLocomotionCharacterState& GetLocomotionState() const;
 
 private:
-	void SetInputDirection(const FVector& NewInputDirection);
+	void SetInputDirection(FVector NewInputDirection);
 
 	FTransform CalculateSmoothTransform() const;
 
