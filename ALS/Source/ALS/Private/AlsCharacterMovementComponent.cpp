@@ -167,10 +167,10 @@ void UAlsCharacterMovementComponent::SetCustomMaxWalkSpeed(const float NewMaxWal
 
 	if (PawnOwner->IsLocallyControlled())
 	{
-		bMovementSettingsChangeRequested = true;
 		CustomMaxWalkSpeed = NewMaxWalkSpeed;
-
 		ServerSetCustomMaxWalkSpeed(NewMaxWalkSpeed);
+
+		bMovementSettingsChangeRequested = true;
 		return;
 	}
 
