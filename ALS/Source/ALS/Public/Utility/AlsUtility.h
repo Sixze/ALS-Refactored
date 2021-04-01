@@ -14,7 +14,7 @@ class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", meta = (DefaultToSelf = "Character"))
-	static float GetAnimationCurveValue(const ACharacter* Character, FName CurveName);
+	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, FName CurveName);
 };
 
 inline float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName CurveName)
