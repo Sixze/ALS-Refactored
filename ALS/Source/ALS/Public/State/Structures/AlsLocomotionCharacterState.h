@@ -14,6 +14,9 @@ struct ALS_API FAlsLocomotionCharacterState
 	FRotator SmoothRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator PreviousSmoothRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator TargetActorRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

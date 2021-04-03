@@ -14,6 +14,12 @@ struct ALS_API FAlsFootState
 	float LockAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector LockRelativeLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator LockRelativeRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LockLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
