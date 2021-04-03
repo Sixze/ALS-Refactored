@@ -252,8 +252,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.Left.IkAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
 	FeetState.Right.IkAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
 
-	RefreshFootLock(FeetState.Left, Constants.FootLeftVirtualBone, Constants.FootLeftLockCurve);
-	RefreshFootLock(FeetState.Right, Constants.FootRightVirtualBone, Constants.FootRightLockCurve);
+	RefreshFootLock(FeetState.Left, Constants.FootLeftVirtualBone, Constants.FootLeftLockCurve, DeltaTime);
+	RefreshFootLock(FeetState.Right, Constants.FootRightVirtualBone, Constants.FootRightLockCurve, DeltaTime);
 
 	if (LocomotionMode.IsInAir())
 	{
@@ -278,7 +278,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
-void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName FootBoneName, const FName FootLockCurveName) const
+void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName FootBoneName,
+                                            const FName FootLockCurveName, const float DeltaTime) const
 {
 	if (FootState.IkAmount <= SMALL_NUMBER)
 	{
@@ -300,6 +301,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		return;
 	}
 
+	const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
+
 	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 1.0f};
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
@@ -314,15 +317,47 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
 		{
-			FootState.LockLocation = FootTransform.GetLocation();
-			FootState.LockRotation = FootTransform.Rotator();
+			const auto FootRelativeTransform{FootTransform.GetRelativeTransform(ComponentTransform)};
+
+			FootState.LockRelativeLocation = FootRelativeTransform.GetLocation();
+			FootState.LockRelativeRotation = FootRelativeTransform.Rotator();
 		}
 	}
 
+	// Get the distance traveled between frames relative to the mesh rotation to determine how much the foot should be offset
+	// to remain planted on the ground, and subtract it from the current relative location to get the new relative location.
+
+	FootState.LockRelativeLocation -= ComponentTransform.InverseTransformVector(LocomotionState.Velocity * DeltaTime);
+
+	// Use the difference between the current and previous rotations to determine
+	// how much the foot should be rotated to remain planted on the ground.
+
+	if (LocomotionMode.IsGrounded())
+	{
+		const auto RotationDifference{
+			AlsCharacter->GetLocomotionState().SmoothRotation - AlsCharacter->GetLocomotionState().PreviousSmoothRotation
+		};
+
+		if (!RotationDifference.IsNearlyZero())
+		{
+			// Subtract the rotation difference from the current relative rotation to get the new relative rotation.
+
+			FootState.LockRelativeRotation -= RotationDifference;
+			FootState.LockRelativeRotation.Normalize();
+
+			// Rotate the relative location by the rotation difference to keep the foot planted in component space.
+
+			FootState.LockRelativeLocation = RotationDifference.UnrotateVector(FootState.LockRelativeLocation);
+		}
+	}
+
+	const auto NewLockQuaternion{ComponentTransform.TransformRotation(FootState.LockRelativeRotation.Quaternion())};
+
+	FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockRelativeLocation);
+	FootState.LockRotation = NewLockQuaternion.Rotator();
+
 	FootState.FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
-	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(),
-	                                       FootState.LockRotation.Quaternion(),
-	                                       FootState.LockAmount).Rotator();
+	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), NewLockQuaternion, FootState.LockAmount).Rotator();
 }
 
 void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const

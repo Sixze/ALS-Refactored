@@ -98,6 +98,7 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshSmoothLocationAndRotation();
 
+	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
 	LocomotionState.InputYawAngle = LocomotionState.SmoothRotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.SmoothRotation.Yaw;
@@ -592,6 +593,8 @@ void AAlsCharacter::RefreshSmoothLocationAndRotation()
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 {
+	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
+
 	RefreshSmoothLocationAndRotation();
 
 	if (GetLocalRole() > ROLE_SimulatedProxy)
