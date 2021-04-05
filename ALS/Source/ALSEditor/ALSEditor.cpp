@@ -2,4 +2,4 @@
 
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE(FDefaultModuleImpl, ALSEditor);
+IMPLEMENT_MODULE(FDefaultModuleImpl, ALSEditor)

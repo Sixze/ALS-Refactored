@@ -72,8 +72,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, meta = (AllowPrivateAccess))
 	EAlsRotationMode RotationMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, ReplicatedUsing = "OnReplicate_OverlayMode",
-		meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
+		ReplicatedUsing = "OnReplicate_OverlayMode", meta = (AllowPrivateAccess))
 	EAlsOverlayMode OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, meta = (AllowPrivateAccess))
