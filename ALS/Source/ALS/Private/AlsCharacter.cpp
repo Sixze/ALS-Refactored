@@ -54,18 +54,18 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Parameters.bIsPushBased = true;
 
 	Parameters.Condition = COND_SkipOwner;
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredStance, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredGait, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredStance, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredGait, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredRotationMode, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, OverlayMode, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredRotationMode, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, OverlayMode, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputDirection, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputDirection, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bAiming, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, AimingRotation, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bAiming, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, AimingRotation, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, RagdollTargetLocation, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, RagdollTargetLocation, Parameters)
 }
 
 void AAlsCharacter::BeginPlay()
@@ -232,7 +232,7 @@ void AAlsCharacter::SetDesiredStance(const EAlsStance NewStance)
 	{
 		DesiredStance = NewStance;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredStance, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredStance, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
@@ -287,7 +287,7 @@ void AAlsCharacter::SetDesiredGait(const EAlsGait NewGait)
 	{
 		DesiredGait = NewGait;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredGait, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredGait, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
@@ -404,7 +404,7 @@ void AAlsCharacter::SetDesiredRotationMode(const EAlsRotationMode NewMode)
 	{
 		DesiredRotationMode = NewMode;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredRotationMode, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, DesiredRotationMode, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
@@ -456,7 +456,7 @@ void AAlsCharacter::SetOverlayMode(const EAlsOverlayMode NewMode)
 
 		OverlayMode = NewMode;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, OverlayMode, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, OverlayMode, this)
 
 		OnOverlayModeChanged(PreviousMode);
 
@@ -567,7 +567,7 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 	{
 		InputDirection = NewInputDirection;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, InputDirection, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, InputDirection, this)
 	}
 }
 
@@ -642,7 +642,7 @@ void AAlsCharacter::SetAiming(const bool bNewAiming)
 	{
 		bAiming = bNewAiming;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bAiming, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bAiming, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
@@ -662,7 +662,7 @@ void AAlsCharacter::SetAimingRotation(const FRotator& NewAimingRotation)
 	{
 		AimingRotation = NewAimingRotation;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, AimingRotation, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, AimingRotation, this)
 	}
 }
 
@@ -1305,7 +1305,7 @@ void AAlsCharacter::SetRagdollTargetLocation(const FVector& NewLocation)
 	{
 		RagdollTargetLocation = NewLocation;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, RagdollTargetLocation, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, RagdollTargetLocation, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
