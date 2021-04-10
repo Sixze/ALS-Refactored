@@ -20,8 +20,8 @@ void UAlsAnimNotify_FootstepSound::Notify(USkeletalMeshComponent* Component, UAn
 		return;
 	}
 
-	auto* AnimInstance{(Component->GetAnimInstance())};
-	if (!IsValid(AnimInstance))
+	auto* AnimationInstance{(Component->GetAnimInstance())};
+	if (!IsValid(AnimationInstance))
 	{
 		return;
 	}
@@ -29,7 +29,7 @@ void UAlsAnimNotify_FootstepSound::Notify(USkeletalMeshComponent* Component, UAn
 	auto ResultVolumeMultiplier{VolumeMultiplier};
 	if (!bIgnoreFootstepSoundBlockCurve)
 	{
-		ResultVolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
+		ResultVolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 	}
 
 	auto* Audio{

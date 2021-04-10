@@ -450,6 +450,8 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+
+	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 };
 
 inline const FVector& AAlsCharacter::GetInputDirection() const
