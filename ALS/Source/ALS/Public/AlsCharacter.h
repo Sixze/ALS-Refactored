@@ -43,6 +43,9 @@ private:
 	bool bRotateToVelocityWhenSprinting;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
+	bool bRotateToVelocityOnJump{true};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
 	FAlsGeneralMantlingSettings GeneralMantlingSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
