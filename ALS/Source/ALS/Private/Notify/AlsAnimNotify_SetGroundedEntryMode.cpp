@@ -17,9 +17,9 @@ void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Compone
 {
 	Super::Notify(Component, Animation);
 
-	auto* AnimInstance{Cast<UAlsAnimationInstance>(Component->GetAnimInstance())};
-	if (IsValid(AnimInstance))
+	auto* AnimationInstance{Cast<UAlsAnimationInstance>(Component->GetAnimInstance())};
+	if (IsValid(AnimationInstance))
 	{
-		AnimInstance->SetGroundedEntryMode(Mode);
+		AnimationInstance->SetGroundedEntryMode(Mode);
 	}
 }

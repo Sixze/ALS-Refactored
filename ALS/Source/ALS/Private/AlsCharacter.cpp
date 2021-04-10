@@ -690,14 +690,13 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	{
 		// Rolling.
 
-		if (/** IsNetMode(NM_Standalone) && */ RollingSettings.bSmoothRotateToInputDuringRoll && LocomotionState.bHasInput)
+		if (RollingSettings.bRotateToInputDuringRoll && LocomotionState.bHasInput)
 		{
-			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle,
-			                                                                   LocomotionState.InputYawAngle,
-			                                                                   DeltaTime, 100.0f);
+			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle, LocomotionState.InputYawAngle,
+			                                                                   DeltaTime, RollingSettings.InputInterpolationSpeed);
 		}
 
-		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 15.0f);
+		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, RollingSettings.ActorRotationInterpolationSpeed);
 		return;
 	}
 
@@ -799,7 +798,7 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	{
 		// Rolling.
 
-		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, 10.0f);
+		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, RollingSettings.ActorRotationInterpolationSpeed);
 		return;
 	}
 
@@ -1481,7 +1480,9 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
 	    LocomotionAction == EAlsLocomotionAction::None)
 	{
-		StartRolling(PlayRate, RollingSettings.bRotateToInputOnStart && LocomotionState.bHasInput
+		StartRolling(PlayRate, LocomotionState.bHasInput &&
+		                       (RollingSettings.bRotateToInputOnStart ||
+		                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
 			                       ? LocomotionState.InputYawAngle
 			                       : LocomotionState.SmoothRotation.Yaw);
 	}
@@ -1489,11 +1490,9 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 
 void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
 {
-	RollingState.TargetYawAngle = TargetYawAngle;
-
 	auto* Montage{SelectRollMontage()};
 
-	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+	StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 
 	ServerStartRolling(Montage, PlayRate, TargetYawAngle);
 }
@@ -1514,8 +1513,22 @@ void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, 
 {
 	if (!IsLocallyControlled())
 	{
-		RollingState.TargetYawAngle = TargetYawAngle;
-
-		GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 	}
+}
+
+void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
+{
+	RollingState.TargetYawAngle = TargetYawAngle;
+
+	if (RollingSettings.ActorRotationInterpolationSpeed <= 0.0f)
+	{
+		LocomotionState.TargetActorRotation = {0.0f, TargetYawAngle, 0.0f};
+
+		SetActorRotation(LocomotionState.TargetActorRotation);
+
+		RefreshSmoothLocationAndRotation();
+	}
+
+	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
 }

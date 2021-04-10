@@ -24,8 +24,8 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Compo
 		return;
 	}
 
-	auto* AnimInstance{(Component->GetAnimInstance())};
-	if (!IsValid(AnimInstance))
+	auto* AnimationInstance{(Component->GetAnimInstance())};
+	if (!IsValid(AnimationInstance))
 	{
 		return;
 	}
@@ -57,6 +57,6 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Compo
 
 	if (bStopMontage)
 	{
-		AnimInstance->Montage_Stop(BlendOutTime, Montage);
+		AnimationInstance->Montage_Stop(BlendOutTime, Montage);
 	}
 }
