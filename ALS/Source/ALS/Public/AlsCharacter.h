@@ -452,6 +452,19 @@ private:
 	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
 	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+
+	// Debug
+
+public:
+	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay,
+	                          float& CharacterHeight, float& VerticalPosition) override;
+
+private:
+	void DrawDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DrawDebugState(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DrawDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
 inline const FVector& AAlsCharacter::GetInputDirection() const

@@ -7,18 +7,6 @@ struct ALS_API FAlsLocomotionAnimationState
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 3))
-	float GaitTypeAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float GaitWalkingAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float GaitRunningAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
-	float GaitSprintingAmount;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasInput;
 
@@ -40,11 +28,20 @@ struct ALS_API FAlsLocomotionAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMoving;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bTransitionsAllowed;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -1, ClampMax = 1))
 	FVector RelativeAccelerationAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 3))
+	float GaitTypeAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	float GaitWalkingAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	float GaitRunningAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	float GaitSprintingAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
 	float RotationYawOffsetForward;
@@ -63,4 +60,7 @@ struct ALS_API FAlsLocomotionAnimationState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -1, ClampMax = 1))
 	float SprintRelativeAccelerationAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bTransitionsAllowed;
 };

@@ -71,16 +71,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 {
-	LocomotionState.GaitTypeAmount = GetCurveValue(Constants.GaitTypeCurve);
-	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount);
-	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 1.0f);
-	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 2.0f);
-
-	LocomotionState.bHasSpeed = AlsCharacter->GetLocomotionState().bHasSpeed;
-	LocomotionState.Speed = AlsCharacter->GetLocomotionState().Speed;
-	LocomotionState.Velocity = AlsCharacter->GetLocomotionState().Velocity;
-	LocomotionState.VelocityYawAngle = AlsCharacter->GetLocomotionState().VelocityYawAngle;
-
 	LocomotionState.bHasInput = AlsCharacter->GetLocomotionState().bHasInput;
 
 	if (LocomotionState.bHasInput && RotationMode.IsVelocityDirection())
@@ -99,7 +89,17 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 		                                                  DeltaTime, GeneralSettings.InputYawAmountInterpolationSpeed);
 	}
 
+	LocomotionState.bHasSpeed = AlsCharacter->GetLocomotionState().bHasSpeed;
+	LocomotionState.Speed = AlsCharacter->GetLocomotionState().Speed;
+	LocomotionState.Velocity = AlsCharacter->GetLocomotionState().Velocity;
+	LocomotionState.VelocityYawAngle = AlsCharacter->GetLocomotionState().VelocityYawAngle;
+
 	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
+
+	LocomotionState.GaitTypeAmount = GetCurveValue(Constants.GaitTypeCurve);
+	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount);
+	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 1.0f);
+	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 2.0f);
 
 	// The transitions allowed curve is modified within certain states, so that is transition allowed will be true while in those states.
 
@@ -663,7 +663,7 @@ void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, 
 		bDynamicTransitionsAllowed = false;
 
 		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionsAllowanceTimer, this,
-		                                       &UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded, AllowanceDelayTime, false);
+		                                       &ThisClass::OnDynamicTransitionAllowanceTimerEnded, AllowanceDelayTime, false);
 
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}
