@@ -11,14 +11,14 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 
 ## Features
 - Based on latest marketplace release.
-- Fully implemented in C++
-- Full replication support with low bandwidth usage
-- Plugin structure
-- Highly optimized for production
-- Lots of bug fixes additional to marketplace version
+- Fully implemented in C++.
+- Full replication support with low bandwidth usage.
+- Plugin structure.
+- Highly optimized for production.
+- Lots of bug fixes additional to marketplace version.
 
 ## Known Issues & Discussion
-- See [Issues](https://github.com/Sixze/ALS-Refactored/issues) section for list of known issues
+- See [Issues](https://github.com/Sixze/ALS-Refactored/issues) section for list of known issues.
 - See [Discussions](https://github.com/Sixze/ALS-Refactored/discussions) section to discuss anything about the plugin, and ask questions. Please do not open an issue to ask questions about the plugin.
 
 ## Setting Up The Plugin
