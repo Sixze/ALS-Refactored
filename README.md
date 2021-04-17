@@ -1,5 +1,5 @@
 # Advanced Locomotion System Refactored
-![Image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/Readme_Screenshots_02.gif)
+![Image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/Header.gif)
 
 Completely refactored and bug fixed version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26**.
 
@@ -27,7 +27,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 - Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this .ini file, merge it into yours.
 - Regenerate visual studio project files and build your project.
 - Launch the project, and enable plugin content viewer as seen below. This will show contents of the plugin in your content browser:
-![image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/Readme_Screenshots_01.png)
+![image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/ShowPluginContent.png)
 
 ## License & Contribution
 **Source code** of the plugin is licensed under MIT license, and other developers are encouraged to fork the repository, open issues & pull requests to help the development.
