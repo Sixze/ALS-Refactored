@@ -5,9 +5,8 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 
 ## Supported Platforms
 - Windows
-- Linux
 
-*Mac, Android, IOS, and console builds are not tested and supported at the moment. Use the plugin on those platforms with your own risk.*
+*macOS, iOS, Linux, Android, and console builds are not tested. Use the plugin on those platforms with your own risk.*
 
 ## Features
 - Based on latest marketplace release.
@@ -24,8 +23,8 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 ## Setting Up The Plugin
 - **C++ project is a requirement. BP projects are currently not supported.**
 - Clone the repository inside your project's `Plugins` folder, or download the latest release and extract it into your project's `Plugins` folder.
-- Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this .ini file, merge it into yours.
-- Regenerate visual studio project files and build your project.
+- Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this `.ini` file, merge it into yours.
+- Regenerate Visual Studio project files and build your project.
 - Launch the project, and enable plugin content viewer as seen below. This will show contents of the plugin in your content browser:
 ![image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/ShowPluginContent.png)
 
