@@ -6,7 +6,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 ## Supported Platforms
 - Windows
 
-*macOS, iOS, Linux, Android, and console builds are not tested. Use the plugin on those platforms with your own risk.*
+*macOS, iOS, Linux, Android, and console builds are not tested. Use the plugin on those platforms with your own risk*.
 
 ## Features
 - Based on latest marketplace release.
@@ -21,7 +21,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 - See [Discussions](https://github.com/Sixze/ALS-Refactored/discussions) section to discuss anything about the plugin, and ask questions. Please do not open an issue to ask questions about the plugin.
 
 ## Setting Up The Plugin
-- **C++ project is a requirement. BP projects are currently not supported.**
+- **C++ project is a requirement. BP projects are currently not supported**.
 - Clone the repository inside your project's `Plugins` folder, or download the latest release and extract it into your project's `Plugins` folder.
 - Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this `.ini` file, merge it into yours.
 - Regenerate Visual Studio project files and build your project.
