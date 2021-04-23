@@ -1,11 +1,13 @@
 #include "AlsAnimationInstance.h"
 
 #include "AlsCharacter.h"
+#include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/AlsMath.h"
+#include "Utility/AlsUtility.h"
 
 const FCollisionObjectQueryParams UAlsAnimationInstance::GroundPredictionObjectQueryParameters{
 	ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Destructible)
@@ -362,6 +364,12 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const
 {
+	if (FootState.IkAmount <= SMALL_NUMBER)
+	{
+		TargetLocationOffset = FVector::ZeroVector;
+		return;
+	}
+
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
 	auto FootLocation{FootState.FinalLocation};
@@ -372,6 +380,25 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
 	                                     ECC_Visibility, {TEXT("AlsAnimationInstance::RefreshFootOffset"), true, AlsCharacter});
+
+#if ENABLE_DRAW_DEBUG
+	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, TEXT("ALS.Traces")))
+	{
+		if (AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
+		{
+			static const auto HitColor{FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true)};
+
+			DrawDebugLine(GetWorld(), Hit.TraceStart, Hit.ImpactPoint, HitColor, false, 0.0f, 0, UAlsUtility::DebugDrawThickness);
+			DrawDebugPoint(GetWorld(), Hit.ImpactPoint, UAlsUtility::DebugDrawImpactPointSize, HitColor);
+		}
+		else
+		{
+			static const auto MissColor{FLinearColor{0.0f, 0.25f, 1.0f}.ToFColor(true)};
+
+			DrawDebugLine(GetWorld(), Hit.TraceStart, Hit.TraceEnd, MissColor, false, 0.0f, 0, UAlsUtility::DebugDrawThickness);
+		}
+	}
+#endif
 
 	auto TargetRotationOffset{FRotator::ZeroRotator};
 
@@ -392,7 +419,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 		TargetRotationOffset.Roll = UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.Y});
 	}
 
-	auto CorrectedLocationOffset = TargetLocationOffset;
+	auto CorrectedLocationOffset{TargetLocationOffset};
 	CorrectedLocationOffset.Z += FeetSettings.IkVerticalCorrection;
 
 	// Interpolate the current location offset to the new target value. Interpolate at
@@ -507,10 +534,12 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 		AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(LocomotionState.Velocity.GetSafeNormal())
 	};
 
-	const auto RelativeDirection = RelativeVelocityDirection /
-	                               (FMath::Abs(RelativeVelocityDirection.X) +
-	                                FMath::Abs(RelativeVelocityDirection.Y) +
-	                                FMath::Abs(RelativeVelocityDirection.Z));
+	const auto RelativeDirection{
+		RelativeVelocityDirection /
+		(FMath::Abs(RelativeVelocityDirection.X) +
+		 FMath::Abs(RelativeVelocityDirection.Y) +
+		 FMath::Abs(RelativeVelocityDirection.Z))
+	};
 
 	MovementState.VelocityBlend.ForwardAmount = FMath::FInterpTo(MovementState.VelocityBlend.ForwardAmount,
 	                                                             UAlsMath::Clamp01(RelativeDirection.X), DeltaTime,
@@ -907,6 +936,16 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
 	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
 	                                    {TEXT("AlsAnimationInstance::CalculateGroundPredictionAmount"), false, AlsCharacter});
+
+#if ENABLE_DRAW_DEBUG
+	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, TEXT("ALS.Traces")))
+	{
+		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd,
+		                                         Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight(),
+		                                         AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
+		                                         Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+	}
+#endif
 
 	if (!AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
 	{

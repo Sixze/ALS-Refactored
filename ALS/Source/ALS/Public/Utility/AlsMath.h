@@ -23,8 +23,7 @@ public:
 	static float LerpClamped(float A, float B, float Alpha);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
-	static float AngleInterpolateConstantTo(const float CurrentAngle, float const TargetAngle, const float DeltaTime,
-	                                        const float InterpolationSpeed);
+	static float InterpolateAngleConstant(float CurrentAngle, float TargetAngle, float DeltaTime, float InterpolationSpeed);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
 	static FVector ClampMagnitude01(const FVector& Vector);
@@ -53,40 +52,16 @@ public:
 
 inline float UAlsMath::Clamp01(const float Value)
 {
-	if (Value <= 0.0f)
-	{
-		return 0.0f;
-	}
-
-	if (Value >= 1.0f)
-	{
-		return 1.0f;
-	}
-
-	return Value;
+	return Value <= 0.0f
+		       ? 0.0f
+		       : Value >= 1.0f
+		       ? 1.0f
+		       : Value;
 }
 
 inline float UAlsMath::LerpClamped(const float A, const float B, const float Alpha)
 {
 	return A + Clamp01(Alpha) * (B - A);
-}
-
-inline float UAlsMath::AngleInterpolateConstantTo(const float CurrentAngle, float const TargetAngle,
-                                                  const float DeltaTime, const float InterpolationSpeed)
-{
-	if (DeltaTime <= 0.0f || CurrentAngle == TargetAngle)
-	{
-		return CurrentAngle;
-	}
-
-	if (InterpolationSpeed <= 0.0f)
-	{
-		// If no interpolation speed, then jump to target value.
-		return TargetAngle;
-	}
-
-	const auto Step{InterpolationSpeed * DeltaTime};
-	return FRotator::NormalizeAxis(CurrentAngle + FMath::Clamp(FRotator::NormalizeAxis(TargetAngle - CurrentAngle), -Step, Step));
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)

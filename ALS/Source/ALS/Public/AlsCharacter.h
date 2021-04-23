@@ -45,7 +45,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
 	bool bRotateToVelocityOnJump{true};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
+		meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))
 	FAlsGeneralMantlingSettings GeneralMantlingSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", meta = (AllowPrivateAccess))
@@ -457,14 +458,21 @@ private:
 
 public:
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay,
-	                          float& CharacterHeight, float& VerticalPosition) override;
+	                          float& Unused, float& VerticalPosition) override;
 
 private:
-	void DrawDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	static void DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	                               float Scale, float HorizontalPosition, float& VerticalPosition);
 
-	void DrawDebugState(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DrawDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugState(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DisplayDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DisplayDebugTraces(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DisplayDebugMantling(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
 inline const FVector& AAlsCharacter::GetInputDirection() const

@@ -12,17 +12,17 @@ void FAlsSavedMove::Clear()
 
 uint8 FAlsSavedMove::GetCompressedFlags() const
 {
-	auto Result = Super::GetCompressedFlags();
+	auto Flags{Super::GetCompressedFlags()};
 
 	if (bMovementSettingsChangeRequested)
 	{
-		Result |= FLAG_Custom_0;
+		Flags |= FLAG_Custom_0;
 	}
 
-	return Result;
+	return Flags;
 }
 
-void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, FVector const& NewAcceleration,
+void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, const FVector& NewAcceleration,
                                FNetworkPredictionData_Client_Character& Data)
 {
 	Super::SetMoveFor(Character, NewDeltaTime, NewAcceleration, Data);
