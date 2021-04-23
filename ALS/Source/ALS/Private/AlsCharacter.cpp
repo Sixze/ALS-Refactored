@@ -15,6 +15,7 @@
 #include "Net/Core/PushModel/PushModel.h"
 #include "Utility/AlsEnumerationUtility.h"
 #include "Utility/AlsMath.h"
+#include "Utility/AlsUtility.h"
 
 const FCollisionObjectQueryParams AAlsCharacter::MantlingAndRagdollObjectQueryParameters{
 	ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Destructible)
@@ -696,8 +697,8 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 		if (RollingSettings.bRotateToInputDuringRoll && LocomotionState.bHasInput)
 		{
-			RollingState.TargetYawAngle = UAlsMath::AngleInterpolateConstantTo(RollingState.TargetYawAngle, LocomotionState.InputYawAngle,
-			                                                                   DeltaTime, RollingSettings.InputInterpolationSpeed);
+			RollingState.TargetYawAngle = UAlsMath::InterpolateAngleConstant(RollingState.TargetYawAngle, LocomotionState.InputYawAngle,
+			                                                                 DeltaTime, RollingSettings.InputInterpolationSpeed);
 		}
 
 		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, RollingSettings.ActorRotationInterpolationSpeed);
@@ -922,12 +923,22 @@ bool AAlsCharacter::TryStartMantlingInAir()
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
+#if ENABLE_DRAW_DEBUG
+	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, TEXT("ALS.Mantling"))};
+#endif
+
 	const auto* Capsule{GetCapsuleComponent()};
 
+	const auto CapsuleRadius{Capsule->GetScaledCapsuleRadius()};
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
+
 	const auto CapsuleBottomLocation{
-		LocomotionState.SmoothLocation - LocomotionState.SmoothRotation.RotateVector(FVector::UpVector) * (CapsuleHalfHeight + 2.0f)
+		LocomotionState.SmoothLocation - LocomotionState.SmoothRotation.RotateVector(FVector::UpVector) * CapsuleHalfHeight
 	};
+
+	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
+
+	const auto LedgeHeightDelta{TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()};
 
 	// Trace forward to find a object the character cannot walk on.
 
@@ -939,79 +950,123 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			: LocomotionState.SmoothRotation.Vector()
 	};
 
-	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * 30.0f};
-	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.GetMax() + TraceSettings.LedgeHeight.GetMin()) * 0.5f;
+	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * CapsuleRadius};
+	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.X + TraceSettings.LedgeHeight.Y) * 0.5f - UCharacterMovementComponent::MAX_FLOOR_DIST;
 
-	const auto ForwardTraceEnd{ForwardTraceStart + ForwardTraceDirection * TraceSettings.ReachDistance};
+	auto ForwardTraceEnd{ForwardTraceStart + ForwardTraceDirection * (CapsuleRadius + TraceSettings.ReachDistance + 1.0f)};
 
-	const auto ForwardTraceCapsuleHalfHeight{(TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * 0.5f + 1.0f};
+	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
-	FHitResult Hit;
-	GetWorld()->SweepSingleByObjectType(Hit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
-	                                    FCollisionShape::MakeCapsule(TraceSettings.TraceRadiusForward, ForwardTraceCapsuleHalfHeight),
-	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Forward trace)"), false, this});
+	FHitResult ForwardTraceHit;
+	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity,
+	                                    MantlingAndRagdollObjectQueryParameters,
+	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
+	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Forward Trace)"), false, this});
 
-	if (!Hit.IsValidBlockingHit() || AlsCharacterMovement->IsWalkable(Hit) || !Hit.Component->CanCharacterStepUp(this))
+	auto* TargetPrimitive{ForwardTraceHit.GetComponent()};
+
+	if (!ForwardTraceHit.IsValidBlockingHit() ||
+	    !IsValid(TargetPrimitive) ||
+	    TargetPrimitive->GetComponentVelocity().SizeSquared() > FMath::Square(GeneralMantlingSettings.TargetPrimitiveSpeedThreshold) ||
+	    !ForwardTraceHit.Component->CanCharacterStepUp(this) ||
+	    AlsCharacterMovement->IsWalkable(ForwardTraceHit))
 	{
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
+			                                         ForwardTraceCapsuleHalfHeight, false, ForwardTraceHit, {0.0f, 0.25f, 1.0f},
+			                                         {0.0f, 0.75f, 1.0f}, TraceSettings.bDrawFailedTraces ? 5.0f : 0.0f);
+		}
+#endif
+
 		return false;
 	}
-
-	auto* TargetPrimitive{Hit.GetComponent()};
-	if (!IsValid(TargetPrimitive))
-	{
-		return false;
-	}
-
-	if (TargetPrimitive->GetComponentVelocity().SizeSquared() > FMath::Square(GeneralMantlingSettings.TargetPrimitiveSpeedThreshold))
-	{
-		// The surface to mantle moves too fast.
-
-		return false;
-	}
-
-	const FVector ForwardTraceImpactPoint{Hit.ImpactPoint};
-	const FVector ForwardTraceImpactNormal{Hit.ImpactNormal};
 
 	// Trace downward from the first trace's impact point and determine if the hit location is walkable.
 
-	auto DownwardTraceEnd{ForwardTraceImpactPoint};
-	DownwardTraceEnd.Z = CapsuleBottomLocation.Z;
-	DownwardTraceEnd -= ForwardTraceImpactNormal * 15.0f;
+	const auto TargetLocationOffset{FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * TraceSettings.TargetLocationOffset};
 
-	auto DownwardTraceStart{DownwardTraceEnd};
-	DownwardTraceStart.Z += TraceSettings.LedgeHeight.GetMax() + TraceSettings.TraceRadiusDownward + 1.0f;
+	const FVector DownwardTraceStart{
+		ForwardTraceHit.ImpactPoint.X - TargetLocationOffset.X, ForwardTraceHit.ImpactPoint.Y - TargetLocationOffset.Y,
+		CapsuleBottomLocation.Z + LedgeHeightDelta + 2.5f * TraceCapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST
+	};
 
-	GetWorld()->SweepSingleByObjectType(Hit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
-	                                    FCollisionShape::MakeSphere(TraceSettings.TraceRadiusDownward),
-	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Downward trace)"), false, this});
+	const FVector DownwardTraceEnd{
+		DownwardTraceStart.X, DownwardTraceStart.Y,
+		CapsuleBottomLocation.Z + TraceSettings.LedgeHeight.GetMin() + TraceCapsuleRadius - UCharacterMovementComponent::MAX_FLOOR_DIST
+	};
 
-	if (!AlsCharacterMovement->IsWalkable(Hit))
+	FHitResult DownwardTraceHit;
+	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
+	                                    MantlingAndRagdollObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Downward Trace)"), false, this});
+
+	if (!AlsCharacterMovement->IsWalkable(DownwardTraceHit))
 	{
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
+			                                         ForwardTraceCapsuleHalfHeight, true, ForwardTraceHit, {0.0f, 0.25f, 1.0f},
+			                                         {0.0f, 0.75f, 1.0f}, TraceSettings.bDrawFailedTraces ? 5.0f : 0.0f);
+
+			UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), DownwardTraceStart, DownwardTraceEnd, TraceCapsuleRadius,
+			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
+			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
+		}
+#endif
+
 		return false;
 	}
 
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
-	FVector SweepTestLocation{Hit.Location.X, Hit.Location.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2.0f};
+	const FVector TargetLocation{
+		DownwardTraceHit.ImpactPoint.X, DownwardTraceHit.ImpactPoint.Y,
+		DownwardTraceHit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST
+	};
 
-	// #if ENABLE_DRAW_DEBUG
-	// 	DrawDebugCapsule(Capsule->GetWorld(), SweepTestLocation, CapsuleHalfHeight, Capsule->GetScaledCapsuleRadius(),
-	// 	                 FQuat::Identity, FColor::Blue, false, 5.0f);
-	// #endif
-
-	if (GetWorld()->SweepTestByObjectType(SweepTestLocation, SweepTestLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
-	                                      FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), CapsuleHalfHeight),
-	                                      {TEXT("AlsBaseCharacter::TryStartMantling (Free space sweep)"), false, this}))
+	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
+	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
+	                                           {TEXT("AlsBaseCharacter::TryStartMantling (Free Space Overlap)"), false, this}))
 	{
-		// Capsule doesn't have enough free space.
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
+			                                         ForwardTraceCapsuleHalfHeight, true, ForwardTraceHit, {0.0f, 0.25f, 1.0f},
+			                                         {0.0f, 0.75f, 1.0f}, TraceSettings.bDrawFailedTraces ? 5.0f : 0.0f);
+
+			UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), DownwardTraceStart, DownwardTraceEnd, TraceCapsuleRadius,
+			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
+			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
+
+			DrawDebugCapsule(Capsule->GetWorld(), TargetLocation, CapsuleHalfHeight, CapsuleRadius,
+			                 FQuat::Identity, FColor::Red, false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
+		}
+#endif
 
 		return false;
 	}
 
-	const auto TargetRotation{(ForwardTraceImpactNormal * FVector{-1.0f, -1.0f, 0.0f}).ToOrientationRotator()};
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebug)
+	{
+		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
+		                                         ForwardTraceCapsuleHalfHeight, true, ForwardTraceHit,
+		                                         {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f}, 5.0f);
 
-	const auto MantlingHeight{SweepTestLocation.Z - LocomotionState.SmoothLocation.Z};
+		UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), DownwardTraceStart, DownwardTraceEnd,
+		                                        TraceCapsuleRadius, true, DownwardTraceHit,
+		                                        {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f}, 7.5f);
+	}
+#endif
+
+	const auto TargetRotation{(-ForwardTraceHit.ImpactNormal.GetSafeNormal2D()).ToOrientationRotator()};
+
+	const auto MantlingHeight{TargetLocation.Z - LocomotionState.SmoothLocation.Z};
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
@@ -1027,7 +1082,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			               : EAlsMantlingType::Low;
 	}
 
-	const FAlsMantlingParameters Parameters{TargetPrimitive, SweepTestLocation, TargetRotation, MantlingHeight, MantlingType};
+	const FAlsMantlingParameters Parameters{TargetPrimitive, TargetLocation, TargetRotation, MantlingHeight, MantlingType};
 
 	StartMantling(Parameters);
 	ServerStartMantling(Parameters);
@@ -1537,48 +1592,123 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
 }
 
-void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& CharacterHeight, float& VerticalPosition)
+void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
 {
 	// Super::DisplayDebug(Canvas, DebugDisplay, CharacterHeight, VerticalPosition);
 
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
-	const auto InitialVerticalPosition{VerticalPosition};
-	auto MaxVerticalPosition{VerticalPosition};
+	const auto RowOffset{12.0f * Scale};
+	const auto ColumnOffset{180.0f * Scale};
 
 	auto HorizontalPosition{5.0f * Scale};
 
+	auto MaxVerticalPosition{VerticalPosition};
+	const auto InitialVerticalPosition{VerticalPosition};
+
+	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"))};
+
 	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Curves")))
 	{
-		DrawDebugCurves(Canvas, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugHeader(Canvas, CurvesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugCurves(Canvas, Scale, HorizontalPosition, VerticalPosition);
 
 		MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
 		VerticalPosition = InitialVerticalPosition;
-		HorizontalPosition += 180.0f * Scale;
+		HorizontalPosition += ColumnOffset;
 	}
+	else
+	{
+		DisplayDebugHeader(Canvas, CurvesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalPosition, VerticalPosition);
+
+		VerticalPosition += RowOffset;
+	}
+
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
+	static const auto StateHeaderText{FText::AsCultureInvariant(TEXT("ALS.State (Shift + 2)"))};
 
 	if (DebugDisplay.IsDisplayOn(TEXT("ALS.State")))
 	{
-		DrawDebugState(Canvas, Scale, HorizontalPosition, VerticalPosition);
-
-		VerticalPosition += 12.0f * Scale;
+		DisplayDebugHeader(Canvas, StateHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugState(Canvas, Scale, HorizontalPosition, VerticalPosition);
 	}
+	else
+	{
+		DisplayDebugHeader(Canvas, StateHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalPosition, VerticalPosition);
+	}
+
+	VerticalPosition += RowOffset;
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
+	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Shapes (Shift + 3)"))};
 
 	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Shapes")))
 	{
-		DrawDebugShapes(Canvas, Scale, HorizontalPosition, VerticalPosition);
-
-		MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+		DisplayDebugHeader(Canvas, ShapesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugShapes(Canvas, Scale, HorizontalPosition, VerticalPosition);
 	}
+	else
+	{
+		DisplayDebugHeader(Canvas, ShapesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalPosition, VerticalPosition);
+	}
+
+	VerticalPosition += RowOffset;
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
+	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Traces (Shift + 4)"))};
+
+	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Traces")))
+	{
+		DisplayDebugHeader(Canvas, TracesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugTraces(Canvas, Scale, HorizontalPosition, VerticalPosition);
+	}
+	else
+	{
+		DisplayDebugHeader(Canvas, TracesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalPosition, VerticalPosition);
+	}
+
+	VerticalPosition += RowOffset;
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
+	static const auto MantlingHeaderText{FText::AsCultureInvariant(TEXT("ALS.Mantling (Shift + 5)"))};
+
+	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Mantling")))
+	{
+		DisplayDebugHeader(Canvas, MantlingHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+		DisplayDebugMantling(Canvas, Scale, HorizontalPosition, VerticalPosition);
+	}
+	else
+	{
+		DisplayDebugHeader(Canvas, MantlingHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalPosition, VerticalPosition);
+	}
+
+	VerticalPosition += RowOffset;
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
 
 	VerticalPosition = MaxVerticalPosition;
 }
 
-void AAlsCharacter::DrawDebugCurves(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+                                       const float Scale, const float HorizontalPosition, float& VerticalPosition)
 {
-	const FVector2D HeaderScale{Scale, Scale};
-	const auto HeaderVerticalOffset{15.0f * Scale};
+	FCanvasTextItem Text{
+		{HorizontalPosition, VerticalPosition},
+		HeaderText,
+		GEngine->GetMediumFont(),
+		HeaderColor
+	};
 
+	Text.Scale = {Scale, Scale};
+	Text.EnableShadow(FLinearColor::Black);
+
+	Text.Draw(Canvas->Canvas);
+
+	VerticalPosition += 15.0f * Scale;
+}
+
+void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+{
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -1586,26 +1716,16 @@ void AAlsCharacter::DrawDebugCurves(UCanvas* Canvas, const float Scale, const fl
 		FLinearColor::White
 	};
 
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
 	Text.EnableShadow(FLinearColor::Black);
 
-	Text.Text = FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"));
-	Text.Scale = HeaderScale;
-	Text.SetColor(FLinearColor::Green);
-	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
-
-	VerticalPosition += HeaderVerticalOffset;
+	const auto RowOffset{12.0f * Scale};
+	const auto ColumnOffset{145.0f * Scale};
 
 	TArray<FName> CurveNames;
 	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
-
-	const FVector2D RowScale{Scale * 0.75f, Scale * 0.75f};
-	const auto RowVerticalOffset{12.0f * Scale};
-
-	const auto ColumnHorizontalOffset{145.0f * Scale};
-
-	Text.Scale = RowScale;
 
 	for (const auto& CurveName : CurveNames)
 	{
@@ -1617,17 +1737,14 @@ void AAlsCharacter::DrawDebugCurves(UCanvas* Canvas, const float Scale, const fl
 		Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 		Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%.2f"), CurveValue));
-		Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+		Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-		VerticalPosition += RowVerticalOffset;
+		VerticalPosition += RowOffset;
 	}
 }
 
-void AAlsCharacter::DrawDebugState(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
-	const FVector2D HeaderScale{Scale, Scale};
-	const auto HeaderVerticalOffset{15.0f * Scale};
-
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -1635,103 +1752,123 @@ void AAlsCharacter::DrawDebugState(UCanvas* Canvas, const float Scale, const flo
 		FLinearColor::White
 	};
 
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
 	Text.EnableShadow(FLinearColor::Black);
 
-	Text.Text = FText::AsCultureInvariant(TEXT("ALS.State (Shift + 2)"));
-	Text.Scale = HeaderScale;
-	Text.SetColor(FLinearColor::Green);
-	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+	const auto RowOffset{12.0f * Scale};
+	const auto ColumnOffset{120.0f * Scale};
 
-	VerticalPosition += HeaderVerticalOffset;
+	static const auto DesiredStanceText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredStance), false))
+	};
 
-	const FVector2D RowScale{Scale * 0.75f, Scale * 0.75f};
-	const auto RowVerticalOffset{12.0f * Scale};
-
-	const auto ColumnHorizontalOffset{120.0f * Scale};
-
-	Text.Scale = RowScale;
-	Text.SetColor(FLinearColor::White);
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredStance), false));
+	Text.Text = DesiredStanceText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(DesiredStance), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Stance), false));
+	static const auto StanceText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Stance), false))
+	};
+
+	Text.Text = StanceText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(Stance), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredGait), false));
+	static const auto DesiredGaitText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredGait), false))
+	};
+
+	Text.Text = DesiredGaitText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(DesiredGait), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Gait), false));
+	static const auto GaitText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Gait), false))
+	};
+
+	Text.Text = GaitText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(Gait), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredRotationMode),
-	                                                                 false));
+	static const auto DesiredRotationModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredRotationMode), false))
+	};
+
+	Text.Text = DesiredRotationModeText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(DesiredRotationMode), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RotationMode), false));
+	static const auto RotationModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RotationMode), false))
+	};
+
+	Text.Text = RotationModeText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(RotationMode), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, OverlayMode), false));
+	static const auto OverlayModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, OverlayMode), false))
+	};
+
+	Text.Text = OverlayModeText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(OverlayMode), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionMode), false));
+	static const auto LocomotionModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionMode), false))
+	};
+
+	Text.Text = LocomotionModeText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(LocomotionMode), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionAction),
-	                                                                 false));
+	static const auto LocomotionActionText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionAction), false))
+	};
+
+	Text.Text = LocomotionActionText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(LocomotionAction), false));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 }
 
-void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
-	const FVector2D HeaderScale{Scale, Scale};
-	const auto HeaderVerticalOffset{15.0f * Scale};
-
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -1739,32 +1876,25 @@ void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const fl
 		FLinearColor::White
 	};
 
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
 	Text.EnableShadow(FLinearColor::Black);
 
-	Text.Text = FText::AsCultureInvariant(TEXT("ALS.Shapes (Shift + 3)"));
-	Text.Scale = HeaderScale;
-	Text.SetColor(FLinearColor::Green);
-	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+	const auto RowOffset{12.0f * Scale};
+	const auto ColumnOffset{120.0f * Scale};
 
-	VerticalPosition += HeaderVerticalOffset;
-
-	const FVector2D RowScale{Scale * 0.75f, Scale * 0.75f};
-	const auto RowVerticalOffset{12.0f * Scale};
-
-	const auto ColumnHorizontalOffset{120.0f * Scale};
-
-	Text.Scale = RowScale;
+	static const auto AimingRotationText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, AimingRotation), false))
+	};
 
 	auto Color{FLinearColor::Red};
-
 	Text.SetColor(Color);
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, AimingRotation), false));
+	Text.Text = AimingRotationText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("R: %.2f P: %.2f Y: %.2f"),
 	                                                      AimingRotation.Roll, AimingRotation.Pitch, AimingRotation.Yaw));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCone(GetWorld(), LocomotionState.SmoothLocation + FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()},
@@ -1772,20 +1902,21 @@ void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const fl
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Color = LocomotionState.bHasInput
-		        ? FLinearColor{1.0f, 0.5f, 0.0f}
-		        : FLinearColor{0.5f, 0.25f, 0.0f};
+	static const auto InputYawAngleText{
+		FText::AsCultureInvariant(
+			FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, InputYawAngle), false))
+	};
 
+	Color = LocomotionState.bHasInput ? FLinearColor{1.0f, 0.5f, 0.0f} : FLinearColor{0.5f, 0.25f, 0.0f};
 	Text.SetColor(Color);
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(
-		GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, InputYawAngle), false));
+	Text.Text = InputYawAngleText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%.2f"), LocomotionState.InputYawAngle));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	const auto FeetLocation{LocomotionState.SmoothLocation - FVector(0.0f, 0.0f, GetCapsuleComponent()->Bounds.BoxExtent.Z)};
@@ -1797,40 +1928,46 @@ void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const fl
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Color = LocomotionState.bHasSpeed
-		        ? FLinearColor{1.0f, 0.0f, 1.0f}
-		        : FLinearColor{0.5f, 0.0f, 0.5f};
+	static const auto SpeedText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, Speed), false))
+	};
 
+	Color = LocomotionState.bHasSpeed ? FLinearColor{0.75f, 0.0f, 1.0f} : FLinearColor{0.375f, 0.0f, 0.5f};
 	Text.SetColor(Color);
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, Speed),
-	                                                                 false));
+	Text.Text = SpeedText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%.2f"), LocomotionState.Speed));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
+
+	static const auto VelocityDirectionText{FText::AsCultureInvariant(TEXT("Velocity Direction"))};
 
 	const auto VelocityDirection{LocomotionState.Velocity.GetSafeNormal()};
 
-	Text.Text = FText::AsCultureInvariant(TEXT("Velocity Direction"));
+	Text.Text = VelocityDirectionText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("X: %.2f Y: %.2f Z: %.2f"),
 	                                                      VelocityDirection.X, VelocityDirection.Y, VelocityDirection.Z));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(
-		GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, VelocityYawAngle), false));
+	static const auto VelocityYawAngleText{
+		FText::AsCultureInvariant(
+			FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, VelocityYawAngle), false))
+	};
+
+	Text.Text = VelocityYawAngleText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%.2f"), LocomotionState.VelocityYawAngle));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugDirectionalArrow(GetWorld(),
@@ -1842,21 +1979,24 @@ void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const fl
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
+
+	static const auto TargetActorRotationText{
+		FText::AsCultureInvariant(
+			FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, TargetActorRotation), false))
+	};
 
 	Color = {0.0f, 0.75f, 1.0f};
-
 	Text.SetColor(Color);
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(
-		GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionCharacterState, TargetActorRotation), false));
+	Text.Text = TargetActorRotationText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("R: %.2f P: %.2f Y: %.2f"),
 	                                                      LocomotionState.TargetActorRotation.Roll,
 	                                                      LocomotionState.TargetActorRotation.Pitch,
 	                                                      LocomotionState.TargetActorRotation.Yaw));
-	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnHorizontalOffset, VerticalPosition});
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugDirectionalArrow(GetWorld(),
@@ -1865,11 +2005,86 @@ void AAlsCharacter::DrawDebugShapes(UCanvas* Canvas, const float Scale, const fl
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 
-	VerticalPosition += RowVerticalOffset;
+	VerticalPosition += RowOffset;
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCapsule(GetWorld(), LocomotionState.SmoothLocation, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
 	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), GetCapsuleComponent()->GetComponentQuat(),
 	                 FColor::Green, false, -1.0f, SDPG_World, 1.0f);
 #endif
+}
+
+void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+{
+	FCanvasTextItem Text{
+		FVector2D::ZeroVector,
+		FText::GetEmpty(),
+		GEngine->GetMediumFont(),
+		FLinearColor::White
+	};
+
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
+	Text.EnableShadow(FLinearColor::Black);
+
+	const auto RowOffset{12.0f * Scale};
+
+	static const auto FootOffsetTraceText{FText::AsCultureInvariant(TEXT("Foot Offset"))};
+
+	Text.SetColor({0.0f, 0.75f, 1.0f});
+
+	Text.Text = FootOffsetTraceText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto GroundPredictionTraceText{FText::AsCultureInvariant(TEXT("Ground Prediction"))};
+
+	Text.SetColor({0.75f, 0.0f, 1.0f});
+
+	Text.Text = GroundPredictionTraceText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+}
+
+void AAlsCharacter::DisplayDebugMantling(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+{
+	FCanvasTextItem Text{
+		FVector2D::ZeroVector,
+		FText::GetEmpty(),
+		GEngine->GetMediumFont(),
+		FLinearColor::White
+	};
+
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
+	Text.EnableShadow(FLinearColor::Black);
+
+	const auto RowOffset{12.0f * Scale};
+
+	static const auto ForwardTraceText{FText::AsCultureInvariant(TEXT("Forward Trace"))};
+
+	Text.SetColor({0.0f, 0.75f, 1.0f});
+
+	Text.Text = ForwardTraceText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto DownwardTraceText{FText::AsCultureInvariant(TEXT("Downward Trace"))};
+
+	Text.SetColor({0.75f, 0.0f, 1.0f});
+
+	Text.Text = DownwardTraceText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto FreeSpaceOverlapText{FText::AsCultureInvariant(TEXT("Free Space Overlap (Only if Failed)"))};
+
+	Text.SetColor(FLinearColor::Red);
+
+	Text.Text = FreeSpaceOverlapText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
 }

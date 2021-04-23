@@ -2,6 +2,24 @@
 
 #include "DrawDebugHelpers.h"
 
+float UAlsMath::InterpolateAngleConstant(const float CurrentAngle, const float TargetAngle,
+                                         const float DeltaTime, const float InterpolationSpeed)
+{
+	if (DeltaTime <= 0.0f || CurrentAngle == TargetAngle)
+	{
+		return CurrentAngle;
+	}
+
+	if (InterpolationSpeed <= 0.0f)
+	{
+		// If no interpolation speed, then jump to target value.
+		return TargetAngle;
+	}
+
+	const auto Step{InterpolationSpeed * DeltaTime};
+	return FRotator::NormalizeAxis(CurrentAngle + FMath::Clamp(FRotator::NormalizeAxis(TargetAngle - CurrentAngle), -Step, Step));
+}
+
 float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float OtherAxisValue)
 {
 	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Format(TEXT("Value: {0}, OtherAxis: {1} Result: {2}"), {

@@ -8,14 +8,14 @@
 class ALS_API FAlsSavedMove final : public FSavedMove_Character
 {
 private:
-	typedef FSavedMove_Character Super;
+	using Super = FSavedMove_Character;
 
 	bool bMovementSettingsChangeRequested{true};
 
 protected:
 	virtual void Clear() override;
 
-	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, FVector const& NewAcceleration,
+	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration,
 	                        FNetworkPredictionData_Client_Character& Data) override;
 
 	virtual uint8 GetCompressedFlags() const override;
@@ -24,7 +24,7 @@ protected:
 class ALS_API FAlsNetworkPredictionData final : public FNetworkPredictionData_Client_Character
 {
 private:
-	typedef FNetworkPredictionData_Client_Character Super;
+	using Super = FNetworkPredictionData_Client_Character;
 
 public:
 	FAlsNetworkPredictionData(const UCharacterMovementComponent& MovementComponent);
