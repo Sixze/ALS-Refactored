@@ -43,7 +43,7 @@ private:
 	bool bRotateToVelocityWhenSprinting;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bRotateToVelocityOnJump{true};
+	bool bKeepRotationOnJumpWhenLookingDirection;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
 		Meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))

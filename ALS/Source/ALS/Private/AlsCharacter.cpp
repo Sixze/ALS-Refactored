@@ -866,9 +866,10 @@ void AAlsCharacter::OnJumpedNetworked()
 {
 	// Set the new in air target actor rotation to the velocity rotation if speed is greater than 100.
 
-	InAirState.TargetYawAngle = bRotateToVelocityOnJump && LocomotionState.Speed > 100.0f
-		                            ? LocomotionState.VelocityYawAngle
-		                            : LocomotionState.SmoothRotation.Yaw;
+	InAirState.TargetYawAngle = LocomotionState.Speed <= 100.0f ||
+	                            bKeepRotationOnJumpWhenLookingDirection && RotationMode == EAlsRotationMode::LookingDirection
+		                            ? LocomotionState.SmoothRotation.Yaw
+		                            : LocomotionState.VelocityYawAngle;
 
 	Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
 }
