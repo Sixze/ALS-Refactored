@@ -280,8 +280,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
-void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName FootBoneName,
-                                            const FName FootLockCurveName, const float DeltaTime) const
+void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
+                                            const FName& FootLockCurveName, const float DeltaTime) const
 {
 	if (FootState.IkAmount <= SMALL_NUMBER)
 	{
@@ -991,7 +991,7 @@ void UAlsAnimationInstance::StopRagdolling()
 	SnapshotPose(RagdollingState.FinalRagdollPose);
 }
 
-float UAlsAnimationInstance::GetCurveValueClamped01(const FName CurveName) const
+float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const
 {
 	return UAlsMath::Clamp01(GetCurveValue(CurveName));
 }

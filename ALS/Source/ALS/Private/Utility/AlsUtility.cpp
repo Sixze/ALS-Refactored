@@ -6,12 +6,12 @@
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
 
-float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName CurveName)
+float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
 {
 	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;
 }
 
-bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName DisplayName)
+bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
 {
 	const auto* FirstPlayerController{IsValid(Actor) ? UGameplayStatics::GetPlayerController(Actor->GetWorld(), 0) : nullptr};
 	auto* Hud{IsValid(FirstPlayerController) ? FirstPlayerController->GetHUD() : nullptr};

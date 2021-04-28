@@ -149,7 +149,7 @@ private:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	void RefreshFootLock(FAlsFootState& FootState, FName FootBoneName, FName FootLockCurveName, float DeltaTime) const;
+	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName, const FName& FootLockCurveName, float DeltaTime) const;
 
 	void RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, float DeltaTime) const;
 
@@ -253,7 +253,7 @@ private:
 	// Utility
 
 public:
-	float GetCurveValueClamped01(FName CurveName) const;
+	float GetCurveValueClamped01(const FName& CurveName) const;
 };
 
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const EAlsGroundedEntryMode NewMode)
