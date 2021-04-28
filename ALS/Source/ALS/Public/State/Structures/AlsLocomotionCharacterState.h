@@ -10,13 +10,13 @@ struct ALS_API FAlsLocomotionCharacterState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasInput;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float InputYawAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float Speed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -25,7 +25,7 @@ struct ALS_API FAlsLocomotionCharacterState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector PreviousVelocity;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float VelocityYawAngle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -10,9 +10,9 @@ struct ALS_API FAlsAimingCharacterState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator SmoothRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float YawSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float PreviousSmoothYawAngle;
 };

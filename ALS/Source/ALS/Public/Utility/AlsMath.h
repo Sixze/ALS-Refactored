@@ -16,6 +16,7 @@ public:
 	static constexpr float RadToDeg{57.295779513082320876798154814105170332405472466564321549160243861f};
 	static constexpr float DegToRad{0.0174532925199432957692369076848861271344287188854172545609719144f};
 
+public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float Clamp01(float Value);
 
@@ -52,11 +53,7 @@ public:
 
 inline float UAlsMath::Clamp01(const float Value)
 {
-	return Value <= 0.0f
-		       ? 0.0f
-		       : Value >= 1.0f
-		       ? 1.0f
-		       : Value;
+	return Value <= 0.0f ? 0.0f : Value >= 1.0f ? 1.0f : Value;
 }
 
 inline float UAlsMath::LerpClamped(const float A, const float B, const float Alpha)

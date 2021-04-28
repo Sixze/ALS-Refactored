@@ -21,13 +21,13 @@ struct ALS_API FAlsMantlingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector StartRelativeLocation{-65.0f, 0.0f, -200.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D ReferenceHeight{125.0f, 200.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
 	FVector2D PlayRate{1.2f, 1.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D StartTime{0.6f, 0.0f};
 };
 
@@ -36,16 +36,16 @@ struct ALS_API FAlsMantlingTraceSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D LedgeHeight{50.0f, 200.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float ReachDistance{75.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float TargetLocationOffset{15.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	bool bDrawFailedTraces;
 };
 

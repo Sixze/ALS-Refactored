@@ -5,19 +5,19 @@
 
 #include "AlsAnimationModifier_CreateLayeringCurves.generated.h"
 
-UCLASS(meta = (DisplayName = "Als Create Layering Curves Animation Modifier"))
+UCLASS(Meta = (DisplayName = "Als Create Layering Curves Animation Modifier"))
 class ALSEDITOR_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimationModifier
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	bool bAddKeyOnEachFrame;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	float CurveValue;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	TArray<FName> CurveNames
 	{
 		UAlsConstants::LayerHeadCurve(),

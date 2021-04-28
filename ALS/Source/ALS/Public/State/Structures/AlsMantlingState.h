@@ -40,10 +40,10 @@ struct ALS_API FAlsMantlingState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveVector* InterpolationAndCorrectionCurve;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float PlayRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float StartTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

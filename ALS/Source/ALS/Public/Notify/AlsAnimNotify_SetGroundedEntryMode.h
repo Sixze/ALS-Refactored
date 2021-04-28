@@ -6,13 +6,13 @@
 
 enum class EAlsGroundedEntryMode : uint8;
 
-UCLASS(meta = (DisplayName = "Als Set Grounded Entry Mode Animation Notify"))
+UCLASS(Meta = (DisplayName = "Als Set Grounded Entry Mode Animation Notify"))
 class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	EAlsGroundedEntryMode Mode;
 
 public:

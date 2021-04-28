@@ -4,7 +4,7 @@
 
 #include "AlsConstants.generated.h"
 
-UCLASS(meta = (BlueprintThreadSafe))
+UCLASS(Meta = (BlueprintThreadSafe))
 class ALS_API UAlsConstants : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
