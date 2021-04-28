@@ -32,7 +32,7 @@ struct ALS_API FAlsLocomotionAnimationState
 	FVector RelativeAccelerationAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 3))
-	float GaitTypeAmount;
+	float GaitAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float GaitWalkingAmount;
