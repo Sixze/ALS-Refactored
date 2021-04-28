@@ -98,10 +98,10 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
 
-	LocomotionState.GaitTypeAmount = GetCurveValue(Constants.GaitTypeCurve);
-	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount);
-	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 1.0f);
-	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitTypeAmount - 2.0f);
+	LocomotionState.GaitAmount = GetCurveValue(Constants.GaitAmountCurve);
+	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount);
+	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 1.0f);
+	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 2.0f);
 
 	// The transitions allowed curve is modified within certain states, so that is transition allowed will be true while in those states.
 
@@ -560,10 +560,10 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 
 float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 {
-	// Calculate the stride blend. This value is used within the blend spaces to scale the stride (distance feet travel) so that the
-	// character can walk or run at different movement speeds. It also allows the walk or run gait animations to blend independently
-	// while still matching the animation speed to the movement speed, preventing the character from needing to play a half walk + half
-	// run blend. The curves are used to map the stride amount to the speed for maximum control.
+	// Calculate the stride blend. This value is used within the blend spaces to scale the stride (distance feet travel) so
+	// that the character can walk or run at different movement speeds. It also allows the walk or run gait animations to
+	// blend independently while still matching the animation speed to the movement speed, preventing the character from needing
+	// to play a half walk + half run blend. The curves are used to map the stride amount to the speed for maximum control.
 
 	const auto Speed{LocomotionState.Speed / GetSkelMeshComponent()->GetComponentScale().Z};
 
@@ -589,10 +589,10 @@ float UAlsAnimationInstance::CalculateWalkRunBlendAmount() const
 
 float UAlsAnimationInstance::CalculateStandingPlayRate() const
 {
-	// Calculate the standing play rate by dividing the character's speed by the animated speed for each gait. The interpolation are
-	// determined by the gait type curve that exists on every locomotion cycle so that the play rate is always in sync with the currently
-	// blended animation. The value is also divided by the stride blend and the mesh scale so that the play rate increases as the stride
-	// or scale gets smaller.
+	// Calculate the standing play rate by dividing the character's speed by the animated speed for each gait.
+	// The interpolation are determined by the gait amount curve that exists on every locomotion cycle so that the
+	// play rate is always in sync with the currently blended animation. The value is also divided by the
+	// stride blend and the mesh scale so that the play rate increases as the stride or scale gets smaller.
 
 	const auto WalkRunSpeedAmount{
 		FMath::Lerp(LocomotionState.Speed / MovementSettings.AnimatedWalkSpeed,

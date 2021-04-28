@@ -243,9 +243,9 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static FName GaitTypeCurve()
+	static FName GaitAmountCurve()
 	{
-		return TEXT("GaitType");
+		return TEXT("GaitAmount");
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
@@ -412,7 +412,7 @@ struct ALS_API FAlsPropertyAccessConstants
 	FName PoseAirCurve{UAlsConstants::PoseAirCurve()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GaitTypeCurve{UAlsConstants::GaitTypeCurve()};
+	FName GaitAmountCurve{UAlsConstants::GaitAmountCurve()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName RotationYawSpeedCurve{UAlsConstants::RotationYawSpeedCurve()};
