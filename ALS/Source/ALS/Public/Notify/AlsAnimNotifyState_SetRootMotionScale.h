@@ -6,13 +6,13 @@
 
 enum class EAlsLocomotionAction : uint8;
 
-UCLASS(meta = (DisplayName = "Als Set Root Motion Scale Animation Notify State"))
+UCLASS(Meta = (DisplayName = "Als Set Root Motion Scale Animation Notify State"))
 class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess, ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0))
 	float TranslationScale{1.0f};
 
 public:

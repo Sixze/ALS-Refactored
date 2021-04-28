@@ -7,7 +7,7 @@ struct ALS_API FAlsRollingSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float ActorRotationInterpolationSpeed{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -19,7 +19,7 @@ struct ALS_API FAlsRollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bRotateToInputDuringRoll{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, EditCondition = "bRotateToInputDuringRoll"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bRotateToInputDuringRoll"))
 	float InputInterpolationSpeed{100.0f};
 
 	// If character landed with a specified speed, then start rolling.
@@ -27,6 +27,6 @@ struct ALS_API FAlsRollingSettings
 	bool bStartRollingOnLand{true};
 
 	// If character landed with a speed greater than specified value, then start rolling.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand"))
 	float RollingOnLandSpeedThreshold{600.0f};
 };

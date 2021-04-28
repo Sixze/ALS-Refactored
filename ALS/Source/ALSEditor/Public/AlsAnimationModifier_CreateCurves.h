@@ -10,7 +10,7 @@ struct ALSEDITOR_API FAlsAnimationCurveKey
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	int32 Frame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -35,13 +35,13 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	};
 };
 
-UCLASS(meta = (DisplayName = "Als Create Curves Animation Modifier"))
+UCLASS(Meta = (DisplayName = "Als Create Curves Animation Modifier"))
 class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifier
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	TArray<FAlsAnimationCurve> Curves
 	{
 		{UAlsConstants::FootLeftIkCurve()},

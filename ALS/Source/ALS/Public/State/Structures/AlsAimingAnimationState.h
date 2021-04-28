@@ -10,36 +10,36 @@ struct ALS_API FAlsAimingAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float YawAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -90, ClampMax = 90))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -90, ClampMax = 90))
 	float PitchAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float YawSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator SmoothRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float SmoothYawAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -90, ClampMax = 90))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -90, ClampMax = 90))
 	float SmoothPitchAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float SmoothYawAmount{0.5f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 0.5))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 0.5))
 	float SmoothYawLeftAmount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.5, ClampMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0.5, ClampMax = 1))
 	float SmoothYawRightAmount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	FRotator SpineRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PitchAmount{0.5f};
 };
