@@ -390,7 +390,7 @@ bool AAlsCharacter::CanSprint() const
 		return false;
 	}
 
-	if (RotationMode == EAlsRotationMode::VelocityDirection)
+	if (bRotateToVelocityWhenSprinting || RotationMode == EAlsRotationMode::VelocityDirection)
 	{
 		return true;
 	}
@@ -443,7 +443,7 @@ void AAlsCharacter::RefreshRotationMode()
 	{
 		SetRotationMode(EAlsRotationMode::Aiming);
 	}
-	else if (bRotateToVelocityWhenSprinting && DesiredGait == EAlsGait::Sprinting)
+	else if (bRotateToVelocityWhenSprinting && Gait == EAlsGait::Sprinting)
 	{
 		SetRotationMode(EAlsRotationMode::VelocityDirection);
 	}
