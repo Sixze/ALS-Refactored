@@ -18,10 +18,10 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character"))
-	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, FName CurveName);
+	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, const FName& CurveName);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor"))
-	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, FName DisplayName);
+	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, const FName& DisplayName);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext", DevelopmentOnly))
 	static void DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
