@@ -111,6 +111,15 @@ void AAlsCharacter::BeginPlay()
 	AimingState.SmoothRotation = AimingRotation;
 
 	RefreshDesiredStance();
+
+	OnOverlayModeChanged(OverlayMode);
+}
+
+void AAlsCharacter::Restart()
+{
+	Super::Restart();
+
+	RefreshDesiredStance();
 }
 
 void AAlsCharacter::Tick(const float DeltaTime)
@@ -391,6 +400,26 @@ bool AAlsCharacter::CanSprint() const
 	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f);
 }
 
+void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
+{
+	if (bDesiredAiming != bNewDesiredAiming)
+	{
+		bDesiredAiming = bNewDesiredAiming;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bDesiredAiming, this)
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetDesiredAiming(bNewDesiredAiming);
+		}
+	}
+}
+
+void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
+{
+	SetDesiredAiming(bNewAiming);
+}
+
 void AAlsCharacter::SetDesiredRotationMode(const EAlsRotationMode NewMode)
 {
 	if (DesiredRotationMode != NewMode)
@@ -642,26 +671,6 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 
 	RefreshSmoothLocationAndRotation();
-}
-
-void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
-{
-	if (bDesiredAiming != bNewDesiredAiming)
-	{
-		bDesiredAiming = bNewDesiredAiming;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bDesiredAiming, this)
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			ServerSetDesiredAiming(bNewDesiredAiming);
-		}
-	}
-}
-
-void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
-{
-	SetDesiredAiming(bNewAiming);
 }
 
 void AAlsCharacter::SetAimingRotation(const FRotator& NewAimingRotation)
@@ -1806,6 +1815,18 @@ void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const 
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(Gait), false));
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto DesiredAimingText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, bDesiredAiming), true))
+	};
+
+	Text.Text = DesiredAimingText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(ToString(bDesiredAiming), false));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 	VerticalPosition += RowOffset;
