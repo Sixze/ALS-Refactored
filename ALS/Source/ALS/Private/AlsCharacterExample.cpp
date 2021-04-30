@@ -140,12 +140,12 @@ void AAlsCharacterExample::InputJumpReleased()
 
 void AAlsCharacterExample::InputAimPressed()
 {
-	SetAiming(true);
+	SetDesiredAiming(true);
 }
 
 void AAlsCharacterExample::InputAimReleased()
 {
-	SetAiming(false);
+	SetDesiredAiming(false);
 }
 
 void AAlsCharacterExample::VelocityDirectionPressedAction()

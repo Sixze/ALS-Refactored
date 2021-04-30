@@ -67,7 +67,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputDirection, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bAiming, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bDesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, AimingRotation, Parameters)
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, RagdollTargetLocation, Parameters)
@@ -339,7 +339,7 @@ EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 	// be in, and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
 	// if you wanted to force the character into a walking state while indoors, this could be done here.
 
-	if (Stance == EAlsStance::Standing && RotationMode != EAlsRotationMode::Aiming)
+	if (Stance == EAlsStance::Standing && (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming))
 	{
 		if (DesiredGait == EAlsGait::Sprinting)
 		{
@@ -385,22 +385,10 @@ bool AAlsCharacter::CanSprint() const
 	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
 	// if there is input and it is faced forward relative to the camera + or - 50 degrees.
 
-	if (!LocomotionState.bHasInput || RotationMode == EAlsRotationMode::Aiming)
-	{
-		return false;
-	}
-
-	if (bRotateToVelocityWhenSprinting || RotationMode == EAlsRotationMode::VelocityDirection)
-	{
-		return true;
-	}
-
-	if (RotationMode == EAlsRotationMode::LookingDirection)
-	{
-		return FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f;
-	}
-
-	return false;
+	return LocomotionState.bHasInput &&
+	       (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming) &&
+	       (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting ||
+	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f);
 }
 
 void AAlsCharacter::SetDesiredRotationMode(const EAlsRotationMode NewMode)
@@ -439,18 +427,33 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(EAlsRotationMode Previo
 
 void AAlsCharacter::RefreshRotationMode()
 {
-	if (bAiming)
+	const auto bSprinting{Gait == EAlsGait::Sprinting};
+
+	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
+	    (!bSprinting || !bSprintHasPriorityOverAiming))
 	{
-		SetRotationMode(EAlsRotationMode::Aiming);
+		SetRotationMode(bBlockAimingWhenInAir && LocomotionMode == EAlsLocomotionMode::InAir
+			                ? EAlsRotationMode::LookingDirection
+			                : EAlsRotationMode::Aiming);
+		return;
 	}
-	else if (bRotateToVelocityWhenSprinting && Gait == EAlsGait::Sprinting)
+
+	if (bSprinting)
 	{
-		SetRotationMode(EAlsRotationMode::VelocityDirection);
+		if (bRotateToVelocityWhenSprinting)
+		{
+			SetRotationMode(EAlsRotationMode::VelocityDirection);
+			return;
+		}
+
+		if (DesiredRotationMode == EAlsRotationMode::Aiming)
+		{
+			SetRotationMode(EAlsRotationMode::LookingDirection);
+			return;
+		}
 	}
-	else
-	{
-		SetRotationMode(DesiredRotationMode);
-	}
+
+	SetRotationMode(DesiredRotationMode);
 }
 
 void AAlsCharacter::SetOverlayMode(const EAlsOverlayMode NewMode)
@@ -641,24 +644,24 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	RefreshSmoothLocationAndRotation();
 }
 
-void AAlsCharacter::SetAiming(const bool bNewAiming)
+void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
 {
-	if (bAiming != bNewAiming)
+	if (bDesiredAiming != bNewDesiredAiming)
 	{
-		bAiming = bNewAiming;
+		bDesiredAiming = bNewDesiredAiming;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bAiming, this)
+		MARK_PROPERTY_DIRTY_FROM_NAME(AAlsCharacter, bDesiredAiming, this)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			ServerSetAiming(bNewAiming);
+			ServerSetDesiredAiming(bNewDesiredAiming);
 		}
 	}
 }
 
-void AAlsCharacter::ServerSetAiming_Implementation(const bool bNewAiming)
+void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
 {
-	SetAiming(bNewAiming);
+	SetDesiredAiming(bNewAiming);
 }
 
 void AAlsCharacter::SetAimingRotation(const FRotator& NewAimingRotation)
@@ -866,10 +869,10 @@ void AAlsCharacter::OnJumpedNetworked()
 {
 	// Set the new in air target actor rotation to the velocity rotation if speed is greater than 100.
 
-	InAirState.TargetYawAngle = LocomotionState.Speed <= 100.0f ||
-	                            bKeepRotationOnJumpWhenLookingDirection && RotationMode == EAlsRotationMode::LookingDirection
-		                            ? LocomotionState.SmoothRotation.Yaw
-		                            : LocomotionState.VelocityYawAngle;
+	InAirState.TargetYawAngle = LocomotionState.Speed > 100.0f &&
+	                            (RotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityOnJump)
+		                            ? LocomotionState.VelocityYawAngle
+		                            : LocomotionState.SmoothRotation.Yaw;
 
 	Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
 }
