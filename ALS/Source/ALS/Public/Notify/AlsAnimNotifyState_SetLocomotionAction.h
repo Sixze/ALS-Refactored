@@ -18,7 +18,6 @@ private:
 public:
 	UAlsAnimNotifyState_SetLocomotionAction();
 
-protected:
 	virtual FString GetNotifyName_Implementation() const override;
 
 	virtual void NotifyBegin(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation, float TotalDuration) override;

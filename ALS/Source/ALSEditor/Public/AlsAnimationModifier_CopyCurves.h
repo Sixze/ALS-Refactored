@@ -19,6 +19,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "!bCopyAllCurves"))
 	TArray<FName> CurveNames;
 
-protected:
+public:
 	virtual void OnApply_Implementation(UAnimSequence* Sequence) override;
 };

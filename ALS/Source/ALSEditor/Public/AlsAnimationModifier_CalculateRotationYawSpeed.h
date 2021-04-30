@@ -12,6 +12,6 @@ class ALSEDITOR_API UAlsAnimationModifier_CalculateRotationYawSpeed : public UAn
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void OnApply_Implementation(UAnimSequence* Sequence) override;
 };

@@ -18,7 +18,6 @@ private:
 public:
 	UAlsAnimNotify_SetGroundedEntryMode();
 
-protected:
 	virtual FString GetNotifyName_Implementation() const override;
 
 	virtual void Notify(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation) override;

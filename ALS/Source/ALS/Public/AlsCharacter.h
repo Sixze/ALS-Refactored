@@ -129,11 +129,12 @@ private:
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+protected:
 	virtual void BeginPlay() override;
 
+public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void AddMovementInput(FVector Direction, float Scale = 1.0f, bool bForce = false) override;

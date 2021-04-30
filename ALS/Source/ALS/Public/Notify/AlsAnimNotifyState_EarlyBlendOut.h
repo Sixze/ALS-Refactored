@@ -42,7 +42,6 @@ private:
 public:
 	UAlsAnimNotifyState_EarlyBlendOut();
 
-protected:
 	virtual FString GetNotifyName_Implementation() const override;
 
 	virtual void NotifyTick(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation, float DeltaTime) override;

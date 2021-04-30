@@ -130,7 +130,7 @@ private:
 
 	static const FCollisionObjectQueryParams GroundPredictionObjectQueryParameters;
 
-protected:
+public:
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
