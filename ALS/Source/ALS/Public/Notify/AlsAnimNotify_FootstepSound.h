@@ -40,7 +40,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	EAlsFootstepType FootstepType;
 
-protected:
+public:
 	virtual FString GetNotifyName_Implementation() const override;
 
 	virtual void Notify(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation) override;

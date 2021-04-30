@@ -62,6 +62,6 @@ private:
 		{UAlsConstants::FootstepSoundBlockCurve()}
 	};
 
-protected:
+public:
 	virtual void OnApply_Implementation(UAnimSequence* Sequence) override;
 };
