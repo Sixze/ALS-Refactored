@@ -40,10 +40,16 @@ private:
 	float MovingSpeedThreshold{150.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
+	bool bSprintHasPriorityOverAiming;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
 	bool bRotateToVelocityWhenSprinting;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bKeepRotationOnJumpWhenLookingDirection;
+	bool bBlockAimingWhenInAir;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
+	bool bRotateToVelocityOnJump{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
 		Meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))
@@ -93,7 +99,7 @@ private:
 	FAlsLocomotionCharacterState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	bool bAiming;
+	bool bDesiredAiming;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FRotator AimingRotation;
@@ -291,15 +297,17 @@ private:
 
 	void RefreshLocomotion(float DeltaTime);
 
-	// Aiming
+	// Desired Aiming
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void SetAiming(bool bNewAiming);
+	void SetDesiredAiming(bool bNewDesiredAiming);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetAiming(bool bNewAiming);
+	void ServerSetDesiredAiming(bool bNewDesiredAiming);
+
+	// Aiming
 
 public:
 	const FRotator& GetAimingRotation() const;

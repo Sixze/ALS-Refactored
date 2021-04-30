@@ -20,7 +20,7 @@ bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayNa
 }
 
 void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
-                                       const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
+                                       const FLinearColor Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
 	auto* World{WorldContext->GetWorld()};
