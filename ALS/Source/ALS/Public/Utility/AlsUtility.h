@@ -7,6 +7,11 @@
 
 class ACharacter;
 
+inline const TCHAR* ToString(const bool bValue)
+{
+	return bValue ? TEXT("True") : TEXT("False");
+}
+
 UCLASS()
 class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 {

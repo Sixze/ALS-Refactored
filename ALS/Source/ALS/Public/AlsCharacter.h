@@ -51,6 +51,26 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
 	bool bRotateToVelocityOnJump{true};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
+		Meta = (AllowPrivateAccess))
+	EAlsStance DesiredStance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
+		Meta = (AllowPrivateAccess))
+	EAlsGait DesiredGait{EAlsGait::Running};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
+		Meta = (AllowPrivateAccess))
+	bool bDesiredAiming;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
+		Meta = (AllowPrivateAccess))
+	EAlsRotationMode DesiredRotationMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
+		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
+	EAlsOverlayMode OverlayMode;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
 		Meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))
 	FAlsGeneralMantlingSettings GeneralMantlingSettings;
@@ -64,27 +84,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
 	UAlsMovementCharacterSettings* MovementSettings;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	EAlsStance DesiredStance;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsStance Stance;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	EAlsGait DesiredGait{EAlsGait::Running};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsGait Gait;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	EAlsRotationMode DesiredRotationMode;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsRotationMode RotationMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
-	EAlsOverlayMode OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsLocomotionMode LocomotionMode;
@@ -97,9 +104,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionCharacterState LocomotionState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	bool bDesiredAiming;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FRotator AimingRotation;
@@ -135,6 +139,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void Restart() override;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void AddMovementInput(FVector Direction, float Scale = 1.0f, bool bForce = false) override;
@@ -209,6 +215,16 @@ private:
 	EAlsGait CalculateActualGait(EAlsGait MaxAllowedGait) const;
 
 	bool CanSprint() const;
+
+	// Desired Aiming
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	void SetDesiredAiming(bool bNewDesiredAiming);
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerSetDesiredAiming(bool bNewDesiredAiming);
 
 	// Desired Rotation Mode
 
@@ -297,16 +313,6 @@ private:
 	void RefreshSmoothLocationAndRotation();
 
 	void RefreshLocomotion(float DeltaTime);
-
-	// Desired Aiming
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void SetDesiredAiming(bool bNewDesiredAiming);
-
-private:
-	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredAiming(bool bNewDesiredAiming);
 
 	// Aiming
 
