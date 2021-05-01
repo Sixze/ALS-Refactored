@@ -61,15 +61,12 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Parameters.Condition = COND_SkipOwner;
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredStance, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredGait, Parameters)
-
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bDesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, DesiredRotationMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, OverlayMode, Parameters)
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, InputDirection, Parameters)
-
-	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, bDesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, AimingRotation, Parameters)
-
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAlsCharacter, RagdollTargetLocation, Parameters)
 }
 
@@ -1614,9 +1611,16 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{180.0f * Scale};
 
+	auto MaxVerticalPosition{VerticalPosition};
 	auto HorizontalPosition{5.0f * Scale};
 
-	auto MaxVerticalPosition{VerticalPosition};
+	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("ALS debug mode is enabled! Press (Shift + 0) to disable it."))};
+
+	DisplayDebugHeader(Canvas, DebugModeHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
+
+	VerticalPosition += RowOffset;
+	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
 	const auto InitialVerticalPosition{VerticalPosition};
 
 	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"))};
