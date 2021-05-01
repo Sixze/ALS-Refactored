@@ -61,6 +61,9 @@ struct ALS_API FAlsGeneralMantlingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TargetPrimitiveSpeedThreshold{10.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	float MaxReachAngle{50.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMantlingTraceSettings GroundedTrace;
 

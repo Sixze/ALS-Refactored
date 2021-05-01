@@ -13,10 +13,6 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr float RadToDeg{57.295779513082320876798154814105170332405472466564321549160243861f};
-	static constexpr float DegToRad{0.0174532925199432957692369076848861271344287188854172545609719144f};
-
-public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float Clamp01(float Value);
 
@@ -83,12 +79,12 @@ inline FVector2D UAlsMath::RadianToDirection(const float Radian)
 
 inline FVector2D UAlsMath::AngleToDirection(const float Angle)
 {
-	return RadianToDirection(Angle * DegToRad);
+	return RadianToDirection(FMath::DegreesToRadians(Angle));
 }
 
 inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
 {
-	return FMath::Atan2(Direction.Y, Direction.X) * RadToDeg;
+	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
 
 inline FTransform UAlsMath::AddTransforms(const FTransform& Left, const FTransform& Right)

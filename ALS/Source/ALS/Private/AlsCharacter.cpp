@@ -952,12 +952,18 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace forward to find a object the character cannot walk on.
 
-	const auto ForwardTraceDirection{
-		LocomotionState.bHasInput
-			? InputDirection
-			: LocomotionState.bHasSpeed
-			? LocomotionState.Velocity.GetUnsafeNormal2D()
-			: LocomotionState.SmoothRotation.Vector()
+	const FVector ForwardTraceDirection{
+		UAlsMath::AngleToDirection(
+			LocomotionState.bHasInput
+				? LocomotionState.SmoothRotation.Yaw +
+				  FMath::ClampAngle(UAlsMath::DirectionToAngle(FVector2D{InputDirection}) - LocomotionState.SmoothRotation.Yaw,
+				                    -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
+				: LocomotionState.bHasSpeed
+				? LocomotionState.SmoothRotation.Yaw +
+				  FMath::ClampAngle(LocomotionState.VelocityYawAngle - LocomotionState.SmoothRotation.Yaw,
+				                    -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
+				: LocomotionState.SmoothRotation.Yaw),
+		0.0f
 	};
 
 	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * CapsuleRadius};
@@ -1927,7 +1933,7 @@ void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCone(GetWorld(), LocomotionState.SmoothLocation + FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()},
-	              AimingRotation.Vector(), 100.0f, 15.0f * UAlsMath::DegToRad, 15.0f * UAlsMath::DegToRad,
+	              AimingRotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
 
