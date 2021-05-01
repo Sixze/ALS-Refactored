@@ -48,7 +48,7 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 	{
 		auto* MutableThis{const_cast<UAlsCharacterMovementComponent*>(this)};
 
-		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData(*this);
+		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData{*this};
 		MutableThis->ClientPredictionData->MaxSmoothNetUpdateDist = 92.0f;
 		MutableThis->ClientPredictionData->NoSmoothNetUpdateDist = 140.0f;
 	}
