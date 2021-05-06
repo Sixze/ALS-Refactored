@@ -15,43 +15,50 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName RootBone()
 	{
-		return TEXT("root");
+		static const FName Name{TEXT("root")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName PelvisBone()
 	{
-		return TEXT("pelvis");
+		static const FName Name{TEXT("pelvis")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName Spine03Bone()
 	{
-		return TEXT("spine_03");
+		static const FName Name{TEXT("spine_03")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName GunLeftVirtualBone()
 	{
-		return TEXT("VB ik_hand_gun_l");
+		static const FName Name{TEXT("VB ik_hand_gun_l")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName GunRightVirtualBone()
 	{
-		return TEXT("VB ik_hand_gun_r");
+		static const FName Name{TEXT("VB ik_hand_gun_r")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName FootLeftVirtualBone()
 	{
-		return TEXT("VB ik_foot_l");
+		static const FName Name{TEXT("VB ik_foot_l")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static FName FootRightVirtualBone()
 	{
-		return TEXT("VB ik_foot_r");
+		static const FName Name{TEXT("VB ik_foot_r")};
+		return Name;
 	}
 
 	// Animation Slots
@@ -59,13 +66,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
 	static FName TransitionSlot()
 	{
-		return TEXT("Transition");
+		static const FName Name{TEXT("Transition")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
 	static FName TurnInPlaceSlot()
 	{
-		return TEXT("TurnInPlace");
+		static const FName Name{TEXT("TurnInPlace")};
+		return Name;
 	}
 
 	// Layering Animation Curves
@@ -73,115 +82,134 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerHeadCurve()
 	{
-		return TEXT("LayerHead");
+		static const FName Name{TEXT("LayerHead")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerHeadAdditiveCurve()
 	{
-		return TEXT("LayerHeadAdditive");
+		static const FName Name{TEXT("LayerHeadAdditive")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmLeftCurve()
 	{
-		return TEXT("LayerArmLeft");
+		static const FName Name{TEXT("LayerArmLeft")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmLeftAdditiveCurve()
 	{
-		return TEXT("LayerArmLeftAdditive");
+		static const FName Name{TEXT("LayerArmLeftAdditive")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmLeftLocalSpaceCurve()
 	{
-		return TEXT("LayerArmLeftLocalSpace");
+		static const FName Name{TEXT("LayerArmLeftLocalSpace")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmRightCurve()
 	{
-		return TEXT("LayerArmRight");
+		static const FName Name{TEXT("LayerArmRight")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmRightAdditiveCurve()
 	{
-		return TEXT("LayerArmRightAdditive");
+		static const FName Name{TEXT("LayerArmRightAdditive")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerArmRightLocalSpaceCurve()
 	{
-		return TEXT("LayerArmRightLocalSpace");
+		static const FName Name{TEXT("LayerArmRightLocalSpace")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerHandLeftCurve()
 	{
-		return TEXT("LayerHandLeft");
+		static const FName Name{TEXT("LayerHandLeft")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerHandRightCurve()
 	{
-		return TEXT("LayerHandRight");
+		static const FName Name{TEXT("LayerHandRight")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerSpineCurve()
 	{
-		return TEXT("LayerSpine");
+		static const FName Name{TEXT("LayerSpine")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerSpineAdditiveCurve()
 	{
-		return TEXT("LayerSpineAdditive");
+		static const FName Name{TEXT("LayerSpineAdditive")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerPelvisCurve()
 	{
-		return TEXT("LayerPelvis");
+		static const FName Name{TEXT("LayerPelvis")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName LayerLegsCurve()
 	{
-		return TEXT("LayerLegs");
+		static const FName Name{TEXT("LayerLegs")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName HandLeftIkCurve()
 	{
-		return TEXT("HandLeftIk");
+		static const FName Name{TEXT("HandLeftIk")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName HandRightIkCurve()
 	{
-		return TEXT("HandRightIk");
+		static const FName Name{TEXT("HandRightIk")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName AimManualCurve()
 	{
-		return TEXT("AimManual");
+		static const FName Name{TEXT("AimManual")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName AimBlockCurve()
 	{
-		return TEXT("AimBlock");
+		static const FName Name{TEXT("AimBlock")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName HipsDirectionLockCurve()
 	{
-		return TEXT("HipsDirectionLock");
+		static const FName Name{TEXT("HipsDirectionLock")};
+		return Name;
 	}
 
 	// Feet Animation Curves
@@ -189,37 +217,43 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootLeftIkCurve()
 	{
-		return TEXT("FootLeftIk");
+		static const FName Name{TEXT("FootLeftIk")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootLeftLockCurve()
 	{
-		return TEXT("FootLeftLock");
+		static const FName Name{TEXT("FootLeftLock")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootRightIkCurve()
 	{
-		return TEXT("FootRightIk");
+		static const FName Name{TEXT("FootRightIk")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootRightLockCurve()
 	{
-		return TEXT("FootRightLock");
+		static const FName Name{TEXT("FootRightLock")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootPlantedCurve()
 	{
-		return TEXT("FootPlanted");
+		static const FName Name{TEXT("FootPlanted")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FeetCrossingCurve()
 	{
-		return TEXT("FeetCrossing");
+		static const FName Name{TEXT("FeetCrossing")};
+		return Name;
 	}
 
 	// Other Animation Curves
@@ -227,61 +261,71 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName PoseStandCurve()
 	{
-		return TEXT("PoseStand");
+		static const FName Name{TEXT("PoseStand")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName PoseCrouchCurve()
 	{
-		return TEXT("PoseCrouch");
+		static const FName Name{TEXT("PoseCrouch")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName PoseAirCurve()
 	{
-		return TEXT("PoseAir");
+		static const FName Name{TEXT("PoseAir")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName GaitAmountCurve()
 	{
-		return TEXT("GaitAmount");
+		static const FName Name{TEXT("GaitAmount")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName RotationYawSpeedCurve()
 	{
-		return TEXT("RotationYawSpeed");
+		static const FName Name{TEXT("RotationYawSpeed")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName RotationYawOffsetCurve()
 	{
-		return TEXT("RotationYawOffset");
+		static const FName Name{TEXT("RotationYawOffset")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName TransitionsAllowedCurve()
 	{
-		return TEXT("TransitionsAllowed");
+		static const FName Name{TEXT("TransitionsAllowed")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName SprintBlockCurve()
 	{
-		return TEXT("SprintBlock");
+		static const FName Name{TEXT("SprintBlock")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName GroundPredictionBlockCurve()
 	{
-		return TEXT("GroundPredictionBlock");
+		static const FName Name{TEXT("GroundPredictionBlock")};
+		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static FName FootstepSoundBlockCurve()
 	{
-		return TEXT("FootstepSoundBlock");
+		static const FName Name{TEXT("FootstepSoundBlock")};
+		return Name;
 	}
 };
 
