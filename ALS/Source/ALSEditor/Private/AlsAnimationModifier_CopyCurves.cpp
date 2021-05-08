@@ -9,8 +9,13 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 		return;
 	}
 
-	TArray<float> CurveTimes;
-	TArray<float> CurveValues;
+	check(IsInGameThread())
+
+	static TArray<float> CurveTimes;
+	CurveTimes.Reset();
+
+	static TArray<float> CurveValues;
+	CurveValues.Reset();
 
 	if (bCopyAllCurves)
 	{
