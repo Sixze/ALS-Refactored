@@ -22,7 +22,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float CurrentAngle, float TargetAngle, float DeltaTime, float InterpolationSpeed);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
 	static FVector ClampMagnitude01(const FVector& Vector);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
@@ -31,7 +31,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
 	static FVector2D AngleToDirection(float Angle);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
 	static float DirectionToAngle(const FVector2D& Direction);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")
