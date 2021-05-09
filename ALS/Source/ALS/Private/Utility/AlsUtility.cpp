@@ -20,7 +20,7 @@ bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayNa
 }
 
 void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
-                                       const FLinearColor Color, const float Duration, const float Thickness, const uint8 DepthPriority)
+                                       const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
 	auto* World{WorldContext->GetWorld()};
@@ -42,7 +42,7 @@ void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVecto
 
 void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const FVector& Start, const FVector& End,
                                              const float Radius, const bool bHit, const FHitResult& Hit,
-                                             const FLinearColor SweepColor, const FLinearColor HitColor,
+                                             const FLinearColor& SweepColor, const FLinearColor& HitColor,
                                              const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -69,7 +69,7 @@ void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const 
 
 void UAlsUtility::DrawDebugSweepSingleCapsule(const UObject* WorldContext, const FVector& Start, const FVector& End,
                                               const float Radius, const float HalfHeight, const bool bHit,
-                                              const FHitResult& Hit, const FLinearColor SweepColor, const FLinearColor HitColor,
+                                              const FHitResult& Hit, const FLinearColor& SweepColor, const FLinearColor& HitColor,
                                               const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG

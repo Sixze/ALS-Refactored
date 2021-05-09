@@ -22,13 +22,14 @@ float UAlsMath::InterpolateAngleConstant(const float CurrentAngle, const float T
 
 float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float OtherAxisValue)
 {
-	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Format(TEXT("Value: {0}, OtherAxis: {1} Result: {2}"), {
-	// 	                                                                        AxisValue, OtherAxisValue, FMath::Clamp(AxisValue *
-	// 			                                                                        FMath::GetMappedRangeValueClamped({0.0f, 0.6f},
-	// 				                                                                        {1.0f, 1.2f},
-	// 				                                                                        FMath::Abs(OtherAxisValue)),
-	// 		                                                                        -1.0f, 1.0f)
-	//                                                                         }));
+	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red,
+	//                                  FString::Format(TEXT("Value: {0}, OtherAxis: {1} Result: {2}"), {
+	// 	                                                 AxisValue, OtherAxisValue, FMath::Clamp(AxisValue *
+	// 			                                                 FMath::GetMappedRangeValueClamped({0.0f, 0.6f},
+	// 				                                                 {1.0f, 1.2f},
+	// 				                                                 FMath::Abs(OtherAxisValue)),
+	// 		                                                 -1.0f, 1.0f)
+	//                                                  }));
 
 	return FMath::Clamp(AxisValue *
 	                    FMath::GetMappedRangeValueClamped({0.0f, 0.6f},
