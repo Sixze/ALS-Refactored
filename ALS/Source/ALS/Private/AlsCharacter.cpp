@@ -1600,7 +1600,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	{
 		LocomotionState.TargetActorRotation = {0.0f, TargetYawAngle, 0.0f};
 
-		SetActorRotation(LocomotionState.TargetActorRotation);
+		SetActorRotation(LocomotionState.TargetActorRotation, ETeleportType::TeleportPhysics);
 
 		RefreshSmoothLocationAndRotation();
 	}
