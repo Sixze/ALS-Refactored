@@ -977,7 +977,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
-	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Forward Trace)"), false, this});
+	                                    {TEXT("AAlsBaseCharacter::TryStartMantling (Forward Trace)"), false, this});
 
 	auto* TargetPrimitive{ForwardTraceHit.GetComponent()};
 
@@ -1016,7 +1016,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
-	                                    {TEXT("AlsBaseCharacter::TryStartMantling (Downward Trace)"), false, this});
+	                                    {TEXT("AAlsBaseCharacter::TryStartMantling (Downward Trace)"), false, this});
 
 	if (!AlsCharacterMovement->IsWalkable(DownwardTraceHit))
 	{
@@ -1046,7 +1046,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
 	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                           {TEXT("AlsBaseCharacter::TryStartMantling (Free Space Overlap)"), false, this}))
+	                                           {TEXT("AAlsBaseCharacter::TryStartMantling (Free Space Overlap)"), false, this}))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -1432,7 +1432,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 		                                        RagdollTargetLocation.Y,
 		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
 	                                        }, MantlingAndRagdollObjectQueryParameters,
-	                                        {TEXT("AlsBaseCharacter::RefreshRagdollingActorLocation"), false, this});
+	                                        {TEXT("AAlsBaseCharacter::RefreshRagdollingActorLocation"), false, this});
 
 	auto NewActorLocation{RagdollTargetLocation};
 
