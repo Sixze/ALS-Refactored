@@ -9,13 +9,11 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 		return;
 	}
 
-	check(IsInGameThread())
-
 	static TArray<float> CurveTimes;
-	CurveTimes.Reset();
+	check(CurveTimes.Num() <= 0)
 
 	static TArray<float> CurveValues;
-	CurveValues.Reset();
+	check(CurveValues.Num() <= 0)
 
 	if (bCopyAllCurves)
 	{
@@ -52,4 +50,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 			UAnimationBlueprintLibrary::AddFloatCurveKeys(Sequence, CurveName, CurveTimes, CurveValues);
 		}
 	}
+
+	CurveTimes.Reset();
+	CurveValues.Reset();
 }

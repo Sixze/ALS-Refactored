@@ -133,11 +133,9 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	switch (LocomotionMode)
 	{
 		case EAlsLocomotionMode::Grounded:
-		{
 			RefreshGait();
 			RefreshGroundedActorRotation(DeltaTime);
-		}
-		break;
+			break;
 
 		case EAlsLocomotionMode::InAir:
 			RefreshInAirActorRotation(DeltaTime);
@@ -934,7 +932,7 @@ bool AAlsCharacter::TryStartMantlingInAir()
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, TEXT("ALS.Mantling"))};
+	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, UAlsUtility::MantlingDisplayName())};
 #endif
 
 	const auto* Capsule{GetCapsuleComponent()};
@@ -1610,7 +1608,13 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
 {
-	// Super::DisplayDebug(Canvas, DebugDisplay, CharacterHeight, VerticalPosition);
+	if (!DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
+	{
+		Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
+		return;
+	}
 
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -1620,7 +1624,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	auto MaxVerticalPosition{VerticalPosition};
 	auto HorizontalPosition{5.0f * Scale};
 
-	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("ALS debug mode is enabled! Press (Shift + 0) to disable it."))};
+	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("Debug mode is enabled! Press (Shift + 0) to disable it."))};
 
 	DisplayDebugHeader(Canvas, DebugModeHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 
@@ -1631,7 +1635,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"))};
 
-	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Curves")))
+	if (DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, CurvesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugCurves(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1651,7 +1655,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto StateHeaderText{FText::AsCultureInvariant(TEXT("ALS.State (Shift + 2)"))};
 
-	if (DebugDisplay.IsDisplayOn(TEXT("ALS.State")))
+	if (DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, StateHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugState(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1666,7 +1670,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Shapes (Shift + 3)"))};
 
-	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Shapes")))
+	if (DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, ShapesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugShapes(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1681,7 +1685,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Traces (Shift + 4)"))};
 
-	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Traces")))
+	if (DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, TracesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugTraces(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1696,7 +1700,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto MantlingHeaderText{FText::AsCultureInvariant(TEXT("ALS.Mantling (Shift + 5)"))};
 
-	if (DebugDisplay.IsDisplayOn(TEXT("ALS.Mantling")))
+	if (DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, MantlingHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugMantling(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1710,6 +1714,8 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
 
 	VerticalPosition = MaxVerticalPosition;
+
+	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
 }
 
 void AAlsCharacter::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,

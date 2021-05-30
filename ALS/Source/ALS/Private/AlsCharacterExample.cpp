@@ -7,32 +7,32 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("LookUpMouse", this, &ThisClass::InputLookUpMouse);
-	PlayerInputComponent->BindAxis("LookRightMouse", this, &ThisClass::InputLookRightMouse);
+	PlayerInputComponent->BindAxis(TEXT("LookUpMouse"), this, &ThisClass::InputLookUpMouse);
+	PlayerInputComponent->BindAxis(TEXT("LookRightMouse"), this, &ThisClass::InputLookRightMouse);
 
-	PlayerInputComponent->BindAxis("LookUp", this, &ThisClass::InputLookUp);
-	PlayerInputComponent->BindAxis("LookRight", this, &ThisClass::InputLookRight);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ThisClass::InputLookUp);
+	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &ThisClass::InputLookRight);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::InputMoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::InputMoveRight);
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ThisClass::InputMoveForward);
+	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ThisClass::InputMoveRight);
 
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ThisClass::InputSprintPressed);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ThisClass::InputSprintReleased);
-	PlayerInputComponent->BindAction("Sprint", IE_DoubleClick, this, &ThisClass::InputRoll);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ThisClass::InputSprintPressed);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ThisClass::InputSprintReleased);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_DoubleClick, this, &ThisClass::InputRoll);
 
-	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ThisClass::InputWalk);
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::InputCrouch);
+	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Pressed, this, &ThisClass::InputWalk);
+	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ThisClass::InputCrouch);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ThisClass::InputJumpPressed);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ThisClass::InputJumpReleased);
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ThisClass::InputJumpPressed);
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ThisClass::InputJumpReleased);
 
-	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ThisClass::InputAimPressed);
-	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ThisClass::InputAimReleased);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ThisClass::InputAimPressed);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ThisClass::InputAimReleased);
 
-	PlayerInputComponent->BindAction("RotateToVelocityDirection", IE_Pressed, this, &ThisClass::VelocityDirectionPressedAction);
-	PlayerInputComponent->BindAction("RotateToLookDirection", IE_Pressed, this, &ThisClass::LookingDirectionPressedAction);
+	PlayerInputComponent->BindAction(TEXT("RotateToVelocityDirection"), IE_Pressed, this, &ThisClass::VelocityDirectionPressedAction);
+	PlayerInputComponent->BindAction(TEXT("RotateToLookDirection"), IE_Pressed, this, &ThisClass::LookingDirectionPressedAction);
 
-	PlayerInputComponent->BindAction("Ragdoll", IE_Pressed, this, &ThisClass::RagdollPressedAction);
+	PlayerInputComponent->BindAction(TEXT("Ragdoll"), IE_Pressed, this, &ThisClass::RagdollPressedAction);
 }
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
@@ -58,13 +58,13 @@ void AAlsCharacterExample::InputLookRight(const float Value)
 void AAlsCharacterExample::InputMoveForward(const float Value)
 {
 	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw), 0.0f},
-	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue("MoveRight")));
+	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveRight"))));
 }
 
 void AAlsCharacterExample::InputMoveRight(const float Value)
 {
 	AddMovementInput(FVector{UAlsMath::AngleToDirection(GetAimingState().SmoothRotation.Yaw + 90.0f), 0.0f},
-	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue("MoveForward")));
+	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveForward"))));
 }
 
 void AAlsCharacterExample::InputSprintPressed()
