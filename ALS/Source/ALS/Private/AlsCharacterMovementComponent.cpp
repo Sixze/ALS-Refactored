@@ -7,31 +7,47 @@ void FAlsSavedMove::Clear()
 {
 	Super::Clear();
 
-	bMovementSettingsChangeRequested = false;
-}
-
-uint8 FAlsSavedMove::GetCompressedFlags() const
-{
-	auto Flags{Super::GetCompressedFlags()};
-
-	if (bMovementSettingsChangeRequested)
-	{
-		Flags |= FLAG_Custom_0;
-	}
-
-	return Flags;
+	Stance = EAlsStance::Standing;
+	RotationMode = EAlsRotationMode::LookingDirection;
+	MaxAllowedGait = EAlsGait::Walking;
 }
 
 void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, const FVector& NewAcceleration,
-                               FNetworkPredictionData_Client_Character& Data)
+                               FNetworkPredictionData_Client_Character& PredictionData)
 {
-	Super::SetMoveFor(Character, NewDeltaTime, NewAcceleration, Data);
+	Super::SetMoveFor(Character, NewDeltaTime, NewAcceleration, PredictionData);
 
-	const auto* CharacterMovement{Cast<UAlsCharacterMovementComponent>(Character->GetCharacterMovement())};
-	if (IsValid(CharacterMovement))
+	const auto* Movement{Cast<UAlsCharacterMovementComponent>(Character->GetCharacterMovement())};
+	if (IsValid(Movement))
 	{
-		bMovementSettingsChangeRequested = CharacterMovement->IsMovementSettingsChangeRequested();
-		MaxSpeed = CharacterMovement->GetCustomMaxWalkSpeed();
+		Stance = Movement->Stance;
+		RotationMode = Movement->RotationMode;
+		MaxAllowedGait = Movement->MaxAllowedGait;
+	}
+}
+
+bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDelta) const
+{
+	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
+
+	return Stance == NewMove->Stance &&
+	       RotationMode == NewMove->RotationMode &&
+	       MaxAllowedGait == NewMove->MaxAllowedGait &&
+	       Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
+}
+
+void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
+{
+	Super::PrepMoveFor(Character);
+
+	auto* Movement{Cast<UAlsCharacterMovementComponent>(Character->GetCharacterMovement())};
+	if (IsValid(Movement))
+	{
+		Movement->Stance = Stance;
+		Movement->RotationMode = RotationMode;
+		Movement->MaxAllowedGait = MaxAllowedGait;
+
+		Movement->RefreshGaitSettings();
 	}
 }
 
@@ -58,7 +74,10 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 
 UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 {
+	MaxWalkSpeed = 175.0f;
+	MaxWalkSpeedCrouched = 150.0;
 	MaxAcceleration = 1500.0f;
+
 	BrakingFrictionFactor = 0.0f;
 	CrouchedHalfHeight = 56.0f;
 	bRunPhysicsWithNoController = true;
@@ -112,29 +131,83 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	Super::PhysWalking(DeltaTime, Iterations);
 }
 
-void UAlsCharacterMovementComponent::OnMovementUpdated(const float DeltaTime, const FVector& OldLocation, const FVector& OldVelocity)
+void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementCharacterSettings* NewMovementSettings)
 {
-	Super::OnMovementUpdated(DeltaTime, OldLocation, OldVelocity);
+	MovementSettings = NewMovementSettings;
 
-	if (bMovementSettingsChangeRequested && IsValid(CharacterOwner))
+	RefreshGaitSettings();
+}
+
+void UAlsCharacterMovementComponent::RefreshGaitSettings()
+{
+	GaitSettings = IsValid(MovementSettings)
+		               ? *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(Stance)
+		               : FAlsMovementGaitSettings{};
+
+	RefreshMaxWalkSpeed();
+}
+
+void UAlsCharacterMovementComponent::SetStance(const EAlsStance NewStance)
+{
+	if (Stance != NewStance && (PawnOwner->GetLocalRole() <= ROLE_AutonomousProxy || PawnOwner->IsLocallyControlled()))
 	{
-		MaxWalkSpeed = CustomMaxWalkSpeed;
-		MaxWalkSpeedCrouched = CustomMaxWalkSpeed;
+		Stance = NewStance;
+
+		RefreshGaitSettings();
+
+		ServerSetStance(Stance);
 	}
 }
 
-void UAlsCharacterMovementComponent::UpdateFromCompressedFlags(const uint8 Flags)
+void UAlsCharacterMovementComponent::ServerSetStance_Implementation(const EAlsStance NewStance)
 {
-	Super::UpdateFromCompressedFlags(Flags);
+	Stance = NewStance;
 
-	bMovementSettingsChangeRequested = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
+	RefreshGaitSettings();
 }
 
-void UAlsCharacterMovementComponent::RefreshGait(const FAlsMovementGaitSettings* NewGaitSettings, const EAlsGait MaxAllowedGait)
+void UAlsCharacterMovementComponent::SetRotationMode(const EAlsRotationMode NewMode)
 {
-	GaitSettings = *NewGaitSettings;
+	if (RotationMode != NewMode && (PawnOwner->GetLocalRole() <= ROLE_AutonomousProxy || PawnOwner->IsLocallyControlled()))
+	{
+		RotationMode = NewMode;
 
-	SetCustomMaxWalkSpeed(GaitSettings.GetSpeedForGait(MaxAllowedGait));
+		RefreshGaitSettings();
+
+		ServerSetRotationMode(RotationMode);
+	}
+}
+
+void UAlsCharacterMovementComponent::ServerSetRotationMode_Implementation(const EAlsRotationMode NewMode)
+{
+	RotationMode = NewMode;
+
+	RefreshGaitSettings();
+}
+
+void UAlsCharacterMovementComponent::SetMaxAllowedGait(const EAlsGait NewGait)
+{
+	if (MaxAllowedGait != NewGait && (PawnOwner->GetLocalRole() <= ROLE_AutonomousProxy || PawnOwner->IsLocallyControlled()))
+	{
+		MaxAllowedGait = NewGait;
+
+		RefreshMaxWalkSpeed();
+
+		ServerSetMaxAllowedGait(NewGait);
+	}
+}
+
+void UAlsCharacterMovementComponent::ServerSetMaxAllowedGait_Implementation(const EAlsGait NewGait)
+{
+	MaxAllowedGait = NewGait;
+
+	RefreshMaxWalkSpeed();
+}
+
+void UAlsCharacterMovementComponent::RefreshMaxWalkSpeed()
+{
+	MaxWalkSpeed = GaitSettings.GetSpeedForGait(MaxAllowedGait);
+	MaxWalkSpeedCrouched = MaxWalkSpeed;
 }
 
 float UAlsCharacterMovementComponent::CalculateGaitAmount() const
@@ -156,32 +229,4 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 	}
 
 	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
-}
-
-void UAlsCharacterMovementComponent::SetCustomMaxWalkSpeed(const float NewMaxWalkSpeed)
-{
-	if (CustomMaxWalkSpeed == NewMaxWalkSpeed)
-	{
-		return;
-	}
-
-	if (PawnOwner->IsLocallyControlled())
-	{
-		CustomMaxWalkSpeed = NewMaxWalkSpeed;
-		ServerSetCustomMaxWalkSpeed(NewMaxWalkSpeed);
-
-		bMovementSettingsChangeRequested = true;
-		return;
-	}
-
-	if (!PawnOwner->HasAuthority())
-	{
-		MaxWalkSpeed = CustomMaxWalkSpeed;
-		MaxWalkSpeedCrouched = CustomMaxWalkSpeed;
-	}
-}
-
-void UAlsCharacterMovementComponent::ServerSetCustomMaxWalkSpeed_Implementation(const float NewMaxWalkSpeed)
-{
-	CustomMaxWalkSpeed = NewMaxWalkSpeed;
 }

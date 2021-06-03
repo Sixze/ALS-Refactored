@@ -169,7 +169,7 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetDesiredStance(EAlsStance NewStance);
 
-	void RefreshDesiredStance();
+	void ApplyDesiredStance();
 
 	// Stance
 
