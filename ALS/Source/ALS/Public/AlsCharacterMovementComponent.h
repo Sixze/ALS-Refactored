@@ -10,15 +10,21 @@ class ALS_API FAlsSavedMove final : public FSavedMove_Character
 private:
 	using Super = FSavedMove_Character;
 
-	bool bMovementSettingsChangeRequested{true};
+	EAlsStance Stance{EAlsStance::Standing};
+
+	EAlsRotationMode RotationMode{EAlsRotationMode::LookingDirection};
+
+	EAlsGait MaxAllowedGait{EAlsGait::Walking};
 
 protected:
 	virtual void Clear() override;
 
 	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration,
-	                        FNetworkPredictionData_Client_Character& Data) override;
+	                        FNetworkPredictionData_Client_Character& PredictionData) override;
 
-	virtual uint8 GetCompressedFlags() const override;
+	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDelta) const override;
+
+	virtual void PrepMoveFor(ACharacter* Character) override;
 };
 
 class ALS_API FAlsNetworkPredictionData final : public FNetworkPredictionData_Client_Character
@@ -38,15 +44,23 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 {
 	GENERATED_BODY()
 
+	friend FAlsSavedMove;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bMovementSettingsChangeRequested{true};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	float CustomMaxWalkSpeed;
+	UAlsMovementCharacterSettings* MovementSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementGaitSettings GaitSettings;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	EAlsStance Stance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	EAlsRotationMode RotationMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	EAlsGait MaxAllowedGait;
 
 public:
 	UAlsCharacterMovementComponent();
@@ -58,43 +72,45 @@ public:
 protected:
 	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
 
-	virtual void OnMovementUpdated(float DeltaTime, const FVector& OldLocation, const FVector& OldVelocity) override;
-
 public:
 	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
-protected:
-	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
-
 public:
-	bool IsMovementSettingsChangeRequested() const;
+	void SetMovementSettings(UAlsMovementCharacterSettings* NewMovementSettings);
 
 	const FAlsMovementGaitSettings& GetGaitSettings() const;
 
-	float GetCustomMaxWalkSpeed() const;
+private:
+	void RefreshGaitSettings();
 
-	void RefreshGait(const FAlsMovementGaitSettings* NewGaitSettings, EAlsGait MaxAllowedGait);
-
-	float CalculateGaitAmount() const;
+public:
+	void SetStance(EAlsStance NewStance);
 
 private:
-	void SetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
-
 	UFUNCTION(Server, Reliable)
-	void ServerSetCustomMaxWalkSpeed(float NewMaxWalkSpeed);
-};
+	void ServerSetStance(EAlsStance NewStance);
 
-inline bool UAlsCharacterMovementComponent::IsMovementSettingsChangeRequested() const
-{
-	return bMovementSettingsChangeRequested;
-}
+public:
+	void SetRotationMode(EAlsRotationMode NewMode);
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerSetRotationMode(EAlsRotationMode NewMode);
+
+public:
+	void SetMaxAllowedGait(EAlsGait NewGait);
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerSetMaxAllowedGait(EAlsGait NewGait);
+
+	void RefreshMaxWalkSpeed();
+
+public:
+	float CalculateGaitAmount() const;
+};
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const
 {
 	return GaitSettings;
-}
-
-inline float UAlsCharacterMovementComponent::GetCustomMaxWalkSpeed() const
-{
-	return CustomMaxWalkSpeed;
 }

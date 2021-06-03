@@ -83,6 +83,10 @@ void AAlsCharacter::BeginPlay()
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 	}
 
+	// Pass current movement settings to the movement component.
+
+	AlsCharacterMovement->SetMovementSettings(MovementSettings);
+
 	FOnTimelineFloat TimelineUpdated{};
 	TimelineUpdated.BindDynamic(this, &ThisClass::OnMantlingTimelineUpdated);
 	MantlingTimeline->AddInterpFloat(GeneralMantlingSettings.TimelineCurve, TimelineUpdated);
@@ -90,11 +94,6 @@ void AAlsCharacter::BeginPlay()
 	FOnTimelineEvent TimelineFinished{};
 	TimelineFinished.BindDynamic(this, &ThisClass::OnMantlingTimelineEnded);
 	MantlingTimeline->SetTimelineFinishedFunc(TimelineFinished);
-
-	// Update states to use the initial desired values.
-
-	Stance = DesiredStance;
-	Gait = DesiredGait;
 
 	// Set default rotation values.
 
@@ -107,7 +106,17 @@ void AAlsCharacter::BeginPlay()
 
 	AimingState.SmoothRotation = AimingRotation;
 
-	RefreshDesiredStance();
+	// Update states to use the initial desired values.
+
+	RefreshRotationMode();
+
+	AlsCharacterMovement->SetRotationMode(RotationMode);
+
+	ApplyDesiredStance();
+
+	AlsCharacterMovement->SetStance(Stance);
+
+	RefreshGait();
 
 	OnOverlayModeChanged(OverlayMode);
 }
@@ -116,7 +125,7 @@ void AAlsCharacter::Restart()
 {
 	Super::Restart();
 
-	RefreshDesiredStance();
+	ApplyDesiredStance();
 }
 
 void AAlsCharacter::Tick(const float DeltaTime)
@@ -214,7 +223,7 @@ void AAlsCharacter::OnJumped_Implementation()
 		OnJumpedNetworked();
 	}
 
-	if (HasAuthority())
+	if (GetLocalRole() >= ROLE_Authority)
 	{
 		MulticastOnJumpedNetworked();
 	}
@@ -229,7 +238,7 @@ void AAlsCharacter::Landed(const FHitResult& Hit)
 		OnLandedNetworked();
 	}
 
-	if (HasAuthority())
+	if (GetLocalRole() >= ROLE_Authority)
 	{
 		MulticastOnLandedNetworked();
 	}
@@ -248,7 +257,7 @@ void AAlsCharacter::SetDesiredStance(const EAlsStance NewStance)
 			ServerSetDesiredStance(NewStance);
 		}
 
-		RefreshDesiredStance();
+		ApplyDesiredStance();
 	}
 }
 
@@ -257,7 +266,7 @@ void AAlsCharacter::ServerSetDesiredStance_Implementation(const EAlsStance NewSt
 	SetDesiredStance(NewStance);
 }
 
-void AAlsCharacter::RefreshDesiredStance()
+void AAlsCharacter::ApplyDesiredStance()
 {
 	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
 	    LocomotionAction == EAlsLocomotionAction::None)
@@ -277,15 +286,16 @@ void AAlsCharacter::RefreshDesiredStance()
 
 void AAlsCharacter::SetStance(const EAlsStance NewStance)
 {
-	if (Stance == NewStance)
+	if (Stance != NewStance)
 	{
-		return;
+		const auto PreviousStance{Stance};
+
+		Stance = NewStance;
+
+		AlsCharacterMovement->SetStance(Stance);
+
+		OnStanceChanged(PreviousStance);
 	}
-
-	const auto PreviousStance{Stance};
-	Stance = NewStance;
-
-	OnStanceChanged(PreviousStance);
 }
 
 void AAlsCharacter::OnStanceChanged_Implementation(EAlsStance PreviousStance) {}
@@ -315,6 +325,7 @@ void AAlsCharacter::SetGait(const EAlsGait NewGait)
 	if (Gait != NewGait)
 	{
 		const auto PreviousGait{Gait};
+
 		Gait = NewGait;
 
 		OnGaitChanged(PreviousGait);
@@ -327,14 +338,11 @@ void AAlsCharacter::RefreshGait()
 {
 	const auto MaxAllowedGait{CalculateMaxAllowedGait()};
 
+	// Update the character max walk speed to the configured speeds based on the currently max allowed gait.
+
+	AlsCharacterMovement->SetMaxAllowedGait(MaxAllowedGait);
+
 	SetGait(CalculateActualGait(MaxAllowedGait));
-
-	// Pass current gait settings through to the movement component and update the character
-	// max walk speed to the configured speeds based on the currently max allowed gait.
-
-	AlsCharacterMovement->RefreshGait(
-		MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(Stance),
-		MaxAllowedGait);
 }
 
 EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
@@ -347,9 +355,7 @@ EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 	{
 		if (DesiredGait == EAlsGait::Sprinting)
 		{
-			return CanSprint()
-				       ? EAlsGait::Sprinting
-				       : EAlsGait::Running;
+			return CanSprint() ? EAlsGait::Sprinting : EAlsGait::Running;
 		}
 
 		return DesiredGait;
@@ -443,6 +449,8 @@ void AAlsCharacter::SetRotationMode(const EAlsRotationMode NewMode)
 
 		RotationMode = NewMode;
 
+		AlsCharacterMovement->SetRotationMode(RotationMode);
+
 		OnRotationModeChanged(PreviousMode);
 	}
 }
@@ -513,22 +521,21 @@ void AAlsCharacter::OnOverlayModeChanged_Implementation(EAlsOverlayMode Previous
 
 void AAlsCharacter::SetLocomotionMode(const EAlsLocomotionMode NewMode)
 {
-	if (LocomotionMode == NewMode)
+	if (LocomotionMode != NewMode)
 	{
-		return;
+		const auto PreviousMode{LocomotionMode};
+
+		LocomotionMode = NewMode;
+
+		NotifyLocomotionModeChanged(PreviousMode);
 	}
-
-	const auto PreviousMode{LocomotionMode};
-	LocomotionMode = NewMode;
-
-	NotifyLocomotionModeChanged(PreviousMode);
 }
 
 void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode PreviousMode)
 {
 	if (LocomotionMode == EAlsLocomotionMode::Grounded)
 	{
-		RefreshDesiredStance();
+		ApplyDesiredStance();
 	}
 	else if (LocomotionMode == EAlsLocomotionMode::Ragdolling && PreviousMode == EAlsLocomotionMode::Mantling)
 	{
@@ -564,15 +571,14 @@ void AAlsCharacter::OnLocomotionModeChanged_Implementation(EAlsLocomotionMode Pr
 
 void AAlsCharacter::SetLocomotionAction(const EAlsLocomotionAction NewAction)
 {
-	if (LocomotionAction == NewAction)
+	if (LocomotionAction != NewAction)
 	{
-		return;
+		const auto PreviousAction{LocomotionAction};
+
+		LocomotionAction = NewAction;
+
+		NotifyLocomotionActionChanged(PreviousAction);
 	}
-
-	const auto PreviousAction{LocomotionAction};
-	LocomotionAction = NewAction;
-
-	NotifyLocomotionActionChanged(PreviousAction);
 }
 
 void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction PreviousAction)
@@ -584,7 +590,7 @@ void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction Pre
 		Crouch();
 	}
 
-	RefreshDesiredStance();
+	ApplyDesiredStance();
 
 	OnLocomotionActionChanged(PreviousAction);
 }
@@ -625,7 +631,7 @@ void AAlsCharacter::RefreshSmoothLocationAndRotation()
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 {
-	if (GetLocalRole() > ROLE_SimulatedProxy)
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		SetInputDirection(AlsCharacterMovement->GetCurrentAcceleration() / AlsCharacterMovement->GetMaxAcceleration());
 	}
@@ -680,7 +686,7 @@ void AAlsCharacter::SetAimingRotation(const FRotator& NewAimingRotation)
 
 void AAlsCharacter::RefreshAiming(const float DeltaTime)
 {
-	if (GetLocalRole() > ROLE_SimulatedProxy)
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		SetAimingRotation(GetControlRotation().GetNormalized());
 	}
@@ -1308,7 +1314,7 @@ void AAlsCharacter::StartRagdolling()
 		return;
 	}
 
-	if (HasAuthority())
+	if (GetLocalRole() >= ROLE_Authority)
 	{
 		MulticastStartRagdolling();
 	}
@@ -1479,7 +1485,7 @@ bool AAlsCharacter::TryStopRagdolling()
 		return false;
 	}
 
-	if (HasAuthority())
+	if (GetLocalRole() >= ROLE_Authority)
 	{
 		MulticastStopRagdolling();
 	}
