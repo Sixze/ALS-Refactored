@@ -379,7 +379,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	GetWorld()->LineTraceSingleByChannel(Hit,
 	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
-	                                     ECC_Visibility, {TEXT("AAlsAnimationInstance::RefreshFootOffset"), true, AlsCharacter});
+	                                     ECC_Visibility, {__FUNCTION__, true, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
@@ -935,7 +935,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	                                    GroundPredictionObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
 	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
-	                                    {TEXT("AAlsAnimationInstance::CalculateGroundPredictionAmount"), false, AlsCharacter});
+	                                    {__FUNCTION__, false, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
