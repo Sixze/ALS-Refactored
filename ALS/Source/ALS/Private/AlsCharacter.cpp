@@ -464,7 +464,7 @@ void AAlsCharacter::RefreshRotationMode()
 	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
 	    (!bSprinting || !bSprintHasPriorityOverAiming))
 	{
-		SetRotationMode(bBlockAimingWhenInAir && LocomotionMode == EAlsLocomotionMode::InAir
+		SetRotationMode(!bAllowAimingWhenInAir && LocomotionMode == EAlsLocomotionMode::InAir
 			                ? EAlsRotationMode::LookingDirection
 			                : EAlsRotationMode::Aiming);
 		return;
@@ -549,7 +549,16 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 		{
 			// If the character enters the air, set the in air rotation and un crouch if crouched.
 
-			InAirState.TargetYawAngle = LocomotionState.SmoothRotation.Yaw;
+			if (InAirRotationMode == EAlsInAirRotationMode::KeepLookingDirectionRelativeRotation)
+			{
+				InAirState.TargetYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
+				InAirState.bLookingDirectionRelativeTargetYawAngle = true;
+			}
+			else
+			{
+				InAirState.TargetYawAngle = LocomotionState.SmoothRotation.Yaw;
+				InAirState.bLookingDirectionRelativeTargetYawAngle = false;
+			}
 
 			if (Stance == EAlsStance::Crouching)
 			{
@@ -824,12 +833,17 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	{
 		case EAlsRotationMode::VelocityDirection:
 		case EAlsRotationMode::LookingDirection:
-			RefreshActorRotation(InAirState.TargetYawAngle, DeltaTime, 5.0f);
+			RefreshActorRotation(InAirState.bLookingDirectionRelativeTargetYawAngle
+				                     ? AimingState.SmoothRotation.Yaw - InAirState.TargetYawAngle
+				                     : InAirState.TargetYawAngle, DeltaTime, 5.0f);
 			break;
 
 		case EAlsRotationMode::Aiming:
 			RefreshActorRotation(AimingState.SmoothRotation.Yaw, DeltaTime, 15.0f);
-			InAirState.TargetYawAngle = LocomotionState.SmoothRotation.Yaw;
+
+			InAirState.TargetYawAngle = InAirState.bLookingDirectionRelativeTargetYawAngle
+				                            ? FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)
+				                            : LocomotionState.SmoothRotation.Yaw;
 			break;
 	}
 }
@@ -877,12 +891,21 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	// Set the new in air target actor rotation to the velocity rotation if speed is greater than 100.
-
-	InAirState.TargetYawAngle = LocomotionState.Speed > 100.0f &&
-	                            (RotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityOnJump)
-		                            ? LocomotionState.VelocityYawAngle
-		                            : LocomotionState.SmoothRotation.Yaw;
+	if (InAirRotationMode == EAlsInAirRotationMode::RotateToVelocityOnJump && LocomotionState.Speed > 100.0f)
+	{
+		InAirState.TargetYawAngle = LocomotionState.VelocityYawAngle;
+		InAirState.bLookingDirectionRelativeTargetYawAngle = false;
+	}
+	else if (InAirRotationMode == EAlsInAirRotationMode::KeepLookingDirectionRelativeRotation)
+	{
+		InAirState.TargetYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
+		InAirState.bLookingDirectionRelativeTargetYawAngle = true;
+	}
+	else
+	{
+		InAirState.TargetYawAngle = LocomotionState.SmoothRotation.Yaw;
+		InAirState.bLookingDirectionRelativeTargetYawAngle = false;
+	}
 
 	Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
 }
@@ -956,6 +979,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace forward to find a object the character cannot walk on.
 
+	static const FName ForwardTraceTagName{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
 	const FVector ForwardTraceDirection{
 		UAlsMath::AngleToDirection(
 			LocomotionState.bHasInput
@@ -981,7 +1006,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
-	                                    {TEXT("AAlsBaseCharacter::TryStartMantling (Forward Trace)"), false, this});
+	                                    {ForwardTraceTagName, false, this});
 
 	auto* TargetPrimitive{ForwardTraceHit.GetComponent()};
 
@@ -1005,6 +1030,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace downward from the first trace's impact point and determine if the hit location is walkable.
 
+	static const FName DownwardTraceTagName{FString::Format(TEXT("{0} (Downward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
 	const auto TargetLocationOffset{FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * TraceSettings.TargetLocationOffset};
 
 	const FVector DownwardTraceStart{
@@ -1020,7 +1047,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
-	                                    {TEXT("AAlsBaseCharacter::TryStartMantling (Downward Trace)"), false, this});
+	                                    {DownwardTraceTagName, false, this});
 
 	if (!AlsCharacterMovement->IsWalkable(DownwardTraceHit))
 	{
@@ -1043,6 +1070,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
+	static const FName FreeSpaceTraceTagName{FString::Format(TEXT("{0} (Free Space Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
 	const FVector TargetLocation{
 		DownwardTraceHit.ImpactPoint.X, DownwardTraceHit.ImpactPoint.Y,
 		DownwardTraceHit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST
@@ -1050,7 +1079,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
 	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                           {TEXT("AAlsBaseCharacter::TryStartMantling (Free Space Overlap)"), false, this}))
+	                                           {FreeSpaceTraceTagName, false, this}))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -1436,7 +1465,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 		                                        RagdollTargetLocation.Y,
 		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
 	                                        }, MantlingAndRagdollObjectQueryParameters,
-	                                        {TEXT("AAlsBaseCharacter::RefreshRagdollingActorLocation"), false, this});
+	                                        {__FUNCTION__, false, this});
 
 	auto NewActorLocation{RagdollTargetLocation};
 

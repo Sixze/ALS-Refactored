@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "Settings/AlsInAirRotationMode.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Settings/AlsMovementCharacterSettings.h"
 #include "Settings/AlsRagdollingSettings.h"
@@ -46,10 +47,10 @@ private:
 	bool bRotateToVelocityWhenSprinting;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bBlockAimingWhenInAir;
+	EAlsInAirRotationMode InAirRotationMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bRotateToVelocityOnJump{true};
+	bool bAllowAimingWhenInAir{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
 		Meta = (AllowPrivateAccess))

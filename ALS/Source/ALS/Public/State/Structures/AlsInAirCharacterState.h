@@ -9,4 +9,7 @@ struct ALS_API FAlsInAirCharacterState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float TargetYawAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bLookingDirectionRelativeTargetYawAngle;
 };
