@@ -379,24 +379,15 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	GetWorld()->LineTraceSingleByChannel(Hit,
 	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
-	                                     ECC_Visibility, {__FUNCTION__, true, AlsCharacter});
+	                                     UEngineTypes::ConvertToCollisionChannel(FeetSettings.IkTraceChannel),
+	                                     {__FUNCTION__, true, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
 	{
-		if (AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
-		{
-			static const auto HitColor{FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true)};
-
-			DrawDebugLine(GetWorld(), Hit.TraceStart, Hit.ImpactPoint, HitColor, false, 0.0f, 0, UAlsUtility::DebugDrawThickness);
-			DrawDebugPoint(GetWorld(), Hit.ImpactPoint, UAlsUtility::DebugDrawImpactPointSize, HitColor);
-		}
-		else
-		{
-			static const auto MissColor{FLinearColor{0.0f, 0.25f, 1.0f}.ToFColor(true)};
-
-			DrawDebugLine(GetWorld(), Hit.TraceStart, Hit.TraceEnd, MissColor, false, 0.0f, 0, UAlsUtility::DebugDrawThickness);
-		}
+		UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd,
+		                                      AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
+		                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
 	}
 #endif
 

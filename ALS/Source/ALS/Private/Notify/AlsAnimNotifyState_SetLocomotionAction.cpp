@@ -15,23 +15,23 @@ FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() 
 	return FString::Format(TEXT("Als Set Locomotion Action: {0}"), {GetEnumValueString(Action)});
 }
 
-void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation,
+void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation,
                                                           const float TotalDuration)
 {
-	Super::NotifyBegin(Component, Animation, TotalDuration);
+	Super::NotifyBegin(MeshComponent, Animation, TotalDuration);
 
-	auto* Character{Cast<AAlsCharacter>(Component->GetOwner())};
+	auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
 	if (IsValid(Character))
 	{
 		Character->SetLocomotionAction(Action);
 	}
 }
 
-void UAlsAnimNotifyState_SetLocomotionAction::NotifyEnd(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation)
+void UAlsAnimNotifyState_SetLocomotionAction::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
 {
-	Super::NotifyEnd(Component, Animation);
+	Super::NotifyEnd(MeshComponent, Animation);
 
-	auto* Character{Cast<AAlsCharacter>(Component->GetOwner())};
+	auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
 	if (IsValid(Character) && Character->GetLocomotionAction() == Action)
 	{
 		Character->SetLocomotionAction(EAlsLocomotionAction::None);

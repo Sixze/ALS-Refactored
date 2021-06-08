@@ -13,10 +13,10 @@ FString UAlsAnimNotifyState_EarlyBlendOut::GetNotifyName_Implementation() const
 	return TEXT("Als Early Blend Out");
 }
 
-void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Component, UAnimSequenceBase* Animation,
+void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation,
                                                    const float DeltaTime)
 {
-	Super::NotifyTick(Component, Animation, DeltaTime);
+	Super::NotifyTick(MeshComponent, Animation, DeltaTime);
 
 	const auto* Montage{Cast<UAnimMontage>(Animation)};
 	if (!IsValid(Montage))
@@ -24,13 +24,13 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Compo
 		return;
 	}
 
-	auto* AnimationInstance{(Component->GetAnimInstance())};
+	auto* AnimationInstance{(MeshComponent->GetAnimInstance())};
 	if (!IsValid(AnimationInstance))
 	{
 		return;
 	}
 
-	const auto* Character{Cast<AAlsCharacter>(Component->GetOwner())};
+	const auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
 	if (!IsValid(Character))
 	{
 		return;

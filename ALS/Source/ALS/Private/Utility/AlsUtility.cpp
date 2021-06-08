@@ -14,6 +14,27 @@ bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayNa
 	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
 }
 
+void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FVector& Start, const FVector& End, const bool bHit,
+                                           const FHitResult& Hit, const FLinearColor& TraceColor, const FLinearColor& HitColor,
+                                           const float Duration, const float Thickness, const uint8 DepthPriority)
+{
+#if ENABLE_DRAW_DEBUG
+	auto* World{WorldContext->GetWorld()};
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	DrawDebugLine(World, Start, End, TraceColor.ToFColor(true), Duration < 0.0f, Duration, DepthPriority, Thickness);
+
+	if (bHit && Hit.bBlockingHit)
+	{
+		DrawDebugPoint(World, Hit.ImpactPoint, DebugDrawImpactPointSize,
+		               HitColor.ToFColor(true), Duration < 0.0f, Duration, DepthPriority);
+	}
+#endif
+}
+
 void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
                                        const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
