@@ -1070,7 +1070,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
-	static const FName FreeSpaceTraceTagName{FString::Format(TEXT("{0} (Free Space Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName FreeSpaceTraceTagName{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	const FVector TargetLocation{
 		DownwardTraceHit.ImpactPoint.X, DownwardTraceHit.ImpactPoint.Y,
@@ -1643,14 +1643,6 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
 {
-	if (!DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()) &&
-	    !DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()) &&
-	    !DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
-	{
-		Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
-		return;
-	}
-
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
 	const auto RowOffset{12.0f * Scale};
@@ -1659,12 +1651,22 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	auto MaxVerticalPosition{VerticalPosition};
 	auto HorizontalPosition{5.0f * Scale};
 
-	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("Debug mode is enabled! Press (Shift + 0) to disable it."))};
+	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("Debug mode is enabled! Press (Shift + 0) to disable."))};
 
 	DisplayDebugHeader(Canvas, DebugModeHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 
 	VerticalPosition += RowOffset;
 	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+
+	if (!DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
+	{
+		VerticalPosition = MaxVerticalPosition;
+
+		Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
+		return;
+	}
 
 	const auto InitialVerticalPosition{VerticalPosition};
 
@@ -1675,7 +1677,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 		DisplayDebugHeader(Canvas, CurvesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugCurves(Canvas, Scale, HorizontalPosition, VerticalPosition);
 
-		MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
+		MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition + RowOffset);
 		VerticalPosition = InitialVerticalPosition;
 		HorizontalPosition += ColumnOffset;
 	}
@@ -2118,6 +2120,15 @@ void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const
 	Text.SetColor({0.75f, 0.0f, 1.0f});
 
 	Text.Text = GroundPredictionTraceText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto FootstepEffectsTraceText{FText::AsCultureInvariant(TEXT("Footstep Effects"))};
+
+	Text.SetColor(FLinearColor::Red);
+
+	Text.Text = FootstepEffectsTraceText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	VerticalPosition += RowOffset;

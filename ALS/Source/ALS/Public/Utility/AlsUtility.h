@@ -61,6 +61,12 @@ public:
 	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, const FName& DisplayName);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
+		DevelopmentOnly, AutoCreateRefTerm = "Start, End, Hit, TraceColor, HitColor"))
+	static void DrawDebugLineTraceSingle(const UObject* WorldContext, const FVector& Start, const FVector& End, bool bHit,
+	                                     const FHitResult& Hit, const FLinearColor& TraceColor, const FLinearColor& HitColor,
+	                                     float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
 		DevelopmentOnly, AutoCreateRefTerm = "Start, End, Color"))
 	static void DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
 	                                 const FLinearColor& Color, float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);

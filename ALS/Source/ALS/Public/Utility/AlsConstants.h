@@ -34,6 +34,20 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	static const FName& FootLeftBone()
+	{
+		static const FName Name{TEXT("foot_l")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	static const FName& FootRightBone()
+	{
+		static const FName Name{TEXT("foot_r")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static const FName& GunLeftVirtualBone()
 	{
 		static const FName Name{TEXT("VB ik_hand_gun_l")};

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Engine/EngineTypes.h"
+
 #include "AlsFeetSettings.generated.h"
 
 class UCurveFloat;
@@ -17,6 +19,9 @@ struct ALS_API FAlsFeetSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float IkVerticalCorrection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<ETraceTypeQuery> IkTraceChannel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float IkTraceDistanceUpward{50.0f};
