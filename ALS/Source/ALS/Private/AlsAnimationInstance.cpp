@@ -931,7 +931,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
 	{
-		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd,
+		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 		                                         Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight(),
 		                                         AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
 		                                         Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
