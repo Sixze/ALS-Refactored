@@ -13,6 +13,9 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	static constexpr float TwoPi{6.2831853071795864769252867665590057683943387987502116419498891846f};
+
+public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float Clamp01(float Value);
 

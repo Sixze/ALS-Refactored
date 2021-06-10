@@ -37,7 +37,7 @@ struct ALS_API FAlsMantlingTraceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	FVector2D LedgeHeight{50.0f, 200.0f};
+	FVector2D LedgeHeight{50.0f, 225.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float ReachDistance{75.0f};
