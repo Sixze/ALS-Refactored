@@ -55,9 +55,11 @@ private:
 
 	void InputAimReleased();
 
-	void VelocityDirectionPressedAction();
+	void VelocityDirectionPressed();
 
-	void LookingDirectionPressedAction();
+	void LookingDirectionPressed();
 
-	void RagdollPressedAction();
+	void RagdollPressed();
+
+	void ViewModePressed();
 };

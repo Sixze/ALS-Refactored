@@ -34,6 +34,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Stance = AlsCharacter->GetStance();
 	Gait = AlsCharacter->GetGait();
 	RotationMode = AlsCharacter->GetRotationMode();
+	ViewMode = AlsCharacter->GetViewMode();
 	OverlayMode = AlsCharacter->GetOverlayMode();
 	LocomotionMode = AlsCharacter->GetLocomotionMode();
 	LocomotionAction = AlsCharacter->GetLocomotionAction();
@@ -696,9 +697,9 @@ void UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded()
 
 void UAlsAnimationInstance::RefreshRotateInPlace()
 {
-	// Rotate in place is allowed only if the character is standing still and aiming.
+	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (LocomotionState.bMoving || !RotationMode.IsAiming())
+	if (LocomotionState.bMoving || !RotationMode.IsAiming() && ViewMode != EAlsViewMode::FirstPerson)
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -752,9 +753,10 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 {
-	// Turn in place is allowed only if transitions are allowed, the character standing still and looking at the camera.
+	// Turn in place is allowed only if transitions are allowed, the character
+	// standing still and looking at the camera and not in first-person mode.
 
-	if (LocomotionState.bMoving || !RotationMode.IsLookingDirection())
+	if (LocomotionState.bMoving || !RotationMode.IsLookingDirection() || ViewMode == EAlsViewMode::FirstPerson)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;

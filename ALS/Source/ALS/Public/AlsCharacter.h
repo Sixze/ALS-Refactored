@@ -12,6 +12,7 @@
 #include "State/Enumerations/AlsOverlayMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
+#include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsAimingCharacterState.h"
 #include "State/Structures/AlsInAirCharacterState.h"
 #include "State/Structures/AlsLocomotionCharacterState.h"
@@ -67,6 +68,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
 		Meta = (AllowPrivateAccess))
 	EAlsRotationMode DesiredRotationMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
+		Meta = (AllowPrivateAccess))
+	EAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
@@ -253,6 +258,18 @@ protected:
 
 	void RefreshRotationMode();
 
+	// View Mode
+
+public:
+	EAlsViewMode GetViewMode() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	void SetViewMode(EAlsViewMode NewMode);
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerSetViewMode(EAlsViewMode NewMode);
+
 	// Overlay Mode
 
 public:
@@ -380,7 +397,7 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
 
-	void StartMantling(const FAlsMantlingParameters& Parameters);
+	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -539,6 +556,11 @@ inline EAlsRotationMode AAlsCharacter::GetDesiredRotationMode() const
 inline EAlsRotationMode AAlsCharacter::GetRotationMode() const
 {
 	return RotationMode;
+}
+
+inline EAlsViewMode AAlsCharacter::GetViewMode() const
+{
+	return ViewMode;
 }
 
 inline EAlsOverlayMode AAlsCharacter::GetOverlayMode() const
