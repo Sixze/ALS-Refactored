@@ -23,6 +23,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "ALSCamera",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "ALSEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
