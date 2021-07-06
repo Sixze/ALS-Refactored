@@ -63,6 +63,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bDesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
@@ -397,7 +398,8 @@ bool AAlsCharacter::CanSprint() const
 
 	return LocomotionState.bHasInput &&
 	       (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming) &&
-	       (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting ||
+	       (ViewMode != EAlsViewMode::FirstPerson &&
+	        (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting) ||
 	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f);
 }
 
@@ -459,6 +461,30 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(EAlsRotationMode Previo
 
 void AAlsCharacter::RefreshRotationMode()
 {
+	if (ViewMode == EAlsViewMode::FirstPerson)
+	{
+		const auto bSprinting{Gait == EAlsGait::Sprinting};
+
+		if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
+		    (!bSprinting || !bSprintHasPriorityOverAiming))
+		{
+			SetRotationMode(!bAllowAimingWhenInAir && LocomotionMode == EAlsLocomotionMode::InAir
+				                ? EAlsRotationMode::LookingDirection
+				                : EAlsRotationMode::Aiming);
+			return;
+		}
+
+		if (bSprinting && DesiredRotationMode == EAlsRotationMode::Aiming ||
+		    DesiredRotationMode == EAlsRotationMode::VelocityDirection)
+		{
+			SetRotationMode(EAlsRotationMode::LookingDirection);
+			return;
+		}
+
+		SetRotationMode(DesiredRotationMode);
+		return;
+	}
+
 	const auto bSprinting{Gait == EAlsGait::Sprinting};
 
 	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
@@ -486,6 +512,26 @@ void AAlsCharacter::RefreshRotationMode()
 	}
 
 	SetRotationMode(DesiredRotationMode);
+}
+
+void AAlsCharacter::SetViewMode(const EAlsViewMode NewMode)
+{
+	if (ViewMode != NewMode)
+	{
+		ViewMode = NewMode;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetViewMode(NewMode);
+		}
+	}
+}
+
+void AAlsCharacter::ServerSetViewMode_Implementation(const EAlsViewMode NewMode)
+{
+	SetViewMode(NewMode);
 }
 
 void AAlsCharacter::SetOverlayMode(const EAlsOverlayMode NewMode)
@@ -768,7 +814,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 	// Not moving.
 
-	if (RotationMode == EAlsRotationMode::Aiming)
+	if (RotationMode == EAlsRotationMode::Aiming && ViewMode != EAlsViewMode::FirstPerson || ViewMode == EAlsViewMode::FirstPerson)
 	{
 		if (LocomotionState.bHasInput)
 		{
@@ -960,6 +1006,11 @@ bool AAlsCharacter::TryStartMantlingInAir()
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
+	if (LocomotionMode == EAlsLocomotionMode::Mantling)
+	{
+		return false;
+	}
+
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, UAlsUtility::MantlingDisplayName())};
 #endif
@@ -1133,8 +1184,15 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const FAlsMantlingParameters Parameters{TargetPrimitive, TargetLocation, TargetRotation, MantlingHeight, MantlingType};
 
-	StartMantling(Parameters);
-	ServerStartMantling(Parameters);
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		MulticastStartMantling(Parameters);
+	}
+	else
+	{
+		StartMantlingImplementation(Parameters);
+		ServerStartMantling(Parameters);
+	}
 
 	return true;
 }
@@ -1148,22 +1206,21 @@ void AAlsCharacter::ServerStartMantling_Implementation(const FAlsMantlingParamet
 
 void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
 {
-	if (!IsLocallyControlled())
-	{
-		StartMantling(Parameters);
-	}
+	StartMantlingImplementation(Parameters);
 }
 
-void AAlsCharacter::StartMantling(const FAlsMantlingParameters& Parameters)
+void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters)
 {
-	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	if (LocomotionMode == EAlsLocomotionMode::Mantling)
 	{
-		// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
-
-		MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
-
-		AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+		return;
 	}
+
+	// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
+
+	MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
+
+	AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
 	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 
@@ -1365,6 +1422,11 @@ void AAlsCharacter::MulticastStartRagdolling_Implementation()
 
 void AAlsCharacter::StartRagdollingImplementation()
 {
+	if (GetLocomotionMode() == EAlsLocomotionMode::Ragdolling)
+	{
+		return;
+	}
+
 	// When networked, disable replicate movement reset ragdolling target location and pull force variables
 	// and if the host is a dedicated server, change animation tick option to avoid z-location bug.
 
@@ -1540,6 +1602,11 @@ void AAlsCharacter::MulticastStopRagdolling_Implementation()
 
 void AAlsCharacter::StopRagdollingImplementation()
 {
+	if (GetLocomotionMode() != EAlsLocomotionMode::Ragdolling)
+	{
+		return;
+	}
+
 	// Re-enable replicate movement and if the host is a dedicated server set animation tick option back to default.
 
 	SetReplicateMovement(true);
@@ -1600,9 +1667,21 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 {
 	auto* Montage{SelectRollMontage()};
 
-	StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
+	if (!IsValid(Montage))
+	{
+		return;
+	}
 
-	ServerStartRolling(Montage, PlayRate, TargetYawAngle);
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
+	}
+	else
+	{
+		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
+
+		ServerStartRolling(Montage, PlayRate, TargetYawAngle);
+	}
 }
 
 UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
@@ -1619,10 +1698,7 @@ void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, con
 
 void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
-	if (!IsLocallyControlled())
-	{
-		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
-	}
+	StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 }
 
 void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
@@ -1638,7 +1714,10 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 		RefreshSmoothLocationAndRotation();
 	}
 
-	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+	if (IsValid(Montage) && !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage))
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+	}
 }
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
@@ -1904,6 +1983,18 @@ void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const 
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(RotationMode), false));
+	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
+	static const auto ViewModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewMode), false))
+	};
+
+	Text.Text = ViewModeText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(ViewMode), false));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 	VerticalPosition += RowOffset;

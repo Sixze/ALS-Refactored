@@ -29,10 +29,12 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ThisClass::InputAimPressed);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ThisClass::InputAimReleased);
 
-	PlayerInputComponent->BindAction(TEXT("RotateToVelocityDirection"), IE_Pressed, this, &ThisClass::VelocityDirectionPressedAction);
-	PlayerInputComponent->BindAction(TEXT("RotateToLookDirection"), IE_Pressed, this, &ThisClass::LookingDirectionPressedAction);
+	PlayerInputComponent->BindAction(TEXT("RotateToVelocityDirection"), IE_Pressed, this, &ThisClass::VelocityDirectionPressed);
+	PlayerInputComponent->BindAction(TEXT("RotateToLookDirection"), IE_Pressed, this, &ThisClass::LookingDirectionPressed);
 
-	PlayerInputComponent->BindAction(TEXT("Ragdoll"), IE_Pressed, this, &ThisClass::RagdollPressedAction);
+	PlayerInputComponent->BindAction(TEXT("Ragdoll"), IE_Pressed, this, &ThisClass::RagdollPressed);
+
+	PlayerInputComponent->BindAction(TEXT("ViewMode"), IE_Pressed, this, &ThisClass::ViewModePressed);
 }
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
@@ -148,17 +150,24 @@ void AAlsCharacterExample::InputAimReleased()
 	SetDesiredAiming(false);
 }
 
-void AAlsCharacterExample::VelocityDirectionPressedAction()
+void AAlsCharacterExample::VelocityDirectionPressed()
 {
 	SetDesiredRotationMode(EAlsRotationMode::VelocityDirection);
 }
 
-void AAlsCharacterExample::LookingDirectionPressedAction()
+void AAlsCharacterExample::LookingDirectionPressed()
 {
 	SetDesiredRotationMode(EAlsRotationMode::LookingDirection);
 }
 
-void AAlsCharacterExample::RagdollPressedAction()
+void AAlsCharacterExample::ViewModePressed()
+{
+	SetViewMode(GetViewMode() == EAlsViewMode::FirstPerson
+		            ? EAlsViewMode::ThirdPerson
+		            : EAlsViewMode::FirstPerson);
+}
+
+void AAlsCharacterExample::RagdollPressed()
 {
 	if (!TryStopRagdolling())
 	{

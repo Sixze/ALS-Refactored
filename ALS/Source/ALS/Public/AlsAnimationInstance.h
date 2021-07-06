@@ -16,6 +16,7 @@
 #include "State/Enumerations/AlsOverlayMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
+#include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsAimingAnimationState.h"
 #include "State/Structures/AlsFeetState.h"
 #include "State/Structures/AlsInAirAnimationState.h"
@@ -76,6 +77,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRotationMode RotationMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	EAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsOverlayMode OverlayMode;
