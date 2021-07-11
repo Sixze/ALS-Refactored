@@ -23,6 +23,12 @@ public:
 	static float LerpClamped(float A, float B, float Alpha);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
+	static float Damp(const float Smoothing, const float DeltaTime);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
+	static float ExponentialDecayDamp(const float Lambda, const float DeltaTime);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float CurrentAngle, float TargetAngle, float DeltaTime, float InterpolationSpeed);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
@@ -58,6 +64,20 @@ inline float UAlsMath::Clamp01(const float Value)
 inline float UAlsMath::LerpClamped(const float A, const float B, const float Alpha)
 {
 	return A + Clamp01(Alpha) * (B - A);
+}
+
+inline float UAlsMath::Damp(const float Smoothing, const float DeltaTime)
+{
+	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+
+	return 1 - FMath::Pow(Smoothing, DeltaTime);
+}
+
+inline float UAlsMath::ExponentialDecayDamp(const float Lambda, const float DeltaTime)
+{
+	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+
+	return 1 - FMath::Exp(-Lambda * DeltaTime);
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)

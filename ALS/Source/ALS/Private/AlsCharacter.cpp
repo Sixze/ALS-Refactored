@@ -30,6 +30,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -90.0f});
 	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
+	GetMesh()->SetAnimInstanceClass(UAlsAnimationInstance::StaticClass());
 
 	// Required for the flail animation to work correctly when ragdolling.
 
@@ -743,7 +744,7 @@ void AAlsCharacter::RefreshAiming(const float DeltaTime)
 {
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
-		SetAimingRotation(GetControlRotation().GetNormalized());
+		SetAimingRotation(GetViewRotation().GetNormalized());
 	}
 
 	// Interpolate aiming rotation to current control rotation for smooth character
