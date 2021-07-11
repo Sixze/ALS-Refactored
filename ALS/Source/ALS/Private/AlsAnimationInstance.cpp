@@ -24,7 +24,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!IsValid(AlsCharacter) || DeltaTime <= SMALL_NUMBER)
+	if (DeltaTime <= SMALL_NUMBER || !IsValid(AlsCharacter))
 	{
 		return;
 	}

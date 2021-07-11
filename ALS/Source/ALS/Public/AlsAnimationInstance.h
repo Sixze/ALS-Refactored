@@ -79,7 +79,7 @@ private:
 	FAlsRotationMode RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	EAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
+	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsOverlayMode OverlayMode;

@@ -28,6 +28,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "ALSExample",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "ALSEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

@@ -27,6 +27,13 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	static const FName& HeadBone()
+	{
+		static const FName Name{TEXT("head")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
 	static const FName& Spine03Bone()
 	{
 		static const FName Name{TEXT("spine_03")};
