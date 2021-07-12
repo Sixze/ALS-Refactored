@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 5,
-	"VersionName": "4.4",
+	"Version": 6,
+	"VersionName": "4.5",
 	"FriendlyName": "Advanced Locomotion System Refactored",
 	"Description": "Completely refactored and bug fixed version of the Community Version of Advanced Locomotion System V4.",
 	"Category": "Animation",
