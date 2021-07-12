@@ -67,7 +67,7 @@ private:
 	AAlsCharacter* AlsCharacter;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bDynamicTransitionsAllowed{true};
+	bool bAllowDynamicTransitions{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsStance Stance;

@@ -62,5 +62,5 @@ struct ALS_API FAlsLocomotionAnimationState
 	float SprintRelativeAccelerationAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bTransitionsAllowed;
+	bool bAllowTransitions;
 };

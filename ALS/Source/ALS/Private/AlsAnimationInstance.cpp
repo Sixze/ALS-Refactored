@@ -104,9 +104,9 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 1.0f);
 	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 2.0f);
 
-	// The transitions allowed curve is modified within certain states, so that is transition allowed will be true while in those states.
+	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
 
-	LocomotionState.bTransitionsAllowed = GetCurveValue(Constants.TransitionsAllowedCurve) >= 0.99f;
+	LocomotionState.bAllowTransitions = GetCurveValue(Constants.AllowTransitionsCurve) >= 0.99f;
 
 	// Allow movement animations if character is moving.
 
@@ -650,7 +650,7 @@ void UAlsAnimationInstance::StopTransitionAndTurnInPlaceSlotAnimations(const flo
 
 void UAlsAnimationInstance::RefreshDynamicTransitions()
 {
-	if (LocomotionState.bMoving || !LocomotionState.bTransitionsAllowed)
+	if (LocomotionState.bMoving || !LocomotionState.bAllowTransitions)
 	{
 		return;
 	}
@@ -679,9 +679,9 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, const float BlendInTime, const float BlendOutTime,
                                                   const float PlayRate, const float StartTime, const float AllowanceDelayTime)
 {
-	if (bDynamicTransitionsAllowed)
+	if (bAllowDynamicTransitions)
 	{
-		bDynamicTransitionsAllowed = false;
+		bAllowDynamicTransitions = false;
 
 		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionsAllowanceTimer, this,
 		                                       &ThisClass::OnDynamicTransitionAllowanceTimerEnded, AllowanceDelayTime, false);
@@ -692,7 +692,7 @@ void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, 
 
 void UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded()
 {
-	bDynamicTransitionsAllowed = true;
+	bAllowDynamicTransitions = true;
 }
 
 void UAlsAnimationInstance::RefreshRotateInPlace()
@@ -763,7 +763,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	if (!LocomotionState.bTransitionsAllowed)
+	if (!LocomotionState.bAllowTransitions)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		return;
