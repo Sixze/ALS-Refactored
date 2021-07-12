@@ -395,9 +395,9 @@ private:
 	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
+	void MulticastStartMantling(const FAlsMantlingParameters& Parameters, bool bInvokedByClient);
 
-	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters);
+	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters, bool bInvokedByClient);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -483,9 +483,9 @@ private:
 	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle, bool bInvokedByClient);
 
-	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle, bool bInvokedByClient);
 
 	// Debug
 

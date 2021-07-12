@@ -1187,11 +1187,11 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
-		MulticastStartMantling(Parameters);
+		MulticastStartMantling(Parameters, false);
 	}
 	else
 	{
-		StartMantlingImplementation(Parameters);
+		StartMantlingImplementation(Parameters, false);
 		ServerStartMantling(Parameters);
 	}
 
@@ -1200,19 +1200,19 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 void AAlsCharacter::ServerStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
 {
-	MulticastStartMantling(Parameters);
+	MulticastStartMantling(Parameters, true);
 
 	ForceNetUpdate();
 }
 
-void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
+void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters, const bool bInvokedByClient)
 {
-	StartMantlingImplementation(Parameters);
+	StartMantlingImplementation(Parameters, bInvokedByClient);
 }
 
-void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters)
+void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters, const bool bInvokedByClient)
 {
-	if (LocomotionMode == EAlsLocomotionMode::Mantling)
+	if (LocomotionMode == EAlsLocomotionMode::Mantling && bInvokedByClient && IsLocallyControlled())
 	{
 		return;
 	}
@@ -1675,12 +1675,11 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
-		MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
+		MulticastStartRolling(Montage, PlayRate, TargetYawAngle, false);
 	}
 	else
 	{
-		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
-
+		StartRollingImplementation(Montage, PlayRate, TargetYawAngle, false);
 		ServerStartRolling(Montage, PlayRate, TargetYawAngle);
 	}
 }
@@ -1692,17 +1691,19 @@ UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
-	MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
+	MulticastStartRolling(Montage, PlayRate, TargetYawAngle, true);
 
 	ForceNetUpdate();
 }
 
-void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
+void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
+                                                         const float TargetYawAngle, const bool bInvokedByClient)
 {
-	StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
+	StartRollingImplementation(Montage, PlayRate, TargetYawAngle, bInvokedByClient);
 }
 
-void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
+void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
+                                               const float TargetYawAngle, const bool bInvokedByClient)
 {
 	RollingState.TargetYawAngle = TargetYawAngle;
 
@@ -1715,7 +1716,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 		RefreshSmoothLocationAndRotation();
 	}
 
-	if (IsValid(Montage) && !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage))
+	if (IsValid(Montage) && (!bInvokedByClient || !IsLocallyControlled()))
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
 	}
