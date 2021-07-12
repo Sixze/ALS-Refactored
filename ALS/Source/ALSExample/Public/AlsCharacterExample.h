@@ -35,6 +35,8 @@ protected:
 
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo) override;
 
+	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition) override;
+
 private:
 	void InputLookUpMouse(float Value);
 

@@ -54,6 +54,16 @@ void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& V
 	AlsCamera->GetViewInfo(ViewInfo);
 }
 
+void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
+{
+	if (AlsCamera->IsActive())
+	{
+		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalPosition);
+	}
+
+	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
+}
+
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
 {
 	AAlsCharacterExample::AddControllerPitchInput(-Value * LookUpMouseSensitivity);

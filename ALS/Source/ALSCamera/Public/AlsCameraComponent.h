@@ -47,19 +47,25 @@ private:
 	AAlsCharacter* AlsCharacter;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bRightShoulder{true};
+	FVector PivotTargetLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FVector PreviousPivotLocation;
+	FVector PivotLagLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FVector PreviousLocation;
+	FVector PivotLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FRotator PreviousRotation;
+	FVector CameraLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FRotator CameraRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360))
-	float PreviousFov;
+	float CameraFov;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bRightShoulder{true};
 
 public:
 	UAlsCameraComponent();
@@ -84,6 +90,21 @@ public:
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
+
+	// Debug
+
+public:
+	void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const;
+
+private:
+	static void DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	                               float Scale, float HorizontalPosition, float& VerticalPosition);
+
+	void DisplayDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DisplayDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+
+	void DisplayDebugTraces(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
 inline bool UAlsCameraComponent::IsRightShoulder() const

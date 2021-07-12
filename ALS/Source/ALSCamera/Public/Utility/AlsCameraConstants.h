@@ -88,4 +88,27 @@ public:
 		static const FName Name{TEXT("FirstPersonAmount")};
 		return Name;
 	}
+
+	// Debug
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants")
+	static const FName& CameraCurvesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.CameraCurves")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& CameraShapesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.CameraShapes")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& CameraTracesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.CameraTraces")};
+		return Name;
+	}
 };
