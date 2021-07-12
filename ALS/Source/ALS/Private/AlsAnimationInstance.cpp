@@ -217,7 +217,7 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	// the rotation before calculating the angle ensures the value is not affected by changes in
 	// actor rotation, allowing slow aiming rotation changes with fast actor rotation changes.
 
-	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AlsCharacter->GetAimingRotation(),
+	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingState.Rotation,
 	                                                        GeneralSettings.AimingSmoothRotationInterpolationSpeed, DeltaTime);
 
 	const auto AimingSmoothRotation{AimingState.SmoothRotation - AlsCharacter->GetLocomotionState().SmoothRotation};
