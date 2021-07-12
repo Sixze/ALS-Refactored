@@ -73,10 +73,8 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	if (bAllowLag)
 	{
-		ResultRotation = FQuat::Slerp(CameraRotation.Quaternion(), AlsCharacter->GetViewRotation().Quaternion(),
-		                              UAlsMath::ExponentialDecayDamp(
-			                              GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()),
-			                              DeltaTime));
+		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), AlsCharacter->GetViewRotation().Quaternion(),
+		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()), DeltaTime);
 	}
 	else
 	{
@@ -119,15 +117,12 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 		const auto RelativeTargetPivotLocation{LagRotation.UnrotateVector(PivotTargetLocation)};
 
 		PivotLagLocation = LagRotation.RotateVector({
-			FMath::Lerp(RelativePreviousPivotLagLocation.X, RelativeTargetPivotLocation.X,
-			            UAlsMath::ExponentialDecayDamp(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurve()),
-			                                           DeltaTime)),
-			FMath::Lerp(RelativePreviousPivotLagLocation.Y, RelativeTargetPivotLocation.Y,
-			            UAlsMath::ExponentialDecayDamp(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve()),
-			                                           DeltaTime)),
-			FMath::Lerp(RelativePreviousPivotLagLocation.Z, RelativeTargetPivotLocation.Z,
-			            UAlsMath::ExponentialDecayDamp(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve()),
-			                                           DeltaTime))
+			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.X, RelativeTargetPivotLocation.X,
+			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurve()), DeltaTime),
+			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.Y, RelativeTargetPivotLocation.Y,
+			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve()), DeltaTime),
+			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.Z, RelativeTargetPivotLocation.Z,
+			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve()), DeltaTime)
 		});
 	}
 	else

@@ -750,7 +750,7 @@ void AAlsCharacter::RefreshAiming(const float DeltaTime)
 	// Interpolate aiming rotation to current control rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	AimingState.SmoothRotation = FMath::RInterpTo(AimingState.SmoothRotation, AimingRotation, DeltaTime, 30.0f);
+	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingRotation, 30.0f, DeltaTime);
 
 	// Set the yaw speed by comparing the current and previous aiming yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
@@ -909,7 +909,7 @@ void AAlsCharacter::RefreshActorRotation(const float TargetYawAngle, const float
 {
 	LocomotionState.TargetActorRotation = {0.0f, TargetYawAngle, 0.0f};
 
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), LocomotionState.TargetActorRotation, DeltaTime, RotationSpeed));
+	SetActorRotation(UAlsMath::ExponentialDecay(GetActorRotation(), LocomotionState.TargetActorRotation, RotationSpeed, DeltaTime));
 
 	RefreshSmoothLocationAndRotation();
 }
@@ -923,7 +923,7 @@ void AAlsCharacter::RefreshActorRotationExtraSmooth(const float TargetYawAngle, 
 	                                                               {0.0f, TargetYawAngle, 0.0f},
 	                                                               DeltaTime, TargetRotationSpeed);
 
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(), LocomotionState.TargetActorRotation, DeltaTime, ActorRotationSpeed));
+	SetActorRotation(UAlsMath::ExponentialDecay(GetActorRotation(), LocomotionState.TargetActorRotation, ActorRotationSpeed, DeltaTime));
 
 	RefreshSmoothLocationAndRotation();
 }
