@@ -348,6 +348,43 @@ public:
 		static const FName Name{TEXT("FootstepSoundBlock")};
 		return Name;
 	}
+
+	// Debug
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& CurvesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.Curves")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& StateDisplayName()
+	{
+		static const FName Name{TEXT("ALS.State")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& ShapesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.Shapes")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& TracesDisplayName()
+	{
+		static const FName Name{TEXT("ALS.Traces")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
+	static const FName& MantlingDisplayName()
+	{
+		static const FName Name{TEXT("ALS.Mantling")};
+		return Name;
+	}
 };
 
 USTRUCT(BlueprintType)

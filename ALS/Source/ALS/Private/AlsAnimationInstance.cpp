@@ -384,7 +384,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	                                     {__FUNCTION__, true, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
-	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
+	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))
 	{
 		UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd,
 		                                      AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
@@ -931,7 +931,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	                                    {__FUNCTION__, false, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
-	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsUtility::TracesDisplayName()))
+	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))
 	{
 		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 		                                         Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight(),

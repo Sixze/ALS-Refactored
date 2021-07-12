@@ -44,7 +44,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	                                {__FUNCTION__, true, Owner});
 
 #if ENABLE_DRAW_DEBUG
-	if (UAlsUtility::ShouldDisplayDebug(Owner, UAlsUtility::TracesDisplayName()))
+	if (UAlsUtility::ShouldDisplayDebug(Owner, UAlsConstants::TracesDisplayName()))
 	{
 		UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
 		                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);

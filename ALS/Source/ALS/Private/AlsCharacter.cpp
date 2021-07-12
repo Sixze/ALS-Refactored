@@ -1013,7 +1013,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, UAlsUtility::MantlingDisplayName())};
+	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, UAlsConstants::MantlingDisplayName())};
 #endif
 
 	const auto* Capsule{GetCapsuleComponent()};
@@ -1726,7 +1726,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
 	const auto RowOffset{12.0f * Scale};
-	const auto ColumnOffset{180.0f * Scale};
+	const auto ColumnOffset{200.0f * Scale};
 
 	auto MaxVerticalPosition{VerticalPosition};
 	auto HorizontalPosition{5.0f * Scale};
@@ -1738,9 +1738,9 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	VerticalPosition += RowOffset;
 	MaxVerticalPosition = FMath::Max(MaxVerticalPosition, VerticalPosition);
 
-	if (!DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()) &&
-	    !DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()) &&
-	    !DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
+	if (!DebugDisplay.IsDisplayOn(UAlsConstants::CurvesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsConstants::StateDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsConstants::ShapesDisplayName()) && !DebugDisplay.IsDisplayOn(UAlsConstants::TracesDisplayName()) &&
+	    !DebugDisplay.IsDisplayOn(UAlsConstants::MantlingDisplayName()))
 	{
 		VerticalPosition = MaxVerticalPosition;
 
@@ -1752,7 +1752,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"))};
 
-	if (DebugDisplay.IsDisplayOn(UAlsUtility::CurvesDisplayName()))
+	if (DebugDisplay.IsDisplayOn(UAlsConstants::CurvesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, CurvesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugCurves(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1772,7 +1772,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto StateHeaderText{FText::AsCultureInvariant(TEXT("ALS.State (Shift + 2)"))};
 
-	if (DebugDisplay.IsDisplayOn(UAlsUtility::StateDisplayName()))
+	if (DebugDisplay.IsDisplayOn(UAlsConstants::StateDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, StateHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugState(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1787,7 +1787,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Shapes (Shift + 3)"))};
 
-	if (DebugDisplay.IsDisplayOn(UAlsUtility::ShapesDisplayName()))
+	if (DebugDisplay.IsDisplayOn(UAlsConstants::ShapesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, ShapesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugShapes(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1802,7 +1802,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Traces (Shift + 4)"))};
 
-	if (DebugDisplay.IsDisplayOn(UAlsUtility::TracesDisplayName()))
+	if (DebugDisplay.IsDisplayOn(UAlsConstants::TracesDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, TracesHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugTraces(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1817,7 +1817,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	static const auto MantlingHeaderText{FText::AsCultureInvariant(TEXT("ALS.Mantling (Shift + 5)"))};
 
-	if (DebugDisplay.IsDisplayOn(UAlsUtility::MantlingDisplayName()))
+	if (DebugDisplay.IsDisplayOn(UAlsConstants::MantlingDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, MantlingHeaderText, FLinearColor::Green, Scale, HorizontalPosition, VerticalPosition);
 		DisplayDebugMantling(Canvas, Scale, HorizontalPosition, VerticalPosition);
@@ -1855,6 +1855,8 @@ void AAlsCharacter::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText,
 
 void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
+	VerticalPosition += 4.0f * Scale;
+
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -1891,6 +1893,8 @@ void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const
 
 void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
+	VerticalPosition += 4.0f * Scale;
+
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -2039,6 +2043,8 @@ void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const 
 
 void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
+	VerticalPosition += 4.0f * Scale;
+
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -2067,7 +2073,7 @@ void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
-	DrawDebugCone(GetWorld(), LocomotionState.SmoothLocation + FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()},
+	DrawDebugCone(GetWorld(), GetPawnViewLocation(),
 	              AimingRotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
@@ -2186,6 +2192,8 @@ void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const
 
 void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
+	VerticalPosition += 4.0f * Scale;
+
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
@@ -2228,6 +2236,8 @@ void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const
 
 void AAlsCharacter::DisplayDebugMantling(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
+	VerticalPosition += 4.0f * Scale;
+
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),

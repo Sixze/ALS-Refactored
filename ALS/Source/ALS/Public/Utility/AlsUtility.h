@@ -24,41 +24,6 @@ public:
 	static constexpr int32 DrawCircleSidesCount{16};
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility")
-	static const FName& CurvesDisplayName()
-	{
-		static const FName Name{TEXT("ALS.Curves")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility")
-	static const FName& StateDisplayName()
-	{
-		static const FName Name{TEXT("ALS.State")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility")
-	static const FName& ShapesDisplayName()
-	{
-		static const FName Name{TEXT("ALS.Shapes")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility")
-	static const FName& TracesDisplayName()
-	{
-		static const FName Name{TEXT("ALS.Traces")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility")
-	static const FName& MantlingDisplayName()
-	{
-		static const FName Name{TEXT("ALS.Mantling")};
-		return Name;
-	}
-
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName"))
 	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, const FName& DisplayName);
 
