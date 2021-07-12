@@ -56,7 +56,7 @@ private:
 		{UAlsConstants::PoseAirCurve()},
 
 		{UAlsConstants::GaitAmountCurve()},
-		{UAlsConstants::TransitionsAllowedCurve()},
+		{UAlsConstants::AllowTransitionsCurve()},
 		{UAlsConstants::SprintBlockCurve()},
 		{UAlsConstants::GroundPredictionBlockCurve()},
 		{UAlsConstants::FootstepSoundBlockCurve()}

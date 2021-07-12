@@ -322,9 +322,9 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& TransitionsAllowedCurve()
+	static const FName& AllowTransitionsCurve()
 	{
-		static const FName Name{TEXT("TransitionsAllowed")};
+		static const FName Name{TEXT("AllowTransitions")};
 		return Name;
 	}
 
@@ -523,7 +523,7 @@ struct ALS_API FAlsPropertyAccessConstants
 	FName RotationYawOffsetCurve{UAlsConstants::RotationYawOffsetCurve()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TransitionsAllowedCurve{UAlsConstants::TransitionsAllowedCurve()};
+	FName AllowTransitionsCurve{UAlsConstants::AllowTransitionsCurve()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SprintBlockCurve{UAlsConstants::SprintBlockCurve()};
