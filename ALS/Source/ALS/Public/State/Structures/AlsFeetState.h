@@ -17,25 +17,25 @@ struct ALS_API FAlsFootState
 	FVector LockRelativeLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator LockRelativeRotation;
+	FQuat LockRelativeRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LockLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator LockRotation;
+	FQuat LockRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector OffsetLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator OffsetRotation;
+	FQuat OffsetRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector FinalLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator FinalRotation;
+	FQuat FinalRotation;
 };
 
 USTRUCT(BlueprintType)

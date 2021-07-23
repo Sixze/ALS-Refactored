@@ -107,6 +107,7 @@ void AAlsCharacter::BeginPlay()
 	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 
 	AimingState.SmoothRotation = AimingRotation;
+	AimingState.PreviousSmoothYawAngle = AimingRotation.Yaw;
 
 	// Update states to use the initial desired values.
 
@@ -815,7 +816,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 	// Not moving.
 
-	if (RotationMode == EAlsRotationMode::Aiming && ViewMode != EAlsViewMode::FirstPerson || ViewMode == EAlsViewMode::FirstPerson)
+	if (RotationMode == EAlsRotationMode::Aiming || ViewMode == EAlsViewMode::FirstPerson)
 	{
 		if (LocomotionState.bHasInput)
 		{

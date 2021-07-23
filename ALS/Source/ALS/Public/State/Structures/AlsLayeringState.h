@@ -60,12 +60,4 @@ struct ALS_API FAlsLayeringState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PoseCrouchingBlendAmount;
-
-	// Ik
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float HandLeftIkAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float HandRightIkAmount;
 };

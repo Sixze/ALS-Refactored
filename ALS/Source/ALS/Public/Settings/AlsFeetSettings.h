@@ -18,9 +18,6 @@ struct ALS_API FAlsFeetSettings
 	float FootHeight{13.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float IkVerticalCorrection;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<ETraceTypeQuery> IkTraceChannel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
