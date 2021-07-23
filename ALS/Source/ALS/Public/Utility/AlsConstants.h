@@ -55,16 +55,16 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& GunLeftVirtualBone()
+	static const FName& HandLeftGunVirtualBone()
 	{
-		static const FName Name{TEXT("VB ik_hand_gun_l")};
+		static const FName Name{TEXT("VB hand_l_to_ik_hand_gun")};
 		return Name;
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& GunRightVirtualBone()
+	static const FName& HandRightGunVirtualBone()
 	{
-		static const FName Name{TEXT("VB ik_hand_gun_r")};
+		static const FName Name{TEXT("VB hand_r_to_ik_hand_gun")};
 		return Name;
 	}
 
@@ -404,10 +404,10 @@ struct ALS_API FAlsPropertyAccessConstants
 	FName Spine03Bone{UAlsConstants::Spine03Bone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GunLeftVirtualBone{UAlsConstants::GunLeftVirtualBone()};
+	FName HandLeftGunVirtualBone{UAlsConstants::HandLeftGunVirtualBone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GunRightVirtualBone{UAlsConstants::GunRightVirtualBone()};
+	FName HandRightGunVirtualBone{UAlsConstants::HandRightGunVirtualBone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FootLeftVirtualBone{UAlsConstants::FootLeftVirtualBone()};

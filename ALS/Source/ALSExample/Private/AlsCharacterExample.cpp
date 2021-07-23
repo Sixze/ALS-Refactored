@@ -66,22 +66,22 @@ void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
 {
-	AAlsCharacterExample::AddControllerPitchInput(-Value * LookUpMouseSensitivity);
+	AddControllerPitchInput(-Value * LookUpMouseSensitivity);
 }
 
 void AAlsCharacterExample::InputLookRightMouse(const float Value)
 {
-	AAlsCharacterExample::AddControllerYawInput(Value * LookRightMouseSensitivity);
+	AddControllerYawInput(Value * LookRightMouseSensitivity);
 }
 
 void AAlsCharacterExample::InputLookUp(const float Value)
 {
-	AAlsCharacterExample::AddControllerPitchInput(-Value * LookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(-Value * LookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AAlsCharacterExample::InputLookRight(const float Value)
 {
-	AAlsCharacterExample::AddControllerYawInput(Value * LookRightRate * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(Value * LookRightRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AAlsCharacterExample::InputMoveForward(const float Value)

@@ -40,6 +40,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "ControlRig",
+			"Enabled": true
+		},
+		{
 			"Name": "Niagara",
 			"Enabled": true
 		}

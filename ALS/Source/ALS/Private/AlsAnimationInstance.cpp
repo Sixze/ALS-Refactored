@@ -195,11 +195,6 @@ void UAlsAnimationInstance::RefreshLayering()
 
 	LayeringState.PoseStandingBlendAmount = GetCurveValueClamped01(Constants.PoseStandCurve);
 	LayeringState.PoseCrouchingBlendAmount = GetCurveValueClamped01(Constants.PoseCrouchCurve);
-
-	// Hand ik is scaled by the arms blend.
-
-	LayeringState.HandLeftIkAmount = LayeringState.ArmLeftBlendAmount * GetCurveValueClamped01(Constants.HandLeftIkCurve);
-	LayeringState.HandRightIkAmount = LayeringState.ArmRightBlendAmount * GetCurveValueClamped01(Constants.HandRightIkCurve);
 }
 
 void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
@@ -297,7 +292,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		FootState.LockAmount = 0.0f;
 
 		FootState.LockLocation = FootTransform.GetLocation();
-		FootState.LockRotation = FootTransform.Rotator();
+		FootState.LockRotation = FootTransform.GetRotation();
 
 		FootState.FinalLocation = FootState.LockLocation;
 		FootState.FinalRotation = FootState.LockRotation;
@@ -323,7 +318,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 			const auto FootRelativeTransform{FootTransform.GetRelativeTransform(ComponentTransform)};
 
 			FootState.LockRelativeLocation = FootRelativeTransform.GetLocation();
-			FootState.LockRelativeRotation = FootRelativeTransform.Rotator();
+			FootState.LockRelativeRotation = FootRelativeTransform.GetRotation();
 		}
 	}
 
@@ -338,29 +333,23 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	if (LocomotionMode.IsGrounded())
 	{
 		const auto RotationDifference{
-			AlsCharacter->GetLocomotionState().SmoothRotation - AlsCharacter->GetLocomotionState().PreviousSmoothRotation
+			(AlsCharacter->GetLocomotionState().PreviousSmoothRotation - AlsCharacter->GetLocomotionState().SmoothRotation).Quaternion()
 		};
 
-		if (!RotationDifference.IsNearlyZero())
-		{
-			// Subtract the rotation difference from the current relative rotation to get the new relative rotation.
+		// Subtract the rotation difference from the current relative rotation to get the new relative rotation.
 
-			FootState.LockRelativeRotation -= RotationDifference;
-			FootState.LockRelativeRotation.Normalize();
+		FootState.LockRelativeRotation = RotationDifference * FootState.LockRelativeRotation;
 
-			// Rotate the relative location by the rotation difference to keep the foot planted in component space.
+		// Rotate the relative location by the rotation difference to keep the foot planted in component space.
 
-			FootState.LockRelativeLocation = RotationDifference.UnrotateVector(FootState.LockRelativeLocation);
-		}
+		FootState.LockRelativeLocation = RotationDifference.RotateVector(FootState.LockRelativeLocation);
 	}
 
-	const auto NewLockQuaternion{ComponentTransform.TransformRotation(FootState.LockRelativeRotation.Quaternion())};
-
 	FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockRelativeLocation);
-	FootState.LockRotation = NewLockQuaternion.Rotator();
+	FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockRelativeRotation);
 
 	FootState.FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
-	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), NewLockQuaternion, FootState.LockAmount).Rotator();
+	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), FootState.LockRotation, FootState.LockAmount);
 }
 
 void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const
@@ -392,7 +381,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	}
 #endif
 
-	auto TargetRotationOffset{FRotator::ZeroRotator};
+	FQuat TargetRotationOffset;
 
 	if (AlsCharacter->GetCharacterMovement()->IsWalkable(Hit))
 	{
@@ -407,42 +396,38 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 
 		// Calculate the rotation offset.
 
-		TargetRotationOffset.Pitch = -UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.X});
-		TargetRotationOffset.Roll = UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.Y});
+		TargetRotationOffset = FRotator{
+			-UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.X}),
+			0.0f,
+			UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.Y})
+		}.Quaternion();
 	}
-
-	auto CorrectedLocationOffset{TargetLocationOffset};
-	CorrectedLocationOffset.Z += FeetSettings.IkVerticalCorrection;
+	else
+	{
+		TargetRotationOffset = FQuat::Identity;
+	}
 
 	// Interpolate the current location offset to the new target value. Interpolate at
 	// different speeds based on whether the new target is above or below the current one.
 
-	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, CorrectedLocationOffset, DeltaTime,
-	                                            FootState.OffsetLocation.Z > CorrectedLocationOffset.Z ? 30.0f : 15.0f);
+	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, TargetLocationOffset, DeltaTime,
+	                                            FootState.OffsetLocation.Z > TargetLocationOffset.Z ? 30.0f : 15.0f);
 
 	// Interpolate the current rotation offset to the new target value.
 
-	FootState.OffsetRotation = FMath::RInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, 30.0f);
+	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, 30.0f);
 
 	FootState.FinalLocation += FootState.OffsetLocation;
-
-	if (!FootState.OffsetRotation.IsZero())
-	{
-		FootState.FinalRotation = (FootState.OffsetRotation.Quaternion() * FootState.FinalRotation.Quaternion()).Rotator();
-	}
+	FootState.FinalRotation = FootState.OffsetRotation * FootState.FinalRotation;
 }
 
 void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime)
 {
 	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, FVector::ZeroVector, DeltaTime, 15.0f);
-	FootState.OffsetRotation = FMath::RInterpTo(FootState.OffsetRotation, FRotator::ZeroRotator, DeltaTime, 15.0f);
+	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, 15.0f);
 
 	FootState.FinalLocation += FootState.OffsetLocation;
-
-	if (!FootState.OffsetRotation.IsZero())
-	{
-		FootState.FinalRotation = (FootState.OffsetRotation.Quaternion() * FootState.FinalRotation.Quaternion()).Rotator();
-	}
+	FootState.FinalRotation = FootState.OffsetRotation * FootState.FinalRotation;
 }
 
 void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVector& TargetFootLeftLocationOffset,
