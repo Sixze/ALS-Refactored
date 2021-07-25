@@ -228,17 +228,12 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	AimingState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped({0.0f, 180.0f}, {0.5f, 1.0f},
 	                                                                     FMath::Abs(AimingState.SmoothYawAngle));
 
-	if (RotationMode.IsAiming())
-	{
-		// Individual rotations for 3 spine bones and pelvis.
-
-		AimingState.SpineRotation.Yaw = AimingState.YawAngle * 0.25f;
-	}
-
 	if (!RotationMode.IsVelocityDirection())
 	{
 		AimingState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, AimingState.PitchAngle);
 	}
+
+	AimingState.LookAmount = 1.0f - GetCurveValueClamped01(Constants.AimManualCurve) * GetCurveValueClamped01(Constants.AimBlockCurve);
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
