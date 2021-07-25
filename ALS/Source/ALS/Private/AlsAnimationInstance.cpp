@@ -56,8 +56,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 			MovementDirection = CalculateMovementDirection();
 
 			RefreshMovement(DeltaTime);
-
-			FeetState.IkRootScaleAmount = CalculateFootIkRootScaleAmount();
 		}
 
 		RefreshDynamicTransitions();
@@ -234,7 +232,7 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	{
 		// Individual rotations for 3 spine bones and pelvis.
 
-		AimingState.SpineRotation.Yaw = FMath::ClampAngle(AimingState.YawAngle, -70.0f, 70.0f) * 0.25f;
+		AimingState.SpineRotation.Yaw = AimingState.YawAngle * 0.25f;
 	}
 
 	if (!RotationMode.IsVelocityDirection())
@@ -456,16 +454,6 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 
 	FeetState.PelvisOffsetLocation = FMath::VInterpTo(FeetState.PelvisOffsetLocation, TargetOffset, DeltaTime,
 	                                                  TargetOffset.Z > FeetState.PelvisOffsetLocation.Z ? 10.0f : 15.0f);
-}
-
-float UAlsAnimationInstance::CalculateFootIkRootScaleAmount() const
-{
-	// Calculate the foot ik root scale amount. This value is used to scale the foot ik root bone to make the foot ik bones
-	// cover more distance on the diagonal blends. Without scaling, the feet would not move far enough on the diagonal
-	// direction due to the linear translational blending of the ik bones. The curve is used to easily map the value.
-
-	return FeetSettings.IkRootScaleAmountCurve->GetFloatValue(
-		MovementState.VelocityBlend.ForwardAmount + MovementState.VelocityBlend.BackwardAmount);
 }
 
 EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const

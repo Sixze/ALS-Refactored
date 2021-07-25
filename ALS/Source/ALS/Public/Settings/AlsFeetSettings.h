@@ -25,8 +25,4 @@ struct ALS_API FAlsFeetSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float IkTraceDistanceDownward{45.0f};
-
-	// Forward and backward velocity blend amount to foot ik root bone scale curve.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* IkRootScaleAmountCurve;
 };

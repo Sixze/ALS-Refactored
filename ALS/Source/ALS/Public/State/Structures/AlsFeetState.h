@@ -63,7 +63,4 @@ struct ALS_API FAlsFeetState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector PelvisOffsetLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float IkRootScaleAmount;
 };

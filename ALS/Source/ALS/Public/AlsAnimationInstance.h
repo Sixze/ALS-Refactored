@@ -161,8 +161,6 @@ private:
 
 	void RefreshPelvisOffset(float DeltaTime, const FVector& TargetFootLeftLocationOffset, const FVector& TargetFootRightLocationOffset);
 
-	float CalculateFootIkRootScaleAmount() const;
-
 	// Grounded Movement
 
 public:
