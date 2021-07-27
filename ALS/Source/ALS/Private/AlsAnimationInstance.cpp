@@ -197,14 +197,15 @@ void UAlsAnimationInstance::RefreshLayering()
 
 void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 {
+	AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
+
 	if (LocomotionAction.IsNone())
 	{
-		AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
+		AimingState.YawAngle = FRotator::NormalizeAxis(AimingState.Rotation.Yaw -
+		                                               AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
 
-		const auto AimingRotation{AimingState.Rotation - AlsCharacter->GetLocomotionState().SmoothRotation};
-
-		AimingState.YawAngle = FRotator::NormalizeAxis(AimingRotation.Yaw);
-		AimingState.PitchAngle = FRotator::NormalizeAxis(AimingRotation.Pitch);
+		AimingState.PitchAngle = FRotator::NormalizeAxis(AimingState.Rotation.Pitch -
+		                                                 AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
 	}
 
 	AimingState.YawSpeed = AlsCharacter->GetAimingState().YawSpeed;
@@ -216,10 +217,11 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingState.Rotation,
 	                                                        GeneralSettings.AimingSmoothRotationInterpolationSpeed, DeltaTime);
 
-	const auto AimingSmoothRotation{AimingState.SmoothRotation - AlsCharacter->GetLocomotionState().SmoothRotation};
+	AimingState.SmoothYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw -
+	                                                     AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
 
-	AimingState.SmoothYawAngle = FRotator::NormalizeAxis(AimingSmoothRotation.Yaw);
-	AimingState.SmoothPitchAngle = FRotator::NormalizeAxis(AimingSmoothRotation.Pitch);
+	AimingState.SmoothPitchAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Pitch -
+	                                                       AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
 
 	// Separate the Smooth aiming yaw angle into 3 separate values. These 3 values are used to
 	// improve the blending of the aiming when rotating completely around the character. This allows
