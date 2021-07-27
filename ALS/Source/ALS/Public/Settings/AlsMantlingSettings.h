@@ -55,6 +55,9 @@ struct ALS_API FAlsGeneralMantlingSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAllowMantling{true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* TimelineCurve;
 
 	// If a dynamic object has a speed bigger than this value, then do not start mantling.
