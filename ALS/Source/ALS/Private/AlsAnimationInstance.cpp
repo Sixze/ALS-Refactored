@@ -197,12 +197,15 @@ void UAlsAnimationInstance::RefreshLayering()
 
 void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 {
-	AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
+	if (LocomotionAction.IsNone())
+	{
+		AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
 
-	const auto AimingRotation{AimingState.Rotation - AlsCharacter->GetLocomotionState().SmoothRotation};
+		const auto AimingRotation{AimingState.Rotation - AlsCharacter->GetLocomotionState().SmoothRotation};
 
-	AimingState.YawAngle = FRotator::NormalizeAxis(AimingRotation.Yaw);
-	AimingState.PitchAngle = FRotator::NormalizeAxis(AimingRotation.Pitch);
+		AimingState.YawAngle = FRotator::NormalizeAxis(AimingRotation.Yaw);
+		AimingState.PitchAngle = FRotator::NormalizeAxis(AimingRotation.Pitch);
+	}
 
 	AimingState.YawSpeed = AlsCharacter->GetAimingState().YawSpeed;
 
@@ -233,7 +236,8 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 		AimingState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, AimingState.PitchAngle);
 	}
 
-	AimingState.LookAmount = 1.0f - GetCurveValueClamped01(Constants.AimManualCurve) * GetCurveValueClamped01(Constants.AimBlockCurve);
+	AimingState.LookAmount = (1.0f - GetCurveValueClamped01(Constants.AimManualCurve)) *
+	                         (1.0f - GetCurveValueClamped01(Constants.AimBlockCurve));
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
