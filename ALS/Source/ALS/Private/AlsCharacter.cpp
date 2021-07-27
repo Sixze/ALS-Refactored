@@ -751,7 +751,9 @@ void AAlsCharacter::RefreshAiming(const float DeltaTime)
 	// Interpolate aiming rotation to current control rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingRotation, 30.0f, DeltaTime);
+	AimingState.SmoothRotation = IsLocallyControlled()
+		                             ? AimingRotation
+		                             : UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingRotation, 30.0f, DeltaTime);
 
 	// Set the yaw speed by comparing the current and previous aiming yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
@@ -1008,7 +1010,7 @@ bool AAlsCharacter::TryStartMantlingInAir()
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
-	if (LocomotionMode == EAlsLocomotionMode::Mantling)
+	if (!GeneralMantlingSettings.bAllowMantling || LocomotionMode == EAlsLocomotionMode::Mantling)
 	{
 		return false;
 	}
@@ -1513,9 +1515,11 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 {
+	const auto bLocallyControlled{IsLocallyControlled()};
+
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBone())};
 
-	if (IsLocallyControlled())
+	if (bLocallyControlled)
 	{
 		SetRagdollTargetLocation(PelvisTransform.GetLocation());
 	}
@@ -1540,7 +1544,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 2.0f;
 	}
 
-	if (!IsLocallyControlled())
+	if (!bLocallyControlled)
 	{
 		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, 750.0f, DeltaTime, 0.6f);
 

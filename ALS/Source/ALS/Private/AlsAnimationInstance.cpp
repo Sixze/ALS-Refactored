@@ -238,8 +238,17 @@ void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
 		AimingState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, AimingState.PitchAngle);
 	}
 
-	AimingState.LookAmount = (1.0f - GetCurveValueClamped01(Constants.AimManualCurve)) *
-	                         (1.0f - GetCurveValueClamped01(Constants.AimBlockCurve));
+	if (RotationMode.IsAiming())
+	{
+		AimingState.SpineYawAngle = AimingState.YawAngle;
+	}
+
+	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(Constants.AimBlockCurve)};
+	const auto AimManualAmount{GetCurveValueClamped01(Constants.AimManualCurve)};
+
+	AimingState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
+
+	AimingState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
