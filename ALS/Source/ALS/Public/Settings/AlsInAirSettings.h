@@ -11,9 +11,9 @@ struct ALS_API FAlsInAirSettings
 
 	// Ground prediction sweep hit time to ground prediction amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* GroundPredictionAmountCurve;
+	UCurveFloat* GroundPredictionAmountCurve{nullptr};
 
 	// Vertical velocity to lean amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* LeanAmountCurve;
+	UCurveFloat* LeanAmountCurve{nullptr};
 };

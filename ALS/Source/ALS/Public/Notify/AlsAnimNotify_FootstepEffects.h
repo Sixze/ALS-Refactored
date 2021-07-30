@@ -53,23 +53,23 @@ struct ALS_API FAlsFootstepEffectSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EPhysicalSurface> SurfaceType;
+	TEnumAsByte<EPhysicalSurface> SurfaceType{SurfaceType1};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	TSoftObjectPtr<USoundBase> Sound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	EAlsFootstepSoundSpawnType SoundSpawnType;
+	EAlsFootstepSoundSpawnType SoundSpawnType{EAlsFootstepSoundSpawnType::SpawnAtTraceHitLocation};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound",
 		Meta = (EditCondition = "SoundSpawnType == EAlsFootstepSoundSpawnType::SpawnAttachedToFootBone"))
-	TEnumAsByte<EAttachLocation::Type> SoundAttachLocationType;
+	TEnumAsByte<EAttachLocation::Type> SoundAttachLocationType{EAttachLocation::KeepRelativeOffset};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	FVector SoundLocationOffset;
+	FVector SoundLocationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	FRotator SoundRotationOffset;
+	FRotator SoundRotationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	TSoftObjectPtr<UMaterialInterface> DecalMaterial;
@@ -88,7 +88,7 @@ struct ALS_API FAlsFootstepEffectSettings
 	FVector DecalLocationOffset{8.0f, 0.0f, 1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	FRotator DecalRotationOffset;
+	FRotator DecalRotationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	FVector DecalSize{10.0f, 20.0f, 20.0f};
@@ -97,17 +97,17 @@ struct ALS_API FAlsFootstepEffectSettings
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
-	EAlsFootstepParticleEffectSpawnType ParticleSystemSpawnType;
+	EAlsFootstepParticleEffectSpawnType ParticleSystemSpawnType{EAlsFootstepParticleEffectSpawnType::SpawnAtTraceHitLocation};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System",
 		Meta = (EditCondition = "ParticleSystemSpawnType == EAlsFootstepParticleEffectSpawnType::SpawnAttachedToFootBone"))
-	TEnumAsByte<EAttachLocation::Type> ParticleSystemAttachLocationType;
+	TEnumAsByte<EAttachLocation::Type> ParticleSystemAttachLocationType{EAttachLocation::KeepRelativeOffset};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
-	FVector ParticleSystemLocationOffset;
+	FVector ParticleSystemLocationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
-	FRotator ParticleSystemRotationOffset;
+	FRotator ParticleSystemRotationOffset{ForceInit};
 };
 
 UCLASS(Blueprintable, BlueprintType)

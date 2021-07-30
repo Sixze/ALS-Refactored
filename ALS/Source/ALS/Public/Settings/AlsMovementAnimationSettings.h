@@ -29,9 +29,9 @@ struct ALS_API FAlsMovementAnimationSettings
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* StrideBlendAmountWalkCurve;
+	UCurveFloat* StrideBlendAmountWalkCurve{nullptr};
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* StrideBlendAmountRunCurve;
+	UCurveFloat* StrideBlendAmountRunCurve{nullptr};
 };

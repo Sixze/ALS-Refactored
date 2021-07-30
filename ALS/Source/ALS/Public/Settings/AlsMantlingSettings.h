@@ -12,11 +12,11 @@ struct ALS_API FAlsMantlingSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* Montage;
+	UAnimMontage* Montage{nullptr};
 
 	// Mantling time to interpolation, horizontal and vertical correction amounts curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveVector* InterpolationAndCorrectionAmountsCurve;
+	UCurveVector* InterpolationAndCorrectionAmountsCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector StartRelativeLocation{-65.0f, 0.0f, -200.0f};
@@ -46,7 +46,7 @@ struct ALS_API FAlsMantlingTraceSettings
 	float TargetLocationOffset{15.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	bool bDrawFailedTraces;
+	bool bDrawFailedTraces{false};
 };
 
 USTRUCT(BlueprintType)
@@ -58,7 +58,7 @@ struct ALS_API FAlsGeneralMantlingSettings
 	bool bAllowMantling{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* TimelineCurve;
+	UCurveFloat* TimelineCurve{nullptr};
 
 	// If a dynamic object has a speed bigger than this value, then do not start mantling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -10,6 +10,17 @@ AAlsCharacterExample::AAlsCharacterExample()
 	AlsCamera->SetupAttachment(GetMesh());
 }
 
+void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
+{
+	if (!AlsCamera->IsActive())
+	{
+		Super::CalcCamera(DeltaTime, ViewInfo);
+		return;
+	}
+
+	AlsCamera->GetViewInfo(ViewInfo);
+}
+
 void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -41,27 +52,6 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction(TEXT("RotationMode"), IE_Pressed, this, &ThisClass::InputRotationModePressed);
 	PlayerInputComponent->BindAction(TEXT("ViewMode"), IE_Pressed, this, &ThisClass::InputViewModePressed);
 	PlayerInputComponent->BindAction(TEXT("SwitchShoulder"), IE_Pressed, this, &ThisClass::InputSwitchShoulderPressed);
-}
-
-void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
-{
-	if (!AlsCamera->IsActive())
-	{
-		Super::CalcCamera(DeltaTime, ViewInfo);
-		return;
-	}
-
-	AlsCamera->GetViewInfo(ViewInfo);
-}
-
-void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
-{
-	if (AlsCamera->IsActive())
-	{
-		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalPosition);
-	}
-
-	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
 }
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
@@ -203,4 +193,14 @@ void AAlsCharacterExample::InputViewModePressed()
 void AAlsCharacterExample::InputSwitchShoulderPressed()
 {
 	AlsCamera->SetRightShoulder(!AlsCamera->IsRightShoulder());
+}
+
+void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
+{
+	if (AlsCamera->IsActive())
+	{
+		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalPosition);
+	}
+
+	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
 }

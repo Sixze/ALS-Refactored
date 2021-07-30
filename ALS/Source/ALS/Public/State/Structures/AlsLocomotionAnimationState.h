@@ -8,59 +8,59 @@ struct ALS_API FAlsLocomotionAnimationState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasInput;
+	bool bHasInput{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float InputYawAmount;
+	float InputYawAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasSpeed;
+	bool bHasSpeed{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float Speed;
+	float Speed{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Velocity;
+	FVector Velocity{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float VelocityYawAngle;
+	float VelocityYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bMoving;
+	bool bMoving{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
-	FVector RelativeAccelerationAmount;
+	FVector RelativeAccelerationAmount{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 3))
-	float GaitAmount;
+	float GaitAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitWalkingAmount;
+	float GaitWalkingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitRunningAmount;
+	float GaitRunningAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitSprintingAmount;
+	float GaitSprintingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float RotationYawOffsetForward;
+	float RotationYawOffsetForward{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float RotationYawOffsetBackward;
+	float RotationYawOffsetBackward{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float RotationYawOffsetLeft;
+	float RotationYawOffsetLeft{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float RotationYawOffsetRight;
+	float RotationYawOffsetRight{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float SprintTime;
+	float SprintTime{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
-	float SprintRelativeAccelerationAmount;
+	float SprintRelativeAccelerationAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowTransitions;
+	bool bAllowTransitions{false};
 };

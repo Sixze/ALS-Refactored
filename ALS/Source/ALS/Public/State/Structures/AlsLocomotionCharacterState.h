@@ -8,41 +8,41 @@ struct ALS_API FAlsLocomotionCharacterState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasInput;
+	bool bHasInput{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float InputYawAngle;
+	float InputYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bHasSpeed;
+	bool bHasSpeed{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float Speed;
+	float Speed{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Velocity;
+	FVector Velocity{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PreviousVelocity;
+	FVector PreviousVelocity{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float VelocityYawAngle;
+	float VelocityYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bMoving;
+	bool bMoving{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Acceleration;
+	FVector Acceleration{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator TargetActorRotation;
+	FRotator TargetActorRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector SmoothLocation;
+	FVector SmoothLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator SmoothRotation;
+	FRotator SmoothRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator PreviousSmoothRotation;
+	FRotator PreviousSmoothRotation{ForceInit};
 };

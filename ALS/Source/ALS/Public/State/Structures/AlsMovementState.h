@@ -19,16 +19,16 @@ struct ALS_API FAlsVelocityBlendState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float ForwardAmount;
+	float ForwardAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float BackwardAmount;
+	float BackwardAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float LeftAmount;
+	float LeftAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float RightAmount;
+	float RightAmount{0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -43,10 +43,10 @@ struct ALS_API FAlsMovementState
 	FAlsVelocityBlendState VelocityBlend;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float StrideBlendAmount;
+	float StrideBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float WalkRunBlendAmount;
+	float WalkRunBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float StandingPlayRate{1.0f};
@@ -55,5 +55,5 @@ struct ALS_API FAlsMovementState
 	float CrouchingPlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bPivotActive;
+	bool bPivotActive{false};
 };

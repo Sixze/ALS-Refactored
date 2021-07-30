@@ -19,14 +19,14 @@ struct ALS_API FAlsGeneralSettings
 	float LeanInterpolationSpeed{4.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetForwardCurve;
+	UCurveFloat* RotationYawOffsetForwardCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetBackwardCurve;
+	UCurveFloat* RotationYawOffsetBackwardCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetLeftCurve;
+	UCurveFloat* RotationYawOffsetLeftCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetRightCurve;
+	UCurveFloat* RotationYawOffsetRightCurve{nullptr};
 };

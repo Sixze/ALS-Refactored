@@ -8,11 +8,11 @@ struct ALS_API FAlsTurnInPlaceState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ActivationDelayTime;
+	float ActivationDelayTime{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDisableFootLock;
+	bool bDisableFootLock{false};
 };
