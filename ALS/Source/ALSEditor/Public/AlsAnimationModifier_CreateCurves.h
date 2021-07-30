@@ -11,10 +11,10 @@ struct ALSEDITOR_API FAlsAnimationCurveKey
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	int32 Frame;
+	int32 Frame{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Value;
+	float Value{0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -26,7 +26,7 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAddKeyOnEachFrame;
+	bool bAddKeyOnEachFrame{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FAlsAnimationCurveKey> Keys

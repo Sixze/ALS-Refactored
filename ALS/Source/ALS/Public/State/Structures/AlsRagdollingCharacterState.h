@@ -10,17 +10,17 @@ struct ALS_API FAlsRagdollingCharacterState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bGrounded;
+	bool bGrounded{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bFacedUpward;
+	bool bFacedUpward{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector RootBoneVelocity;
+	FVector RootBoneVelocity{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PullForce;
+	float PullForce{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EVisibilityBasedAnimTickOption PreviousVisibilityBasedAnimTickOption;
+	EVisibilityBasedAnimTickOption PreviousVisibilityBasedAnimTickOption{EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones};
 };

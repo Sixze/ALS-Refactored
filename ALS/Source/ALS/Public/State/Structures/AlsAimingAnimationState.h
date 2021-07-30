@@ -8,41 +8,41 @@ struct ALS_API FAlsAimingAnimationState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator Rotation;
+	FRotator Rotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float YawAngle;
+	float YawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -90, ClampMax = 90))
-	float PitchAngle;
+	float PitchAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float YawSpeed;
+	float YawSpeed{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator SmoothRotation;
+	FRotator SmoothRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float SmoothYawAngle;
+	float SmoothYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -90, ClampMax = 90))
-	float SmoothPitchAngle;
+	float SmoothPitchAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float SmoothYawAmount{0.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 0.5))
-	float SmoothYawLeftAmount;
+	float SmoothYawLeftAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0.5, ClampMax = 1))
-	float SmoothYawRightAmount;
+	float SmoothYawRightAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PitchAmount{0.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float SpineYawAngle;
+	float SpineYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float LookAmount;
+	float LookAmount{0.0f};
 };

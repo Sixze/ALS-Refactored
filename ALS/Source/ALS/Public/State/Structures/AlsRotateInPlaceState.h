@@ -8,10 +8,10 @@ struct ALS_API FAlsRotateInPlaceState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRotatingLeft;
+	bool bRotatingLeft{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRotatingRight;
+	bool bRotatingRight{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float InitialPlayRate{1.0f};
@@ -20,5 +20,5 @@ struct ALS_API FAlsRotateInPlaceState
 	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDisableFootLock;
+	bool bDisableFootLock{false};
 };

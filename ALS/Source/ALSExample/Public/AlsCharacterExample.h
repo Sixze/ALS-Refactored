@@ -15,6 +15,7 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	UAlsCameraComponent* AlsCamera;
 
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess, ClampMin = 0))
 	float LookUpMouseSensitivity{1.0f};
 
@@ -30,12 +31,15 @@ private:
 public:
 	AAlsCharacterExample();
 
-protected:
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	// Camera
 
+protected:
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo) override;
 
-	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition) override;
+	// Input
+
+protected:
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
 	void InputLookUpMouse(float Value);
@@ -75,4 +79,9 @@ private:
 	void InputViewModePressed();
 
 	void InputSwitchShoulderPressed();
+
+	// Debug
+
+public:
+	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition) override;
 };

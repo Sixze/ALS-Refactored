@@ -14,19 +14,19 @@ struct ALS_API FAlsMantlingParameters
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPrimitiveComponent* TargetPrimitive;
+	UPrimitiveComponent* TargetPrimitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector_NetQuantize TargetLocation;
+	FVector_NetQuantize TargetLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator TargetRotation;
+	FRotator TargetRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MantlingHeight;
+	float MantlingHeight{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EAlsMantlingType MantlingType;
+	EAlsMantlingType MantlingType{EAlsMantlingType::High};
 };
 
 USTRUCT(BlueprintType)
@@ -35,19 +35,19 @@ struct ALS_API FAlsMantlingState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* Montage;
+	UAnimMontage* Montage{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveVector* InterpolationAndCorrectionCurve;
+	UCurveVector* InterpolationAndCorrectionCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float PlayRate;
+	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float StartTime;
+	float StartTime{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPrimitiveComponent* Primitive;
+	UPrimitiveComponent* Primitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform TargetTransform;
@@ -59,8 +59,8 @@ struct ALS_API FAlsMantlingState
 	FTransform ActorOffset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector AnimationOffset;
+	FVector AnimationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ENetworkSmoothingMode PreviousNetworkSmoothingMode;
+	ENetworkSmoothingMode PreviousNetworkSmoothingMode{ENetworkSmoothingMode::Disabled};
 };

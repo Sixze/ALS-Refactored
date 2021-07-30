@@ -13,5 +13,5 @@ struct ALS_API FAlsRagdollingAnimationState
 	FPoseSnapshot FinalRagdollPose;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float FlailPlayRate;
+	float FlailPlayRate{1.0f};
 };

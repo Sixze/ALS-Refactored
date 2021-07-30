@@ -10,7 +10,7 @@ struct ALS_API FAlsTurnInPlaceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimSequenceBase* Animation;
+	UAnimSequenceBase* Animation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float PlayRate{1.2f};
@@ -19,7 +19,7 @@ struct ALS_API FAlsTurnInPlaceSettings
 	bool bScalePlayRateByAnimatedTurnAngle{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float AnimatedTurnAngle;
+	float AnimatedTurnAngle{0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -40,7 +40,7 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	float Turn180AngleThreshold{130.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDisableFootLock;
+	bool bDisableFootLock{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Standing Turn 90 Left"))
 	FAlsTurnInPlaceSettings StandingTurn90Left;

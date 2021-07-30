@@ -8,5 +8,5 @@ struct ALS_API FAlsRollingState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float TargetYawAngle;
+	float TargetYawAngle{0.0f};
 };
