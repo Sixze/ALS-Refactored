@@ -641,7 +641,7 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 	// Check each foot to see if the location difference between the foot look and its desired / target location
 	// (determined via a ik bone) exceeds a threshold. If it does, play an additive transition animation on that
 	// foot. The currently set transition plays the second half of a 2 foot transition animation, so that only
-	// a single foot moves. The separate virtual bone allows the system to know its desired location when locked.
+	// a single foot moves. The separate ik bone allows the system to know its desired location when locked.
 
 	const auto SkeletalMesh{GetSkelMeshComponent()};
 

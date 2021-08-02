@@ -8,7 +8,12 @@ public class ALS : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "NetCore", "Engine", "PhysicsCore", "Niagara"
+			"Core", "CoreUObject", "NetCore", "Engine", "PhysicsCore", "Niagara", "ControlRig"
+		});
+
+		PrivateDependencyModuleNames.AddRange(new[]
+		{
+			"RigVM"
 		});
 	}
 }
