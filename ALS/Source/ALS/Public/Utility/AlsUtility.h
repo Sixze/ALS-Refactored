@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Engine/EngineTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
@@ -24,6 +25,15 @@ public:
 	static constexpr int32 DrawCircleSidesCount{16};
 
 public:
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character", AutoCreateRefTerm = "CurveName"))
+	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, const FName& CurveName);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Tag"))
+	static FGameplayTagContainer GetChildTags(const FGameplayTag& Tag);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Tag"))
+	static FName GetSimpleTagName(const FGameplayTag& Tag);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName"))
 	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, const FName& DisplayName);
 
@@ -75,7 +85,4 @@ public:
 	                                                   float Radius, float HalfHeight, bool bHit, const FHitResult& Hit,
 	                                                   const FLinearColor& SweepColor, const FLinearColor& HitColor,
 	                                                   float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character", AutoCreateRefTerm = "CurveName"))
-	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, const FName& CurveName);
 };

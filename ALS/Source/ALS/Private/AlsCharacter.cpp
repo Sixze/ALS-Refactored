@@ -536,7 +536,7 @@ void AAlsCharacter::ServerSetViewMode_Implementation(const EAlsViewMode NewMode)
 	SetViewMode(NewMode);
 }
 
-void AAlsCharacter::SetOverlayMode(const EAlsOverlayMode NewMode)
+void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewMode)
 {
 	if (OverlayMode != NewMode)
 	{
@@ -555,17 +555,17 @@ void AAlsCharacter::SetOverlayMode(const EAlsOverlayMode NewMode)
 	}
 }
 
-void AAlsCharacter::ServerSetOverlayMode_Implementation(const EAlsOverlayMode NewMode)
+void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewMode)
 {
 	SetOverlayMode(NewMode);
 }
 
-void AAlsCharacter::OnReplicate_OverlayMode(const EAlsOverlayMode PreviousMode)
+void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousMode)
 {
 	OnOverlayModeChanged(PreviousMode);
 }
 
-void AAlsCharacter::OnOverlayModeChanged_Implementation(EAlsOverlayMode PreviousMode) {}
+void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousMode) {}
 
 void AAlsCharacter::SetLocomotionMode(const EAlsLocomotionMode NewMode)
 {
@@ -2017,7 +2017,7 @@ void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const 
 	Text.Text = OverlayModeText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(OverlayMode), false));
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(OverlayMode).ToString(), false));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 	VerticalPosition += RowOffset;

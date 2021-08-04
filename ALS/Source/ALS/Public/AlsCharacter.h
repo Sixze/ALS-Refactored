@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "Settings/AlsInAirRotationMode.h"
 #include "Settings/AlsMantlingSettings.h"
@@ -9,7 +10,6 @@
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
-#include "State/Enumerations/AlsOverlayMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
@@ -75,7 +75,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
-	EAlsOverlayMode OverlayMode;
+	FGameplayTag OverlayMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
 		Meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))
@@ -273,21 +273,21 @@ private:
 	// Overlay Mode
 
 public:
-	EAlsOverlayMode GetOverlayMode() const;
+	const FGameplayTag& GetOverlayMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void SetOverlayMode(EAlsOverlayMode NewMode);
+	void SetOverlayMode(const FGameplayTag& NewMode);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetOverlayMode(EAlsOverlayMode NewMode);
+	void ServerSetOverlayMode(const FGameplayTag& NewMode);
 
 	UFUNCTION()
-	void OnReplicate_OverlayMode(EAlsOverlayMode PreviousMode);
+	void OnReplicate_OverlayMode(const FGameplayTag& PreviousMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnOverlayModeChanged(EAlsOverlayMode PreviousMode);
+	void OnOverlayModeChanged(const FGameplayTag& PreviousMode);
 
 	// Locomotion Mode
 
@@ -562,7 +562,7 @@ inline EAlsViewMode AAlsCharacter::GetViewMode() const
 	return ViewMode;
 }
 
-inline EAlsOverlayMode AAlsCharacter::GetOverlayMode() const
+inline const FGameplayTag& AAlsCharacter::GetOverlayMode() const
 {
 	return OverlayMode;
 }
