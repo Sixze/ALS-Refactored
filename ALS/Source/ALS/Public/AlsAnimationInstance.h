@@ -17,7 +17,6 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
-#include "State/Structures/AlsAimingAnimationState.h"
 #include "State/Structures/AlsFeetState.h"
 #include "State/Structures/AlsInAirAnimationState.h"
 #include "State/Structures/AlsLayeringState.h"
@@ -27,6 +26,7 @@
 #include "State/Structures/AlsRagdollingAnimationState.h"
 #include "State/Structures/AlsRotateInPlaceState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
+#include "State/Structures/AlsViewAnimationState.h"
 #include "Utility/AlsConstants.h"
 
 #include "AlsAnimationInstance.generated.h"
@@ -103,7 +103,7 @@ private:
 	FAlsLayeringState LayeringState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsAimingAnimationState AimingState;
+	FAlsViewAnimationState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsFeetState FeetState;
@@ -146,7 +146,7 @@ private:
 
 	void RefreshLayering();
 
-	void RefreshAiming(float DeltaTime);
+	void RefreshView(float DeltaTime);
 
 	// Feet
 

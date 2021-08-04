@@ -41,7 +41,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
-	RefreshAiming(DeltaTime);
+	RefreshView(DeltaTime);
 	RefreshFeet(DeltaTime);
 
 	if (PreviousLocomotionMode.IsRagdolling() && !LocomotionMode.IsRagdolling())
@@ -137,7 +137,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	// The curves allow for fine control over how the offset behaves for each movement direction.
 
 	const auto RotationYawOffset{
-		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - AlsCharacter->GetAimingState().SmoothRotation.Yaw)
+		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - AlsCharacter->GetViewState().SmoothRotation.Yaw)
 	};
 
 	LocomotionState.RotationYawOffsetForward = GeneralSettings.RotationYawOffsetForwardCurve->GetFloatValue(RotationYawOffset);
@@ -195,60 +195,59 @@ void UAlsAnimationInstance::RefreshLayering()
 	LayeringState.PoseCrouchingBlendAmount = GetCurveValueClamped01(Constants.PoseCrouchCurve);
 }
 
-void UAlsAnimationInstance::RefreshAiming(const float DeltaTime)
+void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
-	AimingState.Rotation = AlsCharacter->GetAimingState().SmoothRotation;
+	ViewState.Rotation = AlsCharacter->GetViewState().SmoothRotation;
 
 	if (LocomotionAction.IsNone())
 	{
-		AimingState.YawAngle = FRotator::NormalizeAxis(AimingState.Rotation.Yaw -
-		                                               AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
+		ViewState.YawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw -
+		                                             AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
 
-		AimingState.PitchAngle = FRotator::NormalizeAxis(AimingState.Rotation.Pitch -
-		                                                 AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
+		ViewState.PitchAngle = FRotator::NormalizeAxis(ViewState.Rotation.Pitch -
+		                                               AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
 	}
 
-	AimingState.YawSpeed = AlsCharacter->GetAimingState().YawSpeed;
+	ViewState.YawSpeed = AlsCharacter->GetViewState().YawSpeed;
 
-	// Interpolate the aiming rotation value to achieve smooth aiming rotation changes. Interpolating
+	// Interpolate the view rotation value to achieve smooth view rotation changes. Interpolating
 	// the rotation before calculating the angle ensures the value is not affected by changes in
-	// actor rotation, allowing slow aiming rotation changes with fast actor rotation changes.
+	// actor rotation, allowing slow view rotation changes with fast actor rotation changes.
 
-	AimingState.SmoothRotation = UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingState.Rotation,
-	                                                        GeneralSettings.AimingSmoothRotationInterpolationSpeed, DeltaTime);
+	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewState.Rotation,
+	                                                      GeneralSettings.ViewSmoothRotationInterpolationSpeed, DeltaTime);
 
-	AimingState.SmoothYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw -
-	                                                     AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
+	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
+	                                                   AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
 
-	AimingState.SmoothPitchAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Pitch -
-	                                                       AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
+	ViewState.SmoothPitchAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Pitch -
+	                                                     AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
 
-	// Separate the Smooth aiming yaw angle into 3 separate values. These 3 values are used to
-	// improve the blending of the aiming when rotating completely around the character. This allows
-	// you to keep the aiming responsive but still smoothly blend from left to right or right to left.
+	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
+	// improve the blending of the view when rotating completely around the character. This allows
+	// you to keep the view responsive but still smoothly blend from left to right or right to left.
 
-	AimingState.SmoothYawAmount = (AimingState.SmoothYawAngle / 180.0f + 1.0f) * 0.5f;
-	AimingState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped({0.0f, 180.0f}, {0.5f, 0.0f},
-	                                                                    FMath::Abs(AimingState.SmoothYawAngle));
-	AimingState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped({0.0f, 180.0f}, {0.5f, 1.0f},
-	                                                                     FMath::Abs(AimingState.SmoothYawAngle));
+	ViewState.SmoothYawAmount = (ViewState.SmoothYawAngle / 180.0f + 1.0f) * 0.5f;
+	ViewState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped({0.0f, 180.0f}, {0.5f, 0.0f},
+	                                                                  FMath::Abs(ViewState.SmoothYawAngle));
+	ViewState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped({0.0f, 180.0f}, {0.5f, 1.0f},
+	                                                                   FMath::Abs(ViewState.SmoothYawAngle));
 
 	if (!RotationMode.IsVelocityDirection())
 	{
-		AimingState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, AimingState.PitchAngle);
+		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
 	}
 
 	if (RotationMode.IsAiming())
 	{
-		AimingState.SpineYawAngle = AimingState.YawAngle;
+		ViewState.SpineYawAngle = ViewState.YawAngle;
 	}
 
 	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(Constants.AimBlockCurve)};
 	const auto AimManualAmount{GetCurveValueClamped01(Constants.AimManualCurve)};
 
-	AimingState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
-
-	AimingState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
+	ViewState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
+	ViewState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
@@ -477,7 +476,7 @@ EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
 	}
 
 	return UAlsMath::CalculateMovementDirection(
-		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - AimingState.Rotation.Yaw),
+		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw),
 		70.0f, 5.0f);
 }
 
@@ -689,19 +688,19 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 		return;
 	}
 
-	// Check if the character should rotate left or right by checking if the aiming yaw angle exceeds the threshold.
+	// Check if the character should rotate left or right by checking if the view yaw angle exceeds the threshold.
 
 	const auto bRotatingLeftPrevious{RotateInPlaceState.bRotatingLeft};
 	const auto bRotatingRightPrevious{RotateInPlaceState.bRotatingRight};
 
-	RotateInPlaceState.bRotatingLeft = AimingState.YawAngle < -RotateInPlaceSettings.AimingYawAngleThreshold;
-	RotateInPlaceState.bRotatingRight = AimingState.YawAngle > RotateInPlaceSettings.AimingYawAngleThreshold;
+	RotateInPlaceState.bRotatingLeft = ViewState.YawAngle < -RotateInPlaceSettings.ViewYawAngleThreshold;
+	RotateInPlaceState.bRotatingRight = ViewState.YawAngle > RotateInPlaceSettings.ViewYawAngleThreshold;
 
 	if (!bRotatingLeftPrevious && RotateInPlaceState.bRotatingLeft ||
 	    !bRotatingRightPrevious && RotateInPlaceState.bRotatingRight)
 	{
 		RotateInPlaceState.InitialPlayRate = FMath::Lerp(RotateInPlaceSettings.PlayRate.X, RotateInPlaceSettings.PlayRate.Y,
-		                                                 UAlsMath::Clamp01(FMath::Abs(AimingState.YawAngle / 180.0f)));
+		                                                 UAlsMath::Clamp01(FMath::Abs(ViewState.YawAngle / 180.0f)));
 	}
 
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
@@ -709,13 +708,13 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 		return;
 	}
 
-	// If the character should be rotating, set the play rate to scale with the aiming yaw speed.
+	// If the character should be rotating, set the play rate to scale with the view yaw speed.
 	// This makes the character rotate faster when moving the camera faster.
 
 	const auto PlayRateFromYawSpeed{
-		FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceAimingYawSpeed,
+		FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceViewYawSpeed,
 		                                  RotateInPlaceSettings.PlayRate,
-		                                  AimingState.YawSpeed)
+		                                  ViewState.YawSpeed)
 	};
 
 	if (RotateInPlaceState.InitialPlayRate > PlayRateFromYawSpeed)
@@ -731,7 +730,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 	// If rotating too fast, then disable the foot lock, or else the legs begin to twist into a spiral.
 
 	RotateInPlaceState.bDisableFootLock = RotateInPlaceSettings.bDisableFootLock ||
-	                                      AimingState.YawSpeed > RotateInPlaceSettings.MaxFootLockAimingYawSpeed;
+	                                      ViewState.YawSpeed > RotateInPlaceSettings.MaxFootLockViewYawSpeed;
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
@@ -752,12 +751,12 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	// Check if the aiming yaw speed is below the threshold, and if aiming yaw angle is outside of the
+	// Check if the view yaw speed is below the threshold, and if view yaw angle is outside of the
 	// threshold. If so, begin counting the activation delay time. If not, reset the activation delay time.
 	// This ensures the conditions remain true for a sustained period of time before turning in place.
 
-	if (AimingState.YawSpeed >= TurnInPlaceSettings.AimingYawSpeedThreshold ||
-	    FMath::Abs(AimingState.YawAngle) <= TurnInPlaceSettings.AimingYawAngleThreshold)
+	if (ViewState.YawSpeed >= TurnInPlaceSettings.ViewYawSpeedThreshold ||
+	    FMath::Abs(ViewState.YawAngle) <= TurnInPlaceSettings.ViewYawAngleThreshold)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;
@@ -767,19 +766,19 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	TurnInPlaceState.ActivationDelayTime += DeltaTime;
 
 	const auto ActivationDelay{
-		FMath::GetMappedRangeValueClamped({TurnInPlaceSettings.AimingYawAngleThreshold, 180.0f},
-		                                  TurnInPlaceSettings.AimingYawAngleToActivationDelay,
-		                                  FMath::Abs(AimingState.YawAngle))
+		FMath::GetMappedRangeValueClamped({TurnInPlaceSettings.ViewYawAngleThreshold, 180.0f},
+		                                  TurnInPlaceSettings.ViewYawAngleToActivationDelay,
+		                                  FMath::Abs(ViewState.YawAngle))
 	};
 
-	// Check if the activation delay time exceeds the set delay (mapped to the aiming yaw angle). If so, start a turn in place.
+	// Check if the activation delay time exceeds the set delay (mapped to the view yaw angle). If so, start a turn in place.
 
 	if (TurnInPlaceState.ActivationDelayTime <= ActivationDelay)
 	{
 		return;
 	}
 
-	StartTurnInPlace(AimingState.Rotation.Yaw);
+	StartTurnInPlace(ViewState.Rotation.Yaw);
 }
 
 void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const float PlayRateScale, const float StartTime,
