@@ -1,13 +1,5 @@
 ﻿#pragma once
 
-#include "AlsEnumerationUtility.generated.h"
-
-UENUM()
-enum class EAlsDummy : uint8
-{
-	None,
-};
-
 template <typename Enumeration>
 static int32 GetEnumValueIndex(const Enumeration Value)
 {

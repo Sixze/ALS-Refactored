@@ -1,11 +1,29 @@
 #include "Utility/AlsUtility.h"
 
 #include "DrawDebugHelpers.h"
+#include "GameplayTagsManager.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/HUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMath.h"
+
+float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
+{
+	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;
+}
+
+FGameplayTagContainer UAlsUtility::GetChildTags(const FGameplayTag& Tag)
+{
+	return UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
+}
+
+FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
+{
+	const auto TagNode{UGameplayTagsManager::Get().FindTagNode(Tag)};
+
+	return TagNode.IsValid() ? TagNode->GetSimpleTagName() : NAME_None;
+}
 
 bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
 {
@@ -308,9 +326,4 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
 		DrawDebugPoint(World, Hit.ImpactPoint, DrawImpactPointSize, HitFColor, bPersistent, Duration, DepthPriority);
 	}
 #endif
-}
-
-float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
-{
-	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;
 }

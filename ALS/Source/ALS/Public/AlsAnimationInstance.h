@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "Settings//AlsGeneralSettings.h"
 #include "Settings/AlsDynamicTransitionSettings.h"
@@ -13,7 +14,6 @@
 #include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsMovementDirection.h"
-#include "State/Enumerations/AlsOverlayMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
@@ -82,7 +82,7 @@ private:
 	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsOverlayMode OverlayMode;
+	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionMode LocomotionMode;
