@@ -40,6 +40,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "GameplayTagsEditor",
+			"Enabled": true
+		},
+		{
 			"Name": "ControlRig",
 			"Enabled": true
 		},
