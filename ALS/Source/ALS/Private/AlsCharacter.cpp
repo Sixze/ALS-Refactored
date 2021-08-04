@@ -68,7 +68,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AimingRotation, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
@@ -106,8 +106,8 @@ void AAlsCharacter::BeginPlay()
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
 	LocomotionState.PreviousSmoothRotation = LocomotionState.SmoothRotation;
 
-	AimingState.SmoothRotation = AimingRotation;
-	AimingState.PreviousSmoothYawAngle = AimingRotation.Yaw;
+	ViewState.SmoothRotation = ViewRotation;
+	ViewState.PreviousSmoothYawAngle = ViewRotation.Yaw;
 
 	// Update states to use the initial desired values.
 
@@ -138,7 +138,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshRotationMode();
 
 	RefreshLocomotion(DeltaTime);
-	RefreshAiming(DeltaTime);
+	RefreshView(DeltaTime);
 
 	// ReSharper disable once CppIncompleteSwitchStatement
 	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
@@ -160,7 +160,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	}
 
 	LocomotionState.PreviousVelocity = LocomotionState.Velocity;
-	AimingState.PreviousSmoothYawAngle = AimingState.SmoothRotation.Yaw;
+	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
 }
 
 void AAlsCharacter::AddMovementInput(const FVector Direction, const float Scale, const bool bForce)
@@ -402,7 +402,7 @@ bool AAlsCharacter::CanSprint() const
 	       (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming) &&
 	       (ViewMode != EAlsViewMode::FirstPerson &&
 	        (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting) ||
-	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - AimingState.SmoothRotation.Yaw)) < 50.0f);
+	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - ViewState.SmoothRotation.Yaw)) < 50.0f);
 }
 
 void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
@@ -413,12 +413,21 @@ void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
 
+		OnDesiredAimingChanged(!bNewDesiredAiming);
+
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
 			ServerSetDesiredAiming(bNewDesiredAiming);
 		}
 	}
 }
+
+void AAlsCharacter::OnReplicate_DesiredAiming(const bool bPreviousDesiredAiming)
+{
+	OnDesiredAimingChanged(bPreviousDesiredAiming);
+}
+
+void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
 
 void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
 {
@@ -599,7 +608,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 
 			if (InAirRotationMode == EAlsInAirRotationMode::KeepLookingDirectionRelativeRotation)
 			{
-				InAirState.TargetYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
+				InAirState.TargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
 				InAirState.bLookingDirectionRelativeTargetYawAngle = true;
 			}
 			else
@@ -731,34 +740,39 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	RefreshSmoothLocationAndRotation();
 }
 
-void AAlsCharacter::SetAimingRotation(const FRotator& NewAimingRotation)
+FRotator AAlsCharacter::GetViewRotation() const
 {
-	if (AimingRotation != NewAimingRotation)
-	{
-		AimingRotation = NewAimingRotation;
+	return ViewRotation;
+}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, AimingRotation, this)
+void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
+{
+	if (ViewRotation != NewViewRotation)
+	{
+		ViewRotation = NewViewRotation;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewRotation, this)
 	}
 }
 
-void AAlsCharacter::RefreshAiming(const float DeltaTime)
+void AAlsCharacter::RefreshView(const float DeltaTime)
 {
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
-		SetAimingRotation(GetViewRotation().GetNormalized());
+		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}
 
-	// Interpolate aiming rotation to current control rotation for smooth character
+	// Interpolate view rotation to current control rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	AimingState.SmoothRotation = IsLocallyControlled()
-		                             ? AimingRotation
-		                             : UAlsMath::ExponentialDecay(AimingState.SmoothRotation, AimingRotation, 30.0f, DeltaTime);
+	ViewState.SmoothRotation = IsLocallyControlled()
+		                           ? ViewRotation
+		                           : UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewRotation, 30.0f, DeltaTime);
 
-	// Set the yaw speed by comparing the current and previous aiming yaw angle, divided
+	// Set the yaw speed by comparing the current and previous view yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
 
-	AimingState.YawSpeed = FMath::Abs((AimingState.SmoothRotation.Yaw - AimingState.PreviousSmoothYawAngle) / DeltaTime);
+	ViewState.YawSpeed = FMath::Abs((ViewState.SmoothRotation.Yaw - ViewState.PreviousSmoothYawAngle) / DeltaTime);
 }
 
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
@@ -800,16 +814,18 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 				const auto TargetYawAngle{
 					Gait == EAlsGait::Sprinting
 						? LocomotionState.VelocityYawAngle
-						: AimingState.SmoothRotation.Yaw + GetMesh()->GetAnimInstance()->GetCurveValue(
+						: ViewState.SmoothRotation.Yaw + GetMesh()->GetAnimInstance()->GetCurveValue(
 							  UAlsConstants::RotationYawOffsetCurve())
 				};
 
-				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500.0f, CalculateActorRotationSpeed());
+				const auto TargetRotationSpeed{Gait == EAlsGait::Sprinting ? 500.0f : 1000.0f};
+
+				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, TargetRotationSpeed, CalculateActorRotationSpeed());
 			}
 			break;
 
 			case EAlsRotationMode::Aiming:
-				RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
+				RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
 				break;
 		}
 
@@ -822,7 +838,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	{
 		if (LocomotionState.bHasInput)
 		{
-			RefreshActorRotationExtraSmooth(AimingState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
+			RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
 		}
 		else
 		{
@@ -860,11 +876,11 @@ void AAlsCharacter::RefreshAimingActorRotation(const float DeltaTime)
 {
 	// Prevent the character from rotating past a certain angle.
 
-	const auto YawAngleDifference{FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)};
+	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)};
 
 	if (FMath::Abs(YawAngleDifference) > 70.0f)
 	{
-		RefreshActorRotation(AimingState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f),
+		RefreshActorRotation(ViewState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f),
 		                     DeltaTime, 20.0f);
 	}
 }
@@ -884,15 +900,15 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 		case EAlsRotationMode::VelocityDirection:
 		case EAlsRotationMode::LookingDirection:
 			RefreshActorRotation(InAirState.bLookingDirectionRelativeTargetYawAngle
-				                     ? AimingState.SmoothRotation.Yaw - InAirState.TargetYawAngle
+				                     ? ViewState.SmoothRotation.Yaw - InAirState.TargetYawAngle
 				                     : InAirState.TargetYawAngle, DeltaTime, 5.0f);
 			break;
 
 		case EAlsRotationMode::Aiming:
-			RefreshActorRotation(AimingState.SmoothRotation.Yaw, DeltaTime, 15.0f);
+			RefreshActorRotation(ViewState.SmoothRotation.Yaw, DeltaTime, 15.0f);
 
 			InAirState.TargetYawAngle = InAirState.bLookingDirectionRelativeTargetYawAngle
-				                            ? FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)
+				                            ? FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)
 				                            : LocomotionState.SmoothRotation.Yaw;
 			break;
 	}
@@ -905,7 +921,7 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
 
 	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
-	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, AimingState.YawSpeed);
+	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, ViewState.YawSpeed);
 }
 
 void AAlsCharacter::RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed)
@@ -948,7 +964,7 @@ void AAlsCharacter::OnJumpedNetworked()
 	}
 	else if (InAirRotationMode == EAlsInAirRotationMode::KeepLookingDirectionRelativeRotation)
 	{
-		InAirState.TargetYawAngle = FRotator::NormalizeAxis(AimingState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
+		InAirState.TargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw);
 		InAirState.bLookingDirectionRelativeTargetYawAngle = true;
 	}
 	else
@@ -2064,23 +2080,23 @@ void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{120.0f * Scale};
 
-	static const auto AimingRotationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, AimingRotation), false))
+	static const auto ViewRotationText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewRotation), false))
 	};
 
 	auto Color{FLinearColor::Red};
 	Text.SetColor(Color);
 
-	Text.Text = AimingRotationText;
+	Text.Text = ViewRotationText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("R: %.2f P: %.2f Y: %.2f"),
-	                                                      AimingRotation.Roll, AimingRotation.Pitch, AimingRotation.Yaw));
+	                                                      ViewRotation.Roll, ViewRotation.Pitch, ViewRotation.Yaw));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCone(GetWorld(), GetPawnViewLocation(),
-	              AimingRotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
+	              ViewRotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
 

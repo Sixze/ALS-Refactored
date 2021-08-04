@@ -28,13 +28,13 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
-	float AimingYawAngleThreshold{45.0f};
+	float ViewYawAngleThreshold{45.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float AimingYawSpeedThreshold{50.0f};
+	float ViewYawSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	FVector2D AimingYawAngleToActivationDelay{0, 0.75f};
+	FVector2D ViewYawAngleToActivationDelay{0, 0.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, DisplayName="Turn 180 Angle Threshold"))
 	float Turn180AngleThreshold{130.0f};

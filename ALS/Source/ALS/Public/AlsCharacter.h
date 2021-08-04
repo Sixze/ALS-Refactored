@@ -13,12 +13,12 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
-#include "State/Structures/AlsAimingCharacterState.h"
 #include "State/Structures/AlsInAirCharacterState.h"
 #include "State/Structures/AlsLocomotionCharacterState.h"
 #include "State/Structures/AlsMantlingState.h"
 #include "State/Structures/AlsRagdollingCharacterState.h"
 #include "State/Structures/AlsRollingState.h"
+#include "State/Structures/AlsViewCharacterState.h"
 
 #include "AlsCharacter.generated.h"
 
@@ -61,8 +61,8 @@ private:
 		Meta = (AllowPrivateAccess))
 	EAlsGait DesiredGait{EAlsGait::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
-		Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
+		ReplicatedUsing = "OnReplicate_DesiredAiming", Meta = (AllowPrivateAccess))
 	bool bDesiredAiming;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
@@ -112,10 +112,10 @@ private:
 	FAlsLocomotionCharacterState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	FRotator AimingRotation;
+	FRotator ViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsAimingCharacterState AimingState;
+	FAlsViewCharacterState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsInAirCharacterState InAirState;
@@ -225,12 +225,21 @@ private:
 	// Desired Aiming
 
 public:
+	bool IsDesiredAiming() const;
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	void SetDesiredAiming(bool bNewDesiredAiming);
 
 private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetDesiredAiming(bool bNewDesiredAiming);
+
+	UFUNCTION()
+	void OnReplicate_DesiredAiming(bool bPreviousDesiredAiming);
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	void OnDesiredAimingChanged(bool bPreviousDesiredAiming);
 
 	// Desired Rotation Mode
 
@@ -332,19 +341,19 @@ private:
 
 	void RefreshLocomotion(float DeltaTime);
 
-	// Aiming
+	// View
 
 public:
-	const FRotator& GetAimingRotation() const;
+	virtual FRotator GetViewRotation() const override;
 
 private:
-	void SetAimingRotation(const FRotator& NewAimingRotation);
+	void SetViewRotation(const FRotator& NewViewRotation);
 
 public:
-	const FAlsAimingCharacterState& GetAimingState() const;
+	const FAlsViewCharacterState& GetViewState() const;
 
 private:
-	void RefreshAiming(float DeltaTime);
+	void RefreshView(float DeltaTime);
 
 	// Rotation
 
@@ -517,14 +526,9 @@ inline const FAlsLocomotionCharacterState& AAlsCharacter::GetLocomotionState() c
 	return LocomotionState;
 }
 
-inline const FRotator& AAlsCharacter::GetAimingRotation() const
+inline const FAlsViewCharacterState& AAlsCharacter::GetViewState() const
 {
-	return AimingRotation;
-}
-
-inline const FAlsAimingCharacterState& AAlsCharacter::GetAimingState() const
-{
-	return AimingState;
+	return ViewState;
 }
 
 inline EAlsStance AAlsCharacter::GetDesiredStance() const
@@ -545,6 +549,11 @@ inline EAlsGait AAlsCharacter::GetDesiredGait() const
 inline EAlsGait AAlsCharacter::GetGait() const
 {
 	return Gait;
+}
+
+inline bool AAlsCharacter::IsDesiredAiming() const
+{
+	return bDesiredAiming;
 }
 
 inline EAlsRotationMode AAlsCharacter::GetDesiredRotationMode() const

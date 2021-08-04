@@ -13,7 +13,7 @@ struct ALS_API FAlsGeneralSettings
 	float InputYawAmountInterpolationSpeed{8.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float AimingSmoothRotationInterpolationSpeed{10.0f};
+	float ViewSmoothRotationInterpolationSpeed{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float LeanInterpolationSpeed{4.0f};
