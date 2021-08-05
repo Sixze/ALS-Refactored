@@ -350,7 +350,7 @@ void AAlsCharacter::RefreshGait()
 
 EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 {
-	// Calculate the allowed gait. This represents the maximum gait the character is currently allowed to
+	// Calculate the max allowed gait. This represents the maximum gait the character is currently allowed to
 	// be in, and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
 	// if you wanted to force the character into a walking state while indoors, this could be done here.
 
@@ -802,6 +802,11 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	{
 		// Moving.
 
+		if (TryRefreshCustomGroundedMovingActorRotation(DeltaTime))
+		{
+			return;
+		}
+
 		switch (RotationMode)
 		{
 			case EAlsRotationMode::VelocityDirection:
@@ -818,14 +823,12 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 							  UAlsConstants::RotationYawOffsetCurve())
 				};
 
-				const auto TargetRotationSpeed{Gait == EAlsGait::Sprinting ? 500.0f : 1000.0f};
-
-				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, TargetRotationSpeed, CalculateActorRotationSpeed());
+				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, 500.0f, CalculateActorRotationSpeed());
 			}
 			break;
 
 			case EAlsRotationMode::Aiming:
-				RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
+				RefreshGroundedMovingAimingActorRotation(DeltaTime);
 				break;
 		}
 
@@ -834,16 +837,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 	// Not moving.
 
-	if (RotationMode == EAlsRotationMode::Aiming || ViewMode == EAlsViewMode::FirstPerson)
+	if (!TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime) &&
+	    RotationMode == EAlsRotationMode::Aiming || ViewMode == EAlsViewMode::FirstPerson)
 	{
-		if (LocomotionState.bHasInput)
-		{
-			RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
-		}
-		else
-		{
-			RefreshAimingActorRotation(DeltaTime);
-		}
+		RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 	}
 
 	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
@@ -872,8 +869,29 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
 }
 
-void AAlsCharacter::RefreshAimingActorRotation(const float DeltaTime)
+bool AAlsCharacter::TryRefreshCustomGroundedMovingActorRotation(const float DeltaTime)
 {
+	return false;
+}
+
+bool AAlsCharacter::TryRefreshCustomGroundedNotMovingActorRotation(const float DeltaTime)
+{
+	return false;
+}
+
+void AAlsCharacter::RefreshGroundedMovingAimingActorRotation(const float DeltaTime)
+{
+	RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
+}
+
+void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float DeltaTime)
+{
+	if (LocomotionState.bHasInput)
+	{
+		RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 1000.0f, 20.0f);
+		return;
+	}
+
 	// Prevent the character from rotating past a certain angle.
 
 	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)};
@@ -885,6 +903,16 @@ void AAlsCharacter::RefreshAimingActorRotation(const float DeltaTime)
 	}
 }
 
+float AAlsCharacter::CalculateActorRotationSpeed() const
+{
+	// Calculate the rotation speed by using the rotation speed curve in the movement gait settings. Using
+	// the curve in conjunction with the gait amount gives you a high level of control over the rotation
+	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
+
+	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
+	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, ViewState.YawSpeed);
+}
+
 void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 {
 	if (LocomotionAction == EAlsLocomotionAction::Rolling)
@@ -892,6 +920,11 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 		// Rolling.
 
 		RefreshActorRotation(RollingState.TargetYawAngle, DeltaTime, RollingSettings.ActorRotationInterpolationSpeed);
+		return;
+	}
+
+	if (TryRefreshCustomInAirActorRotation(DeltaTime))
+	{
 		return;
 	}
 
@@ -905,23 +938,23 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 			break;
 
 		case EAlsRotationMode::Aiming:
-			RefreshActorRotation(ViewState.SmoothRotation.Yaw, DeltaTime, 15.0f);
-
-			InAirState.TargetYawAngle = InAirState.bLookingDirectionRelativeTargetYawAngle
-				                            ? FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)
-				                            : LocomotionState.SmoothRotation.Yaw;
+			RefreshInAirAimingActorRotation(DeltaTime);
 			break;
 	}
 }
 
-float AAlsCharacter::CalculateActorRotationSpeed() const
+bool AAlsCharacter::TryRefreshCustomInAirActorRotation(const float DeltaTime)
 {
-	// Calculate the rotation speed by using the rotation speed curve in the movement gait settings. Using
-	// the curve in conjunction with the gait amount gives you a high level of control over the rotation
-	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
+	return false;
+}
 
-	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
-	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, ViewState.YawSpeed);
+void AAlsCharacter::RefreshInAirAimingActorRotation(const float DeltaTime)
+{
+	RefreshActorRotation(ViewState.SmoothRotation.Yaw, DeltaTime, 15.0f);
+
+	InAirState.TargetYawAngle = InAirState.bLookingDirectionRelativeTargetYawAngle
+		                            ? FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.SmoothRotation.Yaw)
+		                            : LocomotionState.SmoothRotation.Yaw;
 }
 
 void AAlsCharacter::RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed)

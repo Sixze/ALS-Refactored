@@ -73,12 +73,12 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	if (bAllowLag)
 	{
-		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), AlsCharacter->GetViewRotation().Quaternion(),
+		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), AlsCharacter->GetViewState().SmoothRotation.Quaternion(),
 		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()), DeltaTime);
 	}
 	else
 	{
-		ResultRotation = AlsCharacter->GetViewRotation().Quaternion();
+		ResultRotation = AlsCharacter->GetViewState().SmoothRotation.Quaternion();
 	}
 
 	CameraRotation = ResultRotation.Rotator();
@@ -175,12 +175,10 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	};
 
 	FHitResult Hit;
-	GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity,
-	                                 UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel),
-	                                 FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
-	                                 {__FUNCTION__, false, GetOwner()});
-
-	if (Hit.IsValidBlockingHit())
+	if (GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity,
+	                                     UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel),
+	                                     FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
+	                                     {__FUNCTION__, false, GetOwner()}))
 	{
 		ResultLocation = Hit.Location;
 	}

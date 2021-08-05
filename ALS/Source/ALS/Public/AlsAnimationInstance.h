@@ -148,6 +148,9 @@ private:
 
 	void RefreshView(float DeltaTime);
 
+protected:
+	virtual bool IsSpineRotationAllowed();
+
 	// Feet
 
 private:
@@ -221,12 +224,18 @@ private:
 private:
 	void RefreshRotateInPlace();
 
+protected:
+	virtual bool IsRotateInPlaceAllowed();
+
 	// Turn In Place
 
 private:
 	void RefreshTurnInPlace(float DeltaTime);
 
 	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartIfPlaying = false);
+
+protected:
+	virtual bool IsTurnInPlaceAllowed();
 
 	// Jump
 
