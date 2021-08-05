@@ -31,7 +31,7 @@ class ALS_API AAlsCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	UAlsCharacterMovementComponent* AlsCharacterMovement;
 
@@ -90,6 +90,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
 	UAlsMovementCharacterSettings* MovementSettings;
 
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsStance Stance;
 
@@ -360,11 +361,24 @@ private:
 private:
 	void RefreshGroundedActorRotation(float DeltaTime);
 
-	void RefreshAimingActorRotation(float DeltaTime);
+protected:
+	virtual bool TryRefreshCustomGroundedMovingActorRotation(float DeltaTime);
 
-	void RefreshInAirActorRotation(float DeltaTime);
+	virtual bool TryRefreshCustomGroundedNotMovingActorRotation(float DeltaTime);
+
+	void RefreshGroundedMovingAimingActorRotation(float DeltaTime);
+
+	void RefreshGroundedNotMovingAimingActorRotation(float DeltaTime);
 
 	float CalculateActorRotationSpeed() const;
+
+private:
+	void RefreshInAirActorRotation(float DeltaTime);
+
+protected:
+	virtual bool TryRefreshCustomInAirActorRotation(float DeltaTime);
+
+	void RefreshInAirAimingActorRotation(float DeltaTime);
 
 	void RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed);
 

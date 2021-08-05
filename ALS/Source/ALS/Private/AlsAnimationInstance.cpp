@@ -238,7 +238,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
 	}
 
-	if (RotationMode.IsAiming())
+	if (IsSpineRotationAllowed())
 	{
 		ViewState.SpineYawAngle = ViewState.YawAngle;
 	}
@@ -248,6 +248,11 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	ViewState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
 	ViewState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
+}
+
+bool UAlsAnimationInstance::IsSpineRotationAllowed()
+{
+	return RotationMode.IsAiming();
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
@@ -681,7 +686,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 {
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (LocomotionState.bMoving || !RotationMode.IsAiming() && ViewMode != EAlsViewMode::FirstPerson)
+	if (LocomotionState.bMoving || !IsRotateInPlaceAllowed())
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -733,12 +738,17 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 	                                      ViewState.YawSpeed > RotateInPlaceSettings.MaxFootLockViewYawSpeed;
 }
 
+bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
+{
+	return RotationMode.IsAiming() || ViewMode == EAlsViewMode::FirstPerson;
+}
+
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 {
 	// Turn in place is allowed only if transitions are allowed, the character
 	// standing still and looking at the camera and not in first-person mode.
 
-	if (LocomotionState.bMoving || !RotationMode.IsLookingDirection() || ViewMode == EAlsViewMode::FirstPerson)
+	if (LocomotionState.bMoving || !IsTurnInPlaceAllowed())
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;
@@ -842,6 +852,11 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	}
 
 	TurnInPlaceState.bDisableFootLock = TurnInPlaceSettings.bDisableFootLock;
+}
+
+bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
+{
+	return RotationMode.IsLookingDirection() && ViewMode != EAlsViewMode::FirstPerson;
 }
 
 void UAlsAnimationInstance::Jump()
