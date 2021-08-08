@@ -12,6 +12,9 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimati
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	bool bOverrideExistingCurves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	bool bAddKeyOnEachFrame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
@@ -42,7 +45,23 @@ private:
 		UAlsConstants::AimBlockCurve(),
 
 		UAlsConstants::HipsDirectionLockCurve(),
+	};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	bool bAddSlotCurves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	float SlotCurveValue{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	TArray<FName> SlotCurveNames
+	{
+		UAlsConstants::LayerHeadSlotCurve(),
+		UAlsConstants::LayerArmLeftSlotCurve(),
+		UAlsConstants::LayerArmRightSlotCurve(),
+		UAlsConstants::LayerSpineSlotCurve(),
+		UAlsConstants::LayerPelvisSlotCurve(),
+		UAlsConstants::LayerLegsSlotCurve(),
 	};
 
 public:

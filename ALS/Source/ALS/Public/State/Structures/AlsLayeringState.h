@@ -11,6 +11,9 @@ struct ALS_API FAlsLayeringState
 	float HeadBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float HeadSlotBlendAmount{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HeadAdditiveBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
@@ -20,10 +23,13 @@ struct ALS_API FAlsLayeringState
 	float ArmLeftAdditiveBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float ArmLeftLocalSpaceBlendAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float ArmLeftMeshSpaceBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float ArmLeftLocalSpaceBlendAmount{0.0f};
+	float ArmLeftSlotBlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float ArmRightBlendAmount{0.0f};
@@ -32,10 +38,13 @@ struct ALS_API FAlsLayeringState
 	float ArmRightAdditiveBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float ArmRightLocalSpaceBlendAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float ArmRightMeshSpaceBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float ArmRightLocalSpaceBlendAmount{0.0f};
+	float ArmRightSlotBlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HandLeftBlendAmount{0.0f};
@@ -50,14 +59,26 @@ struct ALS_API FAlsLayeringState
 	float SpineAdditiveBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float SpineSlotBlendAmount{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PelvisBlendAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float PelvisSlotBlendAmount{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float LegsBlendAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float LegsSlotBlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PoseStandingBlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PoseCrouchingBlendAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float PoseInAirBlendAmount{0.0f};
 };

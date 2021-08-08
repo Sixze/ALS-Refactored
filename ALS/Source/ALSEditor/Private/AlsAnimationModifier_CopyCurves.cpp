@@ -32,7 +32,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 	}
 	else
 	{
-		for (const auto CurveName : CurveNames)
+		for (const auto& CurveName : CurveNames)
 		{
 			if (!UAnimationBlueprintLibrary::DoesCurveExist(SourceSequence, CurveName, ERawCurveTrackTypes::RCT_Float))
 			{

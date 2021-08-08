@@ -42,6 +42,9 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifi
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	bool bOverrideExistingCurves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	TArray<FAlsAnimationCurve> Curves
 	{
 		{UAlsConstants::FootLeftIkCurve()},

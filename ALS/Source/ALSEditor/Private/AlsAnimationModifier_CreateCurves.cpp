@@ -8,6 +8,11 @@ void UAlsAnimationModifier_CreateCurves::OnApply_Implementation(UAnimSequence* S
 	{
 		if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, Curve.Name, ERawCurveTrackTypes::RCT_Float))
 		{
+			if (!bOverrideExistingCurves)
+			{
+				continue;
+			}
+
 			UAnimationBlueprintLibrary::RemoveCurve(Sequence, Curve.Name);
 		}
 

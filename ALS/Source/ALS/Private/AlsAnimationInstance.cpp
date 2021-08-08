@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
@@ -97,14 +98,14 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
 
-	LocomotionState.GaitAmount = GetCurveValue(Constants.GaitAmountCurve);
+	LocomotionState.GaitAmount = GetCurveValue(UAlsConstants::GaitAmountCurve());
 	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount);
 	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 1.0f);
 	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 2.0f);
 
 	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
 
-	LocomotionState.bAllowTransitions = GetCurveValue(Constants.AllowTransitionsCurve) >= 0.99f;
+	LocomotionState.bAllowTransitions = GetCurveValue(UAlsConstants::AllowTransitionsCurve()) >= 0.99f;
 
 	// Allow movement animations if character is moving.
 
@@ -161,38 +162,48 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 		LocomotionState.SprintTime = 0.0f;
 		LocomotionState.SprintRelativeAccelerationAmount = 0.0f;
 	}
+
+	LocomotionState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurve());
 }
 
 void UAlsAnimationInstance::RefreshLayering()
 {
-	LayeringState.HeadBlendAmount = GetCurveValueClamped01(Constants.LayerHeadCurve);
-	LayeringState.HeadAdditiveBlendAmount = GetCurveValueClamped01(Constants.LayerHeadAdditiveCurve);
+	LayeringState.HeadBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadCurve());
+	LayeringState.HeadAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadAdditiveCurve());
+	LayeringState.HeadSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadSlotCurve());
 
 	// The mesh space blend will always be 1 unless the local space blend is 1.
 
-	LayeringState.ArmLeftBlendAmount = GetCurveValueClamped01(Constants.LayerArmLeftCurve);
-	LayeringState.ArmLeftAdditiveBlendAmount = GetCurveValueClamped01(Constants.LayerArmLeftAdditiveCurve);
-	LayeringState.ArmLeftLocalSpaceBlendAmount = GetCurveValueClamped01(Constants.LayerArmLeftLocalSpaceCurve);
+	LayeringState.ArmLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftCurve());
+	LayeringState.ArmLeftAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftAdditiveCurve());
+	LayeringState.ArmLeftLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftLocalSpaceCurve());
 	LayeringState.ArmLeftMeshSpaceBlendAmount = 1.0f - FMath::FloorToInt(LayeringState.ArmLeftLocalSpaceBlendAmount);
+	LayeringState.ArmLeftSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftSlotCurve());
 
 	// The mesh space blend will always be 1 unless the local space blend is 1.
 
-	LayeringState.ArmRightBlendAmount = GetCurveValueClamped01(Constants.LayerArmRightCurve);
-	LayeringState.ArmRightAdditiveBlendAmount = GetCurveValueClamped01(Constants.LayerArmRightAdditiveCurve);
-	LayeringState.ArmRightLocalSpaceBlendAmount = GetCurveValueClamped01(Constants.LayerArmRightLocalSpaceCurve);
+	LayeringState.ArmRightBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightCurve());
+	LayeringState.ArmRightAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightAdditiveCurve());
+	LayeringState.ArmRightLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightLocalSpaceCurve());
 	LayeringState.ArmRightMeshSpaceBlendAmount = 1.0f - FMath::FloorToInt(LayeringState.ArmRightLocalSpaceBlendAmount);
+	LayeringState.ArmRightSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightSlotCurve());
 
-	LayeringState.HandLeftBlendAmount = GetCurveValueClamped01(Constants.LayerHandLeftCurve);
-	LayeringState.HandRightBlendAmount = GetCurveValueClamped01(Constants.LayerHandRightCurve);
+	LayeringState.HandLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHandLeftCurve());
+	LayeringState.HandRightBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHandRightCurve());
 
-	LayeringState.SpineBlendAmount = GetCurveValueClamped01(Constants.LayerSpineCurve);
-	LayeringState.SpineAdditiveBlendAmount = GetCurveValueClamped01(Constants.LayerSpineAdditiveCurve);
+	LayeringState.SpineBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerSpineCurve());
+	LayeringState.SpineAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerSpineAdditiveCurve());
+	LayeringState.SpineSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerSpineSlotCurve());
 
-	LayeringState.PelvisBlendAmount = GetCurveValueClamped01(Constants.LayerPelvisCurve);
-	LayeringState.LegsBlendAmount = GetCurveValueClamped01(Constants.LayerLegsCurve);
+	LayeringState.PelvisBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerPelvisCurve());
+	LayeringState.PelvisSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerPelvisSlotCurve());
 
-	LayeringState.PoseStandingBlendAmount = GetCurveValueClamped01(Constants.PoseStandCurve);
-	LayeringState.PoseCrouchingBlendAmount = GetCurveValueClamped01(Constants.PoseCrouchCurve);
+	LayeringState.LegsBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerLegsCurve());
+	LayeringState.LegsSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerLegsSlotCurve());
+
+	LayeringState.PoseStandingBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseStandCurve());
+	LayeringState.PoseCrouchingBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseCrouchCurve());
+	LayeringState.PoseInAirBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseAirCurve());
 }
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
@@ -243,8 +254,8 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		ViewState.SpineYawAngle = ViewState.YawAngle;
 	}
 
-	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(Constants.AimBlockCurve)};
-	const auto AimManualAmount{GetCurveValueClamped01(Constants.AimManualCurve)};
+	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
+	const auto AimManualAmount{GetCurveValueClamped01(UAlsConstants::AimManualCurve())};
 
 	ViewState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
 	ViewState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
@@ -257,13 +268,13 @@ bool UAlsAnimationInstance::IsSpineRotationAllowed()
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 {
-	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(Constants.FootPlantedCurve), -1.0f, 1.0f);
+	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
 
-	FeetState.Left.IkAmount = GetCurveValueClamped01(Constants.FootLeftIkCurve);
-	FeetState.Right.IkAmount = GetCurveValueClamped01(Constants.FootRightIkCurve);
+	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
+	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
 
-	RefreshFootLock(FeetState.Left, Constants.FootLeftIkBone, Constants.FootLeftLockCurve, DeltaTime);
-	RefreshFootLock(FeetState.Right, Constants.FootRightIkBone, Constants.FootRightLockCurve, DeltaTime);
+	RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
+	RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
 
 	if (LocomotionMode.IsInAir())
 	{
@@ -375,7 +386,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
 	auto FootLocation{FootState.FinalLocation};
-	FootLocation.Z = GetSkelMeshComponent()->GetSocketLocation(Constants.RootBone).Z;
+	FootLocation.Z = GetSkelMeshComponent()->GetSocketLocation(UAlsConstants::RootBone()).Z;
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit,
@@ -617,7 +628,7 @@ void UAlsAnimationInstance::OnPivotResetTimerEnded()
 void UAlsAnimationInstance::PlayTransition(UAnimSequenceBase* Animation, const float BlendInTime, const float BlendOutTime,
                                            const float PlayRate, const float StartTime)
 {
-	PlaySlotAnimationAsDynamicMontage(Animation, Constants.TransitionSlot, BlendInTime, BlendOutTime, PlayRate, 1, 0.0f, StartTime);
+	PlaySlotAnimationAsDynamicMontage(Animation, UAlsConstants::TransitionSlot(), BlendInTime, BlendOutTime, PlayRate, 1, 0.0f, StartTime);
 }
 
 void UAlsAnimationInstance::PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, const float BlendInTime,
@@ -631,8 +642,8 @@ void UAlsAnimationInstance::PlayTransitionFromStandingIdleOnly(UAnimSequenceBase
 
 void UAlsAnimationInstance::StopTransitionAndTurnInPlaceSlotAnimations(const float BlendOutTime)
 {
-	StopSlotAnimation(BlendOutTime, Constants.TransitionSlot);
-	StopSlotAnimation(BlendOutTime, Constants.TurnInPlaceSlot);
+	StopSlotAnimation(BlendOutTime, UAlsConstants::TransitionSlot());
+	StopSlotAnimation(BlendOutTime, UAlsConstants::TurnInPlaceSlot());
 }
 
 void UAlsAnimationInstance::RefreshDynamicTransitions()
@@ -649,14 +660,14 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 
 	const auto SkeletalMesh{GetSkelMeshComponent()};
 
-	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Constants.FootLeftIkBone), FeetState.Left.LockLocation) >
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootLeftIkBone()), FeetState.Left.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionRightAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
-	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Constants.FootRightIkBone), FeetState.Right.LockLocation) >
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootRightIkBone()), FeetState.Right.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(DynamicTransitionSettings.TransitionLeftAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
@@ -832,13 +843,13 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 	// If the animation is not playing or set to be overriden, play the turn animation as a dynamic montage.
 
-	if (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(Settings.Animation, Constants.TurnInPlaceSlot))
+	if (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(Settings.Animation, UAlsConstants::TurnInPlaceSlot()))
 	{
 		return;
 	}
 
-	PlaySlotAnimationAsDynamicMontage(Settings.Animation, Constants.TurnInPlaceSlot, 0.2f, 0.2f, Settings.PlayRate * PlayRateScale, 1,
-	                                  0.0f, StartTime);
+	PlaySlotAnimationAsDynamicMontage(Settings.Animation, UAlsConstants::TurnInPlaceSlot(), 0.2f, 0.2f,
+	                                  Settings.PlayRate * PlayRateScale, 1, 0.0f, StartTime);
 
 	// Scale the rotation yaw delta (gets scaled in animation graph) to compensate for play rate and turn angle (if allowed).
 
@@ -943,7 +954,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	}
 
 	return FMath::Lerp(InAirSettings.GroundPredictionAmountCurve->GetFloatValue(Hit.Time), 0.0f,
-	                   GetCurveValueClamped01(Constants.GroundPredictionBlockCurve));
+	                   GetCurveValueClamped01(UAlsConstants::GroundPredictionBlockCurve()));
 }
 
 FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
@@ -970,7 +981,7 @@ void UAlsAnimationInstance::RefreshRagdolling()
 	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
 
 	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(
-		GetSkelMeshComponent()->GetPhysicsLinearVelocity(Constants.RootBone).Size() / 1000.0f
+		GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBone()).Size() / 1000.0f
 	);
 }
 

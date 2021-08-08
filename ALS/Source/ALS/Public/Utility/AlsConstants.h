@@ -115,6 +115,13 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerHeadSlotCurve()
+	{
+		static const FName Name{TEXT("LayerHeadSlot")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& LayerArmLeftCurve()
 	{
 		static const FName Name{TEXT("LayerArmLeft")};
@@ -136,6 +143,13 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerArmLeftSlotCurve()
+	{
+		static const FName Name{TEXT("LayerArmLeftSlot")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& LayerArmRightCurve()
 	{
 		static const FName Name{TEXT("LayerArmRight")};
@@ -153,6 +167,13 @@ public:
 	static const FName& LayerArmRightLocalSpaceCurve()
 	{
 		static const FName Name{TEXT("LayerArmRightLocalSpace")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerArmRightSlotCurve()
+	{
+		static const FName Name{TEXT("LayerArmRightSlot")};
 		return Name;
 	}
 
@@ -185,6 +206,13 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerSpineSlotCurve()
+	{
+		static const FName Name{TEXT("LayerSpineSlot")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& LayerPelvisCurve()
 	{
 		static const FName Name{TEXT("LayerPelvis")};
@@ -192,9 +220,23 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerPelvisSlotCurve()
+	{
+		static const FName Name{TEXT("LayerPelvisSlot")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& LayerLegsCurve()
 	{
 		static const FName Name{TEXT("LayerLegs")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& LayerLegsSlotCurve()
+	{
+		static const FName Name{TEXT("LayerLegsSlot")};
 		return Name;
 	}
 
@@ -385,152 +427,4 @@ public:
 		static const FName Name{TEXT("ALS.Mantling")};
 		return Name;
 	}
-};
-
-USTRUCT(BlueprintType)
-struct ALS_API FAlsPropertyAccessConstants
-{
-	GENERATED_BODY()
-
-	// Bones
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RootBone{UAlsConstants::RootBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PelvisBone{UAlsConstants::PelvisBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Spine03Bone{UAlsConstants::Spine03Bone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandLeftGunVirtualBone{UAlsConstants::HandLeftGunVirtualBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandRightGunVirtualBone{UAlsConstants::HandRightGunVirtualBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootLeftIkBone{UAlsConstants::FootLeftIkBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootRightIkBone{UAlsConstants::FootRightIkBone()};
-
-	// Animation Slots
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TransitionSlot{UAlsConstants::TransitionSlot()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TurnInPlaceSlot{UAlsConstants::TurnInPlaceSlot()};
-
-	// Layering Animation Curves
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerHeadCurve{UAlsConstants::LayerHeadCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerHeadAdditiveCurve{UAlsConstants::LayerHeadAdditiveCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmLeftCurve{UAlsConstants::LayerArmLeftCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmLeftAdditiveCurve{UAlsConstants::LayerArmLeftAdditiveCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmLeftLocalSpaceCurve{UAlsConstants::LayerArmLeftLocalSpaceCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmRightCurve{UAlsConstants::LayerArmRightCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmRightAdditiveCurve{UAlsConstants::LayerArmRightAdditiveCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerArmRightLocalSpaceCurve{UAlsConstants::LayerArmRightLocalSpaceCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerHandLeftCurve{UAlsConstants::LayerHandLeftCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerHandRightCurve{UAlsConstants::LayerHandRightCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerSpineCurve{UAlsConstants::LayerSpineCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerSpineAdditiveCurve{UAlsConstants::LayerSpineAdditiveCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerPelvisCurve{UAlsConstants::LayerPelvisCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LayerLegsCurve{UAlsConstants::LayerLegsCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandLeftIkCurve{UAlsConstants::HandLeftIkCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HandRightIkCurve{UAlsConstants::HandRightIkCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AimManualCurve{UAlsConstants::AimManualCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AimBlockCurve{UAlsConstants::AimBlockCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName HipsDirectionLockCurve{UAlsConstants::HipsDirectionLockCurve()};
-
-	// Feet Animation Curves
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootLeftIkCurve{UAlsConstants::FootLeftIkCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootLeftLockCurve{UAlsConstants::FootLeftLockCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootRightIkCurve{UAlsConstants::FootRightIkCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootRightLockCurve{UAlsConstants::FootRightLockCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootPlantedCurve{UAlsConstants::FootPlantedCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FeetCrossingCurve{UAlsConstants::FeetCrossingCurve()};
-
-	// Other Animation Curves
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PoseStandCurve{UAlsConstants::PoseStandCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PoseCrouchCurve{UAlsConstants::PoseCrouchCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PoseAirCurve{UAlsConstants::PoseAirCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GaitAmountCurve{UAlsConstants::GaitAmountCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RotationYawSpeedCurve{UAlsConstants::RotationYawSpeedCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RotationYawOffsetCurve{UAlsConstants::RotationYawOffsetCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName AllowTransitionsCurve{UAlsConstants::AllowTransitionsCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName SprintBlockCurve{UAlsConstants::SprintBlockCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName GroundPredictionBlockCurve{UAlsConstants::GroundPredictionBlockCurve()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FootstepSoundBlockCurve{UAlsConstants::FootstepSoundBlockCurve()};
 };
