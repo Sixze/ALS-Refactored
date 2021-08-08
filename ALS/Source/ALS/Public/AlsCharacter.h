@@ -412,15 +412,17 @@ public:
 private:
 	bool TryStartMantlingInAir();
 
+	bool IsMantlingAllowedToStart() const;
+
 	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
 	UFUNCTION(Server, Reliable)
 	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartMantling(const FAlsMantlingParameters& Parameters, bool bInvokedByClient);
+	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
 
-	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters, bool bInvokedByClient);
+	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -442,6 +444,9 @@ protected:
 
 	// Ragdolling
 
+private:
+	bool IsRagdollingAllowedToStart() const;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	void StartRagdolling();
@@ -458,6 +463,9 @@ private:
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnRagdollingStarted();
+
+private:
+	bool IsRagdollingAllowedToStop() const;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
@@ -500,15 +508,17 @@ protected:
 	UAnimMontage* SelectRollMontage();
 
 private:
+	bool IsRollingAllowedToStart(UAnimMontage* Montage) const;
+
 	void StartRolling(float PlayRate, float TargetYawAngle);
 
 	UFUNCTION(Server, Reliable)
 	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle, bool bInvokedByClient);
+	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
-	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle, bool bInvokedByClient);
+	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
 	// Debug
 
