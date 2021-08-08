@@ -1049,7 +1049,6 @@ void AAlsCharacter::OnLandedGroundFrictionReset() const
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
 	return LocomotionMode == EAlsLocomotionMode::Grounded &&
-	       LocomotionAction == EAlsLocomotionAction::None &&
 	       TryStartMantling(GeneralMantlingSettings.GroundedTrace);
 }
 
@@ -1058,9 +1057,19 @@ bool AAlsCharacter::TryStartMantlingInAir()
 	return TryStartMantling(GeneralMantlingSettings.InAirTrace);
 }
 
+bool AAlsCharacter::IsMantlingAllowedToStart() const
+{
+	// TODO Compare the parameters of the currently running mantling and
+	// the new one to decide whether to replace it with a new one or not.
+
+	return (LocomotionMode == EAlsLocomotionMode::Grounded ||
+	        LocomotionMode == EAlsLocomotionMode::InAir) &&
+	       LocomotionAction == EAlsLocomotionAction::None;
+}
+
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
-	if (!GeneralMantlingSettings.bAllowMantling || LocomotionMode == EAlsLocomotionMode::Mantling)
+	if (!GeneralMantlingSettings.bAllowMantling || !IsMantlingAllowedToStart() || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		return false;
 	}
@@ -1240,11 +1249,11 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
-		MulticastStartMantling(Parameters, false);
+		MulticastStartMantling(Parameters);
 	}
 	else
 	{
-		StartMantlingImplementation(Parameters, false);
+		StartMantlingImplementation(Parameters);
 		ServerStartMantling(Parameters);
 	}
 
@@ -1253,28 +1262,32 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 void AAlsCharacter::ServerStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
 {
-	MulticastStartMantling(Parameters, true);
-
-	ForceNetUpdate();
-}
-
-void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters, const bool bInvokedByClient)
-{
-	StartMantlingImplementation(Parameters, bInvokedByClient);
-}
-
-void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters, const bool bInvokedByClient)
-{
-	if (LocomotionMode == EAlsLocomotionMode::Mantling && bInvokedByClient && IsLocallyControlled())
+	if (IsMantlingAllowedToStart())
 	{
-		return;
+		MulticastStartMantling(Parameters);
+
+		ForceNetUpdate();
 	}
+}
 
-	// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
+void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
+{
+	if (!IsLocallyControlled() || IsMantlingAllowedToStart())
+	{
+		StartMantlingImplementation(Parameters);
+	}
+}
 
-	MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
+void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters)
+{
+	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	{
+		// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
 
-	AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+		MantlingState.PreviousNetworkSmoothingMode = AlsCharacterMovement->NetworkSmoothingMode;
+
+		AlsCharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+	}
 
 	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 
@@ -1315,8 +1328,11 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Clear the character movement mode and set the movement state to mantling.
 
-	AlsCharacterMovement->SetMovementMode(MOVE_None);
-	SetLocomotionMode(EAlsLocomotionMode::Mantling);
+	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	{
+		AlsCharacterMovement->SetMovementMode(MOVE_None);
+		SetLocomotionMode(EAlsLocomotionMode::Mantling);
+	}
 
 	// Configure the mantling timeline so that it is the same length as the interpolation and
 	// correction curve minus the starting position, and plays at the same speed as the animation.
@@ -1447,9 +1463,14 @@ void AAlsCharacter::OnMantlingTimelineEnded()
 
 void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
+bool AAlsCharacter::IsRagdollingAllowedToStart() const
+{
+	return LocomotionMode != EAlsLocomotionMode::Ragdolling;
+}
+
 void AAlsCharacter::StartRagdolling()
 {
-	if (GetLocomotionMode() == EAlsLocomotionMode::Ragdolling)
+	if (!IsRagdollingAllowedToStart() || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		return;
 	}
@@ -1466,56 +1487,60 @@ void AAlsCharacter::StartRagdolling()
 
 void AAlsCharacter::ServerStartRagdolling_Implementation()
 {
-	MulticastStartRagdolling();
+	if (IsRagdollingAllowedToStart())
+	{
+		MulticastStartRagdolling();
+	}
 }
 
 void AAlsCharacter::MulticastStartRagdolling_Implementation()
 {
-	StartRagdollingImplementation();
+	if (!IsLocallyControlled() || IsRagdollingAllowedToStart())
+	{
+		StartRagdollingImplementation();
+	}
 }
 
 void AAlsCharacter::StartRagdollingImplementation()
 {
-	if (GetLocomotionMode() == EAlsLocomotionMode::Ragdolling)
+	// Stop any active montages.
+
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
+
+	if (LocomotionMode != EAlsLocomotionMode::Ragdolling)
 	{
-		return;
+		// When networked, disable replicate movement reset ragdolling target location and pull force variables
+		// and if the host is a dedicated server, change animation tick option to avoid z-location bug.
+
+		SetReplicateMovement(false);
+		AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
+
+		if (IsNetMode(NM_DedicatedServer))
+		{
+			RagdollingState.PreviousVisibilityBasedAnimTickOption = GetMesh()->VisibilityBasedAnimTickOption;
+			GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+		}
+
+		// Clear the character movement mode and set the movement state to ragdolling.
+
+		AlsCharacterMovement->SetMovementMode(MOVE_None);
+		SetLocomotionMode(EAlsLocomotionMode::Ragdolling);
+
+		// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
+
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 	}
 
-	// When networked, disable replicate movement reset ragdolling target location and pull force variables
-	// and if the host is a dedicated server, change animation tick option to avoid z-location bug.
-
-	SetReplicateMovement(false);
-	AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	RagdollingState.PullForce = 0.0f;
 
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		SetRagdollTargetLocation(GetMesh()->GetSocketLocation(UAlsConstants::PelvisBone()));
 	}
-
-	RagdollingState.PullForce = 0.0f;
-
-	if (IsNetMode(NM_DedicatedServer))
-	{
-		RagdollingState.PreviousVisibilityBasedAnimTickOption = GetMesh()->VisibilityBasedAnimTickOption;
-		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-	}
-
-	// Clear the character movement mode and set the movement state to ragdolling.
-
-	AlsCharacterMovement->SetMovementMode(MOVE_None);
-	SetLocomotionMode(EAlsLocomotionMode::Ragdolling);
-
-	// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
-
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
-
-	// Stop any active montages.
-
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
 
 	OnRagdollingStarted();
 }
@@ -1625,9 +1650,14 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 	LocomotionState.TargetActorRotation = LocomotionState.SmoothRotation;
 }
 
+bool AAlsCharacter::IsRagdollingAllowedToStop() const
+{
+	return LocomotionMode == EAlsLocomotionMode::Ragdolling;
+}
+
 bool AAlsCharacter::TryStopRagdolling()
 {
-	if (GetLocomotionMode() != EAlsLocomotionMode::Ragdolling)
+	if (!IsRagdollingAllowedToStop() || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		return false;
 	}
@@ -1646,55 +1676,63 @@ bool AAlsCharacter::TryStopRagdolling()
 
 void AAlsCharacter::ServerStopRagdolling_Implementation()
 {
-	MulticastStopRagdolling();
+	if (IsRagdollingAllowedToStop())
+	{
+		MulticastStopRagdolling();
 
-	ForceNetUpdate();
+		ForceNetUpdate();
+	}
 }
 
 void AAlsCharacter::MulticastStopRagdolling_Implementation()
 {
-	StopRagdollingImplementation();
+	if (!IsLocallyControlled() || IsRagdollingAllowedToStop())
+	{
+		StopRagdollingImplementation();
+	}
 }
 
 void AAlsCharacter::StopRagdollingImplementation()
 {
-	if (GetLocomotionMode() != EAlsLocomotionMode::Ragdolling)
+	if (LocomotionMode == EAlsLocomotionMode::Ragdolling)
 	{
-		return;
+		// Re-enable replicate movement and if the host is a dedicated server set animation tick option back to default.
+
+		SetReplicateMovement(true);
+		AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
+
+		if (IsNetMode(NM_DedicatedServer))
+		{
+			GetMesh()->VisibilityBasedAnimTickOption = RagdollingState.PreviousVisibilityBasedAnimTickOption;
+		}
+
+		// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
+		// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
+
+		if (RagdollingState.bGrounded)
+		{
+			AlsCharacterMovement->SetMovementMode(MOVE_Walking);
+		}
+		else
+		{
+			AlsCharacterMovement->SetMovementMode(MOVE_Falling);
+			AlsCharacterMovement->Velocity = RagdollingState.RootBoneVelocity;
+		}
+
+		// Re-enable capsule collision, and disable physics simulation on the mesh.
+
+		GetMesh()->SetAllBodiesSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		GetMesh()->SetCollisionObjectType(ECC_Pawn);
+
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
-
-	// Re-enable replicate movement and if the host is a dedicated server set animation tick option back to default.
-
-	SetReplicateMovement(true);
-	AlsCharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
-
-	if (IsNetMode(NM_DedicatedServer))
-	{
-		GetMesh()->VisibilityBasedAnimTickOption = RagdollingState.PreviousVisibilityBasedAnimTickOption;
-	}
-
-	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
-	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 
 	if (RagdollingState.bGrounded)
 	{
-		AlsCharacterMovement->SetMovementMode(MOVE_Walking);
 		GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
 		                                           EMontagePlayReturnType::MontageLength, 0.0f, true);
 	}
-	else
-	{
-		AlsCharacterMovement->SetMovementMode(MOVE_Falling);
-		AlsCharacterMovement->Velocity = RagdollingState.RootBoneVelocity;
-	}
-
-	// Re-enable capsule collision, and disable physics simulation on the mesh.
-
-	GetMesh()->SetAllBodiesSimulatePhysics(false);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetMesh()->SetCollisionObjectType(ECC_Pawn);
-
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	OnRagdollingEnded();
 }
@@ -1708,8 +1746,7 @@ void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 void AAlsCharacter::TryStartRolling(const float PlayRate)
 {
-	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
-	    LocomotionAction == EAlsLocomotionAction::None)
+	if (LocomotionMode == EAlsLocomotionMode::Grounded)
 	{
 		StartRolling(PlayRate, LocomotionState.bHasInput &&
 		                       (RollingSettings.bRotateToInputOnStart ||
@@ -1719,22 +1756,33 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	}
 }
 
+bool AAlsCharacter::IsRollingAllowedToStart(UAnimMontage* Montage) const
+{
+	return LocomotionAction == EAlsLocomotionAction::None ||
+	       LocomotionAction == EAlsLocomotionAction::Rolling &&
+	       !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage);
+}
+
 void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
 {
-	auto* Montage{SelectRollMontage()};
+	if (GetLocalRole() <= ROLE_SimulatedProxy)
+	{
+		return;
+	}
 
-	if (!IsValid(Montage))
+	auto* Montage{SelectRollMontage()};
+	if (!IsValid(Montage) || !IsRollingAllowedToStart(Montage))
 	{
 		return;
 	}
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
-		MulticastStartRolling(Montage, PlayRate, TargetYawAngle, false);
+		MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
 	}
 	else
 	{
-		StartRollingImplementation(Montage, PlayRate, TargetYawAngle, false);
+		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 		ServerStartRolling(Montage, PlayRate, TargetYawAngle);
 	}
 }
@@ -1746,19 +1794,23 @@ UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
-	MulticastStartRolling(Montage, PlayRate, TargetYawAngle, true);
+	if (IsRollingAllowedToStart(Montage))
+	{
+		MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
 
-	ForceNetUpdate();
+		ForceNetUpdate();
+	}
 }
 
-void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
-                                                         const float TargetYawAngle, const bool bInvokedByClient)
+void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
-	StartRollingImplementation(Montage, PlayRate, TargetYawAngle, bInvokedByClient);
+	if (!IsLocallyControlled() || IsRollingAllowedToStart(Montage))
+	{
+		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
+	}
 }
 
-void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
-                                               const float TargetYawAngle, const bool bInvokedByClient)
+void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
 	RollingState.TargetYawAngle = TargetYawAngle;
 
@@ -1771,10 +1823,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 		RefreshSmoothLocationAndRotation();
 	}
 
-	if (IsValid(Montage) && (!bInvokedByClient || !IsLocallyControlled()))
-	{
-		GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
-	}
+	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
 }
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)

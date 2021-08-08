@@ -32,7 +32,7 @@ void UAlsAnimNotifyState_SetLocomotionAction::NotifyEnd(USkeletalMeshComponent* 
 	Super::NotifyEnd(MeshComponent, Animation);
 
 	auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
-	if (IsValid(Character) && Character->GetLocomotionAction() == Action)
+	if (IsValid(Character) && ensure(Character->GetLocomotionAction() == Action))
 	{
 		Character->SetLocomotionAction(EAlsLocomotionAction::None);
 	}
