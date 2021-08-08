@@ -175,12 +175,17 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	};
 
 	FHitResult Hit;
-	if (GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity,
-	                                     UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel),
-	                                     FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
-	                                     {__FUNCTION__, false, GetOwner()}))
+	GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity,
+	                                 UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel),
+	                                 FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
+	                                 {__FUNCTION__, false, GetOwner()});
+
+	if (Hit.bBlockingHit)
 	{
-		ResultLocation = Hit.Location;
+		if (!Hit.bStartPenetrating)
+		{
+			ResultLocation = Hit.Location;
+		}
 	}
 
 #if ENABLE_DRAW_DEBUG

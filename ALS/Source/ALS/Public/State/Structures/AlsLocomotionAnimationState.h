@@ -61,6 +61,9 @@ struct ALS_API FAlsLocomotionAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
 	float SprintRelativeAccelerationAmount{0.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float SprintBlockAmount{0.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAllowTransitions{false};
 };

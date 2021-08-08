@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
+#include "Utility/AlsConstants.h"
 #include "Utility/AlsEnumerationUtility.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"

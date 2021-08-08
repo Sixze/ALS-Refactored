@@ -27,7 +27,6 @@
 #include "State/Structures/AlsRotateInPlaceState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
 #include "State/Structures/AlsViewAnimationState.h"
-#include "Utility/AlsConstants.h"
 
 #include "AlsAnimationInstance.generated.h"
 
@@ -39,9 +38,6 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Settings", Transient, Meta = (AllowPrivateAccess))
-	FAlsPropertyAccessConstants Constants;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsGeneralSettings GeneralSettings;
 

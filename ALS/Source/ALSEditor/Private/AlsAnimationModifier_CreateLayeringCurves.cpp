@@ -4,10 +4,15 @@
 
 void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
-	for (const auto CurveName : CurveNames)
+	for (const auto& CurveName : CurveNames)
 	{
 		if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, CurveName, ERawCurveTrackTypes::RCT_Float))
 		{
+			if (!bOverrideExistingCurves)
+			{
+				continue;
+			}
+
 			UAnimationBlueprintLibrary::RemoveCurve(Sequence, CurveName);
 		}
 
@@ -23,6 +28,36 @@ void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSeq
 		else
 		{
 			UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(0), CurveValue);
+		}
+	}
+
+	if (bAddSlotCurves)
+	{
+		for (const auto& SlotCurveName : SlotCurveNames)
+		{
+			if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, SlotCurveName, ERawCurveTrackTypes::RCT_Float))
+			{
+				if (!bOverrideExistingCurves)
+				{
+					continue;
+				}
+
+				UAnimationBlueprintLibrary::RemoveCurve(Sequence, SlotCurveName);
+			}
+
+			UAnimationBlueprintLibrary::AddCurve(Sequence, SlotCurveName);
+
+			if (bAddKeyOnEachFrame)
+			{
+				for (auto i{0}; i < Sequence->GetNumberOfFrames(); i++)
+				{
+					UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, SlotCurveName, Sequence->GetTimeAtFrame(i), SlotCurveValue);
+				}
+			}
+			else
+			{
+				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, SlotCurveName, Sequence->GetTimeAtFrame(0), SlotCurveValue);
+			}
 		}
 	}
 }
