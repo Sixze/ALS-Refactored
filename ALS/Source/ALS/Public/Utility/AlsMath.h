@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
 	static float DirectionToAngle(const FVector2D& Direction);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (DisplayName = "Angle Between (Skip Normalization)", AutoCreateRefTerm = "From, To"))
+	static float AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")
 	static FTransform AddTransforms(const FTransform& Left, const FTransform& Right);
 
@@ -126,6 +129,11 @@ inline FVector2D UAlsMath::AngleToDirection(const float Angle)
 inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+}
+
+inline float UAlsMath::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)
+{
+	return FMath::RadiansToDegrees(FMath::Acos(From | To));
 }
 
 inline FTransform UAlsMath::AddTransforms(const FTransform& Left, const FTransform& Right)

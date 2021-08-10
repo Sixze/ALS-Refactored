@@ -91,6 +91,8 @@ public:
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
 
+	bool TryFindBlockingGeometryAdjustedLocation(FVector& Location, bool bDisplayDebugCameraTraces) const;
+
 	// Debug
 
 public:
