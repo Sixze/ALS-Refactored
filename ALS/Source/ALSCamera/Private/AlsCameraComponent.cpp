@@ -65,6 +65,8 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraShapesDisplayName())};
 	const auto bDisplayDebugCameraTraces{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraTracesDisplayName())};
+#else
+	const auto bDisplayDebugCameraTraces{false};
 #endif
 
 	// Calculate result rotation. Use the view rotation and interpolate for smooth rotation.
@@ -134,7 +136,8 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	if (bDisplayDebugCameraShapes)
 	{
 		DrawDebugLine(GetWorld(), PivotLagLocation, PivotTargetLocation,
-		              FLinearColor{1.0f, 0.5f, 0.0f}.ToFColor(true), false, 0.0f, 0, 1.0f);
+		              FLinearColor{1.0f, 0.5f, 0.0f}.ToFColor(true),
+		              false, 0.0f, 0, UAlsUtility::DrawLineThickness);
 
 		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLagLocation, LagRotation.Rotator(), 16.0f, {1.0f, 0.5f, 0.0f});
 	}
@@ -152,7 +155,9 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraShapes)
 	{
-		DrawDebugLine(GetWorld(), PivotLocation, PivotLagLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true), false, 0.0f, 0, 1.0f);
+		DrawDebugLine(GetWorld(), PivotLocation, PivotLagLocation,
+		              FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
+		              false, 0.0f, 0, UAlsUtility::DrawLineThickness);
 
 		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLocation, LagRotation.Rotator(), 16.0f, {0.0f, 0.75f, 1.0f});
 	}
@@ -174,17 +179,29 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 		AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder ? ThirdPersonTraceRightSocket : ThirdPersonTraceLeftSocket)
 	};
 
-	FHitResult Hit;
-	GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity,
-	                                 UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel),
-	                                 FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
-	                                 {__FUNCTION__, false, GetOwner()});
+	static const FName MainTraceTag{FString::Format(TEXT("{0} (Main Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
-	if (Hit.bBlockingHit)
+	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(ThirdPersonTraceRadius)};
+
+	FHitResult Hit;
+	if (GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity, TraceChanel,
+	                                     CollisionShape, {MainTraceTag, false, GetOwner()}))
 	{
 		if (!Hit.bStartPenetrating)
 		{
 			ResultLocation = Hit.Location;
+		}
+		else if (TryFindBlockingGeometryAdjustedLocation(TraceStart, bDisplayDebugCameraTraces))
+		{
+			static const FName AdjustedTraceTag{FString::Format(TEXT("{0} (Adjusted Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
+			GetWorld()->SweepSingleByChannel(Hit, TraceStart, ResultLocation, FQuat::Identity, TraceChanel,
+			                                 CollisionShape, {AdjustedTraceTag, false, GetOwner()});
+			if (Hit.IsValidBlockingHit())
+			{
+				ResultLocation = Hit.Location;
+			}
 		}
 	}
 
@@ -206,6 +223,88 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 		CameraLocation = FMath::Lerp(ResultLocation, GetFirstPersonPivotLocation(), FirstPersonAmount);
 		CameraFov = FMath::Lerp(ThirdPersonFov, FirstPersonFov, FirstPersonAmount);
 	}
+}
+
+bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Location, const bool bDisplayDebugCameraTraces) const
+{
+	// Copied with modifications from ComponentEncroachesBlockingGeometry_WithAdjustment
+
+	constexpr auto Epsilon{1.0f};
+
+	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(ThirdPersonTraceRadius + Epsilon)};
+
+	static TArray<FOverlapResult> Overlaps;
+	check(Overlaps.Num() <= 0)
+
+	static const FName OverlapMultiTraceTag{FString::Format(TEXT("{0} (Overlap Multi)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
+	if (!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, TraceChanel,
+	                                       CollisionShape, {OverlapMultiTraceTag, false, GetOwner()}))
+	{
+		return false;
+	}
+
+	auto Adjustment{FVector::ZeroVector};
+	auto bAnyValidBlock{false};
+
+	FMTDResult MtdResult;
+
+	for (const auto& Overlap : Overlaps)
+	{
+		if (!Overlap.Component.IsValid() || Overlap.Component->GetCollisionResponseToChannel(TraceChanel) != ECR_Block)
+		{
+			continue;
+		}
+
+		if (!Overlap.Component->ComputePenetration(MtdResult, CollisionShape, Location, FQuat::Identity))
+		{
+			Overlaps.Reset();
+			return false;
+		}
+
+		if (!FMath::IsNearlyZero(MtdResult.Distance))
+		{
+			Adjustment += MtdResult.Direction * MtdResult.Distance;
+			bAnyValidBlock = true;
+		}
+	}
+
+	Overlaps.Reset();
+
+	if (!bAnyValidBlock)
+	{
+		return false;
+	}
+
+	auto AdjustmentDirection{Adjustment};
+	if (!AdjustmentDirection.Normalize())
+	{
+		return false;
+	}
+
+	if (UAlsMath::AngleBetweenSkipNormalization((GetOwner()->GetActorLocation() - Location).GetSafeNormal(),
+	                                            AdjustmentDirection) > 90.0f + 1.0f)
+	{
+		return false;
+	}
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebugCameraTraces)
+	{
+		DrawDebugLine(GetWorld(), Location, Location + Adjustment,
+		              FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
+		              false, 5.0f, 0, UAlsUtility::DrawLineThickness);
+	}
+#endif
+
+	Location += Adjustment;
+
+	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
+	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
+	                                                 FCollisionShape::MakeSphere(ThirdPersonTraceRadius),
+	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 
 void UAlsCameraComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const
@@ -317,7 +416,9 @@ void UAlsCameraComponent::DisplayDebugCurves(UCanvas* Canvas, const float Scale,
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
-	TArray<FName> CurveNames;
+	static TArray<FName> CurveNames;
+	check(CurveNames.Num() <= 0)
+
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
@@ -336,6 +437,8 @@ void UAlsCameraComponent::DisplayDebugCurves(UCanvas* Canvas, const float Scale,
 
 		VerticalPosition += RowOffset;
 	}
+
+	CurveNames.Reset();
 }
 
 void UAlsCameraComponent::DisplayDebugShapes(UCanvas* Canvas, const float Scale,
@@ -449,6 +552,15 @@ void UAlsCameraComponent::DisplayDebugTraces(UCanvas* Canvas, const float Scale,
 
 	const auto RowOffset{12.0f * Scale};
 
+	static const auto BlockingGeometryAdjustmentText{FText::AsCultureInvariant(TEXT("Blocking Geometry Adjustment"))};
+
+	Text.SetColor({0.0f, 0.75f, 1.0f});
+
+	Text.Text = BlockingGeometryAdjustmentText;
+	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
+
+	VerticalPosition += RowOffset;
+
 	static const auto CameraTraceNoHitText{FText::AsCultureInvariant(TEXT("Camera Trace (No Hit)"))};
 
 	Text.SetColor(FLinearColor::Green);
@@ -458,11 +570,11 @@ void UAlsCameraComponent::DisplayDebugTraces(UCanvas* Canvas, const float Scale,
 
 	VerticalPosition += RowOffset;
 
-	static const auto CameraTraceHitText{FText::AsCultureInvariant(TEXT("Camera Trace (Object Hit)"))};
+	static const auto CameraTraceBlockingHitText{FText::AsCultureInvariant(TEXT("Camera Trace (Blocking Hit)"))};
 
 	Text.SetColor(FLinearColor::Red);
 
-	Text.Text = CameraTraceHitText;
+	Text.Text = CameraTraceBlockingHitText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	VerticalPosition += RowOffset;

@@ -1093,7 +1093,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace forward to find a object the character cannot walk on.
 
-	static const FName ForwardTraceTagName{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName ForwardTraceTag{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	const FVector ForwardTraceDirection{
 		UAlsMath::AngleToDirection(
@@ -1120,7 +1120,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
-	                                    {ForwardTraceTagName, false, this});
+	                                    {ForwardTraceTag, false, this});
 
 	auto* TargetPrimitive{ForwardTraceHit.GetComponent()};
 
@@ -1144,7 +1144,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace downward from the first trace's impact point and determine if the hit location is walkable.
 
-	static const FName DownwardTraceTagName{FString::Format(TEXT("{0} (Downward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName DownwardTraceTag{FString::Format(TEXT("{0} (Downward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	const auto TargetLocationOffset{FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * TraceSettings.TargetLocationOffset};
 
@@ -1161,7 +1161,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
 	                                    MantlingAndRagdollObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
-	                                    {DownwardTraceTagName, false, this});
+	                                    {DownwardTraceTag, false, this});
 
 	if (!AlsCharacterMovement->IsWalkable(DownwardTraceHit))
 	{
@@ -1184,7 +1184,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
-	static const FName FreeSpaceTraceTagName{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	const FVector TargetLocation{
 		DownwardTraceHit.ImpactPoint.X, DownwardTraceHit.ImpactPoint.Y,
@@ -1193,7 +1193,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
 	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                           {FreeSpaceTraceTagName, false, this}))
+	                                           {FreeSpaceTraceTag, false, this}))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -1975,7 +1975,9 @@ void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
-	TArray<FName> CurveNames;
+	static TArray<FName> CurveNames;
+	check(CurveNames.Num() <= 0)
+
 	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
@@ -1994,6 +1996,8 @@ void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const
 
 		VerticalPosition += RowOffset;
 	}
+
+	CurveNames.Reset();
 }
 
 void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
