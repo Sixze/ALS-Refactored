@@ -1,9 +1,9 @@
 #pragma once
 
-#include "AlsInAirAnimationState.generated.h"
+#include "AlsInAirState.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsInAirAnimationState
+struct ALS_API FAlsInAirState
 {
 	GENERATED_BODY()
 
