@@ -13,11 +13,9 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
-#include "State/Structures/AlsInAirCharacterState.h"
 #include "State/Structures/AlsLocomotionCharacterState.h"
 #include "State/Structures/AlsMantlingState.h"
 #include "State/Structures/AlsRagdollingCharacterState.h"
-#include "State/Structures/AlsRollingState.h"
 #include "State/Structures/AlsViewCharacterState.h"
 
 #include "AlsCharacter.generated.h"
@@ -119,9 +117,6 @@ private:
 	FAlsViewCharacterState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsInAirCharacterState InAirState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsMantlingState MantlingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
@@ -129,9 +124,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingCharacterState RagdollingState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsRollingState RollingState;
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
@@ -336,9 +328,9 @@ public:
 private:
 	void SetInputDirection(FVector NewInputDirection);
 
-	FTransform CalculateSmoothTransform() const;
+	FTransform CalculateNetworkSmoothedTransform() const;
 
-	void RefreshSmoothLocationAndRotation();
+	void RefreshLocomotionLocationAndRotation();
 
 	void RefreshLocomotion(float DeltaTime);
 
@@ -380,10 +372,11 @@ protected:
 
 	void RefreshInAirAimingActorRotation(float DeltaTime);
 
-	void RefreshActorRotation(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed);
+	void RefreshActorRotation(const float TargetYawAngle, const float DeltaTime,
+	                          const float RotationSpeed, bool bRefreshTargetYawAngle = true);
 
-	void RefreshActorRotationExtraSmooth(const float TargetYawAngle, const float DeltaTime,
-	                                     const float TargetRotationSpeed, const float ActorRotationSpeed);
+	void RefreshActorRotationExtraSmooth(const float TargetYawAngle, const float DeltaTime, const float TargetRotationSpeed,
+	                                     const float ActorRotationSpeed, bool bRefreshTargetYawAngle = true);
 
 	// Jumping
 

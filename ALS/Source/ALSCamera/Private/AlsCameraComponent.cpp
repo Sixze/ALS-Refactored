@@ -69,18 +69,19 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	const auto bDisplayDebugCameraTraces{false};
 #endif
 
-	// Calculate result rotation. Use the view rotation and interpolate for smooth rotation.
+	// Calculate result rotation. Use raw rotation locally and smooth rotation on remote clients.
 
-	FQuat ResultRotation;
+	auto ResultRotation{
+		(AlsCharacter->IsLocallyControlled()
+			 ? AlsCharacter->GetViewRotation()
+			 : AlsCharacter->GetViewState().SmoothRotation).Quaternion()
+	};
 
 	if (bAllowLag)
 	{
-		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), AlsCharacter->GetViewState().SmoothRotation.Quaternion(),
-		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()), DeltaTime);
-	}
-	else
-	{
-		ResultRotation = AlsCharacter->GetViewState().SmoothRotation.Quaternion();
+		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), ResultRotation,
+		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()),
+		                                            DeltaTime);
 	}
 
 	CameraRotation = ResultRotation.Rotator();

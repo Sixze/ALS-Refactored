@@ -82,7 +82,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 		const auto InputYawAngle{
 			FRotator::NormalizeAxis(
-				AlsCharacter->GetLocomotionState().InputYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)
+				AlsCharacter->GetLocomotionState().InputYawAngle - AlsCharacter->GetLocomotionState().Rotation.Yaw)
 		};
 
 		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
@@ -124,12 +124,12 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	if ((Acceleration | LocomotionState.Velocity) > 0.0f)
 	{
-		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
+		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().Rotation.UnrotateVector(
 			UAlsMath::ClampMagnitude01(Acceleration / CharacterMovement->GetMaxAcceleration()));
 	}
 	else
 	{
-		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(
+		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().Rotation.UnrotateVector(
 			UAlsMath::ClampMagnitude01(Acceleration / CharacterMovement->GetMaxBrakingDeceleration()));
 	}
 
@@ -212,11 +212,8 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	if (LocomotionAction.IsNone())
 	{
-		ViewState.YawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw -
-		                                             AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
-
-		ViewState.PitchAngle = FRotator::NormalizeAxis(ViewState.Rotation.Pitch -
-		                                               AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
+		ViewState.YawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw - AlsCharacter->GetLocomotionState().Rotation.Yaw);
+		ViewState.PitchAngle = FRotator::NormalizeAxis(ViewState.Rotation.Pitch - AlsCharacter->GetLocomotionState().Rotation.Pitch);
 	}
 
 	ViewState.YawSpeed = AlsCharacter->GetViewState().YawSpeed;
@@ -229,10 +226,10 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	                                                      GeneralSettings.ViewSmoothRotationInterpolationSpeed, DeltaTime);
 
 	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
-	                                                   AlsCharacter->GetLocomotionState().SmoothRotation.Yaw);
+	                                                   AlsCharacter->GetLocomotionState().Rotation.Yaw);
 
 	ViewState.SmoothPitchAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Pitch -
-	                                                     AlsCharacter->GetLocomotionState().SmoothRotation.Pitch);
+	                                                     AlsCharacter->GetLocomotionState().Rotation.Pitch);
 
 	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
 	// improve the blending of the view when rotating completely around the character. This allows
@@ -356,7 +353,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	if (LocomotionMode.IsGrounded())
 	{
 		const auto RotationDifference{
-			(AlsCharacter->GetLocomotionState().PreviousSmoothRotation - AlsCharacter->GetLocomotionState().SmoothRotation).Quaternion()
+			(AlsCharacter->GetLocomotionState().PreviousRotation - AlsCharacter->GetLocomotionState().Rotation).Quaternion()
 		};
 
 		// Subtract the rotation difference from the current relative rotation to get the new relative rotation.
@@ -521,7 +518,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
-		AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(LocomotionState.Velocity.GetSafeNormal())
+		AlsCharacter->GetLocomotionState().Rotation.UnrotateVector(LocomotionState.Velocity.GetSafeNormal())
 	};
 
 	const auto RelativeDirection{
@@ -805,7 +802,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const float PlayRateScale, const float StartTime,
                                              const bool bAllowRestartIfPlaying)
 {
-	const auto TurnAngle{FRotator::NormalizeAxis(TargetYawAngle - AlsCharacter->GetLocomotionState().SmoothRotation.Yaw)};
+	const auto TurnAngle{FRotator::NormalizeAxis(TargetYawAngle - AlsCharacter->GetLocomotionState().Rotation.Yaw)};
 
 	// Choose settings on the turn angle and stance.
 
@@ -921,7 +918,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	}
 
 	const auto* Capsule{AlsCharacter->GetCapsuleComponent()};
-	const auto SweepStartLocation{AlsCharacter->GetLocomotionState().SmoothLocation};
+	const auto SweepStartLocation{AlsCharacter->GetLocomotionState().Location};
 
 	auto VelocityDirection{LocomotionState.Velocity};
 	VelocityDirection.Z = FMath::Clamp(InAirState.VerticalVelocity, -4000.0f, -200.0f);
@@ -964,7 +961,7 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 	// smoothly reverse the leaning direction when transitioning from moving upwards to moving downwards.
 
 	const auto RelativeVelocity{
-		AlsCharacter->GetLocomotionState().SmoothRotation.UnrotateVector(LocomotionState.Velocity) / 350.0f *
+		AlsCharacter->GetLocomotionState().Rotation.UnrotateVector(LocomotionState.Velocity) / 350.0f *
 		InAirSettings.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 

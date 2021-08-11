@@ -18,7 +18,7 @@
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsFeetState.h"
-#include "State/Structures/AlsInAirAnimationState.h"
+#include "State/Structures/AlsInAirState.h"
 #include "State/Structures/AlsLayeringState.h"
 #include "State/Structures/AlsLeanState.h"
 #include "State/Structures/AlsLocomotionAnimationState.h"
@@ -117,7 +117,7 @@ private:
 	FAlsTurnInPlaceState TurnInPlaceState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsInAirAnimationState InAirState;
+	FAlsInAirState InAirState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingAnimationState RagdollingState;
