@@ -19,7 +19,7 @@ void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* MeshComponent, U
 		return;
 	}
 
-	auto* Player{Cast<APlayerController>(Pawn->GetController())};
+	const auto* Player{Cast<APlayerController>(Pawn->GetController())};
 	if (!IsValid(Player))
 	{
 		return;

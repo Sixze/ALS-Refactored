@@ -31,7 +31,7 @@ class ALS_API AAlsCharacter : public ACharacter
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	UAlsCharacterMovementComponent* AlsCharacterMovement;
+	TWeakObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	UTimelineComponent* MantlingTimeline;
@@ -501,7 +501,7 @@ protected:
 	UAnimMontage* SelectRollMontage();
 
 private:
-	bool IsRollingAllowedToStart(UAnimMontage* Montage) const;
+	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
 
 	void StartRolling(float PlayRate, float TargetYawAngle);
 
@@ -519,18 +519,18 @@ public:
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition) override;
 
 private:
-	static void DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
 	                               float Scale, float HorizontalPosition, float& VerticalPosition);
 
-	void DisplayDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugState(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugState(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugShapes(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugTraces(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugMantling(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
 inline const FVector& AAlsCharacter::GetInputDirection() const

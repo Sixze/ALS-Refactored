@@ -38,7 +38,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
                                  const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -69,7 +69,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
                                     const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -100,7 +100,7 @@ void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const 
                                              const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -125,7 +125,7 @@ void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FV
                                            const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -147,7 +147,7 @@ void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVecto
                                        const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -172,7 +172,7 @@ void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const 
                                              const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -198,7 +198,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsule(const UObject* WorldContext, const
                                               const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;
@@ -232,7 +232,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
                                                          const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	auto* World{WorldContext->GetWorld()};
+	const auto* World{WorldContext->GetWorld()};
 	if (!IsValid(World))
 	{
 		return;

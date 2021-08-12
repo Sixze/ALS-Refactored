@@ -96,17 +96,17 @@ private:
 	// Debug
 
 public:
-	void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const;
+	void DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const;
 
 private:
-	static void DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
 	                               float Scale, float HorizontalPosition, float& VerticalPosition);
 
-	void DisplayDebugCurves(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugShapes(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugShapes(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 
-	void DisplayDebugTraces(UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
+	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
 inline bool UAlsCameraComponent::IsRightShoulder() const

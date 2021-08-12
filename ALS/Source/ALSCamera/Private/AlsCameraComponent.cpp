@@ -308,7 +308,7 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 
-void UAlsCameraComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const
+void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalPosition) const
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -381,7 +381,7 @@ void UAlsCameraComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo&
 	VerticalPosition = MaxVerticalPosition;
 }
 
-void UAlsCameraComponent::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
                                              const float Scale, const float HorizontalPosition, float& VerticalPosition)
 {
 	FCanvasTextItem Text{
@@ -399,7 +399,7 @@ void UAlsCameraComponent::DisplayDebugHeader(UCanvas* Canvas, const FText& Heade
 	VerticalPosition += 15.0f * Scale;
 }
 
-void UAlsCameraComponent::DisplayDebugCurves(UCanvas* Canvas, const float Scale,
+void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
                                              const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
@@ -442,7 +442,7 @@ void UAlsCameraComponent::DisplayDebugCurves(UCanvas* Canvas, const float Scale,
 	CurveNames.Reset();
 }
 
-void UAlsCameraComponent::DisplayDebugShapes(UCanvas* Canvas, const float Scale,
+void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
                                              const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
@@ -536,7 +536,7 @@ void UAlsCameraComponent::DisplayDebugShapes(UCanvas* Canvas, const float Scale,
 	VerticalPosition += RowOffset;
 }
 
-void UAlsCameraComponent::DisplayDebugTraces(UCanvas* Canvas, const float Scale,
+void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
                                              const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;

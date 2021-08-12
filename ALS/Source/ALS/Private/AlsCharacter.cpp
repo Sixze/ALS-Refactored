@@ -1787,7 +1787,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	}
 }
 
-bool AAlsCharacter::IsRollingAllowedToStart(UAnimMontage* Montage) const
+bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
 	return LocomotionAction == EAlsLocomotionAction::None ||
 	       LocomotionAction == EAlsLocomotionAction::Rolling &&
@@ -1971,7 +1971,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
 }
 
-void AAlsCharacter::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
                                        const float Scale, const float HorizontalPosition, float& VerticalPosition)
 {
 	FCanvasTextItem Text{
@@ -1989,7 +1989,7 @@ void AAlsCharacter::DisplayDebugHeader(UCanvas* Canvas, const FText& HeaderText,
 	VerticalPosition += 15.0f * Scale;
 }
 
-void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2031,7 +2031,7 @@ void AAlsCharacter::DisplayDebugCurves(UCanvas* Canvas, const float Scale, const
 	CurveNames.Reset();
 }
 
-void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2181,7 +2181,7 @@ void AAlsCharacter::DisplayDebugState(UCanvas* Canvas, const float Scale, const 
 	VerticalPosition += RowOffset;
 }
 
-void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2330,7 +2330,7 @@ void AAlsCharacter::DisplayDebugShapes(UCanvas* Canvas, const float Scale, const
 #endif
 }
 
-void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2374,7 +2374,7 @@ void AAlsCharacter::DisplayDebugTraces(UCanvas* Canvas, const float Scale, const
 	VerticalPosition += RowOffset;
 }
 
-void AAlsCharacter::DisplayDebugMantling(UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
