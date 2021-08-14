@@ -83,9 +83,16 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
-	static const FName& FirstPersonAmountCurve()
+	static const FName& FirstPersonOverrideCurve()
 	{
-		static const FName Name{TEXT("FirstPersonAmount")};
+		static const FName Name{TEXT("FirstPersonOverride")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	static const FName& TraceOverrideCurve()
+	{
+		static const FName Name{TEXT("TraceOverride")};
 		return Name;
 	}
 

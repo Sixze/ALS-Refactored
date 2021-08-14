@@ -86,8 +86,8 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	CameraRotation = ResultRotation.Rotator();
 
-	const auto FirstPersonAmount{UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonAmountCurve()))};
-	if (FirstPersonAmount >= 1.0f)
+	const auto FirstPersonOverride{UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurve()))};
+	if (FirstPersonOverride >= 1.0f)
 	{
 		PivotTargetLocation = GetThirdPersonPivotTransform().GetLocation();
 		PivotLagLocation = PivotTargetLocation;
@@ -146,12 +146,15 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	// Calculate pivot location. Get the pivot lag location and apply local offsets for further camera control.
 
-	PivotLocation = PivotLagLocation +
-	                PivotTargetTransform.TransformVectorNoScale({
-		                GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
-		                GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
-		                GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
-	                });
+	const auto PivotOffset{
+		PivotTargetTransform.TransformVectorNoScale({
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
+		})
+	};
+
+	PivotLocation = PivotLagLocation + PivotOffset;
 
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraShapes)
@@ -176,11 +179,14 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	// Trace for an object between the camera and character to apply a corrective offset.
 
-	auto TraceStart{
-		AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder ? ThirdPersonTraceRightSocket : ThirdPersonTraceLeftSocket)
-	};
-
 	static const FName MainTraceTag{FString::Format(TEXT("{0} (Main Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+
+	auto TraceStart{
+		FMath::Lerp(
+			AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder ? ThirdPersonTraceRightSocket : ThirdPersonTraceLeftSocket),
+			PivotTargetLocation + PivotOffset + ThirdPersonTraceOverrideOffset,
+			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurve())))
+	};
 
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(ThirdPersonTraceChannel)};
 	const auto CollisionShape{FCollisionShape::MakeSphere(ThirdPersonTraceRadius)};
@@ -214,15 +220,15 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	}
 #endif
 
-	if (FirstPersonAmount <= 0.0f)
+	if (FirstPersonOverride <= 0.0f)
 	{
 		CameraLocation = ResultLocation;
 		CameraFov = ThirdPersonFov;
 	}
 	else
 	{
-		CameraLocation = FMath::Lerp(ResultLocation, GetFirstPersonPivotLocation(), FirstPersonAmount);
-		CameraFov = FMath::Lerp(ThirdPersonFov, FirstPersonFov, FirstPersonAmount);
+		CameraLocation = FMath::Lerp(ResultLocation, GetFirstPersonPivotLocation(), FirstPersonOverride);
+		CameraFov = FMath::Lerp(ThirdPersonFov, FirstPersonFov, FirstPersonOverride);
 	}
 }
 

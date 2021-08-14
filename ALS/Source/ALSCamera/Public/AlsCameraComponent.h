@@ -43,6 +43,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Third Person", Meta = (AllowPrivateAccess))
 	FName ThirdPersonTraceRightSocket{TEXT("ThirdPersonCameraTraceRight")};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Third Person", Meta = (AllowPrivateAccess))
+	FVector ThirdPersonTraceOverrideOffset{0.0f, 0.0f, 40.0f};
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
 
