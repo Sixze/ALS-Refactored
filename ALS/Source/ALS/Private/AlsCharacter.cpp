@@ -1537,6 +1537,10 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
 
+	// Force interrupt any active locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to end.
+
+	SetLocomotionAction(EAlsLocomotionAction::None);
+
 	if (LocomotionMode != EAlsLocomotionMode::Ragdolling)
 	{
 		// When networked, disable replicate movement reset ragdolling target location and pull force variables
