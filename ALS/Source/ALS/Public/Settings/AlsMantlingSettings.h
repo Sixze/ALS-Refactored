@@ -60,12 +60,15 @@ struct ALS_API FAlsGeneralMantlingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* TimelineCurve{nullptr};
 
-	// If a dynamic object has a speed bigger than this value, then do not start mantling.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TargetPrimitiveSpeedThreshold{10.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	float TraceAngleThreshold{110.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
 	float MaxReachAngle{50.0f};
+
+	// If a dynamic object has a speed bigger than this value, then do not start mantling.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TargetPrimitiveSpeedThreshold{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMantlingTraceSettings GroundedTrace;

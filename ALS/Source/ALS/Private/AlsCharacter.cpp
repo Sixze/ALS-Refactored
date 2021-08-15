@@ -730,7 +730,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasInput)
 	{
-		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle(FVector2D{InputDirection});
+		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle2D(InputDirection);
 	}
 
 	LocomotionState.Velocity = GetVelocity();
@@ -745,7 +745,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasSpeed)
 	{
-		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle(FVector2D{LocomotionState.Velocity});
+		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle2D(LocomotionState.Velocity);
 	}
 
 	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
@@ -1103,6 +1103,34 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		return false;
 	}
 
+	float ForwardTraceAngle;
+	if (LocomotionState.bHasSpeed)
+	{
+		ForwardTraceAngle = LocomotionState.bHasInput
+			                    ? LocomotionState.VelocityYawAngle +
+			                      FMath::ClampAngle(LocomotionState.InputYawAngle - LocomotionState.VelocityYawAngle,
+			                                        -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
+			                    : LocomotionState.VelocityYawAngle;
+	}
+	else
+	{
+		ForwardTraceAngle = LocomotionState.bHasInput
+			                    ? LocomotionState.InputYawAngle
+			                    : LocomotionState.Rotation.Yaw;
+	}
+
+	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - LocomotionState.Rotation.Yaw};
+	if (FMath::Abs(ForwardTraceDeltaAngle) > GeneralMantlingSettings.TraceAngleThreshold)
+	{
+		return false;
+	}
+
+	const auto ForwardTraceDirection{
+		UAlsMath::AngleToDirection2D(
+			LocomotionState.Rotation.Yaw +
+			FMath::ClampAngle(ForwardTraceDeltaAngle, -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle))
+	};
+
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(this, UAlsConstants::MantlingDisplayName())};
 #endif
@@ -1123,20 +1151,6 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Trace forward to find a object the character cannot walk on.
 
 	static const FName ForwardTraceTag{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
-
-	const FVector ForwardTraceDirection{
-		UAlsMath::AngleToDirection(
-			LocomotionState.bHasInput
-				? LocomotionState.Rotation.Yaw +
-				  FMath::ClampAngle(UAlsMath::DirectionToAngle(FVector2D{InputDirection}) - LocomotionState.Rotation.Yaw,
-				                    -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
-				: LocomotionState.bHasSpeed
-				? LocomotionState.Rotation.Yaw +
-				  FMath::ClampAngle(LocomotionState.VelocityYawAngle - LocomotionState.Rotation.Yaw,
-				                    -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
-				: LocomotionState.Rotation.Yaw),
-		0.0f
-	};
 
 	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * CapsuleRadius};
 	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.X + TraceSettings.LedgeHeight.Y) * 0.5f - UCharacterMovementComponent::MAX_FLOOR_DIST;
@@ -1993,7 +2007,8 @@ void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& Heade
 	VerticalPosition += 15.0f * Scale;
 }
 
-void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
+                                       const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2035,7 +2050,8 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	CurveNames.Reset();
 }
 
-void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
+                                      const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2185,7 +2201,8 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale, 
 	VerticalPosition += RowOffset;
 }
 
-void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
+                                       const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2244,7 +2261,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f},
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f} +
-	                          FVector{UAlsMath::AngleToDirection(LocomotionState.InputYawAngle) * 50.0f, 0.0f},
+	                          UAlsMath::AngleToDirection2D(LocomotionState.InputYawAngle) * 50.0f,
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 
@@ -2293,7 +2310,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation,
 	                          FeetLocation +
-	                          FVector{UAlsMath::AngleToDirection(LocomotionState.VelocityYawAngle), 0.0f} *
+	                          UAlsMath::AngleToDirection2D(LocomotionState.VelocityYawAngle) *
 	                          FMath::GetMappedRangeValueClamped({0.0f, AlsCharacterMovement->GetMaxSpeed()},
 	                                                            {50.0f, 75.0f}, LocomotionState.Speed),
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
@@ -2334,7 +2351,8 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 #endif
 }
 
-void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
+                                       const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 
@@ -2378,7 +2396,8 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 	VerticalPosition += RowOffset;
 }
 
-void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scale, const float HorizontalPosition, float& VerticalPosition) const
+void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scale,
+                                         const float HorizontalPosition, float& VerticalPosition) const
 {
 	VerticalPosition += 4.0f * Scale;
 

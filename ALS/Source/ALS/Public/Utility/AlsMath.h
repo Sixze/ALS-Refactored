@@ -44,12 +44,22 @@ public:
 	static FVector2D RadianToDirection(float Radian);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
+	static FVector RadianToDirection3D(float Radian);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
 	static FVector2D AngleToDirection(float Angle);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
+	static FVector AngleToDirection2D(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
 	static float DirectionToAngle(const FVector2D& Direction);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (DisplayName = "Angle Between (Skip Normalization)", AutoCreateRefTerm = "From, To"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
+	static float DirectionToAngle2D(const FVector& Direction);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector",
+		Meta = (DisplayName = "Angle Between (Skip Normalization)", AutoCreateRefTerm = "From, To"))
 	static float AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")
@@ -121,12 +131,30 @@ inline FVector2D UAlsMath::RadianToDirection(const float Radian)
 	return {Cos, Sin};
 }
 
+inline FVector UAlsMath::RadianToDirection3D(const float Radian)
+{
+	float Sin, Cos;
+	FMath::SinCos(&Sin, &Cos, Radian);
+
+	return {Cos, Sin, 0.0f};
+}
+
 inline FVector2D UAlsMath::AngleToDirection(const float Angle)
 {
 	return RadianToDirection(FMath::DegreesToRadians(Angle));
 }
 
+inline FVector UAlsMath::AngleToDirection2D(const float Angle)
+{
+	return RadianToDirection3D(FMath::DegreesToRadians(Angle));
+}
+
 inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
+{
+	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+}
+
+inline float UAlsMath::DirectionToAngle2D(const FVector& Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
