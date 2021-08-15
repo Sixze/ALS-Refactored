@@ -1,6 +1,7 @@
 #include "AlsCharacterExample.h"
 
 #include "AlsCameraComponent.h"
+#include "TimerManager.h"
 #include "Components/InputComponent.h"
 #include "Utility/AlsMath.h"
 
@@ -88,21 +89,43 @@ void AAlsCharacterExample::InputMoveRight(const float Value)
 
 void AAlsCharacterExample::InputSprintPressed()
 {
-	SetDesiredGait(EAlsGait::Sprinting);
+	// Start the sprint with a slight delay to give the player enough time to start the roll with a double click instead.
+
+	GetWorldTimerManager().SetTimer(SprintStartTimer, this, &ThisClass::OnSprintStartTimerEnded,
+	                                0.1f, false);
 }
 
 void AAlsCharacterExample::InputSprintReleased()
 {
-	SetDesiredGait(EAlsGait::Running);
+	if (GetWorldTimerManager().TimerExists(SprintStartTimer))
+	{
+		GetWorldTimerManager().ClearTimer(SprintStartTimer);
+	}
+	else
+	{
+		SetDesiredGait(EAlsGait::Running);
+	}
+}
+
+void AAlsCharacterExample::OnSprintStartTimerEnded()
+{
+	SetDesiredGait(EAlsGait::Sprinting);
 }
 
 void AAlsCharacterExample::InputRoll()
 {
+	GetWorldTimerManager().ClearTimer(SprintStartTimer);
+
 	TryStartRolling(1.3f);
 }
 
 void AAlsCharacterExample::InputWalk()
 {
+	if (GetWorldTimerManager().TimerExists(SprintStartTimer))
+	{
+		return;
+	}
+
 	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
 	// ReSharper disable once CppIncompleteSwitchStatement
 	switch (GetDesiredGait())

@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess, ClampMin = 0))
 	float LookRightRate{90.0f};
 
+private:
+	FTimerHandle SprintStartTimer;
+
 public:
 	AAlsCharacterExample();
 
@@ -57,6 +60,8 @@ private:
 	void InputSprintPressed();
 
 	void InputSprintReleased();
+
+	void OnSprintStartTimerEnded();
 
 	void InputRoll();
 
