@@ -218,7 +218,7 @@ private:
 	// Rotate In Place
 
 private:
-	void RefreshRotateInPlace();
+	void RefreshRotateInPlace(float DeltaTime);
 
 protected:
 	virtual bool IsRotateInPlaceAllowed();

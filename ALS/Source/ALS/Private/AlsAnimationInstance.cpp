@@ -61,7 +61,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		RefreshDynamicTransitions();
 
-		RefreshRotateInPlace();
+		RefreshRotateInPlace(DeltaTime);
 		RefreshTurnInPlace(DeltaTime);
 
 		return;
@@ -690,7 +690,7 @@ void UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded()
 	bAllowDynamicTransitions = true;
 }
 
-void UAlsAnimationInstance::RefreshRotateInPlace()
+void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 {
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
@@ -698,52 +698,39 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
+
+		RotateInPlaceState.PlayRate = FMath::FInterpTo(RotateInPlaceState.PlayRate, RotateInPlaceSettings.PlayRate.X, DeltaTime, 5.0f);
+		RotateInPlaceState.FootLockBlockAmount = 0.0f;
 		return;
 	}
 
 	// Check if the character should rotate left or right by checking if the view yaw angle exceeds the threshold.
 
-	const auto bRotatingLeftPrevious{RotateInPlaceState.bRotatingLeft};
-	const auto bRotatingRightPrevious{RotateInPlaceState.bRotatingRight};
-
 	RotateInPlaceState.bRotatingLeft = ViewState.YawAngle < -RotateInPlaceSettings.ViewYawAngleThreshold;
 	RotateInPlaceState.bRotatingRight = ViewState.YawAngle > RotateInPlaceSettings.ViewYawAngleThreshold;
 
-	if (!bRotatingLeftPrevious && RotateInPlaceState.bRotatingLeft ||
-	    !bRotatingRightPrevious && RotateInPlaceState.bRotatingRight)
-	{
-		RotateInPlaceState.InitialPlayRate = FMath::Lerp(RotateInPlaceSettings.PlayRate.X, RotateInPlaceSettings.PlayRate.Y,
-		                                                 UAlsMath::Clamp01(FMath::Abs(ViewState.YawAngle / 180.0f)));
-	}
-
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
+		RotateInPlaceState.PlayRate = FMath::FInterpTo(RotateInPlaceState.PlayRate, RotateInPlaceSettings.PlayRate.X, DeltaTime, 5.0f);
+		RotateInPlaceState.FootLockBlockAmount = 0.0f;
 		return;
 	}
 
 	// If the character should be rotating, set the play rate to scale with the view yaw speed.
 	// This makes the character rotate faster when moving the camera faster.
 
-	const auto PlayRateFromYawSpeed{
-		FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceViewYawSpeed,
-		                                  RotateInPlaceSettings.PlayRate,
-		                                  ViewState.YawSpeed)
+	const auto TargetPlayRate{
+		FMath::GetMappedRangeValueClamped(RotateInPlaceSettings.ReferenceViewYawSpeed, RotateInPlaceSettings.PlayRate, ViewState.YawSpeed)
 	};
 
-	if (RotateInPlaceState.InitialPlayRate > PlayRateFromYawSpeed)
-	{
-		RotateInPlaceState.PlayRate = RotateInPlaceState.InitialPlayRate;
-	}
-	else
-	{
-		RotateInPlaceState.InitialPlayRate = 0.0f;
-		RotateInPlaceState.PlayRate = PlayRateFromYawSpeed;
-	}
+	RotateInPlaceState.PlayRate = FMath::FInterpTo(RotateInPlaceState.PlayRate, TargetPlayRate, DeltaTime, 5.0f);
 
 	// If rotating too fast, then disable the foot lock, or else the legs begin to twist into a spiral.
 
-	RotateInPlaceState.bDisableFootLock = RotateInPlaceSettings.bDisableFootLock ||
-	                                      ViewState.YawSpeed > RotateInPlaceSettings.MaxFootLockViewYawSpeed;
+	RotateInPlaceState.FootLockBlockAmount = !RotateInPlaceSettings.bDisableFootLock &&
+	                                         ViewState.YawSpeed > RotateInPlaceSettings.FootLockBlockViewYawSpeedThreshold
+		                                         ? FMath::FInterpTo(RotateInPlaceState.FootLockBlockAmount, 1.0f, DeltaTime, 10.0f)
+		                                         : 0.0f;
 }
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
