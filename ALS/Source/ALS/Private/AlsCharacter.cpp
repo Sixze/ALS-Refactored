@@ -628,7 +628,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 				UnCrouch();
 			}
 		}
-		else if (LocomotionAction == EAlsLocomotionAction::Rolling)
+		else if (LocomotionAction == EAlsLocomotionAction::Rolling && RollingSettings.bInterruptRollingWhenInAir)
 		{
 			// If the character is currently rolling, enable the ragdolling.
 
@@ -663,6 +663,12 @@ void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction Pre
 	}
 
 	ApplyDesiredStance();
+
+	if (LocomotionAction == EAlsLocomotionAction::None && PreviousAction == EAlsLocomotionAction::Rolling &&
+	    LocomotionMode == EAlsLocomotionMode::InAir && InAirRotationMode == EAlsInAirRotationMode::KeepRelativeRotation)
+	{
+		LocomotionState.TargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.TargetYawAngle);
+	}
 
 	OnLocomotionActionChanged(PreviousAction);
 }

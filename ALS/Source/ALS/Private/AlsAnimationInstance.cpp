@@ -305,7 +305,14 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	}
 
 	const auto FootTransform{GetSkelMeshComponent()->GetSocketTransform(FootBoneName)};
-	const auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
+	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
+
+	if (LocomotionMode.IsInAir() && NewFootLockAmount > FootState.LockAmount)
+	{
+		// Smoothly disable foot locking if the character is in the air.
+
+		NewFootLockAmount = FMath::Max(0.0f, FootState.LockAmount - DeltaTime * 0.6f);
+	}
 
 	if (FeetSettings.bDisableFootLock || NewFootLockAmount <= 0.0f)
 	{
@@ -321,7 +328,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 	const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
 
-	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 1.0f};
+	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 0.99f};
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
 	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it

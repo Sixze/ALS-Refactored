@@ -1,11 +1,11 @@
 #include "Notify/AlsAnimNotify_FootstepEffects.h"
 
+#include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "Components/AudioComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Utility/AlsConstants.h"
@@ -28,6 +28,12 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 
 	auto* Owner{MeshComponent->GetOwner()};
 	if (!IsValid(Owner))
+	{
+		return;
+	}
+
+	auto* Character{Cast<AAlsCharacter>(Owner)};
+	if (IsValid(Character) && Character->GetLocomotionMode() == EAlsLocomotionMode::InAir)
 	{
 		return;
 	}
