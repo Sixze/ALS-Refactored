@@ -1294,7 +1294,11 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			               : EAlsMantlingType::Low;
 	}
 
-	const FAlsMantlingParameters Parameters{TargetPrimitive, TargetLocation, TargetRotation, MantlingHeight, MantlingType};
+	const FAlsMantlingParameters Parameters{
+		TargetPrimitive,
+		TargetPrimitive->GetComponentTransform().GetRelativeTransform({TargetRotation, TargetLocation}),
+		MantlingHeight, MantlingType
+	};
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
@@ -1356,21 +1360,23 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	MantlingState.StartTime = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.StartTime,
 	                                                            Parameters.MantlingHeight);
 
-	MantlingState.Primitive = Parameters.TargetPrimitive;
-	MantlingState.TargetTransform = {Parameters.TargetRotation, Parameters.TargetLocation, FVector::OneVector};
+	MantlingState.Primitive = Parameters.Primitive;
+	MantlingState.RelativeTransform = Parameters.RelativeTransform;
 
-	// Convert the world space target transform to the primitive's local space for use in moving objects.
+	// Convert the primitive's local space transform to the world space space for use in moving objects.
 
-	MantlingState.RelativeTransform = MantlingState.TargetTransform * Parameters.TargetPrimitive->GetComponentTransform().Inverse();
+	const auto TargetTransform{
+		MantlingState.RelativeTransform.GetRelativeTransformReverse(MantlingState.Primitive->GetComponentTransform())
+	};
 
 	// Calculate the actor offset transform (offset amount between the actor and target transform).
 
-	MantlingState.ActorOffset = UAlsMath::SubtractTransforms(CalculateNetworkSmoothedTransform(), MantlingState.TargetTransform);
+	MantlingState.ActorOffset = UAlsMath::SubtractTransforms(CalculateNetworkSmoothedTransform(), TargetTransform);
 
 	// Calculate the animation offset transform from the target location. This would be
-	// the location the actual animation starts at relative to the T target transform.
+	// the location the actual animation starts at relative to the target transform.
 
-	auto AnimationOffsetLocation{Parameters.TargetRotation.Vector() * MantlingSettings.StartRelativeLocation.X};
+	auto AnimationOffsetLocation{TargetTransform.GetRotation().Vector() * MantlingSettings.StartRelativeLocation.X};
 	AnimationOffsetLocation.Z = MantlingSettings.StartRelativeLocation.Z;
 
 	MantlingState.AnimationOffset = AnimationOffsetLocation;
@@ -1414,10 +1420,6 @@ void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameter
 
 void AAlsCharacter::OnMantlingTimelineUpdated(float BlendInTime)
 {
-	// Continually update the target transform from the stored relative transform to follow along with moving objects.
-
-	MantlingState.TargetTransform = MantlingState.RelativeTransform * MantlingState.Primitive->GetComponentTransform();
-
 	// Update the interpolation and correction amounts using the interpolation and correction amounts curve.
 
 	const auto InterpolationAndCorrectionAmounts{
@@ -1473,19 +1475,23 @@ void AAlsCharacter::OnMantlingTimelineUpdated(float BlendInTime)
 		FVector::OneVector
 	};
 
-	// Blend from the current blending transforms into the final transform.
+	// Continually update the target transform from the stored relative transform to follow along with moving objects.
 
 	const auto TargetTransform{
-		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(MantlingState.TargetTransform, ResultOffset), MantlingState.TargetTransform,
-		                          InterpolationAmount)
+		MantlingState.RelativeTransform.GetRelativeTransformReverse(MantlingState.Primitive->GetComponentTransform())
+	};
+
+	// Blend from the current blending transforms into the final transform.
+
+	const auto OffsetTransform{
+		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(TargetTransform, ResultOffset), TargetTransform, InterpolationAmount)
 	};
 
 	// Initial blend in (controlled in the timeline curve) to allow the actor to blend into the interpolation and
 	// correction curve at the midpoint. This prevents pops when mantling an object lower than the animated mantling.
 
 	const auto ResultTransform{
-		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(MantlingState.TargetTransform, MantlingState.ActorOffset), TargetTransform,
-		                          BlendInTime)
+		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(TargetTransform, MantlingState.ActorOffset), OffsetTransform, BlendInTime)
 	};
 
 	SetActorLocationAndRotation(ResultTransform.GetLocation(), ResultTransform.GetRotation());

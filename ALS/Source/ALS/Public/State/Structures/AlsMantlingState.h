@@ -14,13 +14,10 @@ struct ALS_API FAlsMantlingParameters
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPrimitiveComponent* TargetPrimitive{nullptr};
+	UPrimitiveComponent* Primitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector_NetQuantize TargetLocation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator TargetRotation{ForceInit};
+	FTransform RelativeTransform{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MantlingHeight{0.0f};
@@ -48,9 +45,6 @@ struct ALS_API FAlsMantlingState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPrimitiveComponent* Primitive{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FTransform TargetTransform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform RelativeTransform;
