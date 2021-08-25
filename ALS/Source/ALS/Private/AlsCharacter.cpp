@@ -402,8 +402,8 @@ bool AAlsCharacter::CanSprint() const
 
 	return LocomotionState.bHasInput &&
 	       (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming) &&
-	       (ViewMode != EAlsViewMode::FirstPerson &&
-	        (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting) ||
+	       ((ViewMode != EAlsViewMode::FirstPerson &&
+	        (DesiredRotationMode == EAlsRotationMode::VelocityDirection || bRotateToVelocityWhenSprinting)) ||
 	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - ViewState.SmoothRotation.Yaw)) < 50.0f);
 }
 
@@ -487,7 +487,7 @@ void AAlsCharacter::RefreshRotationMode()
 			return;
 		}
 
-		if (bSprinting && DesiredRotationMode == EAlsRotationMode::Aiming ||
+		if ((bSprinting && DesiredRotationMode == EAlsRotationMode::Aiming) ||
 		    DesiredRotationMode == EAlsRotationMode::VelocityDirection)
 		{
 			SetRotationMode(EAlsRotationMode::LookingDirection);
@@ -865,8 +865,8 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 	// Not moving.
 
-	if (!TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime) &&
-	    RotationMode == EAlsRotationMode::Aiming || ViewMode == EAlsViewMode::FirstPerson)
+	if ((!TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime) &&
+	    RotationMode == EAlsRotationMode::Aiming) || ViewMode == EAlsViewMode::FirstPerson)
 	{
 		RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 	}
@@ -1811,7 +1811,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	{
 		StartRolling(PlayRate, LocomotionState.bHasInput &&
 		                       (RollingSettings.bRotateToInputOnStart ||
-		                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
+		                        (RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f))
 			                       ? LocomotionState.InputYawAngle
 			                       : LocomotionState.Rotation.Yaw);
 	}
@@ -1820,8 +1820,8 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
 	return LocomotionAction == EAlsLocomotionAction::None ||
-	       LocomotionAction == EAlsLocomotionAction::Rolling &&
-	       !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage);
+	       (LocomotionAction == EAlsLocomotionAction::Rolling &&
+	       !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
 
 void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
