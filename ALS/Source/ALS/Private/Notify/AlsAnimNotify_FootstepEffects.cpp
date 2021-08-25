@@ -58,7 +58,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 #endif
 
 	const FAlsFootstepEffectSettings* EffectSettings{nullptr};
-	const EPhysicalSurface SurfaceType{Hit.PhysMaterial.IsValid() ? Hit.PhysMaterial->SurfaceType : SurfaceType_Default};
+	const auto SurfaceType{Hit.PhysMaterial.IsValid() ? Hit.PhysMaterial->SurfaceType : TEnumAsByte<EPhysicalSurface>(SurfaceType_Default)};
 
 	for (const auto& Effect : FootstepEffectsSettings->Effects)
 	{
