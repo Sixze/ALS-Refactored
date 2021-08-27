@@ -26,10 +26,10 @@ struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 	FRigElementKey ItemC;
 
 	UPROPERTY(Meta = (Input))
-	bool bInitial;
+	bool bInitial{false};
 
 	UPROPERTY(Meta = (Output))
-	bool bSuccess;
+	bool bSuccess{false};
 
 	UPROPERTY(Meta = (Output))
 	FVector StartLocation{FVector::ZeroVector};
