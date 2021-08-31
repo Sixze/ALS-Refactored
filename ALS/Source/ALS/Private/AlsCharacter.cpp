@@ -1814,7 +1814,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	{
 		StartRolling(PlayRate, LocomotionState.bHasInput &&
 		                       (RollingSettings.bRotateToInputOnStart ||
-		                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
+		                        (RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f))
 			                       ? LocomotionState.InputYawAngle
 			                       : LocomotionState.Rotation.Yaw);
 	}
