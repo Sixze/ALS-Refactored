@@ -92,14 +92,14 @@ inline float UAlsMath::Damp(const float Smoothing, const float DeltaTime)
 {
 	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
 
-	return 1 - FMath::Pow(Smoothing, DeltaTime);
+	return 1.0f - FMath::Pow(Smoothing, DeltaTime);
 }
 
 inline float UAlsMath::ExponentialDecay(const float Lambda, const float DeltaTime)
 {
 	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
 
-	return 1 - FMath::Exp(-Lambda * DeltaTime);
+	return Lambda <= 0.0f ? 1.0f : 1.0f - FMath::Exp(-Lambda * DeltaTime);
 }
 
 template <class T>

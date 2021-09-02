@@ -372,11 +372,31 @@ protected:
 
 	void RefreshInAirAimingActorRotation(float DeltaTime);
 
-	void RefreshActorRotation(const float TargetYawAngle, const float DeltaTime,
-	                          const float RotationSpeed, bool bRefreshTargetYawAngle = true);
+protected:
+	void RefreshTargetYawAngle(float TargetYawAngle, bool bRefreshSmoothTargetYawAngle = true);
 
-	void RefreshActorRotationExtraSmooth(const float TargetYawAngle, const float DeltaTime, const float TargetRotationSpeed,
-	                                     const float ActorRotationSpeed, bool bRefreshTargetYawAngle = true);
+	void RefreshActorRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
+
+	void RefreshActorRotation(float TargetYawAngle, float DeltaTime, float ActorRotationSpeed);
+
+	void RefreshActorRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
+	                                     float ActorRotationSpeed, float TargetYawAngleRotationSpeed);
+
+	// Rotation Lock
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	void LockRotation(float TargetYawAngle);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	void UnLockRotation();
+
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLockRotation(float TargetYawAngle);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastUnLockRotation();
 
 	// Jumping
 

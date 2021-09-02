@@ -34,11 +34,17 @@ struct ALS_API FAlsLocomotionCharacterState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Acceleration{ForceInit};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRotationLocked{false};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
 	float TargetYawAngle{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator SmoothTargetRotation{ForceInit};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
+	float SmoothTargetYawAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
+	float ViewRelativeTargetYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Location{ForceInit};
