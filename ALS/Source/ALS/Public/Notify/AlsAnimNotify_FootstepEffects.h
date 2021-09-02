@@ -61,37 +61,26 @@ struct ALS_API FAlsFootstepEffectSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	EAlsFootstepSoundSpawnType SoundSpawnType{EAlsFootstepSoundSpawnType::SpawnAtTraceHitLocation};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound",
-		Meta = (EditCondition = "SoundSpawnType == EAlsFootstepSoundSpawnType::SpawnAttachedToFootBone"))
-	TEnumAsByte<EAttachLocation::Type> SoundAttachLocationType{EAttachLocation::KeepRelativeOffset};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	FVector SoundLocationOffset{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	FRotator SoundRotationOffset{ForceInit};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	TSoftObjectPtr<UMaterialInterface> DecalMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	EAlsFootstepDecalSpawnType DecalSpawnType{EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal",
-		Meta = (EditCondition = "DecalSpawnType == EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent"))
-	TEnumAsByte<EAttachLocation::Type> DecalAttachLocationType{EAttachLocation::KeepWorldPosition};
+	FVector DecalSize{10.0f, 20.0f, 20.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	float DecalDuration{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	FVector DecalLocationOffset{8.0f, 0.0f, 1.0f};
+	EAlsFootstepDecalSpawnType DecalSpawnType{EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	FRotator DecalRotationOffset{ForceInit};
+	FVector DecalLocationOffset{0.0f, -10.0f, -1.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	FVector DecalSize{10.0f, 20.0f, 20.0f};
+	FRotator DecalFootLeftRotationOffset{90.0f, -90.0f, 180.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	FRotator DecalFootRightRotationOffset{-90.0f, 90.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
@@ -99,15 +88,14 @@ struct ALS_API FAlsFootstepEffectSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
 	EAlsFootstepParticleEffectSpawnType ParticleSystemSpawnType{EAlsFootstepParticleEffectSpawnType::SpawnAtTraceHitLocation};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System",
-		Meta = (EditCondition = "ParticleSystemSpawnType == EAlsFootstepParticleEffectSpawnType::SpawnAttachedToFootBone"))
-	TEnumAsByte<EAttachLocation::Type> ParticleSystemAttachLocationType{EAttachLocation::KeepRelativeOffset};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
 	FVector ParticleSystemLocationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
-	FRotator ParticleSystemRotationOffset{ForceInit};
+	FRotator ParticleSystemFootLeftRotationOffset{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	FRotator ParticleSystemFootRightRotationOffset{ForceInit};
 };
 
 UCLASS(Blueprintable, BlueprintType)
@@ -121,6 +109,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SurfaceTraceDistance{50.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName = "Foot Left Y Axis"))
+	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName = "Foot Right Y Axis"))
+	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (TitleProperty = "SurfaceType"))
 	TArray<FAlsFootstepEffectSettings> Effects;
@@ -136,7 +130,7 @@ private:
 	UAlsFootstepEffectsSettings* FootstepEffectsSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	EAlsFootBone FootBone{EAlsFootBone::Right};
+	EAlsFootBone FootBone{EAlsFootBone::Left};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
 	bool bSpawnSound{true};
@@ -155,15 +149,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal", Meta = (AllowPrivateAccess))
 	bool bSpawnDecal{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal", Meta = (AllowPrivateAccess, EditCondition = "bSpawnDecal"))
-	bool bMirrorDecalX = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal", Meta = (AllowPrivateAccess, EditCondition = "bSpawnDecal"))
-	bool bMirrorDecalY = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal", Meta = (AllowPrivateAccess, EditCondition = "bSpawnDecal"))
-	bool bMirrorDecalZ = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Particle System", Meta = (AllowPrivateAccess))
 	bool bSpawnParticleSystem{true};

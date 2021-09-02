@@ -1,6 +1,6 @@
 #include "Notify/AlsAnimNotify_FootstepEffects.h"
 
-#include "AlsCharacter.h"
+#include "AlsAnimationInstance.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -9,12 +9,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsEnumerationUtility.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {
-	return TEXT("Als Footstep Effects");
+	return FString::Format(TEXT("Als Footstep Effects: {0}"), {GetEnumValueString(FootBone)});
 }
 
 void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
@@ -26,39 +27,73 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 		return;
 	}
 
-	auto* Owner{MeshComponent->GetOwner()};
-	if (!IsValid(Owner))
+	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
+	if (!IsValid(AnimationInstance) || AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
 	{
 		return;
 	}
 
-	auto* Character{Cast<AAlsCharacter>(Owner)};
-	if (IsValid(Character) && Character->GetLocomotionMode() == EAlsLocomotionMode::InAir)
-	{
-		return;
-	}
+	const auto* World{AnimationInstance->GetWorld()};
 
-	auto* World{Owner->GetWorld()};
-
-	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftBone() : UAlsConstants::FootRightBone()};
+	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootRightIkBone()};
 	const auto FootTransform{MeshComponent->GetSocketTransform(FootBoneName)};
 
-	FHitResult Hit;
-	World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
-	                                FootTransform.GetLocation() - FVector{0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance},
-	                                UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-	                                {__FUNCTION__, true, Owner});
+	FVector HitLocation;
+	FVector HitNormal;
+	TWeakObjectPtr<UPrimitiveComponent> HitComponent;
+	TWeakObjectPtr<UPhysicalMaterial> HitPhysicalMaterial;
+
+	const auto& FeetState{
+		FootBone == EAlsFootBone::Left ? AnimationInstance->GetFeetState().Left : AnimationInstance->GetFeetState().Right
+	};
 
 #if ENABLE_DRAW_DEBUG
-	if (UAlsUtility::ShouldDisplayDebug(Owner, UAlsConstants::TracesDisplayName()))
-	{
-		UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
-		                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
-	}
+	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(MeshComponent->GetOwner(), UAlsConstants::TracesDisplayName())};
 #endif
 
+	if (FeetState.bOffsetHitValid)
+	{
+		// Reuse hit information from foot offset logic.
+
+		HitLocation = FeetState.OffsetHitLocation;
+		HitNormal = FeetState.OffsetHitNormal;
+		HitComponent = FeetState.OffsetHitComponent;
+		HitPhysicalMaterial = FeetState.OffsetHitPhysicalMaterial;
+	}
+	else
+	{
+		FHitResult Hit;
+		if (!World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
+		                                     FootTransform.GetLocation() - FVector{
+			                                     0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance
+		                                     },
+		                                     UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
+		                                     {ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()}))
+		{
+			return;
+		}
+
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
+			                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
+		}
+#endif
+
+		HitLocation = Hit.ImpactPoint;
+		HitNormal = Hit.ImpactNormal;
+		HitComponent = Hit.Component;
+		HitPhysicalMaterial = Hit.PhysMaterial;
+	}
+
+	const auto SurfaceType{
+		HitPhysicalMaterial.IsValid()
+			? HitPhysicalMaterial->SurfaceType
+			: TEnumAsByte<EPhysicalSurface>(SurfaceType_Default)
+	};
+
 	const FAlsFootstepEffectSettings* EffectSettings{nullptr};
-	const auto SurfaceType{Hit.PhysMaterial.IsValid() ? Hit.PhysMaterial->SurfaceType : TEnumAsByte<EPhysicalSurface>(SurfaceType_Default)};
 
 	for (const auto& Effect : FootstepEffectsSettings->Effects)
 	{
@@ -79,40 +114,46 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 		return;
 	}
 
+	const auto FootstepLocation{HitLocation};
+
+	const auto FootstepRotation{
+		FRotationMatrix::MakeFromZY(HitNormal, FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
+			                                                                            ? FootstepEffectsSettings->FootLeftYAxis
+			                                                                            : FootstepEffectsSettings->FootRightYAxis)).
+		Rotator()
+	};
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebug)
+	{
+		DrawDebugCoordinateSystem(World, FootstepLocation, FootstepRotation, 25.0f, false, 10.0f, 0, UAlsUtility::DrawLineThickness);
+	}
+#endif
+
 	if (bSpawnSound)
 	{
-		auto ResultVolumeMultiplier{SoundVolumeMultiplier};
+		auto VolumeMultiplier{SoundVolumeMultiplier};
 
 		if (!bIgnoreFootstepSoundBlockCurve)
 		{
-			auto* AnimationInstance{(MeshComponent->GetAnimInstance())};
-			if (IsValid(AnimationInstance))
-			{
-				ResultVolumeMultiplier *=
-					1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
-			}
+			VolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 		}
 
-		if (ResultVolumeMultiplier > 0.0f && EffectSettings->Sound.LoadSynchronous())
+		if (VolumeMultiplier > 0.0f && EffectSettings->Sound.LoadSynchronous())
 		{
 			UAudioComponent* Audio{nullptr};
 
 			switch (EffectSettings->SoundSpawnType)
 			{
 				case EAlsFootstepSoundSpawnType::SpawnAtTraceHitLocation:
-					Audio = UGameplayStatics::SpawnSoundAtLocation(World, EffectSettings->Sound.Get(),
-					                                               (Hit.bBlockingHit ? Hit.Location : FootTransform.GetLocation()) +
-					                                               Owner->GetTransform().TransformVector(
-						                                               EffectSettings->SoundLocationOffset),
-					                                               FootTransform.Rotator() + EffectSettings->SoundRotationOffset,
-					                                               ResultVolumeMultiplier, SoundPitchMultiplier);
+					Audio = UGameplayStatics::SpawnSoundAtLocation(World, EffectSettings->Sound.Get(), FootstepLocation,
+					                                               FootstepRotation, VolumeMultiplier, SoundPitchMultiplier);
 					break;
 
 				case EAlsFootstepSoundSpawnType::SpawnAttachedToFootBone:
 					Audio = UGameplayStatics::SpawnSoundAttached(EffectSettings->Sound.Get(), MeshComponent, FootBoneName,
-					                                             EffectSettings->SoundLocationOffset, EffectSettings->SoundRotationOffset,
-					                                             EffectSettings->SoundAttachLocationType, true,
-					                                             ResultVolumeMultiplier, SoundPitchMultiplier);
+					                                             FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,
+					                                             true, VolumeMultiplier, SoundPitchMultiplier);
 					break;
 			}
 
@@ -123,33 +164,27 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 		}
 	}
 
-	if (!Hit.bBlockingHit)
-	{
-		return;
-	}
-
 	if (bSpawnDecal && EffectSettings->DecalMaterial.LoadSynchronous())
 	{
-		const auto DecalLocation{Hit.Location + Owner->GetTransform().TransformVector(EffectSettings->DecalLocationOffset)};
-
-		const FVector DecalSize{
-			bMirrorDecalX ? -EffectSettings->DecalSize.X : EffectSettings->DecalSize.X,
-			bMirrorDecalY ? -EffectSettings->DecalSize.Y : EffectSettings->DecalSize.Y,
-			bMirrorDecalZ ? -EffectSettings->DecalSize.Z : EffectSettings->DecalSize.Z
+		const auto DecalRotation{
+			FootstepRotation + (FootBone == EAlsFootBone::Left
+				                    ? EffectSettings->DecalFootLeftRotationOffset
+				                    : EffectSettings->DecalFootRightRotationOffset)
 		};
+
+		const auto DecalLocation{FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset)};
 
 		switch (EffectSettings->DecalSpawnType)
 		{
 			case EAlsFootstepDecalSpawnType::SpawnAtTraceHitLocation:
-				UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(), DecalSize, DecalLocation,
-				                                       FootTransform.Rotator() + EffectSettings->DecalRotationOffset,
-				                                       EffectSettings->DecalDuration);
+				UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
+				                                       DecalLocation, DecalRotation, EffectSettings->DecalDuration);
 				break;
 
 			case EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent:
-				UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), DecalSize, Hit.Component.Get(), NAME_None,
-				                                     DecalLocation, FootTransform.Rotator() + EffectSettings->DecalRotationOffset,
-				                                     EffectSettings->DecalAttachLocationType, EffectSettings->DecalDuration);
+				UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
+				                                     HitComponent.Get(), NAME_None, DecalLocation, DecalRotation,
+				                                     EAttachLocation::KeepWorldPosition, EffectSettings->DecalDuration);
 				break;
 		}
 	}
@@ -159,19 +194,28 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 		switch (EffectSettings->ParticleSystemSpawnType)
 		{
 			case EAlsFootstepParticleEffectSpawnType::SpawnAtTraceHitLocation:
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSettings->ParticleSystem.Get(), Hit.Location +
-					                                               Owner->GetTransform().TransformVector(
-						                                               EffectSettings->ParticleSystemLocationOffset),
-				                                               FootTransform.Rotator() + EffectSettings->ParticleSystemRotationOffset,
+			{
+				const auto ParticleSystemRotation{
+					FootstepRotation + (FootBone == EAlsFootBone::Left
+						                    ? EffectSettings->ParticleSystemFootLeftRotationOffset
+						                    : EffectSettings->ParticleSystemFootLeftRotationOffset)
+				};
+
+				const auto ParticleSystemLocation{
+					FootstepLocation + ParticleSystemRotation.RotateVector(EffectSettings->ParticleSystemLocationOffset)
+				};
+
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSettings->ParticleSystem.Get(),
+				                                               ParticleSystemLocation, ParticleSystemRotation,
 				                                               FVector::OneVector, true, true, ENCPoolMethod::AutoRelease);
-				break;
+			}
+			break;
 
 			case EAlsFootstepParticleEffectSpawnType::SpawnAttachedToFootBone:
 				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), MeshComponent, FootBoneName,
 				                                             EffectSettings->ParticleSystemLocationOffset,
-				                                             EffectSettings->ParticleSystemRotationOffset,
-				                                             EffectSettings->ParticleSystemAttachLocationType,
-				                                             true, true, ENCPoolMethod::AutoRelease);
+				                                             EffectSettings->ParticleSystemFootLeftRotationOffset,
+				                                             EAttachLocation::KeepRelativeOffset, true, true, ENCPoolMethod::AutoRelease);
 				break;
 		}
 	}

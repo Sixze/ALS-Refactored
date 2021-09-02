@@ -383,6 +383,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 {
 	if (FootState.IkAmount <= SMALL_NUMBER)
 	{
+		FootState.bOffsetHitValid = false;
+
 		TargetLocationOffset = FVector::ZeroVector;
 		return;
 	}
@@ -397,7 +399,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
 	                                     UEngineTypes::ConvertToCollisionChannel(FeetSettings.IkTraceChannel),
-	                                     {__FUNCTION__, true, AlsCharacter});
+	                                     {ANSI_TO_TCHAR(__FUNCTION__), true, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))
@@ -407,6 +409,12 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 		                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
 	}
 #endif
+
+	FootState.OffsetHitLocation = Hit.ImpactPoint;
+	FootState.OffsetHitNormal = Hit.ImpactNormal;
+	FootState.OffsetHitComponent = Hit.Component;
+	FootState.OffsetHitPhysicalMaterial = Hit.PhysMaterial;
+	FootState.bOffsetHitValid = true;
 
 	FQuat TargetRotationOffset;
 
@@ -455,6 +463,8 @@ void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const floa
 
 	FootState.FinalLocation += FootState.OffsetLocation;
 	FootState.FinalRotation = FootState.OffsetRotation * FootState.FinalRotation;
+
+	FootState.bOffsetHitValid = false;
 }
 
 void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVector& TargetFootLeftLocationOffset,
@@ -667,14 +677,20 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootLeftIkBone()), FeetState.Left.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
-		PlayDynamicTransition(DynamicTransitionSettings.TransitionRightAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
+		PlayDynamicTransition(Stance.IsCrouching()
+			                      ? DynamicTransitionSettings.CrouchingTransitionRightAnimation
+			                      : DynamicTransitionSettings.StandingTransitionRightAnimation,
+		                      0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootRightIkBone()), FeetState.Right.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
-		PlayDynamicTransition(DynamicTransitionSettings.TransitionLeftAnimation, 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
+		PlayDynamicTransition(Stance.IsCrouching()
+			                      ? DynamicTransitionSettings.CrouchingTransitionLeftAnimation
+			                      : DynamicTransitionSettings.StandingTransitionLeftAnimation,
+		                      0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 	}
 }
 
@@ -927,7 +943,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	                                    GroundPredictionObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
 	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
-	                                    {__FUNCTION__, false, AlsCharacter});
+	                                    {ANSI_TO_TCHAR(__FUNCTION__), false, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))

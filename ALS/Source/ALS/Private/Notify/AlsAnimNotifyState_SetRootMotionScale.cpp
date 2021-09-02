@@ -2,6 +2,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
+#include "Utility/AlsLog.h"
 
 UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 {
@@ -30,9 +31,16 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* M
 	Super::NotifyEnd(MeshComponent, Animation);
 
 	auto* Character{Cast<ACharacter>(MeshComponent->GetOwner())};
-	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy &&
-	    ensure(FMath::IsNearlyEqual(Character->GetAnimRootMotionTranslationScale(), TranslationScale)))
+	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
-		Character->SetAnimRootMotionTranslationScale(1.0f);
+		if (FMath::IsNearlyEqual(Character->GetAnimRootMotionTranslationScale(), TranslationScale))
+		{
+			Character->SetAnimRootMotionTranslationScale(1.0f);
+		}
+		else
+		{
+			UE_LOG(LogAls, Warning, TEXT("%s: The current translation scale does not match the translation scale from the animation notify!"
+				       " Probably something changed it before the animation notify ended."), ANSI_TO_TCHAR(__FUNCTION__));
+		}
 	}
 }

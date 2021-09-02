@@ -1045,7 +1045,7 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
+	CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
 }
 
 void AAlsCharacter::MulticastOnLandedNetworked_Implementation()
@@ -1671,7 +1671,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(float DeltaTime)
 		                                        RagdollTargetLocation.Y,
 		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
 	                                        }, MantlingAndRagdollObjectQueryParameters,
-	                                        {__FUNCTION__, false, this});
+	                                        {ANSI_TO_TCHAR(__FUNCTION__), false, this});
 
 	auto NewActorLocation{RagdollTargetLocation};
 

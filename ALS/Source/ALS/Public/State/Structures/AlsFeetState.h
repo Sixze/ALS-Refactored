@@ -2,6 +2,8 @@
 
 #include "AlsFeetState.generated.h"
 
+class UPhysicalMaterial;
+
 USTRUCT(BlueprintType)
 struct ALS_API FAlsFootState
 {
@@ -24,6 +26,21 @@ struct ALS_API FAlsFootState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FQuat LockRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector OffsetHitLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector OffsetHitNormal{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TWeakObjectPtr<UPrimitiveComponent> OffsetHitComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TWeakObjectPtr<UPhysicalMaterial> OffsetHitPhysicalMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bOffsetHitValid{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector OffsetLocation{ForceInit};

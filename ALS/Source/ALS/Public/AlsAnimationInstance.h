@@ -137,6 +137,13 @@ public:
 
 	// Core
 
+public:
+	EAlsRotationMode GetRotationMode() const;
+
+	FAlsLocomotionMode GetLocomotionMode() const;
+
+	const FAlsFeetState& GetFeetState() const;
+
 private:
 	void RefreshLocomotion(float DeltaTime);
 
@@ -262,6 +269,21 @@ private:
 public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
 };
+
+inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const
+{
+	return RotationMode;
+}
+
+inline FAlsLocomotionMode UAlsAnimationInstance::GetLocomotionMode() const
+{
+	return LocomotionMode;
+}
+
+inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const
+{
+	return FeetState;
+}
 
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const EAlsGroundedEntryMode NewMode)
 {

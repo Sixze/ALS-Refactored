@@ -13,8 +13,14 @@ struct ALS_API FAlsDynamicTransitionSettings
 	float FootIkDistanceThreshold{8.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimSequenceBase* TransitionLeftAnimation{nullptr};
+	UAnimSequenceBase* StandingTransitionLeftAnimation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimSequenceBase* TransitionRightAnimation{nullptr};
+	UAnimSequenceBase* StandingTransitionRightAnimation{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimSequenceBase* CrouchingTransitionLeftAnimation{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimSequenceBase* CrouchingTransitionRightAnimation{nullptr};
 };
