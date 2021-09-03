@@ -26,7 +26,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character", AutoCreateRefTerm = "CurveName"))
-	static float GetAnimationCurveValue(UPARAM(DisplayName = "Character [self]") const ACharacter* Character, const FName& CurveName);
+	static float GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Tag"))
 	static FGameplayTagContainer GetChildTags(const FGameplayTag& Tag);
@@ -35,7 +35,7 @@ public:
 	static FName GetSimpleTagName(const FGameplayTag& Tag);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName"))
-	static bool ShouldDisplayDebug(UPARAM(DisplayName = "Actor [self]") const AActor* Actor, const FName& DisplayName);
+	static bool ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
 		DevelopmentOnly, AutoCreateRefTerm = "Center, XAxis, YAxis, Color"))
