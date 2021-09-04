@@ -87,6 +87,13 @@ void AAlsCharacter::BeginPlay()
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 	}
 
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		// Always update the animation on the server to keep the rotation in sync between the clients and the server.
+		// TODO Handle turn in place and rotate in place locally on each client to remove dependency from the server.
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	}
+
 	// Pass current movement settings to the movement component.
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
@@ -209,6 +216,12 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
+	if (LocomotionAction == EAlsLocomotionAction::Rolling)
+	{
+		SetStance(DesiredStance); // Keep desired stance when rolling.
+		return;
+	}
+
 	SetStance(EAlsStance::Crouching);
 }
 
@@ -301,13 +314,13 @@ void AAlsCharacter::ApplyDesiredStance()
 
 void AAlsCharacter::SetStance(const EAlsStance NewStance)
 {
+	AlsCharacterMovement->SetStance(NewStance);
+
 	if (Stance != NewStance)
 	{
 		const auto PreviousStance{Stance};
 
 		Stance = NewStance;
-
-		AlsCharacterMovement->SetStance(Stance);
 
 		OnStanceChanged(PreviousStance);
 	}
@@ -469,13 +482,13 @@ void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const EAlsRotati
 
 void AAlsCharacter::SetRotationMode(const EAlsRotationMode NewMode)
 {
+	AlsCharacterMovement->SetRotationMode(NewMode);
+
 	if (RotationMode != NewMode)
 	{
 		const auto PreviousMode{RotationMode};
 
 		RotationMode = NewMode;
-
-		AlsCharacterMovement->SetRotationMode(RotationMode);
 
 		OnRotationModeChanged(PreviousMode);
 	}
@@ -1936,6 +1949,10 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	}
 
 	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+
+	// Force set  locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to start.
+
+	SetLocomotionAction(EAlsLocomotionAction::Rolling);
 }
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)

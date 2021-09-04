@@ -154,19 +154,7 @@ void UAlsCharacterMovementComponent::SetStance(const EAlsStance NewStance)
 		Stance = NewStance;
 
 		RefreshGaitSettings();
-
-		if (PawnOwner->GetLocalRole() == ROLE_AutonomousProxy && PawnOwner->IsLocallyControlled())
-		{
-			ServerSetStance(Stance);
-		}
 	}
-}
-
-void UAlsCharacterMovementComponent::ServerSetStance_Implementation(const EAlsStance NewStance)
-{
-	Stance = NewStance;
-
-	RefreshGaitSettings();
 }
 
 void UAlsCharacterMovementComponent::SetRotationMode(const EAlsRotationMode NewMode)
@@ -176,19 +164,7 @@ void UAlsCharacterMovementComponent::SetRotationMode(const EAlsRotationMode NewM
 		RotationMode = NewMode;
 
 		RefreshGaitSettings();
-
-		if (PawnOwner->GetLocalRole() == ROLE_AutonomousProxy && PawnOwner->IsLocallyControlled())
-		{
-			ServerSetRotationMode(RotationMode);
-		}
 	}
-}
-
-void UAlsCharacterMovementComponent::ServerSetRotationMode_Implementation(const EAlsRotationMode NewMode)
-{
-	RotationMode = NewMode;
-
-	RefreshGaitSettings();
 }
 
 void UAlsCharacterMovementComponent::SetMaxAllowedGait(const EAlsGait NewGait)
@@ -198,19 +174,7 @@ void UAlsCharacterMovementComponent::SetMaxAllowedGait(const EAlsGait NewGait)
 		MaxAllowedGait = NewGait;
 
 		RefreshMaxWalkSpeed();
-
-		if (PawnOwner->GetLocalRole() == ROLE_AutonomousProxy && PawnOwner->IsLocallyControlled())
-		{
-			ServerSetMaxAllowedGait(NewGait);
-		}
 	}
-}
-
-void UAlsCharacterMovementComponent::ServerSetMaxAllowedGait_Implementation(const EAlsGait NewGait)
-{
-	MaxAllowedGait = NewGait;
-
-	RefreshMaxWalkSpeed();
 }
 
 void UAlsCharacterMovementComponent::RefreshMaxWalkSpeed()

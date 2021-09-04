@@ -6,7 +6,6 @@
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraTypes.h"
 #include "Engine/Canvas.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
@@ -69,22 +68,20 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	const auto bDisplayDebugCameraTraces{false};
 #endif
 
-	// Calculate result rotation. Use raw rotation locally and smooth rotation on remote clients.
+	// Calculate camera rotation. Use raw rotation locally and smooth rotation on remote clients.
 
-	auto ResultRotation{
-		(AlsCharacter->IsLocallyControlled()
-			 ? AlsCharacter->GetViewRotation()
-			 : AlsCharacter->GetViewState().SmoothRotation).Quaternion()
+	auto TargetRotation{
+		AlsCharacter->IsLocallyControlled()
+			? AlsCharacter->GetViewRotation()
+			: AlsCharacter->GetViewState().SmoothRotation
 	};
 
 	if (bAllowLag)
 	{
-		ResultRotation = UAlsMath::ExponentialDecay(CameraRotation.Quaternion(), ResultRotation,
+		CameraRotation = UAlsMath::ExponentialDecay(CameraRotation, TargetRotation,
 		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()),
 		                                            DeltaTime);
 	}
-
-	CameraRotation = ResultRotation.Rotator();
 
 	const auto FirstPersonOverride{UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurve()))};
 	if (FirstPersonOverride >= 1.0f)
@@ -170,7 +167,7 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 	// Calculate result location. Get the pivot location and apply camera relative offsets.
 
 	auto ResultLocation{
-		PivotLocation + ResultRotation.RotateVector({
+		PivotLocation + CameraRotation.RotateVector({
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurve())

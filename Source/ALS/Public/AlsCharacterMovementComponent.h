@@ -86,24 +86,11 @@ private:
 public:
 	void SetStance(EAlsStance NewStance);
 
-private:
-	UFUNCTION(Server, Reliable)
-	void ServerSetStance(EAlsStance NewStance);
-
-public:
 	void SetRotationMode(EAlsRotationMode NewMode);
 
-private:
-	UFUNCTION(Server, Reliable)
-	void ServerSetRotationMode(EAlsRotationMode NewMode);
-
-public:
 	void SetMaxAllowedGait(EAlsGait NewGait);
 
 private:
-	UFUNCTION(Server, Reliable)
-	void ServerSetMaxAllowedGait(EAlsGait NewGait);
-
 	void RefreshMaxWalkSpeed();
 
 public:

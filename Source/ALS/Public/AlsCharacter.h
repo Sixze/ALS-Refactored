@@ -37,7 +37,7 @@ protected:
 	UTimelineComponent* MantlingTimeline;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess, ClampMin = 0))
-	float MovingSpeedThreshold{150.0f};
+	float MovingSpeedThreshold{50.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
 	bool bSprintHasPriorityOverAiming;

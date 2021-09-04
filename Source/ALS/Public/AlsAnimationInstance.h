@@ -204,6 +204,12 @@ private:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UAnimSequenceBase* SelectDynamicTransitionForLeftFoot() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UAnimSequenceBase* SelectDynamicTransitionForRightFoot() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void PlayTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
 	                    float PlayRate = 1.0f, float StartTime = 0.0f);
 
@@ -224,21 +230,21 @@ private:
 
 	// Rotate In Place
 
-private:
-	void RefreshRotateInPlace(float DeltaTime);
-
 protected:
 	virtual bool IsRotateInPlaceAllowed();
 
+private:
+	void RefreshRotateInPlace(float DeltaTime);
+
 	// Turn In Place
+
+protected:
+	virtual bool IsTurnInPlaceAllowed();
 
 private:
 	void RefreshTurnInPlace(float DeltaTime);
 
 	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartIfPlaying = false);
-
-protected:
-	virtual bool IsTurnInPlaceAllowed();
 
 	// Jump
 
@@ -293,4 +299,18 @@ inline void UAlsAnimationInstance::SetGroundedEntryMode(const EAlsGroundedEntryM
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)
 {
 	MovementState.HipsDirection = NewDirection;
+}
+
+inline UAnimSequenceBase* UAlsAnimationInstance::SelectDynamicTransitionForLeftFoot() const
+{
+	return Stance.IsCrouching()
+		       ? DynamicTransitionSettings.CrouchingTransitionLeftAnimation
+		       : DynamicTransitionSettings.StandingTransitionLeftAnimation;
+}
+
+inline UAnimSequenceBase* UAlsAnimationInstance::SelectDynamicTransitionForRightFoot() const
+{
+	return Stance.IsCrouching()
+		       ? DynamicTransitionSettings.CrouchingTransitionRightAnimation
+		       : DynamicTransitionSettings.StandingTransitionRightAnimation;
 }

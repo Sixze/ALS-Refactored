@@ -28,6 +28,9 @@ struct ALS_API FAlsLocomotionAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMoving{false};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bMovingSmooth{false};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
 	FVector RelativeAccelerationAmount{ForceInit};
 

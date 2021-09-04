@@ -4,7 +4,6 @@
 #include "DrawDebugHelpers.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Animation/AnimInstance.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -28,12 +27,12 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	}
 
 	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
-	if (!IsValid(AnimationInstance) || AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
+	if (IsValid(AnimationInstance) && AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
 	{
 		return;
 	}
 
-	const auto* World{AnimationInstance->GetWorld()};
+	const auto* World{MeshComponent->GetWorld()};
 
 	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootRightIkBone()};
 	const auto FootTransform{MeshComponent->GetSocketTransform(FootBoneName)};
@@ -43,22 +42,26 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	TWeakObjectPtr<UPrimitiveComponent> HitComponent;
 	TWeakObjectPtr<UPhysicalMaterial> HitPhysicalMaterial;
 
-	const auto& FeetState{
-		FootBone == EAlsFootBone::Left ? AnimationInstance->GetFeetState().Left : AnimationInstance->GetFeetState().Right
+	const auto* FeetState{
+		IsValid(AnimationInstance)
+			? (FootBone == EAlsFootBone::Left
+				   ? &AnimationInstance->GetFeetState().Left
+				   : &AnimationInstance->GetFeetState().Right)
+			: nullptr
 	};
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(MeshComponent->GetOwner(), UAlsConstants::TracesDisplayName())};
 #endif
 
-	if (FeetState.bOffsetHitValid)
+	if (FeetState != nullptr && FeetState->bOffsetHitValid)
 	{
 		// Reuse hit information from foot offset logic.
 
-		HitLocation = FeetState.OffsetHitLocation;
-		HitNormal = FeetState.OffsetHitNormal;
-		HitComponent = FeetState.OffsetHitComponent;
-		HitPhysicalMaterial = FeetState.OffsetHitPhysicalMaterial;
+		HitLocation = FeetState->OffsetHitLocation;
+		HitNormal = FeetState->OffsetHitNormal;
+		HitComponent = FeetState->OffsetHitComponent;
+		HitPhysicalMaterial = FeetState->OffsetHitPhysicalMaterial;
 	}
 	else
 	{
@@ -134,7 +137,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	{
 		auto VolumeMultiplier{SoundVolumeMultiplier};
 
-		if (!bIgnoreFootstepSoundBlockCurve)
+		if (!bIgnoreFootstepSoundBlockCurve && IsValid(AnimationInstance))
 		{
 			VolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 		}
@@ -146,8 +149,16 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 			switch (EffectSettings->SoundSpawnType)
 			{
 				case EAlsFootstepSoundSpawnType::SpawnAtTraceHitLocation:
-					Audio = UGameplayStatics::SpawnSoundAtLocation(World, EffectSettings->Sound.Get(), FootstepLocation,
-					                                               FootstepRotation, VolumeMultiplier, SoundPitchMultiplier);
+					if (World->WorldType == EWorldType::EditorPreview)
+					{
+						UGameplayStatics::PlaySoundAtLocation(World, EffectSettings->Sound.Get(), FootstepLocation,
+						                                      VolumeMultiplier, SoundPitchMultiplier);
+					}
+					else
+					{
+						Audio = UGameplayStatics::SpawnSoundAtLocation(World, EffectSettings->Sound.Get(), FootstepLocation,
+						                                               FootstepRotation, VolumeMultiplier, SoundPitchMultiplier);
+					}
 					break;
 
 				case EAlsFootstepSoundSpawnType::SpawnAttachedToFootBone:
@@ -174,18 +185,16 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 
 		const auto DecalLocation{FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset)};
 
-		switch (EffectSettings->DecalSpawnType)
+		if (EffectSettings->DecalSpawnType == EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent && HitComponent.IsValid())
 		{
-			case EAlsFootstepDecalSpawnType::SpawnAtTraceHitLocation:
-				UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
-				                                       DecalLocation, DecalRotation, EffectSettings->DecalDuration);
-				break;
-
-			case EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent:
-				UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
-				                                     HitComponent.Get(), NAME_None, DecalLocation, DecalRotation,
-				                                     EAttachLocation::KeepWorldPosition, EffectSettings->DecalDuration);
-				break;
+			UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
+			                                     HitComponent.Get(), NAME_None, DecalLocation, DecalRotation,
+			                                     EAttachLocation::KeepWorldPosition, EffectSettings->DecalDuration);
+		}
+		else
+		{
+			UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
+			                                       DecalLocation, DecalRotation, EffectSettings->DecalDuration);
 		}
 	}
 

@@ -97,6 +97,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.VelocityYawAngle = AlsCharacter->GetLocomotionState().VelocityYawAngle;
 
 	LocomotionState.bMoving = AlsCharacter->GetLocomotionState().bMoving;
+	LocomotionState.bMovingSmooth = LocomotionState.bHasInput || LocomotionState.Speed > GeneralSettings.MovingSpeedSmoothThreshold;
 
 	LocomotionState.GaitAmount = GetCurveValue(UAlsConstants::GaitAmountCurve());
 	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount);
@@ -677,20 +678,14 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootLeftIkBone()), FeetState.Left.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
-		PlayDynamicTransition(Stance.IsCrouching()
-			                      ? DynamicTransitionSettings.CrouchingTransitionRightAnimation
-			                      : DynamicTransitionSettings.StandingTransitionRightAnimation,
-		                      0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
+		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootRightIkBone()), FeetState.Right.LockLocation) >
 	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
-		PlayDynamicTransition(Stance.IsCrouching()
-			                      ? DynamicTransitionSettings.CrouchingTransitionLeftAnimation
-			                      : DynamicTransitionSettings.StandingTransitionLeftAnimation,
-		                      0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
+		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 	}
 }
 
@@ -711,6 +706,11 @@ void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, 
 void UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded()
 {
 	bAllowDynamicTransitions = true;
+}
+
+bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
+{
+	return RotationMode.IsAiming() || ViewMode == EAlsViewMode::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
@@ -756,9 +756,9 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		                                         : 0.0f;
 }
 
-bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
+bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
 {
-	return RotationMode.IsAiming() || ViewMode == EAlsViewMode::FirstPerson;
+	return RotationMode.IsLookingDirection() && ViewMode != EAlsViewMode::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
@@ -870,11 +870,6 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	}
 
 	TurnInPlaceState.bDisableFootLock = TurnInPlaceSettings.bDisableFootLock;
-}
-
-bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
-{
-	return RotationMode.IsLookingDirection() && ViewMode != EAlsViewMode::FirstPerson;
 }
 
 void UAlsAnimationInstance::Jump()
