@@ -14,6 +14,13 @@ class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", AdvancedDisplay, Meta = (AllowPrivateAccess))
+	bool bUseLagSubstepping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", AdvancedDisplay,
+		Meta = (AllowPrivateAccess, EditCondition = "bUseCameraLagSubstepping", ClampMin = 0.005, ClampMax = 0.5))
+	float MaxLagSubstepDeltaTime{1.0f / 60.0f};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|First Person",
 		Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360))
 	float FirstPersonFov{90.0f};

@@ -802,7 +802,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	// Interpolate view rotation to current control rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewRotation, 30.0f, DeltaTime);
+	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewRotation, DeltaTime, 30.0f);
 	ViewState.SmoothRotation.Normalize();
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided
@@ -1044,7 +1044,7 @@ void AAlsCharacter::RefreshActorRotation(const float TargetYawAngle, const float
 {
 	RefreshTargetYawAngle(TargetYawAngle);
 
-	SetActorRotation(UAlsMath::ExponentialDecay(GetActorRotation(), {0.0f, TargetYawAngle, 0.0f}, ActorRotationSpeed, DeltaTime));
+	SetActorRotation(UAlsMath::ExponentialDecay(GetActorRotation(), {0.0f, TargetYawAngle, 0.0f}, DeltaTime, ActorRotationSpeed));
 
 	RefreshLocomotionLocationAndRotation();
 }
@@ -1060,7 +1060,7 @@ void AAlsCharacter::RefreshActorRotationExtraSmooth(const float TargetYawAngle, 
 	                                                                          TargetYawAngle, DeltaTime, TargetYawAngleRotationSpeed);
 
 	SetActorRotation(UAlsMath::ExponentialDecay(GetActorRotation(), {0.0f, LocomotionState.SmoothTargetYawAngle, 0.0f},
-	                                            ActorRotationSpeed, DeltaTime));
+	                                            DeltaTime, ActorRotationSpeed));
 
 	RefreshLocomotionLocationAndRotation();
 }

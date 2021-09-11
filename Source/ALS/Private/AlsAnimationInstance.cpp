@@ -87,8 +87,8 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
 
-		LocomotionState.InputYawAmount = UAlsMath::ExponentialDecay(LocomotionState.InputYawAmount, InputYawAmount,
-		                                                            GeneralSettings.InputYawAmountInterpolationSpeed, DeltaTime);
+		LocomotionState.InputYawAmount = UAlsMath::ExponentialDecay(LocomotionState.InputYawAmount, InputYawAmount, DeltaTime,
+		                                                            GeneralSettings.InputYawAmountInterpolationSpeed);
 	}
 
 	LocomotionState.bHasSpeed = AlsCharacter->GetLocomotionState().bHasSpeed;
@@ -223,8 +223,8 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	// the rotation before calculating the angle ensures the value is not affected by changes in
 	// actor rotation, allowing slow view rotation changes with fast actor rotation changes.
 
-	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewState.Rotation,
-	                                                      GeneralSettings.ViewSmoothRotationInterpolationSpeed, DeltaTime);
+	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewState.Rotation, DeltaTime,
+	                                                      GeneralSettings.ViewSmoothRotationInterpolationSpeed);
 
 	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
 	                                                   AlsCharacter->GetLocomotionState().Rotation.Yaw);

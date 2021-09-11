@@ -70,7 +70,7 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	// Calculate camera rotation. Use raw rotation locally and smooth rotation on remote clients.
 
-	auto TargetRotation{
+	auto TargetCameraRotation{
 		AlsCharacter->IsLocallyControlled()
 			? AlsCharacter->GetViewRotation()
 			: AlsCharacter->GetViewState().SmoothRotation
@@ -78,9 +78,39 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	if (bAllowLag)
 	{
-		CameraRotation = UAlsMath::ExponentialDecay(CameraRotation, TargetRotation,
-		                                            GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve()),
-		                                            DeltaTime);
+		auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve())};
+
+		if (bUseLagSubstepping && DeltaTime > MaxLagSubstepDeltaTime && RotationLag > 0.0f)
+		{
+			const auto InitialCameraRotation{CameraRotation};
+			const auto SubstepRotationSpeed{(TargetCameraRotation - InitialCameraRotation).GetNormalized() * (1.f / DeltaTime)};
+
+			auto PreviousSubstepTime{0.0f};
+
+			for (auto SubstepNumber{1};; SubstepNumber++)
+			{
+				const auto SubstepTime{SubstepNumber * MaxLagSubstepDeltaTime};
+				if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+				{
+					CameraRotation = FMath::RInterpTo(CameraRotation, InitialCameraRotation + SubstepRotationSpeed * SubstepTime,
+					                                  SubstepTime - PreviousSubstepTime, RotationLag);
+
+					PreviousSubstepTime = SubstepTime;
+					continue;
+				}
+
+				CameraRotation = FMath::RInterpTo(CameraRotation, TargetCameraRotation, DeltaTime - PreviousSubstepTime, RotationLag);
+				break;
+			}
+		}
+		else
+		{
+			CameraRotation = UAlsMath::ExponentialDecay(CameraRotation, TargetCameraRotation, DeltaTime, RotationLag);
+		}
+	}
+	else
+	{
+		CameraRotation = TargetCameraRotation;
 	}
 
 	const auto FirstPersonOverride{UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurve()))};
@@ -113,17 +143,61 @@ void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 
 	if (bAllowLag)
 	{
-		const auto RelativePreviousPivotLagLocation{LagRotation.UnrotateVector(PivotLagLocation)};
+		const auto RelativeInitialPivotLagLocation{LagRotation.UnrotateVector(PivotLagLocation)};
 		const auto RelativeTargetPivotLocation{LagRotation.UnrotateVector(PivotTargetLocation)};
 
-		PivotLagLocation = LagRotation.RotateVector({
-			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.X, RelativeTargetPivotLocation.X,
-			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurve()), DeltaTime),
-			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.Y, RelativeTargetPivotLocation.Y,
-			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve()), DeltaTime),
-			UAlsMath::ExponentialDecay(RelativePreviousPivotLagLocation.Z, RelativeTargetPivotLocation.Z,
-			                           GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve()), DeltaTime)
-		});
+		auto LocationLagX{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurve())};
+		auto LocationLagY{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve())};
+		auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve())};
+
+		if (bUseLagSubstepping && DeltaTime > MaxLagSubstepDeltaTime &&
+		    (LocationLagX > 0.0f || LocationLagY > 0.0f || LocationLagZ > 0.0f))
+		{
+			const auto SubstepMovementSpeed{(RelativeTargetPivotLocation - RelativeInitialPivotLagLocation) / DeltaTime};
+
+			auto RelativePivotLagLocation{RelativeInitialPivotLagLocation};
+			auto PreviousSubstepTime{0.0f};
+
+			for (auto SubstepNumber{1};; SubstepNumber++)
+			{
+				const auto SubstepTime{SubstepNumber * MaxLagSubstepDeltaTime};
+				if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+				{
+					const auto SubstepRelativeTargetPivotLocation{RelativeInitialPivotLagLocation + SubstepMovementSpeed * SubstepTime};
+					const auto SubstepDeltaTime{SubstepTime - PreviousSubstepTime};
+
+					RelativePivotLagLocation.X = FMath::FInterpTo(RelativePivotLagLocation.X, SubstepRelativeTargetPivotLocation.X,
+					                                              SubstepDeltaTime, LocationLagX);
+					RelativePivotLagLocation.Y = FMath::FInterpTo(RelativePivotLagLocation.Y, SubstepRelativeTargetPivotLocation.Y,
+					                                              SubstepDeltaTime, LocationLagY);
+					RelativePivotLagLocation.Z = FMath::FInterpTo(RelativePivotLagLocation.Z, SubstepRelativeTargetPivotLocation.Z,
+					                                              SubstepDeltaTime, LocationLagZ);
+
+					PreviousSubstepTime = SubstepTime;
+					continue;
+				}
+
+				const auto SubstepDeltaTime{DeltaTime - PreviousSubstepTime};
+
+				RelativePivotLagLocation.X = FMath::FInterpTo(RelativePivotLagLocation.X, RelativeTargetPivotLocation.X,
+				                                              SubstepDeltaTime, LocationLagX);
+				RelativePivotLagLocation.Y = FMath::FInterpTo(RelativePivotLagLocation.Y, RelativeTargetPivotLocation.Y,
+				                                              SubstepDeltaTime, LocationLagY);
+				RelativePivotLagLocation.Z = FMath::FInterpTo(RelativePivotLagLocation.Z, RelativeTargetPivotLocation.Z,
+				                                              SubstepDeltaTime, LocationLagZ);
+				break;
+			}
+
+			PivotLagLocation = LagRotation.RotateVector(RelativePivotLagLocation);
+		}
+		else
+		{
+			PivotLagLocation = LagRotation.RotateVector({
+				UAlsMath::ExponentialDecay(RelativeInitialPivotLagLocation.X, RelativeTargetPivotLocation.X, DeltaTime, LocationLagX),
+				UAlsMath::ExponentialDecay(RelativeInitialPivotLagLocation.Y, RelativeTargetPivotLocation.Y, DeltaTime, LocationLagY),
+				UAlsMath::ExponentialDecay(RelativeInitialPivotLagLocation.Z, RelativeTargetPivotLocation.Z, DeltaTime, LocationLagZ)
+			});
+		}
 	}
 	else
 	{

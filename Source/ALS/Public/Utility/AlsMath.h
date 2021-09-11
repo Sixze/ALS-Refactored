@@ -23,16 +23,16 @@ public:
 	static float LerpClamped(float A, float B, float Alpha);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
-	static float Damp(const float Smoothing, const float DeltaTime);
+	static float Damp(float DeltaTime, float Smoothing);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
-	static float ExponentialDecay(const float Lambda, const float DeltaTime);
+	static float ExponentialDecay(float DeltaTime, float Lambda);
 
 	template <class T>
-	static T Damp(const T& A, const T& B, const float Smoothing, const float DeltaTime);
+	static T Damp(const T& A, const T& B, float DeltaTime, float Smoothing);
 
 	template <class T>
-	static T ExponentialDecay(const T& A, const T& B, const float Lambda, const float DeltaTime);
+	static T ExponentialDecay(const T& A, const T& B, float DeltaTime, float Lambda);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float CurrentAngle, float TargetAngle, float DeltaTime, float InterpolationSpeed);
@@ -88,30 +88,30 @@ inline float UAlsMath::LerpClamped(const float A, const float B, const float Alp
 	return A + Clamp01(Alpha) * (B - A);
 }
 
-inline float UAlsMath::Damp(const float Smoothing, const float DeltaTime)
+inline float UAlsMath::Damp(const float DeltaTime, const float Smoothing)
 {
 	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
 
 	return 1.0f - FMath::Pow(Smoothing, DeltaTime);
 }
 
-inline float UAlsMath::ExponentialDecay(const float Lambda, const float DeltaTime)
+inline float UAlsMath::ExponentialDecay(const float DeltaTime, const float Lambda)
 {
 	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
 
-	return Lambda <= 0.0f ? 1.0f : 1.0f - FMath::Exp(-Lambda * DeltaTime);
+	return 1.0f - FMath::Exp(-Lambda * DeltaTime);
 }
 
 template <class T>
-T UAlsMath::Damp(const T& A, const T& B, const float Smoothing, const float DeltaTime)
+T UAlsMath::Damp(const T& A, const T& B, const float DeltaTime, const float Smoothing)
 {
-	return FMath::Lerp(A, B, Damp(Smoothing, DeltaTime));
+	return Smoothing <= 0.0f ? B : FMath::Lerp(A, B, Damp(DeltaTime, Smoothing));
 }
 
 template <class T>
-T UAlsMath::ExponentialDecay(const T& A, const T& B, const float Lambda, const float DeltaTime)
+T UAlsMath::ExponentialDecay(const T& A, const T& B, const float DeltaTime, const float Lambda)
 {
-	return FMath::Lerp(A, B, ExponentialDecay(Lambda, DeltaTime));
+	return Lambda <= 0.0f ? B : FMath::Lerp(A, B, ExponentialDecay(DeltaTime, Lambda));
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
