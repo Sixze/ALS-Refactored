@@ -62,7 +62,7 @@ public:
 		Meta = (DisplayName = "Angle Between (Skip Normalization)", AutoCreateRefTerm = "From, To"))
 	static float AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vectors", meta = (DisplayName = "Slerp (Skip Normalization)"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vectors", Meta = (DisplayName = "Slerp (Skip Normalization)"))
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")

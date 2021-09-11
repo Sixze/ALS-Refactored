@@ -278,18 +278,18 @@ public:
 	const FGameplayTag& GetOverlayMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void SetOverlayMode(const FGameplayTag& NewMode);
+	void SetOverlayMode(const FGameplayTag& NewModeTag);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetOverlayMode(const FGameplayTag& NewMode);
+	void ServerSetOverlayMode(const FGameplayTag& NewModeTag);
 
 	UFUNCTION()
-	void OnReplicate_OverlayMode(const FGameplayTag& PreviousMode);
+	void OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnOverlayModeChanged(const FGameplayTag& PreviousMode);
+	void OnOverlayModeChanged(const FGameplayTag& PreviousModeTag);
 
 	// Locomotion Mode
 

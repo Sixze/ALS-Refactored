@@ -70,3 +70,62 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 	bSuccess = TryCalculatePoleVector(Hierarchy->GetInitialGlobalTransform(ItemA).GetLocation(), EndLocation,
 	                                  Hierarchy->GetInitialGlobalTransform(ItemC).GetLocation(), StartLocation, Direction);
 }
+
+FAlsRigUnit_HandIkRetargeting_Execute()
+{
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
+
+	if (Weight <= SMALL_NUMBER)
+	{
+		return;
+	}
+
+	auto* Hierarchy{ExecuteContext.Hierarchy};
+	if (Hierarchy == nullptr)
+	{
+		return;
+	}
+
+	FVector RetargetingOffset;
+
+	if (RetargetingWeight >= 1.0f - SMALL_NUMBER)
+	{
+		RetargetingOffset = Hierarchy->GetGlobalTransform(RightHandBone).GetLocation() -
+		                    Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation();
+	}
+	else if (RetargetingWeight <= SMALL_NUMBER)
+	{
+		RetargetingOffset = Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation() -
+		                    Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation();
+	}
+	else
+	{
+		RetargetingOffset = FMath::Lerp(Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation(),
+		                                Hierarchy->GetGlobalTransform(RightHandBone).GetLocation(),
+		                                RetargetingWeight) -
+		                    FMath::Lerp(Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation(),
+		                                Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation(),
+		                                RetargetingWeight);
+	}
+
+	RetargetingOffset *= FMath::Min(1.0f, Weight);
+
+	if (RetargetingOffset.IsNearlyZero())
+	{
+		return;
+	}
+
+	for (const auto& Bone : BonesToMove)
+	{
+		const auto BoneIndex{Hierarchy->GetIndex(Bone)};
+		if (BoneIndex == INDEX_NONE)
+		{
+			continue;
+		}
+
+		auto BoneTransform{Hierarchy->GetGlobalTransform(Bone.Type, BoneIndex)};
+		BoneTransform.AddToTranslation(RetargetingOffset);
+
+		Hierarchy->SetGlobalTransform(Bone.Type, BoneIndex, BoneTransform, bPropagateToChildren);
+	}
+}

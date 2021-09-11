@@ -572,13 +572,13 @@ void AAlsCharacter::ServerSetViewMode_Implementation(const EAlsViewMode NewMode)
 	SetViewMode(NewMode);
 }
 
-void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewMode)
+void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewModeTag)
 {
-	if (OverlayMode != NewMode)
+	if (OverlayMode != NewModeTag)
 	{
 		const auto PreviousMode{OverlayMode};
 
-		OverlayMode = NewMode;
+		OverlayMode = NewModeTag;
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OverlayMode, this)
 
@@ -586,7 +586,7 @@ void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewMode)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			ServerSetOverlayMode(NewMode);
+			ServerSetOverlayMode(NewModeTag);
 		}
 	}
 }
@@ -596,9 +596,9 @@ void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewM
 	SetOverlayMode(NewMode);
 }
 
-void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousMode)
+void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
 {
-	OnOverlayModeChanged(PreviousMode);
+	OnOverlayModeChanged(PreviousModeTag);
 }
 
 void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousMode) {}
@@ -1067,7 +1067,7 @@ void AAlsCharacter::RefreshActorRotationExtraSmooth(const float TargetYawAngle, 
 
 void AAlsCharacter::LockRotation(const float TargetYawAngle)
 {
-	if (!ensure(!LocomotionState.bRotationLocked))
+	if (LocomotionState.bRotationLocked)
 	{
 		UE_LOG(LogAls, Warning, TEXT("%s: Trying to lock a rotation when it is already locked!"), ANSI_TO_TCHAR(__FUNCTION__));
 		return;
@@ -1950,7 +1950,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 
 	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
 
-	// Force set  locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to start.
+	// Force set locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to start.
 
 	SetLocomotionAction(EAlsLocomotionAction::Rolling);
 }
