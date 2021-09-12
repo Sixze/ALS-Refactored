@@ -271,8 +271,16 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
 	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
 
-	RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
-	RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
+	if (GeneralSettings.bUseFootIkBones)
+	{
+		RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
+		RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
+	}
+	else
+	{
+		RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkVirtualBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
+		RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkVirtualBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
+	}
 
 	if (LocomotionMode.IsInAir())
 	{
@@ -675,15 +683,19 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 
 	const auto SkeletalMesh{GetSkelMeshComponent()};
 
-	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootLeftIkBone()), FeetState.Left.LockLocation) >
-	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(GeneralSettings.bUseFootIkBones
+		                                                         ? UAlsConstants::FootLeftIkBone()
+		                                                         : UAlsConstants::FootLeftIkVirtualBone()),
+	                         FeetState.Left.LockLocation) > FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
 	}
 
-	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(UAlsConstants::FootRightIkBone()), FeetState.Right.LockLocation) >
-	    FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
+	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(GeneralSettings.bUseFootIkBones
+		                                                         ? UAlsConstants::FootRightIkBone()
+		                                                         : UAlsConstants::FootRightIkVirtualBone()),
+	                         FeetState.Right.LockLocation) > FMath::Square(DynamicTransitionSettings.FootIkDistanceThreshold))
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 	}
