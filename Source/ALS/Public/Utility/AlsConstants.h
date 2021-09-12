@@ -82,6 +82,20 @@ public:
 		return Name;
 	}
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	static const FName& FootLeftIkVirtualBone()
+	{
+		static const FName Name{TEXT("VB ik_foot_l")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	static const FName& FootRightIkVirtualBone()
+	{
+		static const FName Name{TEXT("VB ik_foot_r")};
+		return Name;
+	}
+
 	// Animation Slots
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")

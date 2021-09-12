@@ -1,13 +1,19 @@
 ﻿#pragma once
 
-#include "AlsGeneralSettings.generated.h"
+#include "AlsGeneralAnimationSettings.generated.h"
 
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsGeneralSettings
+struct ALS_API FAlsGeneralAnimationSettings
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseHandIkBones{true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseFootIkBones{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float MovingSpeedSmoothThreshold{150.0f};

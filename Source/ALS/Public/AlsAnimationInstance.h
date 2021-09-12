@@ -2,9 +2,9 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
-#include "Settings//AlsGeneralSettings.h"
 #include "Settings/AlsDynamicTransitionSettings.h"
 #include "Settings/AlsFeetSettings.h"
+#include "Settings/AlsGeneralAnimationSettings.h"
 #include "Settings/AlsInAirSettings.h"
 #include "Settings/AlsMovementAnimationSettings.h"
 #include "Settings/AlsRotateInPlaceSettings.h"
@@ -39,7 +39,7 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsGeneralSettings GeneralSettings;
+	FAlsGeneralAnimationSettings GeneralSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsFeetSettings FeetSettings;

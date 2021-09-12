@@ -2116,7 +2116,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	{
 		const auto CurveValue{GetMesh()->GetAnimInstance()->GetCurveValue(CurveName)};
 
-		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::White, UAlsMath::Clamp01(FMath::Abs(CurveValue))));
+		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::White, UAlsMath::Clamp01(CurveValue)));
 
 		Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(CurveName.ToString(), false));
 		Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
