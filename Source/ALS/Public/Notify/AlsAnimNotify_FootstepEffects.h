@@ -133,6 +133,9 @@ private:
 	EAlsFootBone FootBone{EAlsFootBone::Left};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
+	bool bSkipEffectsWhenInAir;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
 	bool bSpawnSound{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))

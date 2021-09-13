@@ -27,7 +27,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	}
 
 	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
-	if (IsValid(AnimationInstance) && AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
+	if (bSkipEffectsWhenInAir && IsValid(AnimationInstance) && AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
 	{
 		return;
 	}
@@ -66,28 +66,33 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	else
 	{
 		FHitResult Hit;
-		if (!World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
-		                                     FootTransform.GetLocation() - FVector{
-			                                     0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance
-		                                     },
-		                                     UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-		                                     {ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()}))
+		if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
+		                                    FootTransform.GetLocation() - FVector{
+			                                    0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance
+		                                    },
+		                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
+		                                    {ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()}))
 		{
-			return;
-		}
-
 #if ENABLE_DRAW_DEBUG
-		if (bDisplayDebug)
-		{
-			UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
-			                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
-		}
+			if (bDisplayDebug)
+			{
+				UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
+				                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
+			}
 #endif
 
-		HitLocation = Hit.ImpactPoint;
-		HitNormal = Hit.ImpactNormal;
-		HitComponent = Hit.Component;
-		HitPhysicalMaterial = Hit.PhysMaterial;
+			HitLocation = Hit.ImpactPoint;
+			HitNormal = Hit.ImpactNormal;
+			HitComponent = Hit.Component;
+			HitPhysicalMaterial = Hit.PhysMaterial;
+		}
+		else
+		{
+			HitLocation = FootTransform.GetLocation();
+			HitNormal = FVector::UpVector;
+			HitComponent = nullptr;
+			HitPhysicalMaterial = nullptr;
+		}
 	}
 
 	const auto SurfaceType{
