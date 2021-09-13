@@ -5,14 +5,21 @@
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
+#include "Engine/CollisionProfile.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-const FCollisionObjectQueryParams UAlsAnimationInstance::GroundPredictionObjectQueryParameters{
-	ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Destructible)
-};
+UAlsAnimationInstance::UAlsAnimationInstance()
+{
+	InAirSettings.GroundPredictionTraceObjectTypes =
+	{
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldStatic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldDynamic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_Destructible)
+	};
+}
 
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
@@ -945,9 +952,14 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 		VelocityDirection * FMath::GetMappedRangeValueClamped({0.0f, -4000.0f}, {50.0f, 2000.0f}, InAirState.VerticalVelocity)
 	};
 
+	FCollisionObjectQueryParams ObjectQueryParameters;
+	for (const auto ObjectType : InAirSettings.GroundPredictionTraceObjectTypes)
+	{
+		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
+	}
+
 	FHitResult Hit;
-	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity,
-	                                    GroundPredictionObjectQueryParameters,
+	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
 	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
 	                                    {ANSI_TO_TCHAR(__FUNCTION__), false, AlsCharacter});

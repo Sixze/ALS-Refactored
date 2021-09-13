@@ -128,9 +128,9 @@ private:
 
 	FTimerHandle JumpResetTimer;
 
-	static const FCollisionObjectQueryParams GroundPredictionObjectQueryParameters;
-
 public:
+	UAlsAnimationInstance();
+
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeUpdateAnimation(float DeltaTime) override;

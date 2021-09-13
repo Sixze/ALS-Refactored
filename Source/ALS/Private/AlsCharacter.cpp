@@ -10,6 +10,7 @@
 #include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
 #include "Engine/Canvas.h"
+#include "Engine/CollisionProfile.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
@@ -18,10 +19,6 @@
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
-
-const FCollisionObjectQueryParams AAlsCharacter::MantlingAndRagdollObjectQueryParameters{
-	ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic) | ECC_TO_BITFIELD(ECC_Destructible)
-};
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
@@ -52,6 +49,20 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	MantlingTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("MantlingTimeline"));
 	MantlingTimeline->SetLooping(false);
 	MantlingTimeline->SetTimelineLengthMode(TL_TimelineLength);
+
+	RagdollingSettings.GroundTraceObjectTypes =
+	{
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldStatic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldDynamic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_Destructible)
+	};
+
+	GeneralMantlingSettings.MantlingTraceObjectTypes =
+	{
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldStatic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldDynamic),
+		UCollisionProfile::Get()->ConvertToObjectType(ECC_Destructible)
+	};
 }
 
 void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -1198,6 +1209,12 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		return false;
 	}
 
+	FCollisionObjectQueryParams ObjectQueryParameters;
+	for (const auto ObjectType : GeneralMantlingSettings.MantlingTraceObjectTypes)
+	{
+		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
+	}
+
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirection2D(
 			LocomotionState.Rotation.Yaw +
@@ -1233,8 +1250,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
 	FHitResult ForwardTraceHit;
-	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity,
-	                                    MantlingAndRagdollObjectQueryParameters,
+	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, ObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
 	                                    {ForwardTraceTag, false, this});
 
@@ -1276,7 +1292,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
-	                                    MantlingAndRagdollObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+	                                    ObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
 	                                    {DownwardTraceTag, false, this});
 
 	if (!AlsCharacterMovement->IsWalkable(DownwardTraceHit))
@@ -1307,7 +1323,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		DownwardTraceHit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST
 	};
 
-	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, MantlingAndRagdollObjectQueryParameters,
+	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, ObjectQueryParameters,
 	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
 	                                           {FreeSpaceTraceTag, false, this}))
 	{
@@ -1728,13 +1744,18 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	// Trace downward from the target location to offset the target location, preventing the lower
 	// half of the capsule from going through the floor when the ragdoll is laying on the ground.
 
+	FCollisionObjectQueryParams ObjectQueryParameters;
+	for (const auto ObjectType : RagdollingSettings.GroundTraceObjectTypes)
+	{
+		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
+	}
+
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(Hit, RagdollTargetLocation, {
 		                                        RagdollTargetLocation.X,
 		                                        RagdollTargetLocation.Y,
 		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
-	                                        }, MantlingAndRagdollObjectQueryParameters,
-	                                        {ANSI_TO_TCHAR(__FUNCTION__), false, this});
+	                                        }, ObjectQueryParameters, {ANSI_TO_TCHAR(__FUNCTION__), false, this});
 
 	auto NewActorLocation{RagdollTargetLocation};
 

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Engine/EngineTypes.h"
+
 #include "AlsMantlingSettings.generated.h"
 
 class UAnimMontage;
@@ -75,4 +77,7 @@ struct ALS_API FAlsGeneralMantlingSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMantlingTraceSettings InAirTrace{{50.0f, 150.0f}, 70.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TEnumAsByte<EObjectTypeQuery>> MantlingTraceObjectTypes;
 };
