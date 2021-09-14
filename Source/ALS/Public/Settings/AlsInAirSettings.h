@@ -20,5 +20,5 @@ struct ALS_API FAlsInAirSettings
 	UCurveFloat* GroundPredictionAmountCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TEnumAsByte<EObjectTypeQuery>> GroundPredictionTraceObjectTypes;
+	TArray<TEnumAsByte<EObjectTypeQuery>> GroundPredictionSweepObjectTypes;
 };

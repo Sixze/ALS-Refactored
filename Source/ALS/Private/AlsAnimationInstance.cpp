@@ -13,7 +13,7 @@
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {
-	InAirSettings.GroundPredictionTraceObjectTypes =
+	InAirSettings.GroundPredictionSweepObjectTypes =
 	{
 		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldStatic),
 		UCollisionProfile::Get()->ConvertToObjectType(ECC_WorldDynamic),
@@ -953,7 +953,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	};
 
 	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : InAirSettings.GroundPredictionTraceObjectTypes)
+	for (const auto ObjectType : InAirSettings.GroundPredictionSweepObjectTypes)
 	{
 		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
 	}
