@@ -1,8 +1,11 @@
 #include "AlsCharacter.h"
 
 #include "DisplayDebugHelpers.h"
+#include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/Canvas.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsEnumerationUtility.h"
 #include "Utility/AlsMath.h"
@@ -444,7 +447,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	                          FeetLocation,
 	                          FeetLocation +
 	                          UAlsMath::AngleToDirection2D(LocomotionState.VelocityYawAngle) *
-	                          FMath::GetMappedRangeValueClamped({0.0f, AlsCharacterMovement->GetMaxSpeed()},
+	                          FMath::GetMappedRangeValueClamped({0.0f, GetCharacterMovement()->GetMaxSpeed()},
 	                                                            {50.0f, 75.0f}, LocomotionState.Speed),
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
