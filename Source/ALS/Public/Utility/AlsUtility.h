@@ -25,6 +25,9 @@ public:
 	static constexpr int32 DrawCircleSidesCount{16};
 
 public:
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
+	static FString NameToDisplayString(const FName& Name, bool bIsBool = false);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character", AutoCreateRefTerm = "CurveName"))
 	static float GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName);
 

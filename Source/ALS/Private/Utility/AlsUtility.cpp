@@ -8,6 +8,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMath.h"
 
+FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)
+{
+	return FName::NameToDisplayString(Name.ToString(), bIsBool);
+}
+
 float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
 {
 	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;

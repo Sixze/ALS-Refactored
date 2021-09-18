@@ -22,7 +22,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 ## Known Issues & Discussion
 
 - See [Issues](https://github.com/Sixze/ALS-Refactored/issues) section for list of known issues.
-- See [Discussions](https://github.com/Sixze/ALS-Refactored/discussions) section to discuss anything about the plugin, and ask questions. Please do not open an issue to ask questions about the plugin.
+- See [Discussions](https://github.com/Sixze/ALS-Refactored/discussions) section to discuss anything about the plugin, and ask questions. Please do not open an issue for questions.
 
 ## Setting Up the Plugin
 
