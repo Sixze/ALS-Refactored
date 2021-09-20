@@ -80,6 +80,10 @@ private:
 public:
 	UAlsCameraComponent();
 
+	virtual void OnRegister() override;
+
+	virtual void Activate(bool bReset) override;
+
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

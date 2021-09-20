@@ -8,7 +8,7 @@ public class ALSExample : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "ALS", "ALSCamera"
+			"Core", "CoreUObject", "Engine", "AIModule", "ALS", "ALSCamera"
 		});
 	}
 }

@@ -12,23 +12,40 @@
 
 UAlsCameraComponent::UAlsCameraComponent()
 {
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
+
 	bTickInEditor = false;
 	bHiddenInGame = true;
 
 	AnimClass = UAlsCameraAnimationInstance::StaticClass();
 }
 
+void UAlsCameraComponent::OnRegister()
+{
+	AlsCharacter = Cast<AAlsCharacter>(GetOwner());
+
+	Super::OnRegister();
+}
+
+void UAlsCameraComponent::Activate(const bool bReset)
+{
+	if (!bReset && !ShouldActivate())
+	{
+		Super::Activate(bReset);
+		return;
+	}
+
+	Super::Activate(bReset);
+
+	TickCamera(0.0f, false);
+}
+
 void UAlsCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(IsValid(SkeletalMesh))
-
-	AlsCharacter = Cast<AAlsCharacter>(GetOwner());
-	check(IsValid(AlsCharacter))
-
-	TickCamera(0.0f, false);
+	ensure(IsValid(SkeletalMesh) && IsValid(AlsCharacter));
 }
 
 void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -61,10 +78,16 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 
 void UAlsCameraComponent::TickCamera(float DeltaTime, bool bAllowLag)
 {
+	if (!IsValid(AlsCharacter) || !IsValid(GetAnimInstance()))
+	{
+		return;
+	}
+
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraShapesDisplayName())};
 	const auto bDisplayDebugCameraTraces{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraTracesDisplayName())};
 #else
+	const auto bDisplayDebugCameraShapes{false};
 	const auto bDisplayDebugCameraTraces{false};
 #endif
 
