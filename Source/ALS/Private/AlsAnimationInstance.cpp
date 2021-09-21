@@ -426,11 +426,15 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	}
 #endif
 
-	FootState.OffsetHitLocation = Hit.ImpactPoint;
-	FootState.OffsetHitNormal = Hit.ImpactNormal;
-	FootState.OffsetHitComponent = Hit.Component;
-	FootState.OffsetHitPhysicalMaterial = Hit.PhysMaterial;
-	FootState.bOffsetHitValid = true;
+	if (Hit.bBlockingHit)
+	{
+		FootState.OffsetHitLocation = Hit.ImpactPoint;
+		FootState.OffsetHitNormal = Hit.ImpactNormal;
+		FootState.OffsetHitComponent = Hit.Component;
+		FootState.OffsetHitPhysicalMaterial = Hit.PhysMaterial;
+	}
+
+	FootState.bOffsetHitValid = Hit.bBlockingHit;
 
 	FQuat TargetRotationOffset;
 
