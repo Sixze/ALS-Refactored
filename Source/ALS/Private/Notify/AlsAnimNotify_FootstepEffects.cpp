@@ -5,6 +5,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/AudioComponent.h"
+#include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Utility/AlsConstants.h"
@@ -190,16 +191,23 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 
 		const auto DecalLocation{FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset)};
 
+		UDecalComponent* Decal;
+
 		if (EffectSettings->DecalSpawnType == EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent && HitComponent.IsValid())
 		{
-			UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
-			                                     HitComponent.Get(), NAME_None, DecalLocation, DecalRotation,
-			                                     EAttachLocation::KeepWorldPosition, EffectSettings->DecalDuration);
+			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
+			                                             HitComponent.Get(), NAME_None, DecalLocation,
+			                                             DecalRotation, EAttachLocation::KeepWorldPosition);
 		}
 		else
 		{
-			UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize,
-			                                       DecalLocation, DecalRotation, EffectSettings->DecalDuration);
+			Decal = UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(),
+			                                               EffectSettings->DecalSize, DecalLocation, DecalRotation);
+		}
+
+		if (IsValid(Decal))
+		{
+			Decal->SetFadeOut(EffectSettings->DecalDuration, EffectSettings->DecalFadeOutDuration, false);
 		}
 	}
 

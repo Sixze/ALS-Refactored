@@ -68,7 +68,10 @@ struct ALS_API FAlsFootstepEffectSettings
 	FVector DecalSize{10.0f, 20.0f, 20.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
-	float DecalDuration{10.0f};
+	float DecalDuration{4.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	float DecalFadeOutDuration{2.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	EAlsFootstepDecalSpawnType DecalSpawnType{EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent};
