@@ -340,6 +340,9 @@ public:
 private:
 	void SetViewRotation(const FRotator& NewViewRotation);
 
+	UFUNCTION(Server, Unreliable)
+	void ServerSetViewRotation(const FRotator& NewViewRotation);
+
 public:
 	const FAlsViewCharacterState& GetViewState() const;
 

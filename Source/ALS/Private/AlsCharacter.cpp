@@ -792,12 +792,22 @@ void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
 		ViewRotation = NewViewRotation;
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewRotation, this)
+
+		if (!IsReplicatingMovement() && GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetViewRotation(NewViewRotation);
+		}
 	}
+}
+
+void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
+{
+	SetViewRotation(NewViewRotation);
 }
 
 void AAlsCharacter::RefreshView(const float DeltaTime)
 {
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	if (IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy || IsLocallyControlled())
 	{
 		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}
