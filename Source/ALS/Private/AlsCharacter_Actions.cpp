@@ -1,13 +1,11 @@
 #include "AlsCharacter.h"
-
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/TimelineComponent.h"
 #include "Curves/CurveVector.h"
 #include "Engine/CollisionProfile.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/GameStateBase.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
@@ -291,11 +289,26 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	MantlingState.Montage = MantlingSettings.Montage;
 	MantlingState.InterpolationAndCorrectionCurve = MantlingSettings.InterpolationAndCorrectionAmountsCurve;
 
-	MantlingState.PlayRate = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.PlayRate,
-	                                                           Parameters.MantlingHeight);
+	MantlingState.WorldStartTime = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
+
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		MantlingState.WorldStartTime -= GetWorld()->GetDeltaSeconds(); // Magic.
+	}
 
 	MantlingState.StartTime = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.StartTime,
 	                                                            Parameters.MantlingHeight);
+
+	MantlingState.PlayRate = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.PlayRate,
+	                                                           Parameters.MantlingHeight);
+
+	// Configure the mantling duration.
+
+	auto MinTime{0.0f};
+	auto MaxTime{0.0f};
+	MantlingState.InterpolationAndCorrectionCurve->GetTimeRange(MinTime, MaxTime);
+
+	MantlingState.Duration = MaxTime - MantlingState.StartTime;
 
 	MantlingState.Primitive = Parameters.Primitive;
 	MantlingState.RelativeTransform = Parameters.RelativeTransform;
@@ -326,23 +339,12 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		SetLocomotionMode(EAlsLocomotionMode::Mantling);
 	}
 
-	// Configure the mantling timeline so that it is the same length as the interpolation and
-	// correction curve minus the starting position, and plays at the same speed as the animation.
-
-	auto MinTime{0.0f};
-	auto MaxTime{0.0f};
-	MantlingState.InterpolationAndCorrectionCurve->GetTimeRange(MinTime, MaxTime);
-
-	MantlingTimeline->SetTimelineLength(MaxTime - MantlingState.StartTime);
-	MantlingTimeline->SetPlayRate(MantlingState.PlayRate);
-	MantlingTimeline->PlayFromStart();
-
 	// Play the animation montage if valid.
 
 	if (IsValid(MantlingState.Montage))
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(MantlingState.Montage, MantlingState.PlayRate, EMontagePlayReturnType::MontageLength,
-		                                           MantlingState.StartTime + MantlingTimeline->GetPlaybackPosition(), false);
+		GetMesh()->GetAnimInstance()->Montage_Play(MantlingState.Montage, MantlingState.PlayRate,
+		                                           EMontagePlayReturnType::MontageLength, MantlingState.StartTime, false);
 	}
 
 	OnMantlingStarted(Parameters);
@@ -355,61 +357,35 @@ FAlsMantlingSettings AAlsCharacter::SelectMantlingSettings_Implementation(EAlsMa
 
 void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
 
-void AAlsCharacter::OnMantlingTimelineUpdated(const float BlendInTime)
+void AAlsCharacter::RefreshMantling()
 {
+	auto Time{(GetWorld()->GetGameState()->GetServerWorldTimeSeconds() - MantlingState.WorldStartTime) * MantlingState.PlayRate};
+
+	auto bStopMantling{false};
+	if (Time >= MantlingState.Duration)
+	{
+		bStopMantling = true;
+		Time = MantlingState.Duration;
+	}
+
 	// Update the interpolation and correction amounts using the interpolation and correction amounts curve.
 
 	const auto InterpolationAndCorrectionAmounts{
-		MantlingState.InterpolationAndCorrectionCurve->GetVectorValue(MantlingState.StartTime + MantlingTimeline->GetPlaybackPosition())
+		MantlingState.InterpolationAndCorrectionCurve->GetVectorValue(MantlingState.StartTime + Time)
 	};
-
-	const auto InterpolationAmount{InterpolationAndCorrectionAmounts.X};
-	const auto HorizontalCorrectionAmount{InterpolationAndCorrectionAmounts.Y};
-	const auto VerticalCorrectionAmount{InterpolationAndCorrectionAmounts.Z};
 
 	// Lerp multiple transforms together for independent control over the horizontal
 	// and vertical blend to the animation offset, as well as the target transform.
 
 	// Blend into the animation horizontal offset.
 
-	const FTransform TargetHorizontalOffset{
-		FRotator::ZeroRotator,
-		{
-			MantlingState.AnimationOffset.X,
-			MantlingState.AnimationOffset.Y,
-			MantlingState.ActorOffset.GetLocation().Z
-		},
-		FVector::OneVector
-	};
-
-	const auto ResultHorizontalOffset{
-		UKismetMathLibrary::TLerp(MantlingState.ActorOffset, TargetHorizontalOffset, HorizontalCorrectionAmount)
-	};
+	auto ResultHorizontalOffset{MantlingState.ActorOffset};
+	ResultHorizontalOffset.BlendWith(FTransform{MantlingState.AnimationOffset}, InterpolationAndCorrectionAmounts.Y);
 
 	// Blend into the animation vertical offset.
 
-	const FTransform TargetVerticalOffset{
-		MantlingState.ActorOffset.GetRotation(),
-		{
-			MantlingState.ActorOffset.GetLocation().X,
-			MantlingState.ActorOffset.GetLocation().Y,
-			MantlingState.AnimationOffset.Z
-		},
-		FVector::OneVector
-	};
-
 	const auto ResultVerticalOffset{
-		UKismetMathLibrary::TLerp(MantlingState.ActorOffset, TargetVerticalOffset, VerticalCorrectionAmount)
-	};
-
-	const FTransform ResultOffset{
-		ResultHorizontalOffset.GetRotation(),
-		{
-			ResultHorizontalOffset.GetLocation().X,
-			ResultHorizontalOffset.GetLocation().Y,
-			ResultVerticalOffset.GetLocation().Z
-		},
-		FVector::OneVector
+		FMath::Lerp(MantlingState.ActorOffset.GetLocation().Z, MantlingState.AnimationOffset.Z, InterpolationAndCorrectionAmounts.Z)
 	};
 
 	// Continually update the target transform from the stored relative transform to follow along with moving objects.
@@ -420,16 +396,22 @@ void AAlsCharacter::OnMantlingTimelineUpdated(const float BlendInTime)
 
 	// Blend from the current blending transforms into the final transform.
 
-	const auto OffsetTransform{
-		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(TargetTransform, ResultOffset), TargetTransform, InterpolationAmount)
+	const auto InterpolationAmount{1.0f - UAlsMath::Clamp01(InterpolationAndCorrectionAmounts.X)};
+
+	const FTransform OffsetTransform{
+		TargetTransform.Rotator() + ResultHorizontalOffset.Rotator() * InterpolationAmount,
+		TargetTransform.GetLocation() + FVector{
+			ResultHorizontalOffset.GetLocation().X,
+			ResultHorizontalOffset.GetLocation().Y,
+			ResultVerticalOffset
+		} * InterpolationAmount
 	};
 
-	// Initial blend in (controlled in the timeline curve) to allow the actor to blend into the interpolation and
-	// correction curve at the midpoint. This prevents pops when mantling an object lower than the animated mantling.
+	// Initial blend in to allow the actor to blend into the interpolation and correction curve
+	// at the midpoint. This prevents pops when mantling an object lower than the animated mantling.
 
-	const auto ResultTransform{
-		UKismetMathLibrary::TLerp(UAlsMath::AddTransforms(TargetTransform, MantlingState.ActorOffset), OffsetTransform, BlendInTime)
-	};
+	auto ResultTransform{UAlsMath::AddTransforms(TargetTransform, MantlingState.ActorOffset)};
+	ResultTransform.BlendWith(OffsetTransform, GeneralMantlingSettings.BlendInCurve->GetFloatValue(Time));
 
 	SetActorLocationAndRotation(ResultTransform.GetLocation(), ResultTransform.GetRotation());
 
@@ -438,19 +420,15 @@ void AAlsCharacter::OnMantlingTimelineUpdated(const float BlendInTime)
 	RefreshLocomotionLocationAndRotation();
 
 	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
-}
 
-void AAlsCharacter::OnMantlingTimelineEnded()
-{
-	// Restore default network smoothing mode.
+	if (bStopMantling)
+	{
+		// Set the character movement mode to walking.
 
-	GetCharacterMovement()->NetworkSmoothingMode = MantlingState.PreviousNetworkSmoothingMode;
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
-	// Set the character movement mode to walking.
-
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
-	OnMantlingEnded();
+		OnMantlingEnded();
+	}
 }
 
 void AAlsCharacter::OnMantlingEnded_Implementation() {}

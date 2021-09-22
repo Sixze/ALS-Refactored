@@ -22,7 +22,6 @@
 
 enum class EAlsMantlingType : uint8;
 class UAlsCharacterMovementComponent;
-class UTimelineComponent;
 
 UCLASS()
 class ALS_API AAlsCharacter : public ACharacter
@@ -32,9 +31,6 @@ class ALS_API AAlsCharacter : public ACharacter
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	TWeakObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	UTimelineComponent* MantlingTimeline;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess, ClampMin = 0))
 	float MovingSpeedThreshold{50.0f};
@@ -446,11 +442,7 @@ protected:
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
-	UFUNCTION()
-	void OnMantlingTimelineUpdated(float BlendInTime);
-
-	UFUNCTION()
-	void OnMantlingTimelineEnded();
+	void RefreshMantling();
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")

@@ -3,7 +3,6 @@
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
 #include "TimerManager.h"
-#include "Components/TimelineComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/CollisionProfile.h"
 #include "Net/UnrealNetwork.h"
@@ -37,10 +36,6 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
-
-	MantlingTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("MantlingTimeline"));
-	MantlingTimeline->SetLooping(false);
-	MantlingTimeline->SetTimelineLengthMode(TL_TimelineLength);
 
 	RagdollingSettings.GroundTraceObjectTypes =
 	{
@@ -101,14 +96,6 @@ void AAlsCharacter::BeginPlay()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
-	FOnTimelineFloat TimelineUpdated{};
-	TimelineUpdated.BindDynamic(this, &ThisClass::OnMantlingTimelineUpdated);
-	MantlingTimeline->AddInterpFloat(GeneralMantlingSettings.TimelineCurve, TimelineUpdated);
-
-	FOnTimelineEvent TimelineFinished{};
-	TimelineFinished.BindDynamic(this, &ThisClass::OnMantlingTimelineEnded);
-	MantlingTimeline->SetTimelineFinishedFunc(TimelineFinished);
-
 	// Set default rotation values.
 
 	RefreshLocomotionLocationAndRotation();
@@ -164,6 +151,10 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		case EAlsLocomotionMode::InAir:
 			RefreshInAirActorRotation(DeltaTime);
 			TryStartMantlingInAir();
+			break;
+
+		case EAlsLocomotionMode::Mantling:
+			RefreshMantling();
 			break;
 
 		case EAlsLocomotionMode::Ragdolling:
@@ -622,6 +613,13 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 {
 	ApplyDesiredStance();
 
+	if (PreviousMode == EAlsLocomotionMode::Mantling)
+	{
+		// Restore default network smoothing mode.
+
+		GetCharacterMovement()->NetworkSmoothingMode = MantlingState.PreviousNetworkSmoothingMode;
+	}
+
 	if (LocomotionMode == EAlsLocomotionMode::Grounded)
 	{
 		if (!LocomotionState.bRotationLocked)
@@ -653,12 +651,6 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 
 			StartRagdolling();
 		}
-	}
-	else if (LocomotionMode == EAlsLocomotionMode::Ragdolling && PreviousMode == EAlsLocomotionMode::Mantling)
-	{
-		// Stop the mantling timeline if transitioning to the ragdolling mode while mantling.
-
-		MantlingTimeline->Stop();
 	}
 
 	OnLocomotionModeChanged(PreviousMode);

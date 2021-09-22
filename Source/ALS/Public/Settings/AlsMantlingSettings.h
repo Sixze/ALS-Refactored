@@ -26,11 +26,11 @@ struct ALS_API FAlsMantlingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D ReferenceHeight{125.0f, 200.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
-	FVector2D PlayRate{1.2f, 1.2f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D StartTime{0.6f, 0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
+	FVector2D PlayRate{1.2f, 1.2f};
 };
 
 USTRUCT(BlueprintType)
@@ -60,7 +60,7 @@ struct ALS_API FAlsGeneralMantlingSettings
 	bool bAllowMantling{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* TimelineCurve{nullptr};
+	UCurveFloat* BlendInCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
 	float TraceAngleThreshold{110.0f};
