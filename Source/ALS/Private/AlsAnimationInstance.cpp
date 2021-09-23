@@ -771,12 +771,16 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	RotateInPlaceState.PlayRate = FMath::FInterpTo(RotateInPlaceState.PlayRate, TargetPlayRate, DeltaTime, 5.0f);
 
-	// If rotating too fast, then disable the foot lock, or else the legs begin to twist into a spiral.
+	// Disable the foot lock when rotating at a large angle or rotating too fast, otherwise the legs may twist in a spiral.
 
-	RotateInPlaceState.FootLockBlockAmount = !RotateInPlaceSettings.bDisableFootLock &&
-	                                         ViewState.YawSpeed > RotateInPlaceSettings.FootLockBlockViewYawSpeedThreshold
-		                                         ? FMath::FInterpTo(RotateInPlaceState.FootLockBlockAmount, 1.0f, DeltaTime, 10.0f)
-		                                         : 0.0f;
+	if (!RotateInPlaceSettings.bDisableFootLock)
+	{
+		RotateInPlaceState.FootLockBlockAmount = FMath::Abs(ViewState.YawAngle) > RotateInPlaceSettings.FootLockBlockViewYawAngleThreshold
+			                                         ? 1.0f
+			                                         : ViewState.YawSpeed > RotateInPlaceSettings.FootLockBlockViewYawSpeedThreshold
+			                                         ? FMath::FInterpTo(RotateInPlaceState.FootLockBlockAmount, 1.0f, DeltaTime, 10.0f)
+			                                         : 0.0f;
+	}
 }
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()

@@ -19,6 +19,9 @@ struct ALS_API FAlsRotateInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDisableFootLock{false};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, EditCondition = "!bDisableFootLock"))
+	float FootLockBlockViewYawAngleThreshold{120.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "!bDisableFootLock"))
 	float FootLockBlockViewYawSpeedThreshold{620.0f};
 };
