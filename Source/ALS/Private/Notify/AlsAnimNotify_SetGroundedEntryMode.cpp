@@ -1,7 +1,7 @@
 #include "Notify/AlsAnimNotify_SetGroundedEntryMode.h"
 
 #include "AlsAnimationInstance.h"
-#include "Utility/AlsEnumerationUtility.h"
+#include "Utility/AlsUtility.h"
 
 UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 {
@@ -10,7 +10,9 @@ UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 
 FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Set Grounded Entry Mode: {0}"), {GetEnumValueString(Mode)});
+	return FString::Format(TEXT("Als Set Grounded Entry Mode: {0}"), {
+		                       FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(GroundedEntryMode).ToString(), false)
+	                       });
 }
 
 void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
@@ -20,6 +22,6 @@ void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* MeshCom
 	auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
 	if (IsValid(AnimationInstance))
 	{
-		AnimationInstance->SetGroundedEntryMode(Mode);
+		AnimationInstance->SetGroundedEntryMode(GroundedEntryMode);
 	}
 }

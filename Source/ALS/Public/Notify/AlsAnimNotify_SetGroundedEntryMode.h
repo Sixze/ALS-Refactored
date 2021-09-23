@@ -1,10 +1,9 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 
 #include "AlsAnimNotify_SetGroundedEntryMode.generated.h"
-
-enum class EAlsGroundedEntryMode : uint8;
 
 UCLASS(Meta = (DisplayName = "Als Set Grounded Entry Mode Animation Notify"))
 class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
@@ -13,7 +12,7 @@ class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	EAlsGroundedEntryMode Mode;
+	FGameplayTag GroundedEntryMode;
 
 public:
 	UAlsAnimNotify_SetGroundedEntryMode();

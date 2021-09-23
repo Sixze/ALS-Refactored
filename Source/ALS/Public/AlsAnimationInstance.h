@@ -10,7 +10,6 @@
 #include "Settings/AlsRotateInPlaceSettings.h"
 #include "Settings/AlsTurnInPlaceSettings.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsGroundedEntryMode.h"
 #include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsMovementDirection.h"
@@ -90,7 +89,7 @@ private:
 	FAlsMovementDirection MovementDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsGroundedEntryMode GroundedEntryMode;
+	FGameplayTag GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionAnimationState LocomotionState;
@@ -170,8 +169,8 @@ private:
 	// Grounded Movement
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void SetGroundedEntryMode(EAlsGroundedEntryMode NewMode);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (AutoCreateRefTerm = "NewModeTag"))
+	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void SetHipsDirection(EAlsHipsDirection NewDirection);
@@ -291,9 +290,9 @@ inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const
 	return FeetState;
 }
 
-inline void UAlsAnimationInstance::SetGroundedEntryMode(const EAlsGroundedEntryMode NewMode)
+inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewModeTag)
 {
-	GroundedEntryMode = NewMode;
+	GroundedEntryMode = NewModeTag;
 }
 
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)

@@ -271,7 +271,7 @@ private:
 public:
 	const FGameplayTag& GetOverlayMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
 	void SetOverlayMode(const FGameplayTag& NewModeTag);
 
 private:
