@@ -483,17 +483,10 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	if (LocomotionMode != EAlsLocomotionMode::Ragdolling)
 	{
-		// When networked, disable replicate movement reset ragdolling target location and pull force variables
-		// and if the host is a dedicated server, change animation tick option to avoid z-location bug.
+		// When networked, disable replicate movement reset ragdolling target location and pull force variables.
 
 		SetReplicateMovement(false);
 		GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
-
-		if (IsNetMode(NM_DedicatedServer))
-		{
-			RagdollingState.PreviousVisibilityBasedAnimTickOption = GetMesh()->VisibilityBasedAnimTickOption;
-			GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-		}
 
 		// Clear the character movement mode and set the movement state to ragdolling.
 
@@ -543,6 +536,12 @@ void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector&
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 {
+	if (IsNetMode(NM_DedicatedServer))
+	{
+		// Change animation tick option when the host is a dedicated server to avoid z-location bug.
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	}
+
 	const auto RootBoneVelocity{GetMesh()->GetPhysicsLinearVelocity(UAlsConstants::RootBone())};
 
 	RagdollingState.RootBoneVelocity = RootBoneVelocity.SizeSquared() > SMALL_NUMBER || IsLocallyControlled()
@@ -675,15 +674,10 @@ void AAlsCharacter::StopRagdollingImplementation()
 {
 	if (LocomotionMode == EAlsLocomotionMode::Ragdolling)
 	{
-		// Re-enable replicate movement and if the host is a dedicated server set animation tick option back to default.
+		// Re-enable replicate movement.
 
 		SetReplicateMovement(true);
 		GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = false;
-
-		if (IsNetMode(NM_DedicatedServer))
-		{
-			GetMesh()->VisibilityBasedAnimTickOption = RagdollingState.PreviousVisibilityBasedAnimTickOption;
-		}
 
 		// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
 		// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.

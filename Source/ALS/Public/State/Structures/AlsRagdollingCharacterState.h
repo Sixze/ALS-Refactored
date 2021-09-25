@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Components/SkinnedMeshComponent.h"
-
 #include "AlsRagdollingCharacterState.generated.h"
 
 USTRUCT(BlueprintType)
@@ -20,7 +18,4 @@ struct ALS_API FAlsRagdollingCharacterState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PullForce{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EVisibilityBasedAnimTickOption PreviousVisibilityBasedAnimTickOption{EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones};
 };

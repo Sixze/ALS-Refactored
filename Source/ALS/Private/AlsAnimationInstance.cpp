@@ -37,6 +37,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
+	bRotationYawSpeedCurveValidAtThisFrame = true;
+
 	const auto PreviousLocomotionMode{LocomotionMode};
 
 	Stance = AlsCharacter->GetStance();

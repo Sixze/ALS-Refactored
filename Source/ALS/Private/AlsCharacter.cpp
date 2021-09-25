@@ -26,10 +26,6 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetMesh()->bUpdateJointsFromAnimation = true;
 
-	// Uncomment the line of code below if you have noticeable foot lock issues on simulated proxies.
-
-	// GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-
 	// If this option is enabled, then it can cause problems with animation curves (for example, aiming will not work correctly).
 	// https://answers.unrealengine.com/questions/1001006/view.html
 
@@ -72,25 +68,13 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
-void AAlsCharacter::BeginPlay()
+void AAlsCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
-
-	if (GetLocalRole() <= ROLE_SimulatedProxy)
-	{
-		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
-	}
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		// Always update the animation on the server to keep the rotation in sync between the clients and the server.
-		// TODO Handle turn in place and rotate in place locally on each client to remove dependency from the server.
-		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-	}
 
 	// Pass current movement settings to the movement component.
 
@@ -107,6 +91,11 @@ void AAlsCharacter::BeginPlay()
 
 	ViewState.SmoothRotation = ViewRotation;
 	ViewState.PreviousSmoothYawAngle = ViewRotation.Yaw;
+}
+
+void AAlsCharacter::BeginPlay()
+{
+	Super::BeginPlay();
 
 	// Update states to use the initial desired values.
 
@@ -132,6 +121,10 @@ void AAlsCharacter::Restart()
 
 void AAlsCharacter::Tick(const float DeltaTime)
 {
+	// Restore initial visibility based animation tick option.
+
+	GetMesh()->VisibilityBasedAnimTickOption = GetClass()->GetDefaultObject<ACharacter>()->GetMesh()->VisibilityBasedAnimTickOption;
+
 	Super::Tick(DeltaTime);
 
 	RefreshRotationMode();
@@ -698,8 +691,9 @@ FTransform AAlsCharacter::CalculateNetworkSmoothedTransform() const
 	return AlsCharacterMovement->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled
 		       ? GetActorTransform()
 		       : GetActorTransform() * FTransform{
-			         GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * BaseRotationOffset.Inverse(),
-			         GetMesh()->GetRelativeLocation() - BaseTranslationOffset
+			         GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) *
+			         GetBaseRotationOffset().Inverse(),
+			         GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
 		         };
 }
 
@@ -718,8 +712,8 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 
 	const auto SmoothTransform{
 		ActorTransform * FTransform{
-			GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * BaseRotationOffset.Inverse(),
-			GetMesh()->GetRelativeLocation() - BaseTranslationOffset
+			GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * GetBaseRotationOffset().Inverse(),
+			GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
 		}
 	};
 
@@ -838,13 +832,13 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		return;
 	}
 
-	if (LocomotionAction != EAlsLocomotionAction::None)
+	if (LocomotionAction != EAlsLocomotionAction::None || HasAnyRootMotion())
 	{
 		// Other actions are ignored.
 		return;
 	}
 
-	if (LocomotionState.bMoving && !HasAnyRootMotion())
+	if (LocomotionState.bMoving)
 	{
 		// Moving.
 
@@ -890,30 +884,34 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 	}
 
-	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
-	if (FMath::Abs(RotationYawSpeed) <= KINDA_SMALL_NUMBER)
+	auto* AnimationInstance{CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())};
+	if (!AnimationInstance->bRotationYawSpeedCurveValidAtThisFrame)
 	{
+		// Skip actor rotation modification using the rotation yaw speed animation curve because animation
+		// blueprint has not been updated yet (animation blueprint has a lower update rate than character actor).
 		return;
 	}
 
-	// Apply the rotation yaw speed curve from animations.
+	AnimationInstance->bRotationYawSpeedCurveValidAtThisFrame = false;
 
-	if (GetLocalRole() == ROLE_AutonomousProxy)
+	if (GetLocalRole() >= ROLE_Authority && !IsNetMode(NM_Standalone))
 	{
-		SetActorRotation({
-			LocomotionState.Rotation.Pitch,
-			LocomotionState.Rotation.Yaw + RotationYawSpeed * DeltaTime,
-			LocomotionState.Rotation.Roll
-		});
+		// Fully update the animation blueprint on the server when not moving to keep the rotation in sync between clients and the server.
+
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}
-	else
+
+	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
+	if (FMath::Abs(RotationYawSpeed) > KINDA_SMALL_NUMBER)
 	{
+		// Apply the rotation yaw speed curve from animations.
+
 		AddActorWorldRotation({0.0f, RotationYawSpeed * DeltaTime, 0.0f});
+
+		RefreshLocomotionLocationAndRotation();
+
+		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
 	}
-
-	RefreshLocomotionLocationAndRotation();
-
-	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
 }
 
 bool AAlsCharacter::TryRefreshCustomGroundedMovingActorRotation(const float DeltaTime)

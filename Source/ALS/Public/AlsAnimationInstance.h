@@ -61,6 +61,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
 
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
 
@@ -126,6 +127,10 @@ private:
 	FTimerHandle PivotResetTimer;
 
 	FTimerHandle JumpResetTimer;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bRotationYawSpeedCurveValidAtThisFrame{true};
 
 public:
 	UAlsAnimationInstance();
