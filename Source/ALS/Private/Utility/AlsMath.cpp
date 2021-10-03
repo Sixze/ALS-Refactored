@@ -22,6 +22,8 @@ float UAlsMath::InterpolateAngleConstant(const float CurrentAngle, const float T
 
 FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To, const float Alpha)
 {
+	// http://allenchou.net/2018/05/game-math-deriving-the-slerp-formula/
+
 	const auto Dot{From | To};
 
 	if (Dot > 0.9995f || Dot < -0.9995f)
@@ -30,13 +32,13 @@ FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To,
 	}
 
 	const auto Theta{FMath::Acos(Dot) * Alpha};
-	const auto Vector{(To - From * Dot).GetSafeNormal()};
+	const auto FromPerpendicular{(To - From * Dot).GetSafeNormal()};
 
 	float Sin;
 	float Cos;
 	FMath::SinCos(&Sin, &Cos, Theta);
 
-	return From * Cos + Vector * Sin;
+	return From * Cos + FromPerpendicular * Sin;
 }
 
 float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float OtherAxisValue)

@@ -33,7 +33,7 @@ private:
 	bool bRagdolling{false};
 
 public:
-	FAlsLocomotionMode() {}
+	FAlsLocomotionMode() = default;
 
 	FAlsLocomotionMode(const EAlsLocomotionMode InitialLocomotionMode)
 	{

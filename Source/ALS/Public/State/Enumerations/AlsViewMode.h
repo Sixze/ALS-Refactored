@@ -25,7 +25,7 @@ private:
 	bool bThirdPerson{false};
 
 public:
-	FAlsViewMode() {}
+	FAlsViewMode() = default;
 
 	FAlsViewMode(const EAlsViewMode InitialGroundedEntryMode)
 	{

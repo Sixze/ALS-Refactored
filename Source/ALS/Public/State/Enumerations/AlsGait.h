@@ -29,7 +29,7 @@ private:
 	bool bSprinting{false};
 
 public:
-	FAlsGait() {}
+	FAlsGait() = default;
 
 	FAlsGait(const EAlsGait InitialGait)
 	{

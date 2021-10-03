@@ -33,7 +33,7 @@ private:
 	bool bGettingUp{false};
 
 public:
-	FAlsLocomotionAction() {}
+	FAlsLocomotionAction() = default;
 
 	FAlsLocomotionAction(const EAlsLocomotionAction InitialLocomotionAction)
 	{

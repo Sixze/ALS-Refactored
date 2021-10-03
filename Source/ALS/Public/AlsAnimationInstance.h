@@ -61,7 +61,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
 
-private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bRotationYawSpeedAppliedThisFrame;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
 
@@ -129,10 +131,6 @@ private:
 	FTimerHandle JumpResetTimer;
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bRotationYawSpeedCurveValidAtThisFrame{true};
-
-public:
 	UAlsAnimationInstance();
 
 	virtual void NativeInitializeAnimation() override;
@@ -142,6 +140,10 @@ public:
 	// Core
 
 public:
+	bool IsRotationYawSpeedAppliedThisFrame() const;
+
+	void SetRotationYawSpeedAppliedThisFrame(bool bApplied);
+
 	EAlsRotationMode GetRotationMode() const;
 
 	FAlsLocomotionMode GetLocomotionMode() const;
@@ -162,6 +164,8 @@ protected:
 
 private:
 	void RefreshFeet(float DeltaTime);
+
+	void HandleFootLockChangedBase(FAlsFootState& FootState, const FVector& BaseLocation, const FQuat& BaseRotation) const;
 
 	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName, const FName& FootLockCurveName, float DeltaTime) const;
 
@@ -279,6 +283,16 @@ private:
 public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
 };
+
+inline bool UAlsAnimationInstance::IsRotationYawSpeedAppliedThisFrame() const
+{
+	return bRotationYawSpeedAppliedThisFrame;
+}
+
+inline void UAlsAnimationInstance::SetRotationYawSpeedAppliedThisFrame(const bool bApplied)
+{
+	bRotationYawSpeedAppliedThisFrame = bApplied;
+}
 
 inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const
 {

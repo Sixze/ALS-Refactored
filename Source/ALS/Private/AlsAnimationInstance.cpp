@@ -37,7 +37,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	bRotationYawSpeedCurveValidAtThisFrame = true;
+	SetRotationYawSpeedAppliedThisFrame(false);
 
 	const auto PreviousLocomotionMode{LocomotionMode};
 
@@ -280,6 +280,20 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
 	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
 
+	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
+	if (BasedMovement.MovementBase != FeetState.BasePrimitive || BasedMovement.BoneName != FeetState.BaseBoneName)
+	{
+		FeetState.BasePrimitive = BasedMovement.MovementBase;
+		FeetState.BaseBoneName = BasedMovement.BoneName;
+
+		FVector BaseLocation;
+		FQuat BaseRotation;
+		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
+
+		HandleFootLockChangedBase(FeetState.Left, BaseLocation, BaseRotation);
+		HandleFootLockChangedBase(FeetState.Right, BaseLocation, BaseRotation);
+	}
+
 	if (GeneralSettings.bUseFootIkBones)
 	{
 		RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
@@ -314,6 +328,36 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
+void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FVector& BaseLocation,
+                                                      const FQuat& BaseRotation) const
+{
+	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
+	if (BasedMovement.HasRelativeRotation())
+	{
+		const auto BaseRotationInverted{BaseRotation.Inverse()};
+
+		FootState.LockRelativeLocation = BaseRotationInverted.RotateVector(FootState.LockLocation - BaseLocation);
+		FootState.LockRelativeRotation = BaseRotationInverted * FootState.LockRotation;
+	}
+	else if (BasedMovement.HasRelativeLocation())
+	{
+		FootState.LockRelativeLocation = FootState.LockLocation - BaseLocation;
+		FootState.LockRelativeRotation = FootState.LockRotation;
+	}
+	else if (IsValid(BasedMovement.MovementBase))
+	{
+		FootState.LockRelativeLocation = FootState.LockLocation;
+		FootState.LockRelativeRotation = FootState.LockRotation;
+	}
+	else
+	{
+		const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
+
+		FootState.LockRelativeLocation = ComponentTransform.InverseTransformPositionNoScale(FootState.LockLocation);
+		FootState.LockRelativeRotation = ComponentTransform.InverseTransformRotation(FootState.LockRotation);
+	}
+}
+
 void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
                                             const FName& FootLockCurveName, const float DeltaTime) const
 {
@@ -332,7 +376,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		NewFootLockAmount = FMath::Max(0.0f, FootState.LockAmount - DeltaTime * 0.6f);
 	}
 
-	if (FeetSettings.bDisableFootLock || NewFootLockAmount <= 0.0f)
+	if (FeetSettings.bDisableFootLock || NewFootLockAmount <= SMALL_NUMBER)
 	{
 		FootState.LockAmount = 0.0f;
 
@@ -344,7 +388,11 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		return;
 	}
 
-	const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
+	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
+
+	FVector BaseLocation;
+	FQuat BaseRotation;
+	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
 
 	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 0.99f};
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
@@ -360,38 +408,55 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
 		{
-			const auto FootRelativeTransform{FootTransform.GetRelativeTransform(ComponentTransform)};
+			if (BasedMovement.HasRelativeRotation())
+			{
+				const auto BaseRotationInverted{BaseRotation.Inverse()};
 
-			FootState.LockRelativeLocation = FootRelativeTransform.GetLocation();
-			FootState.LockRelativeRotation = FootRelativeTransform.GetRotation();
+				FootState.LockRelativeLocation = BaseRotationInverted.RotateVector(FootTransform.GetLocation() - BaseLocation);
+				FootState.LockRelativeRotation = BaseRotationInverted * FootTransform.GetRotation();
+			}
+			else if (BasedMovement.HasRelativeLocation())
+			{
+				FootState.LockRelativeLocation = FootTransform.GetLocation() - BaseLocation;
+				FootState.LockRelativeRotation = FootTransform.GetRotation();
+			}
+			else if (IsValid(BasedMovement.MovementBase))
+			{
+				FootState.LockRelativeLocation = FootTransform.GetLocation();
+				FootState.LockRelativeRotation = FootTransform.GetRotation();
+			}
+			else
+			{
+				const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
+
+				FootState.LockRelativeLocation = ComponentTransform.InverseTransformPositionNoScale(FootState.LockLocation);
+				FootState.LockRelativeRotation = ComponentTransform.InverseTransformRotation(FootState.LockRotation);
+			}
 		}
 	}
 
-	// Get the distance traveled between frames relative to the mesh rotation to determine how much the foot should be offset
-	// to remain planted on the ground, and subtract it from the current relative location to get the new relative location.
-
-	FootState.LockRelativeLocation -= ComponentTransform.InverseTransformVector(LocomotionState.Velocity * DeltaTime);
-
-	// Use the difference between the current and previous rotations to determine
-	// how much the foot should be rotated to remain planted on the ground.
-
-	if (LocomotionMode.IsGrounded())
+	if (BasedMovement.HasRelativeRotation())
 	{
-		const auto RotationDifference{
-			(AlsCharacter->GetLocomotionState().PreviousRotation - AlsCharacter->GetLocomotionState().Rotation).Quaternion()
-		};
-
-		// Subtract the rotation difference from the current relative rotation to get the new relative rotation.
-
-		FootState.LockRelativeRotation = RotationDifference * FootState.LockRelativeRotation;
-
-		// Rotate the relative location by the rotation difference to keep the foot planted in component space.
-
-		FootState.LockRelativeLocation = RotationDifference.RotateVector(FootState.LockRelativeLocation);
+		FootState.LockLocation = BaseLocation + BaseRotation.RotateVector(FootState.LockRelativeLocation);
+		FootState.LockRotation = BaseRotation * FootState.LockRelativeRotation;
 	}
+	else if (BasedMovement.HasRelativeLocation())
+	{
+		FootState.LockLocation = BaseLocation + FootState.LockRelativeLocation;
+		FootState.LockRotation = FootState.LockRelativeRotation;
+	}
+	else if (IsValid(BasedMovement.MovementBase))
+	{
+		FootState.LockLocation = FootState.LockRelativeLocation;
+		FootState.LockRotation = FootState.LockRelativeRotation;
+	}
+	else
+	{
+		const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
 
-	FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockRelativeLocation);
-	FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockRelativeRotation);
+		FootState.LockLocation = ComponentTransform.TransformPositionNoScale(FootState.LockRelativeLocation);
+		FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockRelativeRotation);
+	}
 
 	FootState.FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
 	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), FootState.LockRotation, FootState.LockAmount);

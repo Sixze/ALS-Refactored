@@ -87,7 +87,6 @@ void AAlsCharacter::PostInitializeComponents()
 
 	LocomotionState.InputYawAngle = LocomotionState.Rotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.Rotation.Yaw;
-	LocomotionState.PreviousRotation = LocomotionState.Rotation;
 
 	ViewState.SmoothRotation = ViewRotation;
 	ViewState.PreviousSmoothYawAngle = ViewRotation.Yaw;
@@ -761,8 +760,6 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 		                               ? NewAcceleration
 		                               : LocomotionState.Acceleration * 0.5f;
 
-	LocomotionState.PreviousRotation = LocomotionState.Rotation;
-
 	RefreshLocomotionLocationAndRotation();
 }
 
@@ -838,6 +835,8 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		return;
 	}
 
+	auto* AnimationInstance{CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())};
+
 	if (LocomotionState.bMoving)
 	{
 		// Moving.
@@ -860,7 +859,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 					Gait == EAlsGait::Sprinting
 						? LocomotionState.VelocityYawAngle
 						: FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw +
-						                          GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
+						                          AnimationInstance->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
 				};
 
 				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateActorRotationSpeed(), 500.0f);
@@ -884,24 +883,16 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 	}
 
-	auto* AnimationInstance{CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())};
-	if (!AnimationInstance->bRotationYawSpeedCurveValidAtThisFrame)
+	if (AnimationInstance->IsRotationYawSpeedAppliedThisFrame())
 	{
 		// Skip actor rotation modification using the rotation yaw speed animation curve because animation
 		// blueprint has not been updated yet (animation blueprint has a lower update rate than character actor).
 		return;
 	}
 
-	AnimationInstance->bRotationYawSpeedCurveValidAtThisFrame = false;
+	AnimationInstance->SetRotationYawSpeedAppliedThisFrame(true);
 
-	if (GetLocalRole() >= ROLE_Authority && !IsNetMode(NM_Standalone))
-	{
-		// Fully update the animation blueprint on the server when not moving to keep the rotation in sync between clients and the server.
-
-		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-	}
-
-	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
+	const auto RotationYawSpeed{AnimationInstance->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
 	if (FMath::Abs(RotationYawSpeed) > KINDA_SMALL_NUMBER)
 	{
 		// Apply the rotation yaw speed curve from animations.
@@ -911,6 +902,13 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		RefreshLocomotionLocationAndRotation();
 
 		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
+	}
+
+	if (GetLocalRole() >= ROLE_Authority && !IsNetMode(NM_Standalone))
+	{
+		// Fully update the animation blueprint on the server when not moving to keep the rotation in sync between clients and the server.
+
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}
 }
 
@@ -940,7 +938,6 @@ void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float Delt
 	// Prevent the character from rotating past a certain angle.
 
 	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.Rotation.Yaw)};
-
 	if (FMath::Abs(YawAngleDifference) > 70.0f)
 	{
 		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f)),

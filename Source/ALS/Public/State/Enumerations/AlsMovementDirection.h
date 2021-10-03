@@ -33,7 +33,7 @@ private:
 	bool bRight{false};
 
 public:
-	FAlsMovementDirection() {}
+	FAlsMovementDirection() = default;
 
 	FAlsMovementDirection(const EAlsMovementDirection InitialMovementDirection)
 	{

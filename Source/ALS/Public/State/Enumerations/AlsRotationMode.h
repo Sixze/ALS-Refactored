@@ -29,7 +29,7 @@ private:
 	bool bAiming{false};
 
 public:
-	FAlsRotationMode() {}
+	FAlsRotationMode() = default;
 
 	FAlsRotationMode(const EAlsRotationMode InitialRotationMode)
 	{

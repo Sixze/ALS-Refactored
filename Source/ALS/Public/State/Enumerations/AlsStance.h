@@ -25,7 +25,7 @@ private:
 	bool bCrouching{false};
 
 public:
-	FAlsStance() {}
+	FAlsStance() = default;
 
 	FAlsStance(const EAlsStance InitialStance)
 	{

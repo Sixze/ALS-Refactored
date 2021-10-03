@@ -5,7 +5,7 @@
 struct ALS_API FAlsGroundedEntryModeTags : public FGameplayTagNativeAdder
 {
 private:
-	static FAlsGroundedEntryModeTags Instance;
+	static const FAlsGroundedEntryModeTags Instance;
 
 public:
 	FGameplayTag Default;

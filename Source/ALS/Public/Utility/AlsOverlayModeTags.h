@@ -5,7 +5,7 @@
 struct ALS_API FAlsOverlayModeTags : public FGameplayTagNativeAdder
 {
 private:
-	static FAlsOverlayModeTags Instance;
+	static const FAlsOverlayModeTags Instance;
 
 public:
 	FGameplayTag Default;

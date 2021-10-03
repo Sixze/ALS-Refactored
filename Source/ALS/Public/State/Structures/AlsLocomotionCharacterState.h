@@ -51,7 +51,4 @@ struct ALS_API FAlsLocomotionCharacterState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator PreviousRotation{ForceInit};
 };
