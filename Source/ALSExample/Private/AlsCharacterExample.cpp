@@ -3,7 +3,6 @@
 #include "AlsCameraComponent.h"
 #include "TimerManager.h"
 #include "Components/InputComponent.h"
-#include "Utility/AlsMath.h"
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
