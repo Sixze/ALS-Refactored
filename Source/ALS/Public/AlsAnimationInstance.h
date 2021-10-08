@@ -165,7 +165,8 @@ protected:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	void HandleFootLockChangedBase(FAlsFootState& FootState, const FVector& BaseLocation, const FQuat& BaseRotation) const;
+	void HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName,
+	                               const FVector& BaseLocation, const FQuat& BaseRotation) const;
 
 	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName, const FName& FootLockCurveName, float DeltaTime) const;
 

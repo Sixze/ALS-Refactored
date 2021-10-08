@@ -280,6 +280,18 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
 	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
 
+	const auto& FootLeftBone{
+		GeneralSettings.bUseFootIkBones
+			? UAlsConstants::FootLeftIkBone()
+			: UAlsConstants::FootLeftIkVirtualBone()
+	};
+
+	const auto& FootRightBone{
+		GeneralSettings.bUseFootIkBones
+			? UAlsConstants::FootRightIkBone()
+			: UAlsConstants::FootRightIkVirtualBone()
+	};
+
 	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
 	if (BasedMovement.MovementBase != FeetState.BasePrimitive || BasedMovement.BoneName != FeetState.BaseBoneName)
 	{
@@ -290,20 +302,12 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		FQuat BaseRotation;
 		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
 
-		HandleFootLockChangedBase(FeetState.Left, BaseLocation, BaseRotation);
-		HandleFootLockChangedBase(FeetState.Right, BaseLocation, BaseRotation);
+		HandleFootLockChangedBase(FeetState.Left, FootLeftBone, BaseLocation, BaseRotation);
+		HandleFootLockChangedBase(FeetState.Right, FootRightBone, BaseLocation, BaseRotation);
 	}
 
-	if (GeneralSettings.bUseFootIkBones)
-	{
-		RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
-		RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
-	}
-	else
-	{
-		RefreshFootLock(FeetState.Left, UAlsConstants::FootLeftIkVirtualBone(), UAlsConstants::FootLeftLockCurve(), DeltaTime);
-		RefreshFootLock(FeetState.Right, UAlsConstants::FootRightIkVirtualBone(), UAlsConstants::FootRightLockCurve(), DeltaTime);
-	}
+	RefreshFootLock(FeetState.Left, FootLeftBone, UAlsConstants::FootLeftLockCurve(), DeltaTime);
+	RefreshFootLock(FeetState.Right, FootRightBone, UAlsConstants::FootRightLockCurve(), DeltaTime);
 
 	if (LocomotionMode.IsInAir())
 	{
@@ -328,9 +332,17 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
 }
 
-void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FVector& BaseLocation,
-                                                      const FQuat& BaseRotation) const
+void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName,
+                                                      const FVector& BaseLocation, const FQuat& BaseRotation) const
 {
+	if (FootState.LockLocation.IsZero())
+	{
+		const auto FootTransform{GetSkelMeshComponent()->GetSocketTransform(FootBoneName)};
+
+		FootState.LockLocation = FootTransform.GetLocation();
+		FootState.LockRotation = FootTransform.GetRotation();
+	}
+
 	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
 	if (BasedMovement.HasRelativeRotation())
 	{
@@ -427,6 +439,12 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 			}
 			else
 			{
+				if (FootState.LockLocation.IsZero())
+				{
+					FootState.LockLocation = FootTransform.GetLocation();
+					FootState.LockRotation = FootTransform.GetRotation();
+				}
+
 				const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
 
 				FootState.LockRelativeLocation = ComponentTransform.InverseTransformPositionNoScale(FootState.LockLocation);

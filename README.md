@@ -2,7 +2,7 @@
 
 ![Image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/Header.gif)
 
-Completely refactored and bug fixed version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26**.
+Completely refactored and bug fixed version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26, 4.27, 5.0 EA**.
 
 ## Supported Platforms
 
@@ -27,6 +27,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 ## Setting Up the Plugin
 
 - **C++ project is a requirement. Blueprint projects are currently not supported.**
+- **Important!** If you are using Unreal Engine 4.27 or 5.0 EA, open the `ALS.uplugin` file in any text editor and remove line with `EngineVersion`.
 - Clone the repository inside your project's plugins folder, or download the latest release and extract it into your project's plugins folder.
 - Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this file, then merge it into yours.
 - Regenerate Visual Studio project files and build your project.
