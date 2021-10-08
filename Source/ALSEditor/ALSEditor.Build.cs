@@ -10,5 +10,18 @@ public class ALSEditor : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "AnimationModifiers", "ALS"
 		});
+
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(new[]
+			{
+				"AnimGraph"
+			});
+
+			PrivateDependencyModuleNames.AddRange(new[]
+			{
+				"BlueprintGraph"
+			});
+		}
 	}
 }

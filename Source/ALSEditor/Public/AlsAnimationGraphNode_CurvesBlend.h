@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AlsAnimationNode_CurvesBlend.h"
 #include "AnimGraphNode_BlendListBase.h"
+#include "AnimationNode/AlsAnimationNode_CurvesBlend.h"
 
 #include "AlsAnimationGraphNode_CurvesBlend.generated.h"
 
 UCLASS()
-class ALS_API UAlsAnimationGraphNode_CurvesBlend : public UAnimGraphNode_BlendListBase
+class ALSEDITOR_API UAlsAnimationGraphNode_CurvesBlend : public UAnimGraphNode_BlendListBase
 {
 	GENERATED_BODY()
 

@@ -1,4 +1,4 @@
-#include "AnimationNode/AlsAnimationGraphNode_CurvesBlend.h"
+#include "AlsAnimationGraphNode_CurvesBlend.h"
 
 #define LOCTEXT_NAMESPACE "BlendCurvesAnimationGraphNode"
 
@@ -7,7 +7,7 @@ FText UAlsAnimationGraphNode_CurvesBlend::GetTooltipText() const
 	return LOCTEXT("Tooltip", "Blend Curves");
 }
 
-FText UAlsAnimationGraphNode_CurvesBlend::GetNodeTitle(ENodeTitleType::Type TitleType) const
+FText UAlsAnimationGraphNode_CurvesBlend::GetNodeTitle(const ENodeTitleType::Type TitleType) const
 {
 	return LOCTEXT("Title", "Blend Curves");
 }
