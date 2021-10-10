@@ -34,7 +34,7 @@
 		},
 		{
 			"Name": "ALSEditor",
-			"Type": "Editor",
+			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
 		}
 	],
