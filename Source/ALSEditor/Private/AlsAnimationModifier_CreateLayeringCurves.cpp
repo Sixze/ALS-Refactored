@@ -20,7 +20,11 @@ void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSeq
 
 		if (bAddKeyOnEachFrame)
 		{
+#if ENGINE_MAJOR_VERSION >= 5
+			for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
+#else
 			for (auto i{0}; i < Sequence->GetNumberOfFrames(); i++)
+#endif
 			{
 				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(i), CurveValue);
 			}
@@ -49,7 +53,11 @@ void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSeq
 
 			if (bAddKeyOnEachFrame)
 			{
+#if ENGINE_MAJOR_VERSION >= 5
+				for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
+#else
 				for (auto i{0}; i < Sequence->GetNumberOfFrames(); i++)
+#endif
 				{
 					UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, SlotCurveName, Sequence->GetTimeAtFrame(i), SlotCurveValue);
 				}

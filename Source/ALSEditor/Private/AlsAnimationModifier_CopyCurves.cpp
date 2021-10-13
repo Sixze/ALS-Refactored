@@ -17,7 +17,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 
 	if (bCopyAllCurves)
 	{
-		for (const auto& Curve : SourceSequence->RawCurveData.FloatCurves)
+		for (const auto& Curve : SourceSequence->GetCurveData().FloatCurves)
 		{
 			if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, Curve.Name.DisplayName, ERawCurveTrackTypes::RCT_Float))
 			{

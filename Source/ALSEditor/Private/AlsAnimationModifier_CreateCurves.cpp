@@ -20,7 +20,11 @@ void UAlsAnimationModifier_CreateCurves::OnApply_Implementation(UAnimSequence* S
 
 		if (Curve.bAddKeyOnEachFrame)
 		{
+#if ENGINE_MAJOR_VERSION >= 5
+			for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
+#else
 			for (auto i{0}; i < Sequence->GetNumberOfFrames(); i++)
+#endif
 			{
 				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, Curve.Name, Sequence->GetTimeAtFrame(i), 0);
 			}

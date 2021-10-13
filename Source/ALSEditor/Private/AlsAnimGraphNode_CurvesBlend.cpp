@@ -17,4 +17,8 @@ FString UAlsAnimGraphNode_CurvesBlend::GetNodeCategory() const
 	return TEXT("ALS");
 }
 
+#if ENGINE_MAJOR_VERSION >= 5
+void UAlsAnimGraphNode_CurvesBlend::GetOutputLinkAttributes(FNodeAttributeArray& Attributes) const {}
+#endif
+
 #undef LOCTEXT_NAMESPACE
