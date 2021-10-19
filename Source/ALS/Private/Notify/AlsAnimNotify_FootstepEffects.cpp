@@ -66,13 +66,16 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	}
 	else
 	{
+		FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()};
+		QueryParameters.bReturnPhysicalMaterial = true;
+
 		FHitResult Hit;
 		if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
 		                                    FootTransform.GetLocation() - FVector{
 			                                    0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance
 		                                    },
 		                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-		                                    {ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()}))
+		                                    QueryParameters))
 		{
 #if ENABLE_DRAW_DEBUG
 			if (bDisplayDebug)

@@ -495,12 +495,14 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	auto FootLocation{FootState.FinalLocation};
 	FootLocation.Z = GetSkelMeshComponent()->GetSocketLocation(UAlsConstants::RootBone()).Z;
 
+	FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, AlsCharacter};
+	QueryParameters.bReturnPhysicalMaterial = true;
+
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit,
 	                                     FootLocation + FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceUpward},
 	                                     FootLocation - FVector{0.0f, 0.0f, FeetSettings.IkTraceDistanceDownward},
-	                                     UEngineTypes::ConvertToCollisionChannel(FeetSettings.IkTraceChannel),
-	                                     {ANSI_TO_TCHAR(__FUNCTION__), true, AlsCharacter});
+	                                     UEngineTypes::ConvertToCollisionChannel(FeetSettings.IkTraceChannel), QueryParameters);
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))
