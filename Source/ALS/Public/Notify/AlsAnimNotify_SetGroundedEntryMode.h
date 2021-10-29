@@ -5,7 +5,7 @@
 
 #include "AlsAnimNotify_SetGroundedEntryMode.generated.h"
 
-UCLASS(Meta = (DisplayName = "Als Set Grounded Entry Mode Animation Notify"))
+UCLASS(DisplayName = "Als Set Grounded Entry Mode Animation Notify")
 class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
 {
 	GENERATED_BODY()

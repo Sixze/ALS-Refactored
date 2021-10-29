@@ -4,7 +4,7 @@
 
 #include "AlsAnimNotifyState_SetRootMotionScale.generated.h"
 
-UCLASS(Meta = (DisplayName = "Als Set Root Motion Scale Animation Notify State"))
+UCLASS(DisplayName = "Als Set Root Motion Scale Animation Notify State")
 class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 {
 	GENERATED_BODY()

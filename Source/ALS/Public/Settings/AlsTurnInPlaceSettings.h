@@ -36,33 +36,33 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D ViewYawAngleToActivationDelay{0, 0.75f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, DisplayName="Turn 180 Angle Threshold"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Turn 180 Angle Threshold", Meta = (ClampMin = 0, ClampMax = 180))
 	float Turn180AngleThreshold{130.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDisableFootLock{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Standing Turn 90 Left"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Standing Turn 90 Left")
 	FAlsTurnInPlaceSettings StandingTurn90Left;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Standing Turn 90 Right"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Standing Turn 90 Right")
 	FAlsTurnInPlaceSettings StandingTurn90Right;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Standing Turn 180 Left"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Standing Turn 180 Left")
 	FAlsTurnInPlaceSettings StandingTurn180Left;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Standing Turn 180 Right"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Standing Turn 180 Right")
 	FAlsTurnInPlaceSettings StandingTurn180Right;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Crouching Turn 90 Left"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Crouching Turn 90 Left")
 	FAlsTurnInPlaceSettings CrouchingTurn90Left;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Crouching Turn 90 Right"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Crouching Turn 90 Right")
 	FAlsTurnInPlaceSettings CrouchingTurn90Right;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Crouching Turn 180 Left"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Crouching Turn 180 Left")
 	FAlsTurnInPlaceSettings CrouchingTurn180Left;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName="Crouching Turn 180 Right"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Crouching Turn 180 Right")
 	FAlsTurnInPlaceSettings CrouchingTurn180Right;
 };

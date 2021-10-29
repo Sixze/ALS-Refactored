@@ -71,8 +71,7 @@ protected:
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
 	FGameplayTag OverlayMode;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character",
-		Meta = (AllowPrivateAccess, DisplayName = "Mantling Settings"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", DisplayName = "Mantling Settings")
 	FAlsGeneralMantlingSettings GeneralMantlingSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))

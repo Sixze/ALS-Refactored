@@ -35,7 +35,7 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	};
 };
 
-UCLASS(Meta = (DisplayName = "Als Create Curves Animation Modifier"))
+UCLASS(DisplayName = "Als Create Curves Animation Modifier")
 class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifier
 {
 	GENERATED_BODY()

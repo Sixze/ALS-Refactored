@@ -6,7 +6,7 @@
 
 enum class EAlsLocomotionAction : uint8;
 
-UCLASS(Meta = (DisplayName = "Als Set Locomotion Action Animation Notify State"))
+UCLASS(DisplayName = "Als Set Locomotion Action Animation Notify State")
 class ALS_API UAlsAnimNotifyState_SetLocomotionAction : public UAnimNotifyState
 {
 	GENERATED_BODY()

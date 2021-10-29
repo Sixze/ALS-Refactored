@@ -17,7 +17,7 @@ struct FAlsRigUnit_HighLevelBaseMutable : public FRigUnitMutable
 };
 
 // Calculates the intersection location and direction of the perpendicular to line AC through point B.
-USTRUCT(Meta = (DisplayName = "Calculate Pole Vector", Category = "ALS|Als", Varying))
+USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS|Als", Varying))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 {
 	GENERATED_BODY()
@@ -59,7 +59,7 @@ struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 	virtual void Execute(const FRigUnitContext& Context) override;
 };
 
-USTRUCT(Meta = (DisplayName = "Hand Ik Retargeting", Category = "ALS|Als"))
+USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS|Als"))
 struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBaseMutable
 {
 	GENERATED_BODY()

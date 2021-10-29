@@ -9,7 +9,7 @@
 
 class UAnimMontage;
 
-UCLASS(Meta = (DisplayName = "Als Early Blend Out Animation Notify State"))
+UCLASS(DisplayName = "Als Early Blend Out Animation Notify State")
 class ALS_API UAlsAnimNotifyState_EarlyBlendOut : public UAnimNotifyState
 {
 	GENERATED_BODY()

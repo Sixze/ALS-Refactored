@@ -113,17 +113,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SurfaceTraceDistance{50.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName = "Foot Left Y Axis"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Foot Left Y Axis")
 	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (DisplayName = "Foot Right Y Axis"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Foot Right Y Axis")
 	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (TitleProperty = "SurfaceType"))
 	TArray<FAlsFootstepEffectSettings> Effects;
 };
 
-UCLASS(Meta = (DisplayName = "Als Footstep Effects Animation Notify"))
+UCLASS(DisplayName = "Als Footstep Effects Animation Notify")
 class ALS_API UAlsAnimNotify_FootstepEffects : public UAnimNotify
 {
 	GENERATED_BODY()

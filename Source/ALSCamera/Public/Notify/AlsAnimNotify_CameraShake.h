@@ -7,7 +7,7 @@
 
 class UCameraShakeBase;
 
-UCLASS(Meta = (DisplayName = "Als Camera Shake Animation Notify"))
+UCLASS(DisplayName = "Als Camera Shake Animation Notify")
 class ALSCAMERA_API UAlsAnimNotify_CameraShake : public UAnimNotify
 {
 	GENERATED_BODY()
