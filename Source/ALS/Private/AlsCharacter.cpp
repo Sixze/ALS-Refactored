@@ -361,8 +361,8 @@ void AAlsCharacter::RefreshGait()
 
 EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 {
-	// Calculate the max allowed gait. This represents the maximum gait the character is currently allowed to
-	// be in, and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
+	// Calculate the max allowed gait. This represents the maximum gait the character is currently allowed
+	// to be in and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
 	// if you wanted to force the character into a walking state while indoors, this could be done here.
 
 	if (Stance == EAlsStance::Standing && (RotationMode != EAlsRotationMode::Aiming || bSprintHasPriorityOverAiming))
@@ -387,7 +387,7 @@ EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 
 EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
 {
-	// Get the new gait. This is calculated by the actual movement of the character, and so it can be
+	// Get the new gait. This is calculated by the actual movement of the character and so it can be
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 

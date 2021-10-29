@@ -692,7 +692,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 			GetCharacterMovement()->Velocity = RagdollingState.RootBoneVelocity;
 		}
 
-		// Re-enable capsule collision, and disable physics simulation on the mesh.
+		// Re-enable capsule collision and disable physics simulation on the mesh.
 
 		GetMesh()->SetAllBodiesSimulatePhysics(false);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

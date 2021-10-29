@@ -125,8 +125,8 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 	}
 
 	// Calculate the relative acceleration amount. This value represents the current amount of acceleration / deceleration
-	// relative to the actor rotation. It is normalized to a range of -1 to 1 so that -1 equals the max
-	// braking deceleration, and 1 equals the max acceleration of the character movement component.
+	// relative to the actor rotation. It is normalized to a range of -1 to 1 so that -1 equals the
+	// max braking deceleration and 1 equals the max acceleration of the character movement component.
 
 	const auto Acceleration{AlsCharacter->GetLocomotionState().Acceleration};
 
@@ -410,7 +410,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
 	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it
-	// so that the foot can only blend out of the locked position or lock to a new position, and never blend in.
+	// so that the foot can only blend out of the locked position or lock to a new position and never blend in.
 
 	if (bNewAmountIsEqualOne || bNewAmountIsLessThanPrevious)
 	{
@@ -604,8 +604,8 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 
 EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
 {
-	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera
-	// during the looking direction / aiming modes, and is used in the cycle blending to blend to the appropriate directional states.
+	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
+	// the looking direction / aiming modes and is used in the cycle blending to blend to the appropriate directional states.
 
 	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
 	{
@@ -638,7 +638,7 @@ void UAlsAnimationInstance::RefreshMovement(const float DeltaTime)
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 {
 	// Calculate and interpolate the velocity blend. This value represents the velocity amount of the
-	// actor in each direction (normalized so that diagonals equal 0.5 for each direction), and is
+	// actor in each direction (normalized so that diagonals equal 0.5 for each direction) and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
@@ -893,7 +893,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	// Check if the view yaw speed is below the threshold, and if view yaw angle is outside of the
+	// Check if the view yaw speed is below the threshold and if view yaw angle is outside of the
 	// threshold. If so, begin counting the activation delay time. If not, reset the activation delay time.
 	// This ensures the conditions remain true for a sustained period of time before turning in place.
 
@@ -1028,7 +1028,7 @@ void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 {
 	// Calculate the ground prediction weight by tracing in the velocity direction to find a walkable surface the character
-	// is falling toward, and getting the "time" (range from 0 to 1, 1 being maximum, 0 being about to ground) till impact.
+	// is falling toward and getting the "time" (range from 0 to 1, 1 being maximum, 0 being about to ground) till impact.
 	// The ground prediction amount curve is used to control how the time affects the final amount for a smooth blend.
 
 	if (InAirState.VerticalVelocity >= -200.0f)

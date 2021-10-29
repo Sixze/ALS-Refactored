@@ -26,12 +26,12 @@ struct ALS_API FAlsMovementGaitSettings
 	float SprintSpeed{650.0f};
 
 	// Gait amount to acceleration, deceleration and ground friction curve.
-	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running and 3 is sprinting.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveVector* AccelerationAndDecelerationAndGroundFrictionCurve{nullptr};
 
 	// Gait amount to rotation speed curve.
-	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running and 3 is sprinting.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* RotationSpeedCurve{nullptr};
 

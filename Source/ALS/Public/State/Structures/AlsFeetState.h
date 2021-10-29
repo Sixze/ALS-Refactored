@@ -67,7 +67,7 @@ struct ALS_API FAlsFeetState
 	FName BaseBoneName;
 
 	// Choose whether a foot is planted or about to plant when stopping using the foot planted animation
-	// curve. A value less than 0.5 means the foot is planted, and a value more than 0.5 means the
+	// curve. A value less than 0.5 means the foot is planted and a value more than 0.5 means the
 	// foot is still in the air. The foot planted curve also determines which foot is planted (or
 	// about to plant). Positive values mean the right foot is planted, negative values mean the left.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
