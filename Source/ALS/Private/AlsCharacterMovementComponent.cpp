@@ -131,7 +131,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	Super::PhysWalking(DeltaTime, Iterations);
 }
 
-void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementCharacterSettings* NewMovementSettings)
+void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* NewMovementSettings)
 {
 	MovementSettings = NewMovementSettings;
 

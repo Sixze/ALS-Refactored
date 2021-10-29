@@ -6,7 +6,7 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 
-#include "AlsMovementCharacterSettings.generated.h"
+#include "AlsMovementSettings.generated.h"
 
 class UCurveVector;
 class UCurveFloat;
@@ -84,7 +84,7 @@ struct ALS_API FAlsMovementStanceSettings
 };
 
 UCLASS(Blueprintable, BlueprintType)
-class UAlsMovementCharacterSettings : public UDataAsset
+class ALS_API UAlsMovementSettings : public UDataAsset
 {
 	GENERATED_BODY()
 

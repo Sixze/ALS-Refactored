@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Settings/AlsInAirRotationMode.h"
 #include "Settings/AlsMantlingSettings.h"
-#include "Settings/AlsMovementCharacterSettings.h"
+#include "Settings/AlsMovementSettings.h"
 #include "Settings/AlsRagdollingSettings.h"
 #include "Settings/AlsRollingSettings.h"
 #include "State/Enumerations/AlsGait.h"
@@ -13,10 +13,10 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
-#include "State/Structures/AlsLocomotionCharacterState.h"
+#include "State/Structures/AlsLocomotionState.h"
 #include "State/Structures/AlsMantlingState.h"
-#include "State/Structures/AlsRagdollingCharacterState.h"
-#include "State/Structures/AlsViewCharacterState.h"
+#include "State/Structures/AlsRagdollingState.h"
+#include "State/Structures/AlsViewState.h"
 
 #include "AlsCharacter.generated.h"
 
@@ -81,7 +81,7 @@ protected:
 	FAlsRollingSettings RollingSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	UAlsMovementCharacterSettings* MovementSettings;
+	UAlsMovementSettings* MovementSettings;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
@@ -103,13 +103,13 @@ private:
 	FVector_NetQuantizeNormal InputDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionCharacterState LocomotionState;
+	FAlsLocomotionState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FRotator ViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsViewCharacterState ViewState;
+	FAlsViewState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsMantlingState MantlingState;
@@ -118,7 +118,7 @@ private:
 	FVector_NetQuantize RagdollTargetLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsRagdollingCharacterState RagdollingState;
+	FAlsRagdollingState RagdollingState;
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
@@ -318,7 +318,7 @@ protected:
 public:
 	const FVector& GetInputDirection() const;
 
-	const FAlsLocomotionCharacterState& GetLocomotionState() const;
+	const FAlsLocomotionState& GetLocomotionState() const;
 
 private:
 	void SetInputDirection(FVector NewInputDirection);
@@ -341,7 +341,7 @@ private:
 	void ServerSetViewRotation(const FRotator& NewViewRotation);
 
 public:
-	const FAlsViewCharacterState& GetViewState() const;
+	const FAlsViewState& GetViewState() const;
 
 private:
 	void RefreshView(float DeltaTime);
@@ -552,12 +552,12 @@ inline const FVector& AAlsCharacter::GetInputDirection() const
 	return InputDirection;
 }
 
-inline const FAlsLocomotionCharacterState& AAlsCharacter::GetLocomotionState() const
+inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 {
 	return LocomotionState;
 }
 
-inline const FAlsViewCharacterState& AAlsCharacter::GetViewState() const
+inline const FAlsViewState& AAlsCharacter::GetViewState() const
 {
 	return ViewState;
 }

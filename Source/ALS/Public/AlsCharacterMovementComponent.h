@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Settings/AlsMovementCharacterSettings.h"
+#include "Settings/AlsMovementSettings.h"
 
 #include "AlsCharacterMovementComponent.generated.h"
 
@@ -48,7 +48,7 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	UAlsMovementCharacterSettings* MovementSettings;
+	UAlsMovementSettings* MovementSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementGaitSettings GaitSettings;
@@ -76,7 +76,7 @@ public:
 	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 public:
-	void SetMovementSettings(UAlsMovementCharacterSettings* NewMovementSettings);
+	void SetMovementSettings(UAlsMovementSettings* NewMovementSettings);
 
 	const FAlsMovementGaitSettings& GetGaitSettings() const;
 

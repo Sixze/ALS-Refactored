@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "AlsLocomotionCharacterState.generated.h"
+#include "AlsLocomotionState.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsLocomotionCharacterState
+struct ALS_API FAlsLocomotionState
 {
 	GENERATED_BODY()
 
