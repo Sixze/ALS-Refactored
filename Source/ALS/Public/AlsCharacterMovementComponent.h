@@ -5,7 +5,7 @@
 
 #include "AlsCharacterMovementComponent.generated.h"
 
-class ALS_API FAlsSavedMove final : public FSavedMove_Character
+class ALS_API FAlsSavedMove : public FSavedMove_Character
 {
 private:
 	using Super = FSavedMove_Character;
@@ -27,7 +27,7 @@ protected:
 	virtual void PrepMoveFor(ACharacter* Character) override;
 };
 
-class ALS_API FAlsNetworkPredictionData final : public FNetworkPredictionData_Client_Character
+class ALS_API FAlsNetworkPredictionData : public FNetworkPredictionData_Client_Character
 {
 private:
 	using Super = FNetworkPredictionData_Client_Character;

@@ -30,7 +30,7 @@ class ALS_API AAlsCharacter : public ACharacter
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	TWeakObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+	UAlsCharacterMovementComponent* AlsCharacterMovement;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess, ClampMin = 0))
 	float MovingSpeedThreshold{50.0f};
