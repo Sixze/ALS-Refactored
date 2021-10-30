@@ -115,7 +115,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
 
-	LocomotionState.bAllowTransitions = GetCurveValue(UAlsConstants::AllowTransitionsCurve()) >= 0.99f;
+	LocomotionState.bAllowTransitions = FAnimWeight::IsFullWeight(GetCurveValue(UAlsConstants::AllowTransitionsCurve()));
 
 	// Allow movement animations if character is moving.
 
@@ -132,7 +132,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	const auto* CharacterMovement{AlsCharacter->GetCharacterMovement()};
 
-	if ((Acceleration | LocomotionState.Velocity) > 0.0f)
+	if ((Acceleration | LocomotionState.Velocity) >= 0.0f)
 	{
 		LocomotionState.RelativeAccelerationAmount = AlsCharacter->GetLocomotionState().Rotation.UnrotateVector(
 			UAlsMath::ClampMagnitude01(Acceleration / CharacterMovement->GetMaxAcceleration()));
@@ -187,7 +187,7 @@ void UAlsAnimationInstance::RefreshLayering()
 	LayeringState.ArmLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftCurve());
 	LayeringState.ArmLeftAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftAdditiveCurve());
 	LayeringState.ArmLeftLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftLocalSpaceCurve());
-	LayeringState.ArmLeftMeshSpaceBlendAmount = 1.0f - FMath::FloorToInt(LayeringState.ArmLeftLocalSpaceBlendAmount);
+	LayeringState.ArmLeftMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmLeftLocalSpaceBlendAmount);
 	LayeringState.ArmLeftSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftSlotCurve());
 
 	// The mesh space blend will always be 1 unless the local space blend is 1.
@@ -195,7 +195,7 @@ void UAlsAnimationInstance::RefreshLayering()
 	LayeringState.ArmRightBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightCurve());
 	LayeringState.ArmRightAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightAdditiveCurve());
 	LayeringState.ArmRightLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightLocalSpaceCurve());
-	LayeringState.ArmRightMeshSpaceBlendAmount = 1.0f - FMath::FloorToInt(LayeringState.ArmRightLocalSpaceBlendAmount);
+	LayeringState.ArmRightMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmRightLocalSpaceBlendAmount);
 	LayeringState.ArmRightSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightSlotCurve());
 
 	LayeringState.HandLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHandLeftCurve());
@@ -373,7 +373,7 @@ void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, 
 void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
                                             const FName& FootLockCurveName, const float DeltaTime) const
 {
-	if (FootState.IkAmount <= SMALL_NUMBER)
+	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
 		return;
 	}
@@ -388,7 +388,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		NewFootLockAmount = FMath::Max(0.0f, FootState.LockAmount - DeltaTime * 0.6f);
 	}
 
-	if (FeetSettings.bDisableFootLock || NewFootLockAmount <= SMALL_NUMBER)
+	if (FeetSettings.bDisableFootLock || !FAnimWeight::IsRelevant(NewFootLockAmount))
 	{
 		FootState.LockAmount = 0.0f;
 
@@ -406,7 +406,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	FQuat BaseRotation;
 	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
 
-	const auto bNewAmountIsEqualOne{NewFootLockAmount >= 0.99f};
+	const auto bNewAmountIsEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
 	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it
@@ -482,7 +482,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const
 {
-	if (FootState.IkAmount <= SMALL_NUMBER)
+	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
 		FootState.bOffsetHitValid = false;
 
@@ -581,7 +581,7 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 
 	FeetState.PelvisOffsetAmount = (FeetState.Left.IkAmount + FeetState.Right.IkAmount) * 0.5f;
 
-	if (FeetState.PelvisOffsetAmount <= SMALL_NUMBER)
+	if (!FAnimWeight::IsRelevant(FeetState.PelvisOffsetAmount))
 	{
 		FeetState.PelvisOffsetLocation = FVector::ZeroVector;
 		return;

@@ -75,7 +75,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	if (Weight <= SMALL_NUMBER)
+	if (Weight <= KINDA_SMALL_NUMBER)
 	{
 		return;
 	}
@@ -88,12 +88,12 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 
 	FVector RetargetingOffset;
 
-	if (RetargetingWeight >= 1.0f - SMALL_NUMBER)
+	if (RetargetingWeight >= 1.0f - KINDA_SMALL_NUMBER)
 	{
 		RetargetingOffset = Hierarchy->GetGlobalTransform(RightHandBone).GetLocation() -
 		                    Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation();
 	}
-	else if (RetargetingWeight <= SMALL_NUMBER)
+	else if (RetargetingWeight <= KINDA_SMALL_NUMBER)
 	{
 		RetargetingOffset = Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation() -
 		                    Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation();

@@ -729,7 +729,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	// If the character has input, update the input yaw angle.
 
-	LocomotionState.bHasInput = InputDirection.SizeSquared() > SMALL_NUMBER;
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
 
 	if (LocomotionState.bHasInput)
 	{

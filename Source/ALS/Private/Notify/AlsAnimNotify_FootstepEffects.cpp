@@ -151,7 +151,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 			VolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 		}
 
-		if (VolumeMultiplier > 0.0f && EffectSettings->Sound.LoadSynchronous())
+		if (VolumeMultiplier >= KINDA_SMALL_NUMBER && EffectSettings->Sound.LoadSynchronous())
 		{
 			UAudioComponent* Audio{nullptr};
 
