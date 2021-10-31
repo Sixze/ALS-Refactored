@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Engine/DataAsset.h"
-#include "Engine/DataTable.h"
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"

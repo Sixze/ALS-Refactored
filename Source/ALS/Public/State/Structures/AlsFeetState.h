@@ -84,6 +84,6 @@ struct ALS_API FAlsFeetState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PelvisOffsetAmount{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PelvisOffsetLocation{ForceInit};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z")
+	float PelvisOffsetZ{0.0f};
 };

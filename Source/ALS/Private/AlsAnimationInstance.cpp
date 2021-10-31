@@ -314,7 +314,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		ResetFootOffset(FeetState.Left, DeltaTime);
 		ResetFootOffset(FeetState.Right, DeltaTime);
 
-		RefreshPelvisOffset(DeltaTime, FVector::ZeroVector, FVector::ZeroVector);
+		RefreshPelvisOffset(DeltaTime, 0.0f, 0.0f);
 		return;
 	}
 
@@ -329,7 +329,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	auto TargetFootRightLocationOffset{FVector::ZeroVector};
 	RefreshFootOffset(FeetState.Right, TargetFootRightLocationOffset, DeltaTime);
 
-	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset, TargetFootRightLocationOffset);
+	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset.Z, TargetFootRightLocationOffset.Z);
 }
 
 void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName,
@@ -553,7 +553,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	// different speeds based on whether the new target is above or below the current one.
 
 	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, TargetLocationOffset, DeltaTime,
-	                                            FootState.OffsetLocation.Z > TargetLocationOffset.Z ? 30.0f : 15.0f);
+	                                            TargetLocationOffset.Z > FootState.OffsetLocation.Z ? 15.0f : 30.0f);
 
 	// Interpolate the current rotation offset to the new target value.
 
@@ -574,8 +574,8 @@ void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const floa
 	FootState.bOffsetHitValid = false;
 }
 
-void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVector& TargetFootLeftLocationOffset,
-                                                const FVector& TargetFootRightLocationOffset)
+void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const float TargetFootLeftLocationOffsetZ,
+                                                const float TargetFootRightLocationOffsetZ)
 {
 	// Calculate the pelvis offset amount by finding the average foot ik weight. If the amount is 0, clear the offset.
 
@@ -583,23 +583,19 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const FVe
 
 	if (!FAnimWeight::IsRelevant(FeetState.PelvisOffsetAmount))
 	{
-		FeetState.PelvisOffsetLocation = FVector::ZeroVector;
+		FeetState.PelvisOffsetZ = 0.0f;
 		return;
 	}
 
-	// Set the new location offset to be the lowest foot offset.
+	// Set the new offset to be the lowest foot offset.
 
-	const auto TargetOffset{
-		TargetFootLeftLocationOffset.Z < TargetFootRightLocationOffset.Z
-			? TargetFootLeftLocationOffset
-			: TargetFootRightLocationOffset
-	};
+	const auto TargetPelvisOffsetZ{FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ)};
 
-	// Interpolate the current location offset to the new target value. Interpolate at
-	// different speeds based on whether the new target is above or below the current one.
+	// Interpolate the current offset to the new target value. Interpolate at different
+	// speeds based on whether the new target is above or below the current one.
 
-	FeetState.PelvisOffsetLocation = FMath::VInterpTo(FeetState.PelvisOffsetLocation, TargetOffset, DeltaTime,
-	                                                  TargetOffset.Z > FeetState.PelvisOffsetLocation.Z ? 10.0f : 15.0f);
+	FeetState.PelvisOffsetZ = FMath::FInterpTo(FeetState.PelvisOffsetZ, TargetPelvisOffsetZ, DeltaTime,
+	                                           TargetPelvisOffsetZ > FeetState.PelvisOffsetZ ? 10.0f : 15.0f);
 }
 
 EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const

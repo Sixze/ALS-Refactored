@@ -174,7 +174,7 @@ private:
 
 	static void ResetFootOffset(FAlsFootState& FootState, float DeltaTime);
 
-	void RefreshPelvisOffset(float DeltaTime, const FVector& TargetFootLeftLocationOffset, const FVector& TargetFootRightLocationOffset);
+	void RefreshPelvisOffset(float DeltaTime, float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ);
 
 	// Grounded Movement
 
