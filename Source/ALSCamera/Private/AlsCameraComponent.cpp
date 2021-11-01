@@ -209,7 +209,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	const auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve())};
 
-	if (!bUseLagSubstepping || DeltaTime <= MaxLagSubstepDeltaTime || RotationLag <= 0.0f)
+	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || RotationLag <= 0.0f)
 	{
 		return UAlsMath::ExponentialDecay(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
 	}
@@ -222,17 +222,18 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
-		const auto SubstepTime{SubstepNumber * MaxLagSubstepDeltaTime};
+		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
 		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
 		{
 			NewCameraRotation = FMath::RInterpTo(NewCameraRotation, CameraInitialRotation + SubstepRotationSpeed * SubstepTime,
 			                                     SubstepTime - PreviousSubstepTime, RotationLag);
 
 			PreviousSubstepTime = SubstepTime;
-			continue;
 		}
-
-		return FMath::RInterpTo(NewCameraRotation, CameraTargetRotation, DeltaTime - PreviousSubstepTime, RotationLag);
+		else
+		{
+			return FMath::RInterpTo(NewCameraRotation, CameraTargetRotation, DeltaTime - PreviousSubstepTime, RotationLag);
+		}
 	}
 }
 
@@ -250,7 +251,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto LocationLagY{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve())};
 	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve())};
 
-	if (!bUseLagSubstepping || DeltaTime <= MaxLagSubstepDeltaTime || LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f)
+	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f)
 	{
 		return CameraYawRotation.RotateVector({
 			UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
@@ -266,7 +267,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
-		const auto SubstepTime{SubstepNumber * MaxLagSubstepDeltaTime};
+		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
 		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
 		{
 			const auto SubstepRelativePivotTargetLocation{RelativePivotInitialLagLocation + SubstepMovementSpeed * SubstepTime};
@@ -280,21 +281,21 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 			                                              SubstepDeltaTime, LocationLagZ);
 
 			PreviousSubstepTime = SubstepTime;
-			continue;
 		}
+		else
+		{
+			const auto RemainingDeltaTime{DeltaTime - PreviousSubstepTime};
 
-		const auto SubstepDeltaTime{DeltaTime - PreviousSubstepTime};
+			RelativePivotLagLocation.X = FMath::FInterpTo(RelativePivotLagLocation.X, RelativePivotTargetLocation.X,
+			                                              RemainingDeltaTime, LocationLagX);
+			RelativePivotLagLocation.Y = FMath::FInterpTo(RelativePivotLagLocation.Y, RelativePivotTargetLocation.Y,
+			                                              RemainingDeltaTime, LocationLagY);
+			RelativePivotLagLocation.Z = FMath::FInterpTo(RelativePivotLagLocation.Z, RelativePivotTargetLocation.Z,
+			                                              RemainingDeltaTime, LocationLagZ);
 
-		RelativePivotLagLocation.X = FMath::FInterpTo(RelativePivotLagLocation.X, RelativePivotTargetLocation.X,
-		                                              SubstepDeltaTime, LocationLagX);
-		RelativePivotLagLocation.Y = FMath::FInterpTo(RelativePivotLagLocation.Y, RelativePivotTargetLocation.Y,
-		                                              SubstepDeltaTime, LocationLagY);
-		RelativePivotLagLocation.Z = FMath::FInterpTo(RelativePivotLagLocation.Z, RelativePivotTargetLocation.Z,
-		                                              SubstepDeltaTime, LocationLagZ);
-		break;
+			return CameraYawRotation.RotateVector(RelativePivotLagLocation);
+		}
 	}
-
-	return CameraYawRotation.RotateVector(RelativePivotLagLocation);
 }
 
 FVector UAlsCameraComponent::CalculatePivotOffset(const FQuat& PivotTargetRotation) const

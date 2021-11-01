@@ -80,7 +80,7 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", AdvancedDisplay,
 		Meta = (AllowPrivateAccess, EditCondition = "bUseCameraLagSubstepping", ClampMin = 0.005, ClampMax = 0.5))
-	float MaxLagSubstepDeltaTime{1.0f / 60.0f};
+	float LagSubstepDeltaTime{1.0f / 60.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;

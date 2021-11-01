@@ -323,10 +323,10 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		return;
 	}
 
-	auto TargetFootLeftLocationOffset{FVector::ZeroVector};
+	FVector TargetFootLeftLocationOffset;
 	RefreshFootOffset(FeetState.Left, TargetFootLeftLocationOffset, DeltaTime);
 
-	auto TargetFootRightLocationOffset{FVector::ZeroVector};
+	FVector TargetFootRightLocationOffset;
 	RefreshFootOffset(FeetState.Right, TargetFootRightLocationOffset, DeltaTime);
 
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset.Z, TargetFootRightLocationOffset.Z);
@@ -546,16 +546,14 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 	}
 	else
 	{
+		TargetLocationOffset = FVector::ZeroVector;
 		TargetRotationOffset = FQuat::Identity;
 	}
 
-	// Interpolate the current location offset to the new target value. Interpolate at
-	// different speeds based on whether the new target is above or below the current one.
+	// Interpolate current offsets to the new target values.
 
-	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, TargetLocationOffset, DeltaTime,
-	                                            TargetLocationOffset.Z > FootState.OffsetLocation.Z ? 15.0f : 30.0f);
-
-	// Interpolate the current rotation offset to the new target value.
+	FootState.OffsetLocation = UAlsMath::InterpolateVectorSpringStable(FootState.OffsetLocation, TargetLocationOffset,
+	                                                                   FootState.OffsetSpringState, 20.0f, 4.0f, DeltaTime, 4.0f);
 
 	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, 30.0f);
 
@@ -565,7 +563,9 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 
 void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime)
 {
-	FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, FVector::ZeroVector, DeltaTime, 15.0f);
+	FootState.OffsetLocation = UAlsMath::InterpolateVectorSpringStable(FootState.OffsetLocation, FVector::ZeroVector,
+	                                                                   FootState.OffsetSpringState, 20.0f, 4.0f, DeltaTime, 4.0f);
+
 	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, 15.0f);
 
 	FootState.FinalLocation += FootState.OffsetLocation;
@@ -577,25 +577,18 @@ void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const floa
 void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const float TargetFootLeftLocationOffsetZ,
                                                 const float TargetFootRightLocationOffsetZ)
 {
-	// Calculate the pelvis offset amount by finding the average foot ik weight. If the amount is 0, clear the offset.
+	// Calculate the pelvis offset amount by finding the average foot ik weight.
 
 	FeetState.PelvisOffsetAmount = (FeetState.Left.IkAmount + FeetState.Right.IkAmount) * 0.5f;
-
-	if (!FAnimWeight::IsRelevant(FeetState.PelvisOffsetAmount))
-	{
-		FeetState.PelvisOffsetZ = 0.0f;
-		return;
-	}
 
 	// Set the new offset to be the lowest foot offset.
 
 	const auto TargetPelvisOffsetZ{FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ)};
 
-	// Interpolate the current offset to the new target value. Interpolate at different
-	// speeds based on whether the new target is above or below the current one.
+	// Interpolate current offset to the new target value.
 
-	FeetState.PelvisOffsetZ = FMath::FInterpTo(FeetState.PelvisOffsetZ, TargetPelvisOffsetZ, DeltaTime,
-	                                           TargetPelvisOffsetZ > FeetState.PelvisOffsetZ ? 10.0f : 15.0f);
+	FeetState.PelvisOffsetZ = UAlsMath::InterpolateFloatSpringStable(FeetState.PelvisOffsetZ, TargetPelvisOffsetZ,
+	                                                                 FeetState.PelvisSpringState, 10.0f, 2.0f, DeltaTime, 10.0f);
 }
 
 EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const

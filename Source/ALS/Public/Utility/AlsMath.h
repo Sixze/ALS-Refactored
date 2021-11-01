@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Kismet/BlueprintFunctionLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "State/Enumerations/AlsMovementDirection.h"
 
 #include "AlsMath.generated.h"
@@ -33,6 +33,14 @@ public:
 
 	template <class T>
 	static T ExponentialDecay(const T& A, const T& B, float DeltaTime, float Lambda);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math")
+	static float InterpolateFloatSpringStable(float Current, float Target, UPARAM(ref) FFloatSpringState& SpringState,
+	                                          float Stiffness, float CriticalDampingFactor, float DeltaTime, float Mass = 1.0f);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math", Meta = (AutoCreateRefTerm = "Current, Target"))
+	static FVector InterpolateVectorSpringStable(const FVector& Current, const FVector& Target, UPARAM(ref) FVectorSpringState& SpringState,
+	                                             float Stiffness, float CriticalDampingFactor, float DeltaTime, float Mass = 1.0f);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float CurrentAngle, float TargetAngle, float DeltaTime, float InterpolationSpeed);
