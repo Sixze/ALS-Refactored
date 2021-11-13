@@ -336,6 +336,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	if (LocomotionMode != EAlsLocomotionMode::Mantling)
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_None);
+		GetCharacterMovement()->SetBase(MantlingState.Primitive);
+
 		SetLocomotionMode(EAlsLocomotionMode::Mantling);
 	}
 
@@ -414,6 +416,8 @@ void AAlsCharacter::RefreshMantling()
 	ResultTransform.BlendWith(OffsetTransform, GeneralMantlingSettings.BlendInCurve->GetFloatValue(Time));
 
 	SetActorLocationAndRotation(ResultTransform.GetLocation(), ResultTransform.GetRotation());
+
+	GetCharacterMovement()->SaveBaseLocation();
 
 	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 

@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Tag"))
 	static FName GetSimpleTagName(const FGameplayTag& Tag);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext"))
+	static float GetFirstPlayerPingSeconds(const UObject* WorldContext);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName"))
 	static bool ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName);
 

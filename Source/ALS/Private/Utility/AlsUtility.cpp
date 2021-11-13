@@ -5,6 +5,7 @@
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/HUD.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMath.h"
 
@@ -30,12 +31,39 @@ FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
 	return TagNode.IsValid() ? TagNode->GetSimpleTagName() : NAME_None;
 }
 
+float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
+{
+	const auto* World{WorldContext->GetWorld()};
+	if (!IsValid(World))
+	{
+		return 0.0f;
+	}
+
+	const auto* PlayerController{World->GetFirstPlayerController()};
+	if (!IsValid(PlayerController) || !IsValid(PlayerController->PlayerState))
+	{
+		return 0.0f;
+	}
+
+	// Divide by 2 to approximate 1-way ping from 2-way ping.
+	return PlayerController->PlayerState->ExactPing * 0.5f * 0.001f;
+}
+
 bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
 {
-	const auto* FirstPlayerController{IsValid(Actor) ? UGameplayStatics::GetPlayerController(Actor->GetWorld(), 0) : nullptr};
-	auto* Hud{IsValid(FirstPlayerController) ? FirstPlayerController->GetHUD() : nullptr};
+	if (!IsValid(Actor))
+	{
+		return false;
+	}
 
-	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
+	const auto* PlayerController{Actor->GetWorld()->GetFirstPlayerController()};
+	if (!IsValid(PlayerController) || !IsValid(PlayerController->GetHUD()))
+	{
+		return false;
+	}
+
+	return PlayerController->GetHUD()->ShouldDisplayDebug(DisplayName) &&
+	       PlayerController->GetHUD()->GetCurrentDebugTargetActor() == Actor;
 }
 
 void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,

@@ -547,21 +547,6 @@ private:
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalPosition, float& VerticalPosition) const;
 };
 
-inline const FVector& AAlsCharacter::GetInputDirection() const
-{
-	return InputDirection;
-}
-
-inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
-{
-	return LocomotionState;
-}
-
-inline const FAlsViewState& AAlsCharacter::GetViewState() const
-{
-	return ViewState;
-}
-
 inline EAlsStance AAlsCharacter::GetDesiredStance() const
 {
 	return DesiredStance;
@@ -615,4 +600,19 @@ inline EAlsLocomotionMode AAlsCharacter::GetLocomotionMode() const
 inline EAlsLocomotionAction AAlsCharacter::GetLocomotionAction() const
 {
 	return LocomotionAction;
+}
+
+inline const FVector& AAlsCharacter::GetInputDirection() const
+{
+	return InputDirection;
+}
+
+inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
+{
+	return LocomotionState;
+}
+
+inline const FAlsViewState& AAlsCharacter::GetViewState() const
+{
+	return ViewState;
 }
