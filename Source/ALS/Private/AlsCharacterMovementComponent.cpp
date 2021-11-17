@@ -3,6 +3,36 @@
 #include "AlsCharacter.h"
 #include "Curves/CurveVector.h"
 
+void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, const ENetworkMoveType MoveType)
+{
+	Super::ClientFillNetworkMoveData(Move, MoveType);
+
+	const auto& SavedMove{static_cast<const FAlsSavedMove&>(Move)};
+
+	Stance = SavedMove.Stance;
+	RotationMode = SavedMove.RotationMode;
+	MaxAllowedGait = SavedMove.MaxAllowedGait;
+}
+
+bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Movement, FArchive& Archive,
+                                             UPackageMap* Map, const ENetworkMoveType MoveType)
+{
+	Super::Serialize(Movement, Archive, Map, MoveType);
+
+	SerializeOptionalValue(Archive.IsSaving(), Archive, Stance, EAlsStance::Standing);
+	SerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, EAlsRotationMode::LookingDirection);
+	SerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, EAlsGait::Walking);
+
+	return !Archive.IsError();
+}
+
+FAlsCharacterNetworkMoveDataContainer::FAlsCharacterNetworkMoveDataContainer()
+{
+	NewMoveData = &MoveData[0];
+	PendingMoveData = &MoveData[1];
+	OldMoveData = &MoveData[2];
+}
+
 void FAlsSavedMove::Clear()
 {
 	Super::Clear();
@@ -58,22 +88,13 @@ FSavedMovePtr FAlsNetworkPredictionData::AllocateNewMove()
 	return MakeShared<FAlsSavedMove>();
 }
 
-FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
-{
-	if (ClientPredictionData == nullptr)
-	{
-		auto* MutableThis{const_cast<UAlsCharacterMovementComponent*>(this)};
-
-		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData{*this};
-		MutableThis->ClientPredictionData->MaxSmoothNetUpdateDist = 92.0f;
-		MutableThis->ClientPredictionData->NoSmoothNetUpdateDist = 140.0f;
-	}
-
-	return ClientPredictionData;
-}
-
 UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 {
+	SetNetworkMoveDataContainer(MoveDataContainer);
+
+	// NetworkMaxSmoothUpdateDistance = 92.0f;
+	// NetworkNoSmoothUpdateDistance = 140.0f;
+
 	MaxWalkSpeed = 175.0f;
 	MaxWalkSpeedCrouched = 150.0;
 	MaxAcceleration = 1500.0f;
@@ -129,6 +150,39 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	}
 
 	Super::PhysWalking(DeltaTime, Iterations);
+}
+
+void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, const int32 Iterations)
+{
+	Super::PhysCustom(DeltaTime, Iterations); // TODO Is it better to handle mantling here?
+}
+
+FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
+{
+	if (ClientPredictionData == nullptr)
+	{
+		auto* MutableThis{const_cast<UAlsCharacterMovementComponent*>(this)};
+
+		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData{*this};
+	}
+
+	return ClientPredictionData;
+}
+
+void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp, const float DeltaTime,
+                                                    const uint8 CompressedFlags, const FVector& NewAcceleration)
+{
+	const auto* MoveData{static_cast<FAlsCharacterNetworkMoveData*>(GetCurrentNetworkMoveData())};
+	if (MoveData != nullptr)
+	{
+		Stance = MoveData->Stance;
+		RotationMode = MoveData->RotationMode;
+		MaxAllowedGait = MoveData->MaxAllowedGait;
+
+		RefreshGaitSettings();
+	}
+
+	Super::MoveAutonomous(ClientTimeStamp, DeltaTime, CompressedFlags, NewAcceleration);
 }
 
 void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* NewMovementSettings)

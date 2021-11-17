@@ -5,9 +5,36 @@
 
 #include "AlsCharacterMovementComponent.generated.h"
 
-class ALS_API FAlsSavedMove : public FSavedMove_Character
+class ALS_API FAlsCharacterNetworkMoveData : public FCharacterNetworkMoveData
 {
 private:
+	using Super = FCharacterNetworkMoveData;
+
+public:
+	EAlsStance Stance{EAlsStance::Standing};
+
+	EAlsRotationMode RotationMode{EAlsRotationMode::LookingDirection};
+
+	EAlsGait MaxAllowedGait{EAlsGait::Walking};
+
+public:
+	virtual void ClientFillNetworkMoveData(const FSavedMove_Character& Move, ENetworkMoveType MoveType) override;
+
+	virtual bool Serialize(UCharacterMovementComponent& Movement, FArchive& Archive, UPackageMap* Map, ENetworkMoveType MoveType) override;
+};
+
+class ALS_API FAlsCharacterNetworkMoveDataContainer : public FCharacterNetworkMoveDataContainer
+{
+public:
+	FAlsCharacterNetworkMoveData MoveData[3];
+
+public:
+	FAlsCharacterNetworkMoveDataContainer();
+};
+
+class ALS_API FAlsSavedMove : public FSavedMove_Character
+{
+public:
 	using Super = FSavedMove_Character;
 
 	EAlsStance Stance{EAlsStance::Standing};
@@ -16,7 +43,7 @@ private:
 
 	EAlsGait MaxAllowedGait{EAlsGait::Walking};
 
-protected:
+public:
 	virtual void Clear() override;
 
 	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration,
@@ -35,7 +62,6 @@ private:
 public:
 	FAlsNetworkPredictionData(const UCharacterMovementComponent& MovementComponent);
 
-protected:
 	virtual FSavedMovePtr AllocateNewMove() override;
 };
 
@@ -47,6 +73,8 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 	friend FAlsSavedMove;
 
 private:
+	FAlsCharacterNetworkMoveDataContainer MoveDataContainer;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	UAlsMovementSettings* MovementSettings;
 
@@ -72,8 +100,13 @@ public:
 protected:
 	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
 
+	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
+
 public:
 	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
+
+protected:
+	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
 
 public:
 	void SetMovementSettings(UAlsMovementSettings* NewMovementSettings);
