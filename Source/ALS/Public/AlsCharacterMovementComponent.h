@@ -34,9 +34,10 @@ public:
 
 class ALS_API FAlsSavedMove : public FSavedMove_Character
 {
-public:
+private:
 	using Super = FSavedMove_Character;
 
+public:
 	EAlsStance Stance{EAlsStance::Standing};
 
 	EAlsRotationMode RotationMode{EAlsRotationMode::LookingDirection};
@@ -93,6 +94,10 @@ private:
 public:
 	UAlsCharacterMovementComponent();
 
+protected:
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
+
+public:
 	virtual float GetMaxAcceleration() const override;
 
 	virtual float GetMaxBrakingDeceleration() const override;

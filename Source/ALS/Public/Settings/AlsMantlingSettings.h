@@ -1,37 +1,80 @@
 ﻿#pragma once
 
+#include "Engine/DataAsset.h"
 #include "Engine/EngineTypes.h"
+#include "State/Enumerations/AlsMantlingType.h"
 
 #include "AlsMantlingSettings.generated.h"
 
 class UAnimMontage;
-class UCurveVector;
 class UCurveFloat;
+class UCurveVector;
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsMantlingSettings
+struct ALS_API FAlsMantlingParameters
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector_NetQuantize10 TargetRelativeLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator TargetRelativeRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MantlingHeight{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAlsMantlingType MantlingType{EAlsMantlingType::High};
+};
+
+UCLASS(Blueprintable, BlueprintType)
+class ALS_API UAlsMantlingSettings : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* Montage{nullptr};
+
+	// Mantling time to blend in amount curve.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* BlendInCurve{nullptr};
 
 	// Mantling time to interpolation, horizontal and vertical correction amounts curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveVector* InterpolationAndCorrectionAmountsCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector StartRelativeLocation{-65.0f, 0.0f, -200.0f};
+	FVector StartRelativeLocation{-65.0f, 0.0f, -100.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	FVector2D ReferenceHeight{125.0f, 200.0f};
+	FVector2D ReferenceHeight{50.0f, 100.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	FVector2D StartTime{0.6f, 0.0f};
+	FVector2D StartTime{0.5f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
-	FVector2D PlayRate{1.2f, 1.2f};
+	FVector2D PlayRate{1.0f, 1.0f};
+
+public:
+	float CalculateStartTime(float MantlingHeight) const;
+
+	float CalculatePlayRate(float MantlingHeight) const;
 };
+
+inline float UAlsMantlingSettings::CalculateStartTime(const float MantlingHeight) const
+{
+	return FMath::GetMappedRangeValueClamped(ReferenceHeight, StartTime, MantlingHeight);
+}
+
+inline float UAlsMantlingSettings::CalculatePlayRate(const float MantlingHeight) const
+{
+	return FMath::GetMappedRangeValueClamped(ReferenceHeight, PlayRate, MantlingHeight);
+}
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMantlingTraceSettings
@@ -58,9 +101,6 @@ struct ALS_API FAlsGeneralMantlingSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAllowMantling{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* BlendInCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
 	float TraceAngleThreshold{110.0f};

@@ -45,8 +45,7 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 		return 0.0f;
 	}
 
-	// Divide by 2 to approximate 1-way ping from 2-way ping.
-	return PlayerController->PlayerState->ExactPing * 0.5f * 0.001f;
+	return PlayerController->PlayerState->ExactPing * 0.001f;
 }
 
 bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)

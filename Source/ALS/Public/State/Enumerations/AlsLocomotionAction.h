@@ -7,8 +7,9 @@ enum class EAlsLocomotionAction : uint8
 {
 	None,
 	Mantling,
-	Rolling,
-	GettingUp
+	Ragdolling,
+	GettingUp,
+	Rolling
 };
 
 USTRUCT(BlueprintType)
@@ -27,10 +28,13 @@ private:
 	bool bMantling{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
-	bool bRolling{false};
+	bool bRagdolling{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
 	bool bGettingUp{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
+	bool bRolling{false};
 
 public:
 	FAlsLocomotionAction() = default;
@@ -50,14 +54,19 @@ public:
 		return bMantling;
 	}
 
-	bool IsRolling() const
+	bool IsRagdolling() const
 	{
-		return bRolling;
+		return bRagdolling;
 	}
 
 	bool IsGettingUp() const
 	{
 		return bGettingUp;
+	}
+
+	bool IsRolling() const
+	{
+		return bRolling;
 	}
 
 	operator EAlsLocomotionAction() const
@@ -71,7 +80,8 @@ public:
 
 		bNone = LocomotionAction == EAlsLocomotionAction::None;
 		bMantling = LocomotionAction == EAlsLocomotionAction::Mantling;
-		bRolling = LocomotionAction == EAlsLocomotionAction::Rolling;
+		bRagdolling = LocomotionAction == EAlsLocomotionAction::Ragdolling;
 		bGettingUp = LocomotionAction == EAlsLocomotionAction::GettingUp;
+		bRolling = LocomotionAction == EAlsLocomotionAction::Rolling;
 	}
 };

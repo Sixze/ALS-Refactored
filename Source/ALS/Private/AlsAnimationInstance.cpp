@@ -39,7 +39,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	SetRotationYawSpeedAppliedThisFrame(false);
 
-	const auto PreviousLocomotionMode{LocomotionMode};
+	const auto PreviousLocomotionAction{LocomotionAction};
 
 	Stance = AlsCharacter->GetStance();
 	Gait = AlsCharacter->GetGait();
@@ -49,32 +49,22 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	LocomotionMode = AlsCharacter->GetLocomotionMode();
 	LocomotionAction = AlsCharacter->GetLocomotionAction();
 
-	RefreshLocomotion(DeltaTime);
-	RefreshLayering();
-	RefreshView(DeltaTime);
-	RefreshFeet(DeltaTime);
-
-	if (PreviousLocomotionMode.IsRagdolling() && !LocomotionMode.IsRagdolling())
+	if (PreviousLocomotionAction.IsRagdolling() && !LocomotionAction.IsRagdolling())
 	{
 		StopRagdolling();
 	}
 
-	if (LocomotionMode.IsGrounded())
-	{
-		if (LocomotionState.bMoving)
-		{
-			MovementDirection = CalculateMovementDirection();
+	RefreshLocomotion(DeltaTime);
+	RefreshLayering();
+	RefreshView(DeltaTime);
+	
+	RefreshFeet(DeltaTime);
 
-			RefreshMovement(DeltaTime);
-		}
+	RefreshMovement(DeltaTime);
+	RefreshDynamicTransitions();
 
-		RefreshDynamicTransitions();
-
-		RefreshRotateInPlace(DeltaTime);
-		RefreshTurnInPlace(DeltaTime);
-
-		return;
-	}
+	RefreshRotateInPlace(DeltaTime);
+	RefreshTurnInPlace(DeltaTime);
 
 	RefreshInAir(DeltaTime);
 	RefreshRagdolling();
@@ -318,7 +308,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		return;
 	}
 
-	if (LocomotionMode.IsRagdolling())
+	if (LocomotionAction.IsRagdolling())
 	{
 		return;
 	}
@@ -591,23 +581,15 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const flo
 	                                                                 FeetState.PelvisSpringState, 10.0f, 2.0f, DeltaTime, 10.0f);
 }
 
-EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
-{
-	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
-	// the looking direction / aiming modes and is used in the cycle blending to blend to the appropriate directional states.
-
-	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
-	{
-		return EAlsMovementDirection::Forward;
-	}
-
-	return UAlsMath::CalculateMovementDirection(
-		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw),
-		70.0f, 5.0f);
-}
-
 void UAlsAnimationInstance::RefreshMovement(const float DeltaTime)
 {
+	if (!LocomotionMode.IsGrounded() || !LocomotionState.bMoving)
+	{
+		return;
+	}
+
+	MovementDirection = CalculateMovementDirection();
+
 	RefreshVelocityBlend(DeltaTime);
 
 	MovementState.StrideBlendAmount = CalculateStrideBlendAmount();
@@ -622,6 +604,21 @@ void UAlsAnimationInstance::RefreshMovement(const float DeltaTime)
 
 	LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, LocomotionState.RelativeAccelerationAmount.X, DeltaTime,
 	                                           GeneralSettings.LeanInterpolationSpeed);
+}
+
+EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
+{
+	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
+	// the looking direction / aiming modes and is used in the cycle blending to blend to the appropriate directional states.
+
+	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
+	{
+		return EAlsMovementDirection::Forward;
+	}
+
+	return UAlsMath::CalculateMovementDirection(
+		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw),
+		70.0f, 5.0f);
 }
 
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
@@ -758,7 +755,7 @@ void UAlsAnimationInstance::StopTransitionAndTurnInPlaceSlotAnimations(const flo
 
 void UAlsAnimationInstance::RefreshDynamicTransitions()
 {
-	if (LocomotionState.bMoving || !LocomotionState.bAllowTransitions)
+	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !LocomotionState.bAllowTransitions)
 	{
 		return;
 	}
@@ -816,7 +813,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 {
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (LocomotionState.bMoving || !IsRotateInPlaceAllowed())
+	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !IsRotateInPlaceAllowed())
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -869,7 +866,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	// Turn in place is allowed only if transitions are allowed, the character
 	// standing still and looking at the camera and not in first-person mode.
 
-	if (LocomotionState.bMoving || !IsTurnInPlaceAllowed())
+	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !IsTurnInPlaceAllowed())
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;
@@ -1083,7 +1080,7 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 
 void UAlsAnimationInstance::RefreshRagdolling()
 {
-	if (LocomotionMode != EAlsLocomotionMode::Ragdolling)
+	if (LocomotionAction != EAlsLocomotionAction::Ragdolling)
 	{
 		return;
 	}

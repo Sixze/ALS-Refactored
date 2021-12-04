@@ -34,25 +34,27 @@ struct ALS_API FAlsMovementGaitSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* RotationSpeedCurve{nullptr};
 
-	float GetSpeedForGait(const EAlsGait Gait) const
-	{
-		switch (Gait)
-		{
-			case EAlsGait::Running:
-				return RunSpeed;
-
-			case EAlsGait::Sprinting:
-				return SprintSpeed;
-
-			case EAlsGait::Walking:
-				return WalkSpeed;
-
-			default:
-				checkNoEntry();
-				return 0.0f;
-		}
-	}
+	float GetSpeedForGait(const EAlsGait Gait) const;
 };
+
+inline float FAlsMovementGaitSettings::GetSpeedForGait(const EAlsGait Gait) const
+{
+	switch (Gait)
+	{
+		case EAlsGait::Running:
+			return RunSpeed;
+
+		case EAlsGait::Sprinting:
+			return SprintSpeed;
+
+		case EAlsGait::Walking:
+			return WalkSpeed;
+
+		default:
+			checkNoEntry();
+			return 0.0f;
+	}
+}
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMovementStanceSettings
@@ -65,22 +67,24 @@ struct ALS_API FAlsMovementStanceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementGaitSettings Crouching;
 
-	const FAlsMovementGaitSettings* GetMovementGaitSettingsForStance(const EAlsStance Stance) const
-	{
-		switch (Stance)
-		{
-			case EAlsStance::Standing:
-				return &Standing;
-
-			case EAlsStance::Crouching:
-				return &Crouching;
-
-			default:
-				checkNoEntry();
-				return nullptr;
-		}
-	}
+	const FAlsMovementGaitSettings* GetMovementGaitSettingsForStance(const EAlsStance Stance) const;
 };
+
+inline const FAlsMovementGaitSettings* FAlsMovementStanceSettings::GetMovementGaitSettingsForStance(const EAlsStance Stance) const
+{
+	switch (Stance)
+	{
+		case EAlsStance::Standing:
+			return &Standing;
+
+		case EAlsStance::Crouching:
+			return &Crouching;
+
+		default:
+			checkNoEntry();
+			return nullptr;
+	}
+}
 
 UCLASS(Blueprintable, BlueprintType)
 class ALS_API UAlsMovementSettings : public UDataAsset
@@ -97,22 +101,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementStanceSettings Aiming;
 
-	const FAlsMovementStanceSettings* GetMovementStanceSettingsForRotationMode(const EAlsRotationMode RotationMode) const
-	{
-		switch (RotationMode)
-		{
-			case EAlsRotationMode::LookingDirection:
-				return &LookingDirection;
-
-			case EAlsRotationMode::VelocityDirection:
-				return &VelocityDirection;
-
-			case EAlsRotationMode::Aiming:
-				return &Aiming;
-
-			default:
-				checkNoEntry();
-				return nullptr;
-		}
-	}
+public:
+	const FAlsMovementStanceSettings* GetMovementStanceSettingsForRotationMode(const EAlsRotationMode RotationMode) const;
 };
+
+inline const FAlsMovementStanceSettings* UAlsMovementSettings::GetMovementStanceSettingsForRotationMode(
+	const EAlsRotationMode RotationMode) const
+{
+	switch (RotationMode)
+	{
+		case EAlsRotationMode::LookingDirection:
+			return &LookingDirection;
+
+		case EAlsRotationMode::VelocityDirection:
+			return &VelocityDirection;
+
+		case EAlsRotationMode::Aiming:
+			return &Aiming;
+
+		default:
+			checkNoEntry();
+			return nullptr;
+	}
+}

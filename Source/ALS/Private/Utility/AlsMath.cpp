@@ -20,7 +20,7 @@ float UAlsMath::InterpolateFloatSpringStable(const float Current, const float Ta
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * SpringInterpolationConstants::SubstepDeltaTime};
-		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			Result = UKismetMathLibrary::FloatSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
 			                                               SpringInterpolationConstants::SubstepDeltaTime, Mass);
@@ -47,7 +47,7 @@ FVector UAlsMath::InterpolateVectorSpringStable(const FVector& Current, const FV
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * SpringInterpolationConstants::SubstepDeltaTime};
-		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			Result = UKismetMathLibrary::VectorSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
 			                                                SpringInterpolationConstants::SubstepDeltaTime, Mass);

@@ -73,12 +73,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", DisplayName = "Slerp (Skip Normalization)")
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")
-	static FTransform AddTransforms(const FTransform& Left, const FTransform& Right);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Transform")
-	static FTransform SubtractTransforms(const FTransform& Left, const FTransform& Right);
-
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
 	static float FixGamepadDiagonalValues(float AxisValue, float OtherAxisValue);
 
@@ -173,22 +167,4 @@ inline float UAlsMath::DirectionToAngle2D(const FVector& Direction)
 inline float UAlsMath::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)
 {
 	return FMath::RadiansToDegrees(FMath::Acos(From | To));
-}
-
-inline FTransform UAlsMath::AddTransforms(const FTransform& Left, const FTransform& Right)
-{
-	return {
-		Left.Rotator() + Right.Rotator(),
-		Left.GetLocation() + Right.GetLocation(),
-		Left.GetScale3D() + Right.GetScale3D()
-	};
-}
-
-inline FTransform UAlsMath::SubtractTransforms(const FTransform& Left, const FTransform& Right)
-{
-	return {
-		Left.Rotator() - Right.Rotator(),
-		Left.GetLocation() - Right.GetLocation(),
-		Left.GetScale3D() - Right.GetScale3D()
-	};
 }

@@ -36,26 +36,12 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshC
 		return;
 	}
 
-	auto bStopMontage{false};
-
-	if (bCheckInput && Character->GetLocomotionState().bHasInput)
-	{
-		bStopMontage = true;
-	}
-	else if (bCheckLocomotionMode && Character->GetLocomotionMode() == LocomotionModeEquals)
-	{
-		bStopMontage = true;
-	}
-	else if (bCheckStance && Character->GetStance() == StanceEquals)
-	{
-		bStopMontage = true;
-	}
-	else if (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals)
-	{
-		bStopMontage = true;
-	}
-
-	if (bStopMontage)
+	// ReSharper disable CppRedundantParentheses
+	if ((bCheckInput && Character->GetLocomotionState().bHasInput) ||
+	    (bCheckLocomotionMode && Character->GetLocomotionMode() == LocomotionModeEquals) ||
+	    (bCheckStance && Character->GetStance() == StanceEquals) ||
+	    (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals))
+		// ReSharper restore CppRedundantParentheses
 	{
 		AnimationInstance->Montage_Stop(BlendOutTime, Montage);
 	}

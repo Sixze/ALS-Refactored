@@ -223,7 +223,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			NewCameraRotation = FMath::RInterpTo(NewCameraRotation, CameraInitialRotation + SubstepRotationSpeed * SubstepTime,
 			                                     SubstepTime - PreviousSubstepTime, RotationLag);
@@ -268,7 +268,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - KINDA_SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			const auto SubstepRelativePivotTargetLocation{RelativePivotInitialLagLocation + SubstepMovementSpeed * SubstepTime};
 			const auto SubstepDeltaTime{SubstepTime - PreviousSubstepTime};

@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "Net/Core/PushModel/PushModel.h"
+#include "RootMotionSource/AlsRootMotionSource_Mantling.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
@@ -19,25 +20,24 @@ bool AAlsCharacter::TryStartMantlingGrounded()
 
 bool AAlsCharacter::TryStartMantlingInAir()
 {
-	return TryStartMantling(GeneralMantlingSettings.InAirTrace);
+	return LocomotionMode == EAlsLocomotionMode::InAir && IsLocallyControlled() &&
+	       TryStartMantling(GeneralMantlingSettings.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart() const
 {
-	// TODO Compare the parameters of the currently running mantling and
-	// the new one to decide whether to replace it with a new one or not.
-
-	return (LocomotionMode == EAlsLocomotionMode::Grounded ||
-	        LocomotionMode == EAlsLocomotionMode::InAir) &&
-	       LocomotionAction == EAlsLocomotionAction::None;
+	return LocomotionAction == EAlsLocomotionAction::None;
 }
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
-	if (!GeneralMantlingSettings.bAllowMantling || !IsMantlingAllowedToStart() || GetLocalRole() <= ROLE_SimulatedProxy)
+	if (!GeneralMantlingSettings.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
 		return false;
 	}
+
+	auto ActorLocation{GetActorLocation()};
+	auto ActorRotation{GetActorRotation()};
 
 	float ForwardTraceAngle;
 	if (LocomotionState.bHasSpeed)
@@ -52,10 +52,10 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	{
 		ForwardTraceAngle = LocomotionState.bHasInput
 			                    ? LocomotionState.InputYawAngle
-			                    : LocomotionState.Rotation.Yaw;
+			                    : ActorRotation.Yaw;
 	}
 
-	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - LocomotionState.Rotation.Yaw};
+	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - ActorRotation.Yaw};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > GeneralMantlingSettings.TraceAngleThreshold)
 	{
 		return false;
@@ -69,7 +69,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirection2D(
-			LocomotionState.Rotation.Yaw +
+			ActorRotation.Yaw +
 			FMath::ClampAngle(ForwardTraceDeltaAngle, -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle))
 	};
 
@@ -83,7 +83,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
 	const auto CapsuleBottomLocation{
-		LocomotionState.Location - LocomotionState.Rotation.RotateVector(FVector::UpVector) * CapsuleHalfHeight
+		ActorLocation - GetActorQuat().RotateVector(FVector::UpVector) * CapsuleHalfHeight
 	};
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
@@ -111,7 +111,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	if (!ForwardTraceHit.IsValidBlockingHit() ||
 	    !IsValid(TargetPrimitive) ||
 	    TargetPrimitive->GetComponentVelocity().SizeSquared() > FMath::Square(GeneralMantlingSettings.TargetPrimitiveSpeedThreshold) ||
-	    !ForwardTraceHit.Component->CanCharacterStepUp(this) ||
+	    !TargetPrimitive->CanCharacterStepUp(this) ||
 	    GetCharacterMovement()->IsWalkable(ForwardTraceHit))
 	{
 #if ENABLE_DRAW_DEBUG
@@ -211,29 +211,38 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 #endif
 
-	const auto TargetRotation{(-ForwardTraceHit.ImpactNormal.GetSafeNormal2D()).ToOrientationRotator()};
+	const auto TargetRotation{(-ForwardTraceHit.ImpactNormal.GetSafeNormal2D()).ToOrientationQuat()};
 
-	const auto MantlingHeight{TargetLocation.Z - LocomotionState.Location.Z};
+	FAlsMantlingParameters Parameters;
+
+	Parameters.TargetPrimitive = TargetPrimitive;
+	Parameters.MantlingHeight = TargetLocation.Z - ActorLocation.Z;
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	EAlsMantlingType MantlingType;
-	if (LocomotionMode == EAlsLocomotionMode::InAir)
+	Parameters.MantlingType = LocomotionMode == EAlsLocomotionMode::Grounded
+		                          ? Parameters.MantlingHeight > 125.0f
+			                            ? EAlsMantlingType::High
+			                            : EAlsMantlingType::Low
+		                          : EAlsMantlingType::InAir;
+
+	// If the target primitive can't move, then use world coordinates in order to
+	// save some performance by skipping some coordinate space transformations later.
+
+	if (MovementBaseUtility::UseRelativeLocation(TargetPrimitive))
 	{
-		MantlingType = EAlsMantlingType::InAir;
+		const auto TargetRelativeTransform{
+			TargetPrimitive->GetComponentTransform().GetRelativeTransform({TargetRotation, TargetLocation})
+		};
+
+		Parameters.TargetRelativeLocation = TargetRelativeTransform.GetLocation();
+		Parameters.TargetRelativeRotation = TargetRelativeTransform.Rotator();
 	}
 	else
 	{
-		MantlingType = MantlingHeight > 125.0f
-			               ? EAlsMantlingType::High
-			               : EAlsMantlingType::Low;
+		Parameters.TargetRelativeLocation = TargetLocation;
+		Parameters.TargetRelativeRotation = TargetRotation.Rotator();
 	}
-
-	const FAlsMantlingParameters Parameters{
-		TargetPrimitive,
-		TargetPrimitive->GetComponentTransform().GetRelativeTransform({TargetRotation, TargetLocation}),
-		MantlingHeight, MantlingType
-	};
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
@@ -241,6 +250,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 	else
 	{
+		GetCharacterMovement()->FlushServerMoves();
+
 		StartMantlingImplementation(Parameters);
 		ServerStartMantling(Parameters);
 	}
@@ -253,198 +264,173 @@ void AAlsCharacter::ServerStartMantling_Implementation(const FAlsMantlingParamet
 	if (IsMantlingAllowedToStart())
 	{
 		MulticastStartMantling(Parameters);
-
 		ForceNetUpdate();
 	}
 }
 
 void AAlsCharacter::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
 {
-	if (!IsLocallyControlled() || IsMantlingAllowedToStart())
-	{
-		StartMantlingImplementation(Parameters);
-	}
+	StartMantlingImplementation(Parameters);
 }
 
 void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Parameters)
 {
-	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	if (!IsMantlingAllowedToStart())
 	{
-		// This will help to get rid of the jitter on the client side due to mispredictions of the character's future position.
-
-		MantlingState.PreviousNetworkSmoothingMode = GetCharacterMovement()->NetworkSmoothingMode;
-
-		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+		return;
 	}
 
-	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
-
-	LocomotionState.Location = GetActorLocation();
-	LocomotionState.Rotation = GetActorRotation();
-
-	// Selects the mantling settings and use it to set the new mantling state.
-
-	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
-
-	MantlingState.Montage = MantlingSettings.Montage;
-	MantlingState.InterpolationAndCorrectionCurve = MantlingSettings.InterpolationAndCorrectionAmountsCurve;
-
-	MantlingState.WorldStartTime = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
-
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
+	if (!IsValid(MantlingSettings))
 	{
-		MantlingState.WorldStartTime -= GetWorld()->GetDeltaSeconds(); // Magic.
+		return;
 	}
 
-	MantlingState.StartTime = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.StartTime,
-	                                                            Parameters.MantlingHeight);
+	const auto StartTime{MantlingSettings->CalculateStartTime(Parameters.MantlingHeight)};
+	const auto PlayRate{MantlingSettings->CalculatePlayRate(Parameters.MantlingHeight)};
 
-	MantlingState.PlayRate = FMath::GetMappedRangeValueClamped(MantlingSettings.ReferenceHeight, MantlingSettings.PlayRate,
-	                                                           Parameters.MantlingHeight);
-
-	// Configure the mantling duration.
+	// Calculate mantling duration.
 
 	auto MinTime{0.0f};
 	auto MaxTime{0.0f};
-	MantlingState.InterpolationAndCorrectionCurve->GetTimeRange(MinTime, MaxTime);
+	MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetTimeRange(MinTime, MaxTime);
 
-	MantlingState.Duration = MaxTime - MantlingState.StartTime;
+	const auto Duration{MaxTime - StartTime};
 
-	MantlingState.Primitive = Parameters.Primitive;
-	MantlingState.RelativeTransform = Parameters.RelativeTransform;
+	// Calculate actor offsets (offsets between actor and target transform).
 
-	// Convert the primitive's local space transform to the world space space for use in moving objects.
+	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
 
 	const auto TargetTransform{
-		MantlingState.RelativeTransform.GetRelativeTransformReverse(MantlingState.Primitive->GetComponentTransform())
+		bUseRelativeLocation
+			? FTransform{
+				Parameters.TargetRelativeRotation, Parameters.TargetRelativeLocation,
+				Parameters.TargetPrimitive->GetComponentScale()
+			}.GetRelativeTransformReverse(Parameters.TargetPrimitive->GetComponentTransform())
+			: FTransform{Parameters.TargetRelativeRotation, Parameters.TargetRelativeLocation}
 	};
 
-	// Calculate the actor offset transform (offset amount between the actor and target transform).
+	const auto ActorLocationOffset{GetActorLocation() - TargetTransform.GetLocation()};
+	const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * GetActorQuat()};
 
-	MantlingState.ActorOffset = UAlsMath::SubtractTransforms(CalculateNetworkSmoothedTransform(), TargetTransform);
+	// Clear the character movement mode and set the locomotion action to mantling.
 
-	// Calculate the animation offset transform from the target location. This would be
-	// the location the actual animation starts at relative to the target transform.
+	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+	GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
 
-	auto AnimationOffsetLocation{TargetTransform.GetRotation().Vector() * MantlingSettings.StartRelativeLocation.X};
-	AnimationOffsetLocation.Z = MantlingSettings.StartRelativeLocation.Z;
+	SetLocomotionMode(EAlsLocomotionMode::None);
 
-	MantlingState.AnimationOffset = AnimationOffsetLocation;
-
-	// Clear the character movement mode and set the movement state to mantling.
-
-	if (LocomotionMode != EAlsLocomotionMode::Mantling)
+	if (GetLocalRole() >= ROLE_Authority)
 	{
-		GetCharacterMovement()->SetMovementMode(MOVE_None);
-		GetCharacterMovement()->SetBase(MantlingState.Primitive);
-
-		SetLocomotionMode(EAlsLocomotionMode::Mantling);
+		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+		GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
 	}
+
+	// Apply mantling root motion.
+
+	const auto Mantling{MakeShared<FAlsRootMotionSource_Mantling>()};
+	Mantling->InstanceName = ANSI_TO_TCHAR(__FUNCTION__);
+	Mantling->Duration = Duration / PlayRate;
+	Mantling->MantlingSettings = MantlingSettings;
+	Mantling->TargetPrimitive = bUseRelativeLocation ? Parameters.TargetPrimitive : nullptr;
+	Mantling->TargetRelativeLocation = Parameters.TargetRelativeLocation;
+	Mantling->TargetRelativeRotation = Parameters.TargetRelativeRotation;
+	Mantling->ActorLocationOffset = ActorLocationOffset;
+	Mantling->ActorRotationOffset = ActorRotationOffset.Rotator();
+	Mantling->MantlingHeight = Parameters.MantlingHeight;
+
+	MantlingRootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(Mantling);
 
 	// Play the animation montage if valid.
 
-	if (IsValid(MantlingState.Montage))
+	if (IsValid(MantlingSettings->Montage))
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(MantlingState.Montage, MantlingState.PlayRate,
-		                                           EMontagePlayReturnType::MontageLength, MantlingState.StartTime, false);
+		// Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
+
+		const auto MontageStartTime{
+			Parameters.MantlingType == EAlsMantlingType::InAir && IsLocallyControlled()
+				? StartTime - FMath::GetMappedRangeValueClamped(
+					  MantlingSettings->ReferenceHeight, {GetWorld()->GetDeltaSeconds(), 0.0f}, Parameters.MantlingHeight)
+				: StartTime
+		};
+
+		if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, PlayRate,
+		                                               EMontagePlayReturnType::MontageLength,
+		                                               MontageStartTime, false))
+		{
+			SetLocomotionAction(EAlsLocomotionAction::Mantling);
+		}
 	}
 
 	OnMantlingStarted(Parameters);
 }
 
-FAlsMantlingSettings AAlsCharacter::SelectMantlingSettings_Implementation(EAlsMantlingType MantlingType)
+UAlsMantlingSettings* AAlsCharacter::SelectMantlingSettings_Implementation(EAlsMantlingType MantlingType)
 {
-	return {};
+	return nullptr;
 }
 
 void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
 
 void AAlsCharacter::RefreshMantling()
 {
-	auto Time{(GetWorld()->GetGameState()->GetServerWorldTimeSeconds() - MantlingState.WorldStartTime) * MantlingState.PlayRate};
-
-	auto bStopMantling{false};
-	if (Time >= MantlingState.Duration)
+	if (MantlingRootMotionSourceId <= 0)
 	{
-		bStopMantling = true;
-		Time = MantlingState.Duration;
+		return;
 	}
 
-	// Update the interpolation and correction amounts using the interpolation and correction amounts curve.
-
-	const auto InterpolationAndCorrectionAmounts{
-		MantlingState.InterpolationAndCorrectionCurve->GetVectorValue(MantlingState.StartTime + Time)
-	};
-
-	// Lerp multiple transforms together for independent control over the horizontal
-	// and vertical blend to the animation offset, as well as the target transform.
-
-	// Blend into the animation horizontal offset.
-
-	auto ResultHorizontalOffset{MantlingState.ActorOffset};
-	ResultHorizontalOffset.BlendWith(FTransform{MantlingState.AnimationOffset}, InterpolationAndCorrectionAmounts.Y);
-
-	// Blend into the animation vertical offset.
-
-	const auto ResultVerticalOffset{
-		FMath::Lerp(MantlingState.ActorOffset.GetLocation().Z, MantlingState.AnimationOffset.Z, InterpolationAndCorrectionAmounts.Z)
-	};
-
-	// Continually update the target transform from the stored relative transform to follow along with moving objects.
-
-	const auto TargetTransform{
-		MantlingState.RelativeTransform.GetRelativeTransformReverse(MantlingState.Primitive->GetComponentTransform())
-	};
-
-	// Blend from the current blending transforms into the final transform.
-
-	const auto InterpolationAmount{1.0f - UAlsMath::Clamp01(InterpolationAndCorrectionAmounts.X)};
-
-	const FTransform OffsetTransform{
-		TargetTransform.Rotator() + ResultHorizontalOffset.Rotator() * InterpolationAmount,
-		TargetTransform.GetLocation() + FVector{
-			ResultHorizontalOffset.GetLocation().X,
-			ResultHorizontalOffset.GetLocation().Y,
-			ResultVerticalOffset
-		} * InterpolationAmount
-	};
-
-	// Initial blend in to allow the actor to blend into the interpolation and correction curve
-	// at the midpoint. This prevents pops when mantling an object lower than the animated mantling.
-
-	auto ResultTransform{UAlsMath::AddTransforms(TargetTransform, MantlingState.ActorOffset)};
-	ResultTransform.BlendWith(OffsetTransform, GeneralMantlingSettings.BlendInCurve->GetFloatValue(Time));
-
-	SetActorLocationAndRotation(ResultTransform.GetLocation(), ResultTransform.GetRotation());
-
-	GetCharacterMovement()->SaveBaseLocation();
-
-	GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
-
-	RefreshLocomotionLocationAndRotation();
-
-	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
-
-	if (bStopMantling)
+	const auto RootMotionSource{GetCharacterMovement()->GetRootMotionSourceByID(MantlingRootMotionSourceId)};
+	if (RootMotionSource.IsValid() &&
+	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) &&
+	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
 	{
-		// Set the character movement mode to walking.
-
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
-		OnMantlingEnded();
+		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
 	}
+	else
+	{
+		StopMantling();
+		ForceNetUpdate();
+	}
+}
+
+void AAlsCharacter::StopMantling()
+{
+	if (MantlingRootMotionSourceId <= 0)
+	{
+		return;
+	}
+
+	const auto RootMotionSource{GetCharacterMovement()->GetRootMotionSourceByID(MantlingRootMotionSourceId)};
+	if (RootMotionSource.IsValid() &&
+	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) &&
+	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
+	{
+		RootMotionSource->Status.SetFlag(ERootMotionSourceStatusFlags::MarkedForRemoval);
+	}
+
+	MantlingRootMotionSourceId = 0;
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+	}
+
+	SetLocomotionMode(EAlsLocomotionMode::Grounded);
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	OnMantlingEnded();
 }
 
 void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
 bool AAlsCharacter::IsRagdollingAllowedToStart() const
 {
-	return LocomotionMode != EAlsLocomotionMode::Ragdolling;
+	return LocomotionAction != EAlsLocomotionAction::Ragdolling;
 }
 
 void AAlsCharacter::StartRagdolling()
 {
-	if (!IsRagdollingAllowedToStart() || GetLocalRole() <= ROLE_SimulatedProxy)
+	if (GetLocalRole() <= ROLE_SimulatedProxy || !IsRagdollingAllowedToStart())
 	{
 		return;
 	}
@@ -455,6 +441,8 @@ void AAlsCharacter::StartRagdolling()
 	}
 	else
 	{
+		GetCharacterMovement()->FlushServerMoves();
+
 		ServerStartRagdolling();
 	}
 }
@@ -464,47 +452,45 @@ void AAlsCharacter::ServerStartRagdolling_Implementation()
 	if (IsRagdollingAllowedToStart())
 	{
 		MulticastStartRagdolling();
+		ForceNetUpdate();
 	}
 }
 
 void AAlsCharacter::MulticastStartRagdolling_Implementation()
 {
-	if (!IsLocallyControlled() || IsRagdollingAllowedToStart())
-	{
-		StartRagdollingImplementation();
-	}
+	StartRagdollingImplementation();
 }
 
 void AAlsCharacter::StartRagdollingImplementation()
 {
+	if (!IsRagdollingAllowedToStart())
+	{
+		return;
+	}
+
 	// Stop any active montages.
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
 
-	// Force interrupt any active locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to end.
+	// When networked, disable replicate movement reset ragdolling target location and pull force variables.
 
-	SetLocomotionAction(EAlsLocomotionAction::None);
+	SetReplicateMovement(false);
+	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
 
-	if (LocomotionMode != EAlsLocomotionMode::Ragdolling)
-	{
-		// When networked, disable replicate movement reset ragdolling target location and pull force variables.
+	// Clear the character movement mode and set the locomotion action to ragdolling.
 
-		SetReplicateMovement(false);
-		GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
 
-		// Clear the character movement mode and set the movement state to ragdolling.
+	SetLocomotionMode(EAlsLocomotionMode::None);
+	SetLocomotionAction(EAlsLocomotionAction::Ragdolling);
 
-		GetCharacterMovement()->SetMovementMode(MOVE_None);
-		SetLocomotionMode(EAlsLocomotionMode::Ragdolling);
+	// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
 
-		// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-		GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
-	}
+	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 
 	RagdollingState.PullForce = 0.0f;
 
@@ -540,6 +526,11 @@ void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector&
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 {
+	if (LocomotionAction != EAlsLocomotionAction::Ragdolling)
+	{
+		return;
+	}
+
 	if (IsNetMode(NM_DedicatedServer))
 	{
 		// Change animation tick option when the host is a dedicated server to avoid z-location bug.
@@ -634,12 +625,12 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionMode == EAlsLocomotionMode::Ragdolling;
+	return LocomotionAction == EAlsLocomotionAction::Ragdolling;
 }
 
 bool AAlsCharacter::TryStopRagdolling()
 {
-	if (!IsRagdollingAllowedToStop() || GetLocalRole() <= ROLE_SimulatedProxy)
+	if (GetLocalRole() <= ROLE_SimulatedProxy || !IsRagdollingAllowedToStop())
 	{
 		return false;
 	}
@@ -661,57 +652,60 @@ void AAlsCharacter::ServerStopRagdolling_Implementation()
 	if (IsRagdollingAllowedToStop())
 	{
 		MulticastStopRagdolling();
-
 		ForceNetUpdate();
 	}
 }
 
 void AAlsCharacter::MulticastStopRagdolling_Implementation()
 {
-	if (!IsLocallyControlled() || IsRagdollingAllowedToStop())
-	{
-		StopRagdollingImplementation();
-	}
+	StopRagdollingImplementation();
 }
 
 void AAlsCharacter::StopRagdollingImplementation()
 {
-	if (LocomotionMode == EAlsLocomotionMode::Ragdolling)
+	if (!IsRagdollingAllowedToStop())
 	{
-		// Re-enable replicate movement.
-
-		SetReplicateMovement(true);
-		GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = false;
-
-		// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
-		// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
-
-		if (RagdollingState.bGrounded)
-		{
-			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		}
-		else
-		{
-			GetCharacterMovement()->SetMovementMode(MOVE_Falling);
-			GetCharacterMovement()->Velocity = RagdollingState.RootBoneVelocity;
-		}
-
-		// Re-enable capsule collision and disable physics simulation on the mesh.
-
-		GetMesh()->SetAllBodiesSimulatePhysics(false);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		GetMesh()->SetCollisionObjectType(ECC_Pawn);
-
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		return;
 	}
+
+	// Re-enable capsule collision and disable physics simulation on the mesh.
+
+	GetMesh()->SetAllBodiesSimulatePhysics(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	SetLocomotionAction(EAlsLocomotionAction::None);
+
+	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
+	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 
 	if (RagdollingState.bGrounded)
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
-		                                           EMontagePlayReturnType::MontageLength, 0.0f, true);
+		SetLocomotionMode(EAlsLocomotionMode::Grounded);
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+	else
+	{
+		SetLocomotionMode(EAlsLocomotionMode::InAir);
+		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		GetCharacterMovement()->Velocity = RagdollingState.RootBoneVelocity;
 	}
 
+	// Re-enable replicate movement.
+
+	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = false;
+	SetReplicateMovement(true);
+
 	OnRagdollingEnded();
+
+	if (RagdollingState.bGrounded &&
+	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
+	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	{
+		SetLocomotionAction(EAlsLocomotionAction::GettingUp);
+	}
 }
 
 UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(bool bRagdollFacedUpward)
@@ -723,14 +717,16 @@ void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 void AAlsCharacter::TryStartRolling(const float PlayRate)
 {
-	if (LocomotionMode == EAlsLocomotionMode::Grounded)
+	if (LocomotionMode != EAlsLocomotionMode::Grounded)
 	{
-		StartRolling(PlayRate, LocomotionState.bHasInput &&
-		                       (RollingSettings.bRotateToInputOnStart ||
-		                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
-			                       ? LocomotionState.InputYawAngle
-			                       : LocomotionState.Rotation.Yaw);
+		return;
 	}
+
+	StartRolling(PlayRate, LocomotionState.bHasInput &&
+	                       (RollingSettings.bRotateToInputOnStart ||
+	                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
+		                       ? LocomotionState.InputYawAngle
+		                       : GetActorRotation().Yaw);
 }
 
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
@@ -760,6 +756,8 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 	}
 	else
 	{
+		GetCharacterMovement()->FlushServerMoves();
+
 		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 		ServerStartRolling(Montage, PlayRate, TargetYawAngle);
 	}
@@ -775,21 +773,22 @@ void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, con
 	if (IsRollingAllowedToStart(Montage))
 	{
 		MulticastStartRolling(Montage, PlayRate, TargetYawAngle);
-
 		ForceNetUpdate();
 	}
 }
 
 void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
-	if (!IsLocallyControlled() || IsRollingAllowedToStart(Montage))
-	{
-		StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
-	}
+	StartRollingImplementation(Montage, PlayRate, TargetYawAngle);
 }
 
 void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
 {
+	if (!IsRollingAllowedToStart(Montage))
+	{
+		return;
+	}
+
 	if (RollingSettings.ActorRotationInterpolationSpeed <= 0.0f)
 	{
 		RefreshActorRotationInstant(TargetYawAngle, ETeleportType::TeleportPhysics);
@@ -799,9 +798,25 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 		RefreshTargetYawAngle(TargetYawAngle, false);
 	}
 
-	GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate);
+	if (GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
+	{
+		SetLocomotionAction(EAlsLocomotionAction::Rolling);
+	}
+}
 
-	// Force set locomotion action without waiting for the UAlsAnimNotifyState_SetLocomotionAction animation notify to start.
+void AAlsCharacter::RefreshRolling(const float DeltaTime)
+{
+	if (LocomotionState.bRotationLocked || LocomotionAction != EAlsLocomotionAction::Rolling)
+	{
+		return;
+	}
 
-	SetLocomotionAction(EAlsLocomotionAction::Rolling);
+	if (RollingSettings.bRotateToInputDuringRoll && LocomotionState.bHasInput)
+	{
+		RefreshTargetYawAngle(UAlsMath::InterpolateAngleConstant(LocomotionState.TargetYawAngle,
+		                                                         LocomotionState.InputYawAngle,
+		                                                         DeltaTime, RollingSettings.InputInterpolationSpeed));
+	}
+
+	RefreshActorRotation(LocomotionState.TargetYawAngle, DeltaTime, RollingSettings.ActorRotationInterpolationSpeed);
 }

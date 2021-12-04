@@ -5,10 +5,9 @@
 UENUM(BlueprintType)
 enum class EAlsLocomotionMode : uint8
 {
+	None,
 	Grounded,
 	InAir,
-	Mantling,
-	Ragdolling
 };
 
 USTRUCT(BlueprintType)
@@ -21,16 +20,13 @@ private:
 	EAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
-	bool bGrounded{true};
+	bool bNone{true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
+	bool bGrounded{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
 	bool bInAir{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
-	bool bMantling{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess))
-	bool bRagdolling{false};
 
 public:
 	FAlsLocomotionMode() = default;
@@ -38,6 +34,11 @@ public:
 	FAlsLocomotionMode(const EAlsLocomotionMode InitialLocomotionMode)
 	{
 		*this = InitialLocomotionMode;
+	}
+
+	bool IsNone() const
+	{
+		return bNone;
 	}
 
 	bool IsGrounded() const
@@ -50,16 +51,6 @@ public:
 		return bInAir;
 	}
 
-	bool IsMantling() const
-	{
-		return bMantling;
-	}
-
-	bool IsRagdolling() const
-	{
-		return bRagdolling;
-	}
-
 	operator EAlsLocomotionMode() const
 	{
 		return LocomotionMode;
@@ -69,9 +60,8 @@ public:
 	{
 		LocomotionMode = NewLocomotionMode;
 
+		bNone = LocomotionMode == EAlsLocomotionMode::None;
 		bGrounded = LocomotionMode == EAlsLocomotionMode::Grounded;
 		bInAir = LocomotionMode == EAlsLocomotionMode::InAir;
-		bMantling = LocomotionMode == EAlsLocomotionMode::Mantling;
-		bRagdolling = LocomotionMode == EAlsLocomotionMode::Ragdolling;
 	}
 };

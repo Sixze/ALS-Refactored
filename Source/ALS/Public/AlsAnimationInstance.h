@@ -83,7 +83,7 @@ private:
 	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionMode LocomotionMode;
+	FAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionAction LocomotionAction;
@@ -186,9 +186,9 @@ public:
 	void SetHipsDirection(EAlsHipsDirection NewDirection);
 
 private:
-	EAlsMovementDirection CalculateMovementDirection() const;
-
 	void RefreshMovement(float DeltaTime);
+
+	EAlsMovementDirection CalculateMovementDirection() const;
 
 	void RefreshVelocityBlend(const float DeltaTime);
 

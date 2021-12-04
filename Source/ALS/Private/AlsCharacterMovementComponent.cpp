@@ -122,6 +122,15 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	JumpOffJumpZFactor = 0.0f;
 }
 
+void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
+
+	// This removes some very noticeable changes in the mesh location when the character automatically uncrouches at the end of the roll.
+
+	bCrouchMaintainsBaseLocation = true;
+}
+
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
@@ -152,9 +161,29 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	Super::PhysWalking(DeltaTime, Iterations);
 }
 
-void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, const int32 Iterations)
+void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Iterations)
 {
-	Super::PhysCustom(DeltaTime, Iterations); // TODO Is it better to handle mantling here?
+	if (DeltaTime < MIN_TICK_TIME)
+	{
+		Super::PhysCustom(DeltaTime, Iterations);
+		return;
+	}
+
+	Iterations++;
+	bJustTeleported = false;
+
+	RestorePreAdditiveRootMotionVelocity();
+
+	if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
+	{
+		Velocity = FVector::ZeroVector;
+	}
+
+	ApplyRootMotionToVelocity(DeltaTime);
+
+	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
+
+	Super::PhysCustom(DeltaTime, Iterations);
 }
 
 FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const

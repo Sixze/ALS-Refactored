@@ -14,7 +14,6 @@
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsLocomotionState.h"
-#include "State/Structures/AlsMantlingState.h"
 #include "State/Structures/AlsRagdollingState.h"
 #include "State/Structures/AlsViewState.h"
 
@@ -94,7 +93,7 @@ private:
 	EAlsRotationMode RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	EAlsLocomotionMode LocomotionMode;
+	EAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsLocomotionAction LocomotionAction;
@@ -112,7 +111,7 @@ private:
 	FAlsViewState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsMantlingState MantlingState;
+	int32 MantlingRootMotionSourceId;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FVector_NetQuantize RagdollTargetLocation;
@@ -437,13 +436,15 @@ private:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	FAlsMantlingSettings SelectMantlingSettings(EAlsMantlingType MantlingType);
+	UAlsMantlingSettings* SelectMantlingSettings(EAlsMantlingType MantlingType);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
 	void RefreshMantling();
+
+	void StopMantling();
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -526,6 +527,8 @@ private:
 	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
 
 	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+
+	void RefreshRolling(float DeltaTime);
 
 	// Debug
 
