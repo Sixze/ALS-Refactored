@@ -12,7 +12,7 @@ enum class EAlsMovementDirection : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsMovementDirection
+struct ALS_API FAlsMovementDirection
 {
 	GENERATED_BODY()
 

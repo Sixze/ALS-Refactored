@@ -11,7 +11,7 @@ enum class EAlsGait : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsGait
+struct ALS_API FAlsGait
 {
 	GENERATED_BODY()
 

@@ -10,7 +10,7 @@ enum class EAlsStance : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsStance
+struct ALS_API FAlsStance
 {
 	GENERATED_BODY()
 

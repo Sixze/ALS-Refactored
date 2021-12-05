@@ -11,7 +11,7 @@ struct ALS_API FAlsRigUnit_MathBase : public FRigUnit
 };
 
 USTRUCT(Meta = (Abstract, NodeColor = "0.4 0.05 0.4"))
-struct FAlsRigUnit_HighLevelBaseMutable : public FRigUnitMutable
+struct ALS_API FAlsRigUnit_HighLevelBaseMutable : public FRigUnitMutable
 {
 	GENERATED_BODY()
 };

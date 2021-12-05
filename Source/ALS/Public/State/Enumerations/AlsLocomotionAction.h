@@ -13,7 +13,7 @@ enum class EAlsLocomotionAction : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsLocomotionAction
+struct ALS_API FAlsLocomotionAction
 {
 	GENERATED_BODY()
 

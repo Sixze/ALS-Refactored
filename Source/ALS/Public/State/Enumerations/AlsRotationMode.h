@@ -11,7 +11,7 @@ enum class EAlsRotationMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsRotationMode
+struct ALS_API FAlsRotationMode
 {
 	GENERATED_BODY()
 

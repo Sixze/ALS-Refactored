@@ -10,7 +10,7 @@ enum class EAlsViewMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAlsViewMode
+struct ALS_API FAlsViewMode
 {
 	GENERATED_BODY()
 
