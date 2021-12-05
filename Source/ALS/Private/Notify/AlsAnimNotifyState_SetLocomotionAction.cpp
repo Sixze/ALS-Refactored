@@ -2,8 +2,7 @@
 
 #include "AlsCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "State/Enumerations/AlsLocomotionAction.h"
-#include "Utility/AlsEnumerationUtility.h"
+#include "Utility/AlsUtility.h"
 
 UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction()
 {
@@ -12,7 +11,9 @@ UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction
 
 FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Set Locomotion Action: {0}"), {GetEnumValueString(Action)});
+	return FString::Format(TEXT("Als Set Locomotion Action: {0}"), {
+		                       FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false)
+	                       });
 }
 
 void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation,
@@ -23,7 +24,7 @@ void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent
 	auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
 	if (IsValid(Character))
 	{
-		Character->SetLocomotionAction(Action);
+		Character->SetLocomotionAction(LocomotionAction);
 	}
 }
 
@@ -32,8 +33,8 @@ void UAlsAnimNotifyState_SetLocomotionAction::NotifyEnd(USkeletalMeshComponent* 
 	Super::NotifyEnd(MeshComponent, Animation);
 
 	auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
-	if (IsValid(Character) && Character->GetLocomotionAction() == Action)
+	if (IsValid(Character) && Character->GetLocomotionAction() == LocomotionAction)
 	{
-		Character->SetLocomotionAction(EAlsLocomotionAction::None);
+		Character->SetLocomotionAction(FGameplayTag::EmptyTag);
 	}
 }

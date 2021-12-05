@@ -8,7 +8,6 @@
 #include "Settings/AlsRagdollingSettings.h"
 #include "Settings/AlsRollingSettings.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
@@ -96,7 +95,7 @@ private:
 	EAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	EAlsLocomotionAction LocomotionAction;
+	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FVector_NetQuantizeNormal InputDirection;
@@ -269,7 +268,7 @@ private:
 	// Overlay Mode
 
 public:
-	const FGameplayTag& GetOverlayMode() const;
+	FGameplayTag GetOverlayMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
 	void SetOverlayMode(const FGameplayTag& NewModeTag);
@@ -302,15 +301,15 @@ protected:
 	// Locomotion Action
 
 public:
-	EAlsLocomotionAction GetLocomotionAction() const;
+	FGameplayTag GetLocomotionAction() const;
 
-	void SetLocomotionAction(EAlsLocomotionAction NewAction);
+	void SetLocomotionAction(const FGameplayTag& NewActionTag);
 
-	void NotifyLocomotionActionChanged(EAlsLocomotionAction PreviousAction);
+	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnLocomotionActionChanged(EAlsLocomotionAction PreviousAction);
+	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
 	// Locomotion
 
@@ -590,7 +589,7 @@ inline EAlsViewMode AAlsCharacter::GetViewMode() const
 	return ViewMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetOverlayMode() const
+inline FGameplayTag AAlsCharacter::GetOverlayMode() const
 {
 	return OverlayMode;
 }
@@ -600,7 +599,7 @@ inline EAlsLocomotionMode AAlsCharacter::GetLocomotionMode() const
 	return LocomotionMode;
 }
 
-inline EAlsLocomotionAction AAlsCharacter::GetLocomotionAction() const
+inline FGameplayTag AAlsCharacter::GetLocomotionAction() const
 {
 	return LocomotionAction;
 }

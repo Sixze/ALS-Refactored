@@ -1,8 +1,8 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
@@ -41,7 +41,7 @@ private:
 	FAlsLocomotionMode LocomotionMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionAction LocomotionAction;
+	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bRightShoulder{true};

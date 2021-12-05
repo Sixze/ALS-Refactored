@@ -10,7 +10,6 @@
 #include "Settings/AlsRotateInPlaceSettings.h"
 #include "Settings/AlsTurnInPlaceSettings.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsLocomotionAction.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsMovementDirection.h"
 #include "State/Enumerations/AlsRotationMode.h"
@@ -86,7 +85,7 @@ private:
 	FAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionAction LocomotionAction;
+	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementDirection MovementDirection;

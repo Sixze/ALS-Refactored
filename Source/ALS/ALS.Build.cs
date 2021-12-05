@@ -8,7 +8,7 @@ public class ALS : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "NetCore", "Engine", "PhysicsCore", "GameplayTags", "ControlRig", "Niagara"
+			"Core", "CoreUObject", "NetCore", "Engine", "PhysicsCore", "GameplayTags", "AnimGraphRuntime", "ControlRig", "Niagara"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new[]

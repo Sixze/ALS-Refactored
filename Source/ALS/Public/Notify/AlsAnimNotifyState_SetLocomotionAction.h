@@ -1,10 +1,9 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 
 #include "AlsAnimNotifyState_SetLocomotionAction.generated.h"
-
-enum class EAlsLocomotionAction : uint8;
 
 UCLASS(DisplayName = "Als Set Locomotion Action Animation Notify State")
 class ALS_API UAlsAnimNotifyState_SetLocomotionAction : public UAnimNotifyState
@@ -13,7 +12,7 @@ class ALS_API UAlsAnimNotifyState_SetLocomotionAction : public UAnimNotifyState
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	EAlsLocomotionAction Action;
+	FGameplayTag LocomotionAction;
 
 public:
 	UAlsAnimNotifyState_SetLocomotionAction();

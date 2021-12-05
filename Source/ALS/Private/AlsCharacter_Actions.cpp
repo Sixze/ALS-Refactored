@@ -1,4 +1,5 @@
 #include "AlsCharacter.h"
+
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
@@ -12,6 +13,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
@@ -27,7 +29,7 @@ bool AAlsCharacter::TryStartMantlingInAir()
 
 bool AAlsCharacter::IsMantlingAllowedToStart() const
 {
-	return LocomotionAction == EAlsLocomotionAction::None;
+	return !LocomotionAction.IsValid();
 }
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
@@ -358,7 +360,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		                                               EMontagePlayReturnType::MontageLength,
 		                                               MontageStartTime, false))
 		{
-			SetLocomotionAction(EAlsLocomotionAction::Mantling);
+			SetLocomotionAction(FAlsLocomotionActionTags::Get().Mantling);
 		}
 	}
 
@@ -425,7 +427,7 @@ void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
 bool AAlsCharacter::IsRagdollingAllowedToStart() const
 {
-	return LocomotionAction != EAlsLocomotionAction::Ragdolling;
+	return LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling;
 }
 
 void AAlsCharacter::StartRagdolling()
@@ -482,7 +484,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	AlsCharacterMovement->SetMovementModeLocked(true);
 
-	SetLocomotionAction(EAlsLocomotionAction::Ragdolling);
+	SetLocomotionAction(FAlsLocomotionActionTags::Get().Ragdolling);
 
 	// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
 
@@ -526,7 +528,7 @@ void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector&
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 {
-	if (LocomotionAction != EAlsLocomotionAction::Ragdolling)
+	if (LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling)
 	{
 		return;
 	}
@@ -625,7 +627,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionAction == EAlsLocomotionAction::Ragdolling;
+	return LocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling;
 }
 
 bool AAlsCharacter::TryStopRagdolling()
@@ -676,7 +678,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	SetLocomotionAction(EAlsLocomotionAction::None);
+	SetLocomotionAction(FGameplayTag::EmptyTag);
 
 	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
@@ -704,7 +706,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
 	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
 	{
-		SetLocomotionAction(EAlsLocomotionAction::GettingUp);
+		SetLocomotionAction(FAlsLocomotionActionTags::Get().GettingUp);
 	}
 }
 
@@ -731,9 +733,9 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
-	return LocomotionAction == EAlsLocomotionAction::None ||
+	return !LocomotionAction.IsValid() ||
 	       // ReSharper disable once CppRedundantParentheses
-	       (LocomotionAction == EAlsLocomotionAction::Rolling &&
+	       (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling &&
 	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
 
@@ -800,13 +802,13 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 
 	if (GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
 	{
-		SetLocomotionAction(EAlsLocomotionAction::Rolling);
+		SetLocomotionAction(FAlsLocomotionActionTags::Get().Rolling);
 	}
 }
 
 void AAlsCharacter::RefreshRolling(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked || LocomotionAction != EAlsLocomotionAction::Rolling)
+	if (LocomotionState.bRotationLocked || LocomotionAction != FAlsLocomotionActionTags::Get().Rolling)
 	{
 		return;
 	}

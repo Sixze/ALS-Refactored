@@ -22,6 +22,7 @@ struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(Meta = (Input, ExpandByDefault))
 	FRigElementKey ItemA;
 
@@ -55,6 +56,7 @@ struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 	// UPROPERTY()
 	// FCachedRigElement CachedItemCIndex;
 
+public:
 	RIGVM_METHOD()
 	virtual void Execute(const FRigUnitContext& Context) override;
 };
@@ -64,6 +66,7 @@ struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBaseM
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(Meta = (Input, ExpandByDefault))
 	FRigElementKey LeftHandBone;
 
@@ -89,6 +92,7 @@ struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBaseM
 	UPROPERTY(Meta = (Input, Constant))
 	bool bPropagateToChildren{false};
 
+public:
 	RIGVM_METHOD()
 	virtual void Execute(const FRigUnitContext& Context) override;
 };

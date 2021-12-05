@@ -11,6 +11,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMath.h"
+#include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
@@ -160,8 +161,7 @@ void AAlsCharacter::AddMovementInput(const FVector Direction, const float Scale,
 void AAlsCharacter::Jump()
 {
 	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
-	    LocomotionAction == EAlsLocomotionAction::None &&
-	    Stance == EAlsStance::Standing)
+	    !LocomotionAction.IsValid() && Stance == EAlsStance::Standing)
 	{
 		Super::Jump();
 	}
@@ -195,7 +195,7 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	if (LocomotionAction == EAlsLocomotionAction::Rolling)
+	if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling)
 	{
 		SetStance(DesiredStance); // Keep desired stance when rolling.
 		return;
@@ -265,7 +265,7 @@ void AAlsCharacter::ServerSetDesiredStance_Implementation(const EAlsStance NewSt
 
 void AAlsCharacter::ApplyDesiredStance()
 {
-	if (LocomotionAction == EAlsLocomotionAction::None)
+	if (!LocomotionAction.IsValid())
 	{
 		if (LocomotionMode == EAlsLocomotionMode::Grounded)
 		{
@@ -285,7 +285,7 @@ void AAlsCharacter::ApplyDesiredStance()
 			UnCrouch();
 		}
 	}
-	else if (LocomotionAction == EAlsLocomotionAction::Rolling && RollingSettings.bCrouchOnStart)
+	else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && RollingSettings.bCrouchOnStart)
 	{
 		Crouch();
 	}
@@ -575,9 +575,9 @@ void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewModeTag)
 	}
 }
 
-void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewMode)
+void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewModeTag)
 {
-	SetOverlayMode(NewMode);
+	SetOverlayMode(NewModeTag);
 }
 
 void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
@@ -585,7 +585,7 @@ void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
 	OnOverlayModeChanged(PreviousModeTag);
 }
 
-void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousMode) {}
+void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
 
 void AAlsCharacter::SetLocomotionMode(const EAlsLocomotionMode NewMode)
 {
@@ -615,7 +615,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 			break;
 
 		case EAlsLocomotionMode::InAir:
-			if (LocomotionAction == EAlsLocomotionAction::None)
+			if (!LocomotionAction.IsValid())
 			{
 				// If the character enters the air, set the in air rotation.
 
@@ -631,7 +631,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 					}
 				}
 			}
-			else if (LocomotionAction == EAlsLocomotionAction::Rolling && RollingSettings.bInterruptRollingWhenInAir)
+			else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && RollingSettings.bInterruptRollingWhenInAir)
 			{
 				// If the character is currently rolling, enable the ragdolling.
 
@@ -645,26 +645,26 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 
 void AAlsCharacter::OnLocomotionModeChanged_Implementation(EAlsLocomotionMode PreviousMode) {}
 
-void AAlsCharacter::SetLocomotionAction(const EAlsLocomotionAction NewAction)
+void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewActionTag)
 {
-	if (LocomotionAction != NewAction)
+	if (LocomotionAction != NewActionTag)
 	{
 		const auto PreviousAction{LocomotionAction};
 
-		LocomotionAction = NewAction;
+		LocomotionAction = NewActionTag;
 
 		NotifyLocomotionActionChanged(PreviousAction);
 	}
 }
 
-void AAlsCharacter::NotifyLocomotionActionChanged(const EAlsLocomotionAction PreviousAction)
+void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag)
 {
 	ApplyDesiredStance();
 
-	OnLocomotionActionChanged(PreviousAction);
+	OnLocomotionActionChanged(PreviousActionTag);
 }
 
-void AAlsCharacter::OnLocomotionActionChanged_Implementation(EAlsLocomotionAction PreviousAction) {}
+void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag& PreviousActionTag) {}
 
 void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
@@ -805,7 +805,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bRotationLocked || LocomotionMode != EAlsLocomotionMode::Grounded ||
-	    LocomotionAction != EAlsLocomotionAction::None || HasAnyRootMotion())
+	    LocomotionAction.IsValid() || HasAnyRootMotion())
 	{
 		return;
 	}
@@ -933,7 +933,7 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bRotationLocked || LocomotionMode != EAlsLocomotionMode::InAir ||
-	    LocomotionAction != EAlsLocomotionAction::None || TryRefreshCustomInAirActorRotation(DeltaTime))
+	    LocomotionAction.IsValid() || TryRefreshCustomInAirActorRotation(DeltaTime))
 	{
 		return;
 	}

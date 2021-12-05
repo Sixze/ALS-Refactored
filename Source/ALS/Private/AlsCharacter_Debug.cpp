@@ -331,7 +331,7 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 	Text.Text = LocomotionActionText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(GetEnumValueString(LocomotionAction), false));
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 	VerticalPosition += RowOffset;

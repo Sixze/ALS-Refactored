@@ -10,6 +10,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {
@@ -49,7 +50,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	LocomotionMode = AlsCharacter->GetLocomotionMode();
 	LocomotionAction = AlsCharacter->GetLocomotionAction();
 
-	if (PreviousLocomotionAction.IsRagdolling() && !LocomotionAction.IsRagdolling())
+	if (PreviousLocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling &&
+	    LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling)
 	{
 		StopRagdolling();
 	}
@@ -57,7 +59,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
 	RefreshView(DeltaTime);
-	
+
 	RefreshFeet(DeltaTime);
 
 	RefreshMovement(DeltaTime);
@@ -210,7 +212,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
 	ViewState.Rotation = AlsCharacter->GetViewState().SmoothRotation;
 
-	if (LocomotionAction.IsNone())
+	if (!LocomotionAction.IsValid())
 	{
 		ViewState.YawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw - AlsCharacter->GetLocomotionState().Rotation.Yaw);
 		ViewState.PitchAngle = FRotator::NormalizeAxis(ViewState.Rotation.Pitch - AlsCharacter->GetLocomotionState().Rotation.Pitch);
@@ -308,7 +310,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		return;
 	}
 
-	if (LocomotionAction.IsRagdolling())
+	if (LocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling)
 	{
 		return;
 	}
@@ -1080,7 +1082,7 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 
 void UAlsAnimationInstance::RefreshRagdolling()
 {
-	if (LocomotionAction != EAlsLocomotionAction::Ragdolling)
+	if (LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling)
 	{
 		return;
 	}

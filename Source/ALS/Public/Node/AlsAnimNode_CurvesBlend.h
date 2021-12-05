@@ -26,6 +26,7 @@ struct ALS_API FAlsAnimNode_CurvesBlend : public FAnimNode_Base
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	FPoseLink SourcePose;
 
@@ -38,6 +39,7 @@ struct ALS_API FAlsAnimNode_CurvesBlend : public FAnimNode_Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::Override};
 
+public:
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 
 	virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
