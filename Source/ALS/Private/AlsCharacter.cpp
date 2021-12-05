@@ -169,18 +169,9 @@ void AAlsCharacter::Jump()
 
 void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, const uint8 PreviousCustomMode)
 {
-	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
-
-	if (LocomotionMode == EAlsLocomotionMode::None)
-	{
-		// Ignore movement mode change caused by movement component if current locomotion mode is a none.
-		return;
-	}
-
 	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
 	// custom set of movement modes but still use the functionality of the default character movement component.
 
-	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
 	switch (GetCharacterMovement()->MovementMode)
 	{
 		case MOVE_Walking:
@@ -191,7 +182,13 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, cons
 		case MOVE_Falling:
 			SetLocomotionMode(EAlsLocomotionMode::InAir);
 			break;
+
+		default:
+			SetLocomotionMode(EAlsLocomotionMode::None);
+			break;
 	}
+
+	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
 }
 
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)

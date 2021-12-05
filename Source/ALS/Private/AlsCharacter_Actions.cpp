@@ -1,4 +1,5 @@
 #include "AlsCharacter.h"
+#include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -317,8 +318,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 	GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
-
-	SetLocomotionMode(EAlsLocomotionMode::None);
+	AlsCharacterMovement->SetMovementModeLocked(true);
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
@@ -415,7 +415,7 @@ void AAlsCharacter::StopMantling()
 		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 	}
 
-	SetLocomotionMode(EAlsLocomotionMode::Grounded);
+	AlsCharacterMovement->SetMovementModeLocked(false);
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 	OnMantlingEnded();
@@ -480,8 +480,8 @@ void AAlsCharacter::StartRagdollingImplementation()
 	// Clear the character movement mode and set the locomotion action to ragdolling.
 
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	AlsCharacterMovement->SetMovementModeLocked(true);
 
-	SetLocomotionMode(EAlsLocomotionMode::None);
 	SetLocomotionAction(EAlsLocomotionAction::Ragdolling);
 
 	// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
@@ -681,14 +681,14 @@ void AAlsCharacter::StopRagdollingImplementation()
 	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 
+	AlsCharacterMovement->SetMovementModeLocked(false);
+
 	if (RagdollingState.bGrounded)
 	{
-		SetLocomotionMode(EAlsLocomotionMode::Grounded);
 		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 	else
 	{
-		SetLocomotionMode(EAlsLocomotionMode::InAir);
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 		GetCharacterMovement()->Velocity = RagdollingState.RootBoneVelocity;
 	}

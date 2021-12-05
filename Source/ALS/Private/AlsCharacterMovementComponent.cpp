@@ -122,6 +122,14 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	JumpOffJumpZFactor = 0.0f;
 }
 
+void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
+{
+	if (!bMovementModeLocked)
+	{
+		Super::SetMovementMode(NewMovementMode, NewCustomMode);
+	}
+}
+
 void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
 {
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
@@ -285,4 +293,9 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 	}
 
 	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
+}
+
+void UAlsCharacterMovementComponent::SetMovementModeLocked(const bool bNewMovementModeLocked)
+{
+	bMovementModeLocked = bNewMovementModeLocked;
 }

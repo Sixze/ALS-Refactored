@@ -91,8 +91,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	EAlsGait MaxAllowedGait;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bMovementModeLocked;
+
 public:
 	UAlsCharacterMovementComponent();
+
+	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
 
 protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
@@ -133,6 +138,8 @@ private:
 
 public:
 	float CalculateGaitAmount() const;
+
+	void SetMovementModeLocked(bool bNewMovementModeLocked);
 };
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const
