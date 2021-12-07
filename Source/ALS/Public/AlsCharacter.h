@@ -20,6 +20,7 @@
 
 enum class EAlsMantlingType : uint8;
 class UAlsCharacterMovementComponent;
+class UAlsAnimationInstance;
 
 UCLASS()
 class ALS_API AAlsCharacter : public ACharacter
@@ -82,6 +83,9 @@ protected:
 	UAlsMovementSettings* MovementSettings;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Instanced, Meta = (AllowPrivateAccess))
+	UAlsAnimationInstance* AlsAnimationInstance;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsStance Stance;
 

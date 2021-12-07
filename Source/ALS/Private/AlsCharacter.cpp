@@ -76,6 +76,10 @@ void AAlsCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	GetMesh()->VisibilityBasedAnimTickOption = GetLocalRole() >= ROLE_Authority
+		                                           ? EVisibilityBasedAnimTickOption::AlwaysTickPose
+		                                           : EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
@@ -83,6 +87,8 @@ void AAlsCharacter::PostInitializeComponents()
 	// Pass current movement settings to the movement component.
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
+
+	AlsAnimationInstance = CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	// Set default rotation values.
 
@@ -126,7 +132,14 @@ void AAlsCharacter::Tick(const float DeltaTime)
 {
 	// Restore initial visibility based animation tick option.
 
-	GetMesh()->VisibilityBasedAnimTickOption = GetClass()->GetDefaultObject<ACharacter>()->GetMesh()->VisibilityBasedAnimTickOption;
+	GetMesh()->VisibilityBasedAnimTickOption = GetLocalRole() >= ROLE_Authority
+		                                           ? EVisibilityBasedAnimTickOption::AlwaysTickPose
+		                                           : EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+
+	if (!GetMesh()->bRecentlyRendered && GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
+	{
+		AlsAnimationInstance->SetPendingUpdate(true);
+	}
 
 	Super::Tick(DeltaTime);
 
@@ -810,8 +823,6 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		return;
 	}
 
-	auto* AnimationInstance{CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())};
-
 	if (LocomotionState.bMoving)
 	{
 		// Moving.
@@ -834,7 +845,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 					Gait == EAlsGait::Sprinting
 						? LocomotionState.VelocityYawAngle
 						: FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw +
-						                          AnimationInstance->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
+						                          AlsAnimationInstance->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
 				};
 
 				RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateActorRotationSpeed(), 500.0f);
@@ -858,16 +869,16 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 		RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 	}
 
-	if (AnimationInstance->IsRotationYawSpeedAppliedThisFrame())
+	if (AlsAnimationInstance->IsRotationYawSpeedAppliedThisFrame())
 	{
 		// Skip actor rotation modification using the rotation yaw speed animation curve because animation
 		// blueprint has not been updated yet (animation blueprint has a lower update rate than character actor).
 		return;
 	}
 
-	AnimationInstance->SetRotationYawSpeedAppliedThisFrame(true);
+	AlsAnimationInstance->SetRotationYawSpeedAppliedThisFrame(true);
 
-	const auto RotationYawSpeed{AnimationInstance->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
+	const auto RotationYawSpeed{AlsAnimationInstance->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
 	if (FMath::Abs(RotationYawSpeed) > KINDA_SMALL_NUMBER)
 	{
 		// Apply the rotation yaw speed curve from animations.
@@ -1058,7 +1069,7 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance())->Jump();
+	AlsAnimationInstance->Jump();
 }
 
 void AAlsCharacter::MulticastOnLandedNetworked_Implementation()

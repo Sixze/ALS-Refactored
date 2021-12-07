@@ -60,6 +60,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
 
+	// Used to indicate that the animation blueprint has not been updated for a long time
+	// and its current state may be incorrect (such as foot location used in foot locking).
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bPendingUpdate;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bRotationYawSpeedAppliedThisFrame;
 
@@ -139,6 +144,8 @@ public:
 	// Core
 
 public:
+	void SetPendingUpdate(bool bNewPendingUpdate);
+
 	bool IsRotationYawSpeedAppliedThisFrame() const;
 
 	void SetRotationYawSpeedAppliedThisFrame(bool bApplied);
@@ -283,6 +290,11 @@ private:
 public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
 };
+
+inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
+{
+	bPendingUpdate = bNewPendingUpdate;
+}
 
 inline bool UAlsAnimationInstance::IsRotationYawSpeedAppliedThisFrame() const
 {

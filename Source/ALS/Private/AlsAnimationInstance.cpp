@@ -70,6 +70,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	RefreshInAir(DeltaTime);
 	RefreshRagdolling();
+
+	SetPendingUpdate(false);
 }
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
@@ -267,6 +269,15 @@ bool UAlsAnimationInstance::IsSpineRotationAllowed()
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 {
+	if (bPendingUpdate)
+	{
+		// Reinitialize foot locking.
+
+		FeetState.BasePrimitive = nullptr;
+		FeetState.Left.LockLocation = FVector::ZeroVector;
+		FeetState.Right.LockLocation = FVector::ZeroVector;
+	}
+
 	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
 
 	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
