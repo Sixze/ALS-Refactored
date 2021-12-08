@@ -7,6 +7,7 @@ int32 FAlsAnimNode_GameplayTagsBlend::GetActiveChildIndex()
 		       : 0;
 }
 
+#if WITH_EDITOR
 void FAlsAnimNode_GameplayTagsBlend::RefreshPoses()
 {
 	const auto Difference{BlendPose.Num() - Tags.Num() - 1};
@@ -30,3 +31,4 @@ void FAlsAnimNode_GameplayTagsBlend::RefreshPoses()
 		}
 	}
 }
+#endif

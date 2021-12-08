@@ -1,5 +1,6 @@
 #include "AlsAnimGraphNode_GameplayTagsBlend.h"
 
+#include "Animation/AnimNode_Inertialization.h"
 #include "Utility/AlsUtility.h"
 
 #define LOCTEXT_NAMESPACE "GameplayTagsBlendAnimationGraphNode"
@@ -68,6 +69,16 @@ void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, con
 		Pin->PinFriendlyName = FText::Format(LOCTEXT("BlendTime", "{0} Blend Time"), {Pin->PinFriendlyName});
 	}
 }
+
+#if ENGINE_MAJOR_VERSION >= 5
+void UAlsAnimGraphNode_GameplayTagsBlend::GetOutputLinkAttributes(FNodeAttributeArray& Attributes) const
+{
+	if (Node.TransitionType == EBlendListTransitionType::Inertialization)
+	{
+		Attributes.Add(UE::Anim::IInertializationRequester::Attribute);
+	}
+}
+#endif
 
 void UAlsAnimGraphNode_GameplayTagsBlend::GetBlendPinProperties(const UEdGraphPin* Pin, bool& bBlendPosePin, bool& bBlendTimePin)
 {

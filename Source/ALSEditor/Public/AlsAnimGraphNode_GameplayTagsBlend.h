@@ -29,6 +29,10 @@ public:
 
 	virtual void CustomizePinData(UEdGraphPin* Pin, FName SourcePropertyName, int32 ArrayIndex) const override;
 
+#if ENGINE_MAJOR_VERSION >= 5
+	virtual void GetOutputLinkAttributes(FNodeAttributeArray& Attributes) const override;
+#endif
+
 protected:
 	static void GetBlendPinProperties(const UEdGraphPin* Pin, bool& bBlendPosePin, bool& bBlendTimePin);
 };

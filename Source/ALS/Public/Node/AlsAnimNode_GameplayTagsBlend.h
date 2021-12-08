@@ -21,5 +21,7 @@ protected:
 	virtual int32 GetActiveChildIndex() override;
 
 public:
+#if WITH_EDITOR
 	void RefreshPoses();
+#endif
 };
