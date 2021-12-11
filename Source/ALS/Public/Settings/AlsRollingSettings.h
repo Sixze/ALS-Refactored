@@ -1,11 +1,16 @@
 ﻿#pragma once
 
+#include "Animation/AnimMontage.h"
+
 #include "AlsRollingSettings.generated.h"
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsRollingSettings
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Montage{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float ActorRotationInterpolationSpeed{10.0f};

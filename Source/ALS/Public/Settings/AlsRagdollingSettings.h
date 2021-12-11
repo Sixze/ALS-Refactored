@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Engine/EngineTypes.h"
+#include "Animation/AnimMontage.h"
 
 #include "AlsRagdollingSettings.generated.h"
 
@@ -18,4 +18,10 @@ struct ALS_API FAlsRagdollingSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TEnumAsByte<EObjectTypeQuery>> GroundTraceObjectTypes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* GetUpFrontMontage{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* GetUpBackMontage{nullptr};
 };

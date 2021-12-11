@@ -711,9 +711,9 @@ void AAlsCharacter::StopRagdollingImplementation()
 	}
 }
 
-UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(bool bRagdollFacedUpward)
+UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdollFacedUpward)
 {
-	return nullptr;
+	return bRagdollFacedUpward ? RagdollingSettings.GetUpBackMontage : RagdollingSettings.GetUpFrontMontage;
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}
@@ -768,7 +768,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 
 UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 {
-	return nullptr;
+	return RollingSettings.Montage;
 }
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate, const float TargetYawAngle)
