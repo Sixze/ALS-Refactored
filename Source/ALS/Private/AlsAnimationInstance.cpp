@@ -33,7 +33,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (DeltaTime <= SMALL_NUMBER || !IsValid(AlsCharacter))
+	if (!IsValid(AlsCharacter))
 	{
 		return;
 	}
@@ -295,6 +295,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 			: UAlsConstants::FootRightIkVirtualBone()
 	};
 
+	const auto RelativeTransform{GetSkelMeshComponent()->GetComponentTransform().Inverse()};
+
 	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
 	if (BasedMovement.MovementBase != FeetState.BasePrimitive || BasedMovement.BoneName != FeetState.BaseBoneName)
 	{
@@ -305,17 +307,27 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		FQuat BaseRotation;
 		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
 
-		HandleFootLockChangedBase(FeetState.Left, FootLeftBone, BaseLocation, BaseRotation);
-		HandleFootLockChangedBase(FeetState.Right, FootRightBone, BaseLocation, BaseRotation);
+		HandleFootLockChangedBase(FeetState.Left, FootLeftBone, BaseLocation, BaseRotation, RelativeTransform);
+		HandleFootLockChangedBase(FeetState.Right, FootRightBone, BaseLocation, BaseRotation, RelativeTransform);
 	}
 
-	RefreshFootLock(FeetState.Left, FootLeftBone, UAlsConstants::FootLeftLockCurve(), DeltaTime);
-	RefreshFootLock(FeetState.Right, FootRightBone, UAlsConstants::FootRightLockCurve(), DeltaTime);
+	FVector FinalFootLeftLocation;
+	FQuat FinalFootLeftRotation;
+	RefreshFootLock(FeetState.Left, FootLeftBone, UAlsConstants::FootLeftLockCurve(),
+	                RelativeTransform, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
+
+	FVector FinalFootRightLocation;
+	FQuat FinalFootRightRotation;
+	RefreshFootLock(FeetState.Right, FootRightBone, UAlsConstants::FootRightLockCurve(),
+	                RelativeTransform, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
 
 	if (LocomotionMode.IsInAir())
 	{
-		ResetFootOffset(FeetState.Left, DeltaTime);
-		ResetFootOffset(FeetState.Right, DeltaTime);
+		ResetFootOffset(FeetState.Left, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
+		ResetFootOffset(FeetState.Right, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
+
+		RefreshFinalFootState(FeetState.Left, RelativeTransform, FinalFootLeftLocation, FinalFootLeftRotation);
+		RefreshFinalFootState(FeetState.Right, RelativeTransform, FinalFootRightLocation, FinalFootRightRotation);
 
 		RefreshPelvisOffset(DeltaTime, 0.0f, 0.0f);
 		return;
@@ -323,20 +335,25 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	if (LocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling)
 	{
+		RefreshFinalFootState(FeetState.Left, RelativeTransform, FinalFootLeftLocation, FinalFootLeftRotation);
+		RefreshFinalFootState(FeetState.Right, RelativeTransform, FinalFootRightLocation, FinalFootRightRotation);
 		return;
 	}
 
 	FVector TargetFootLeftLocationOffset;
-	RefreshFootOffset(FeetState.Left, TargetFootLeftLocationOffset, DeltaTime);
+	RefreshFootOffset(FeetState.Left, DeltaTime, TargetFootLeftLocationOffset, FinalFootLeftLocation, FinalFootLeftRotation);
 
 	FVector TargetFootRightLocationOffset;
-	RefreshFootOffset(FeetState.Right, TargetFootRightLocationOffset, DeltaTime);
+	RefreshFootOffset(FeetState.Right, DeltaTime, TargetFootRightLocationOffset, FinalFootRightLocation, FinalFootRightRotation);
+
+	RefreshFinalFootState(FeetState.Left, RelativeTransform, FinalFootLeftLocation, FinalFootLeftRotation);
+	RefreshFinalFootState(FeetState.Right, RelativeTransform, FinalFootRightLocation, FinalFootRightRotation);
 
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset.Z, TargetFootRightLocationOffset.Z);
 }
 
-void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName,
-                                                      const FVector& BaseLocation, const FQuat& BaseRotation) const
+void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
+                                                      const FQuat& BaseRotation, const FTransform& RelativeTransform) const
 {
 	if (FootState.LockLocation.IsZero())
 	{
@@ -366,15 +383,14 @@ void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, 
 	}
 	else
 	{
-		const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
-
-		FootState.LockRelativeLocation = ComponentTransform.InverseTransformPositionNoScale(FootState.LockLocation);
-		FootState.LockRelativeRotation = ComponentTransform.InverseTransformRotation(FootState.LockRotation);
+		FootState.LockRelativeLocation = RelativeTransform.TransformPosition(FootState.LockLocation);
+		FootState.LockRelativeRotation = RelativeTransform.TransformRotation(FootState.LockRotation);
 	}
 }
 
 void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
-                                            const FName& FootLockCurveName, const float DeltaTime) const
+                                            const FName& FootLockCurveName, const FTransform& RelativeTransform,
+                                            const float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const
 {
 	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
@@ -398,8 +414,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		FootState.LockLocation = FootTransform.GetLocation();
 		FootState.LockRotation = FootTransform.GetRotation();
 
-		FootState.FinalLocation = FootState.LockLocation;
-		FootState.FinalRotation = FootState.LockRotation;
+		FinalLocation = FootState.LockLocation;
+		FinalRotation = FootState.LockRotation;
 		return;
 	}
 
@@ -448,10 +464,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 					FootState.LockRotation = FootTransform.GetRotation();
 				}
 
-				const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
-
-				FootState.LockRelativeLocation = ComponentTransform.InverseTransformPositionNoScale(FootState.LockLocation);
-				FootState.LockRelativeRotation = ComponentTransform.InverseTransformRotation(FootState.LockRotation);
+				FootState.LockRelativeLocation = RelativeTransform.TransformPosition(FootState.LockLocation);
+				FootState.LockRelativeRotation = RelativeTransform.TransformRotation(FootState.LockRotation);
 			}
 		}
 	}
@@ -475,15 +489,16 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	{
 		const auto& ComponentTransform{GetSkelMeshComponent()->GetComponentTransform()};
 
-		FootState.LockLocation = ComponentTransform.TransformPositionNoScale(FootState.LockRelativeLocation);
+		FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockRelativeLocation);
 		FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockRelativeRotation);
 	}
 
-	FootState.FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
-	FootState.FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), FootState.LockRotation, FootState.LockAmount);
+	FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
+	FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), FootState.LockRotation, FootState.LockAmount);
 }
 
-void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, const float DeltaTime) const
+void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const float DeltaTime, FVector& TargetLocationOffset,
+                                              FVector& FinalLocation, FQuat& FinalRotation) const
 {
 	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
@@ -495,7 +510,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
-	auto FootLocation{FootState.FinalLocation};
+	auto FootLocation{FinalLocation};
 	FootLocation.Z = GetSkelMeshComponent()->GetSocketLocation(UAlsConstants::RootBone()).Z;
 
 	FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, AlsCharacter};
@@ -560,21 +575,31 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, FVector&
 
 	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, 30.0f);
 
-	FootState.FinalLocation += FootState.OffsetLocation;
-	FootState.FinalRotation = FootState.OffsetRotation * FootState.FinalRotation;
+	FinalLocation += FootState.OffsetLocation;
+	FinalRotation = FootState.OffsetRotation * FinalRotation;
 }
 
-void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime)
+void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation)
 {
 	FootState.OffsetLocation = UAlsMath::InterpolateVectorSpringStable(FootState.OffsetLocation, FVector::ZeroVector,
 	                                                                   FootState.OffsetSpringState, 20.0f, 4.0f, DeltaTime, 4.0f);
 
 	FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, 15.0f);
 
-	FootState.FinalLocation += FootState.OffsetLocation;
-	FootState.FinalRotation = FootState.OffsetRotation * FootState.FinalRotation;
+	FinalLocation += FootState.OffsetLocation;
+	FinalRotation = FootState.OffsetRotation * FinalRotation;
 
 	FootState.bOffsetHitValid = false;
+}
+
+void UAlsAnimationInstance::RefreshFinalFootState(FAlsFootState& FootState, const FTransform& RelativeTransform,
+                                                  const FVector& FinalLocation, const FQuat& FinalRotation)
+{
+	FootState.FinalLocation = FinalLocation;
+	FootState.FinalRotation = FinalRotation;
+
+	FootState.FinalRelativeLocation = RelativeTransform.TransformPosition(FinalLocation);
+	FootState.FinalRelativeRotation = RelativeTransform.TransformRotation(FinalRotation);
 }
 
 void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const float TargetFootLeftLocationOffsetZ,

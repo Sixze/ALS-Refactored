@@ -171,14 +171,20 @@ protected:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	void HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName,
-	                               const FVector& BaseLocation, const FQuat& BaseRotation) const;
+	void HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
+	                               const FQuat& BaseRotation, const FTransform& RelativeTransform) const;
 
-	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName, const FName& FootLockCurveName, float DeltaTime) const;
+	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
+	                     const FName& FootLockCurveName, const FTransform& RelativeTransform,
+	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	void RefreshFootOffset(FAlsFootState& FootState, FVector& TargetLocationOffset, float DeltaTime) const;
+	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,
+	                       FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	static void ResetFootOffset(FAlsFootState& FootState, float DeltaTime);
+	static void ResetFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation);
+
+	static void RefreshFinalFootState(FAlsFootState& FootState, const FTransform& RelativeTransform,
+	                                  const FVector& FinalLocation, const FQuat& FinalRotation);
 
 	void RefreshPelvisOffset(float DeltaTime, float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ);
 

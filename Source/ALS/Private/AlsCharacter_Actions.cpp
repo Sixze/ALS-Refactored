@@ -284,7 +284,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	}
 
 	auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
-	if (!IsValid(MantlingSettings))
+	if (!IsValid(MantlingSettings) || !IsValid(MantlingSettings->BlendInCurve) ||
+	    !IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve))
 	{
 		return;
 	}
