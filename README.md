@@ -28,7 +28,7 @@ Completely refactored and bug fixed version of the [Community Version](https://g
 
 - **C++ project is a requirement. Blueprint projects are currently not supported.**
 - Clone the repository inside your project's plugins folder, or download the latest release and extract it into your project's plugins folder.
-- Put `Config/DefaultInput.ini` from the plugin folder inside your project's config folder. If your project already have this file, then merge it into yours.
+- Place `DefaultEngine.ini` and `DefaultInput.ini` from the plugin config folder into your project config folder. If your project already has theese files, then merge them with yours.
 - Regenerate Visual Studio project files and build your project.
 - Launch the project, and enable plugin content viewer as seen below. This will show contents of the plugin in your content browser:
 ![image](https://github.com/Sixze/ALS-Refactored/raw/main/Screenshots/ShowPluginContent.png)

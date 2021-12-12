@@ -38,8 +38,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	SetRotationYawSpeedAppliedThisFrame(false);
-
 	const auto PreviousLocomotionAction{LocomotionAction};
 
 	Stance = AlsCharacter->GetStance();
@@ -72,6 +70,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshRagdolling();
 
 	SetPendingUpdate(false);
+	SetRotationYawSpeedChanged(true);
 }
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)

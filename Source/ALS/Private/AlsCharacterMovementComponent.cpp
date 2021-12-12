@@ -139,6 +139,21 @@ void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode P
 	bCrouchMaintainsBaseLocation = true;
 }
 
+void UAlsCharacterMovementComponent::TickComponent(const float DeltaTime, const ELevelTick TickType,
+                                                   FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// If move combining is enabled, then as a fallback flush server moves to ensure
+	// that local character rotation is applied correctly on autonomous proxy clients.
+
+	static const auto* MoveCombiningConsoleVariable{IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"))};
+	if (MoveCombiningConsoleVariable != nullptr && MoveCombiningConsoleVariable->GetInt() != 0)
+	{
+		FlushServerMoves();
+	}
+}
+
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.

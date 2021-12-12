@@ -66,7 +66,7 @@ private:
 	bool bPendingUpdate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bRotationYawSpeedAppliedThisFrame;
+	bool bRotationYawSpeedChanged{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
@@ -146,9 +146,9 @@ public:
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
 
-	bool IsRotationYawSpeedAppliedThisFrame() const;
+	bool IsRotationYawSpeedChanged() const;
 
-	void SetRotationYawSpeedAppliedThisFrame(bool bApplied);
+	void SetRotationYawSpeedChanged(bool bChanged);
 
 	EAlsRotationMode GetRotationMode() const;
 
@@ -302,14 +302,14 @@ inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate
 	bPendingUpdate = bNewPendingUpdate;
 }
 
-inline bool UAlsAnimationInstance::IsRotationYawSpeedAppliedThisFrame() const
+inline bool UAlsAnimationInstance::IsRotationYawSpeedChanged() const
 {
-	return bRotationYawSpeedAppliedThisFrame;
+	return bRotationYawSpeedChanged;
 }
 
-inline void UAlsAnimationInstance::SetRotationYawSpeedAppliedThisFrame(const bool bApplied)
+inline void UAlsAnimationInstance::SetRotationYawSpeedChanged(const bool bChanged)
 {
-	bRotationYawSpeedAppliedThisFrame = bApplied;
+	bRotationYawSpeedChanged = bChanged;
 }
 
 inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const

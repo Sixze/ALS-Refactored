@@ -365,6 +365,10 @@ protected:
 	float CalculateActorRotationSpeed() const;
 
 private:
+	void ApplyRotationYawSpeed(float DeltaTime);
+
+	void ResetRotationYawSpeed();
+
 	void RefreshInAirActorRotation(float DeltaTime);
 
 protected:
