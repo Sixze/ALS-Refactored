@@ -139,8 +139,6 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void AddMovementInput(FVector Direction, float Scale = 1.0f, bool bForce = false) override;
-
 	virtual void Jump() override;
 
 	virtual void OnMovementModeChanged(EMovementMode PreviousMode, uint8 PreviousCustomMode = 0) override;
