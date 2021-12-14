@@ -170,14 +170,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AAlsCharacter::AddMovementInput(const FVector Direction, const float Scale, const bool bForce)
-{
-	if (LocomotionMode != EAlsLocomotionMode::None)
-	{
-		Super::AddMovementInput(Direction, Scale, bForce);
-	}
-}
-
 void AAlsCharacter::Jump()
 {
 	if (LocomotionMode == EAlsLocomotionMode::Grounded &&
