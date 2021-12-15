@@ -797,7 +797,8 @@ void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewView
 
 void AAlsCharacter::RefreshView(const float DeltaTime)
 {
-	if (IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy || IsLocallyControlled())
+	// ReSharper disable once CppRedundantParentheses
+	if ((IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy) || IsLocallyControlled())
 	{
 		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}

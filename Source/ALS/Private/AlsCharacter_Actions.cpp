@@ -727,7 +727,8 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 
 	StartRolling(PlayRate, LocomotionState.bHasInput &&
 	                       (RollingSettings.bRotateToInputOnStart ||
-	                        RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f)
+	                       // ReSharper disable once CppRedundantParentheses
+	                        (RollingSettings.bRotateToInputDuringRoll && RollingSettings.InputInterpolationSpeed <= 0.0f))
 		                       ? LocomotionState.InputYawAngle
 		                       : GetActorRotation().Yaw);
 }
