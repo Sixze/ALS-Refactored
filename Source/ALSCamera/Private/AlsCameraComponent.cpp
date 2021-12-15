@@ -251,7 +251,8 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto LocationLagY{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurve())};
 	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve())};
 
-	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f)
+	// ReSharper disable once CppRedundantParentheses
+	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || (LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f))
 	{
 		return CameraYawRotation.RotateVector({
 			UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
