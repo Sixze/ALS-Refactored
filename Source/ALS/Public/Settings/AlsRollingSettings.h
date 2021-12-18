@@ -12,20 +12,14 @@ struct ALS_API FAlsRollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* Montage{nullptr};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float ActorRotationInterpolationSpeed{10.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCrouchOnStart{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bRotateToInputOnStart{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRotateToInputDuringRoll{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bRotateToInputDuringRoll"))
-	float InputInterpolationSpeed{100.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	float RotationInterpolationSpeed{10.0f};
 
 	// If character landed with a specified speed, then start rolling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

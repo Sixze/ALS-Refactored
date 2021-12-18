@@ -151,6 +151,9 @@ public:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
+private:
+	void PhysicsRotation(float DeltaTime);
+
 	// Desired Stance
 
 public:
@@ -379,10 +382,11 @@ protected:
 
 	void RefreshActorRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
-	void RefreshActorRotation(float TargetYawAngle, float DeltaTime, float ActorRotationSpeed);
+	void RefreshActorRotation(float TargetYawAngle, float DeltaTime, float ActorRotationInterpolationSpeed);
 
 	void RefreshActorRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
-	                                     float ActorRotationSpeed, float TargetYawAngleRotationSpeed);
+	                                     float ActorRotationInterpolationSpeed,
+	                                     float TargetYawAngleRotationSpeed);
 
 	// Rotation Lock
 
@@ -526,14 +530,14 @@ private:
 	void StartRolling(float PlayRate, float TargetYawAngle);
 
 	UFUNCTION(Server, Reliable)
-	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
 
-	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float TargetYawAngle);
+	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
 
-	void RefreshRolling(float DeltaTime);
+	void RefreshRollingPhysics(float DeltaTime);
 
 	// Debug
 

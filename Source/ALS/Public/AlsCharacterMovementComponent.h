@@ -5,6 +5,8 @@
 
 #include "AlsCharacterMovementComponent.generated.h"
 
+using FAlsPhysicsRotationDelegate = TMulticastDelegate<void(float DeltaTime)>;
+
 class ALS_API FAlsCharacterNetworkMoveData : public FCharacterNetworkMoveData
 {
 private:
@@ -95,6 +97,9 @@ private:
 	bool bMovementModeLocked;
 
 public:
+	FAlsPhysicsRotationDelegate OnPhysicsRotation;
+
+public:
 	UAlsCharacterMovementComponent();
 
 	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
@@ -110,13 +115,15 @@ public:
 
 	virtual float GetMaxBrakingDeceleration() const override;
 
+	virtual void PhysicsRotation(float DeltaTime) override;
+
 protected:
 	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
 
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 
 public:
-	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
+	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 protected:
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;

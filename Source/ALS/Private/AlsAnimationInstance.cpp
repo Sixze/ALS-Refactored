@@ -79,12 +79,11 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasInput && RotationMode.IsVelocityDirection())
 	{
-		// Get the delta between the current input yaw angle and character rotation and map it to a range
-		// from 0 to 1. This value is used in the aiming to make the character look toward the current input.
+		// Get the delta between character rotation and current input yaw angle and map it to a range from
+		// 0 to 1. This value is used in the aiming to make the character look toward the current input.
 
 		const auto InputYawAngle{
-			FRotator::NormalizeAxis(
-				AlsCharacter->GetLocomotionState().InputYawAngle - AlsCharacter->GetLocomotionState().Rotation.Yaw)
+			FRotator::NormalizeAxis(AlsCharacter->GetLocomotionState().InputYawAngle - AlsCharacter->GetLocomotionState().Rotation.Yaw)
 		};
 
 		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
@@ -654,8 +653,7 @@ EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
 	}
 
 	return UAlsMath::CalculateMovementDirection(
-		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw),
-		70.0f, 5.0f);
+		FRotator::NormalizeAxis(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw), 70.0f, 5.0f);
 }
 
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)

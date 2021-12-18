@@ -122,6 +122,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	};
 
 	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
+	CameraRotation.Normalize();
 
 	const auto PivotTargetTransform{GetThirdPersonPivotTransform()};
 

@@ -2,6 +2,7 @@
 
 #include "AlsCharacter.h"
 #include "Curves/CurveVector.h"
+#include "GameFramework/Controller.h"
 
 void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, const ENetworkMoveType MoveType)
 {
@@ -120,6 +121,8 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 
 	FallingLateralFriction = 1.0f;
 	JumpOffJumpZFactor = 0.0f;
+
+	bAllowPhysicsRotationDuringAnimRootMotion = true;
 }
 
 void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
@@ -170,6 +173,16 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 	return IsMovingOnGround() && IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).Y
 		       : Super::GetMaxBrakingDeceleration();
+}
+
+void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
+{
+	if (HasValidData() && (IsValid(CharacterOwner->Controller) || bRunPhysicsWithNoController))
+	{
+		Super::PhysicsRotation(DeltaTime);
+
+		OnPhysicsRotation.Broadcast(DeltaTime);
+	}
 }
 
 void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const int32 Iterations)

@@ -62,24 +62,6 @@ FVector UAlsMath::InterpolateVectorSpringStable(const FVector& Current, const FV
 	}
 }
 
-float UAlsMath::InterpolateAngleConstant(const float CurrentAngle, const float TargetAngle,
-                                         const float DeltaTime, const float InterpolationSpeed)
-{
-	if (DeltaTime <= 0.0f || CurrentAngle == TargetAngle)
-	{
-		return CurrentAngle;
-	}
-
-	if (InterpolationSpeed <= 0.0f)
-	{
-		// If no interpolation speed, then jump to target value.
-		return TargetAngle;
-	}
-
-	const auto Step{InterpolationSpeed * DeltaTime};
-	return FRotator::NormalizeAxis(CurrentAngle + FMath::Clamp(FRotator::NormalizeAxis(TargetAngle - CurrentAngle), -Step, Step));
-}
-
 FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To, const float Alpha)
 {
 	// http://allenchou.net/2018/05/game-math-deriving-the-slerp-formula/

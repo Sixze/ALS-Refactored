@@ -34,6 +34,12 @@ public:
 	template <class T>
 	static T ExponentialDecay(const T& A, const T& B, float DeltaTime, float Lambda);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
+	static float DampAngle(float A, float B, float DeltaTime, float Smoothing);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
+	static float ExponentialDecayAngle(float A, float B, float DeltaTime, float Lambda);
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math")
 	static float InterpolateFloatSpringStable(float Current, float Target, UPARAM(ref) FFloatSpringState& SpringState,
 	                                          float Stiffness, float CriticalDampingFactor, float DeltaTime, float Mass = 1.0f);
@@ -114,6 +120,24 @@ template <class T>
 T UAlsMath::ExponentialDecay(const T& A, const T& B, const float DeltaTime, const float Lambda)
 {
 	return Lambda <= 0.0f ? B : FMath::Lerp(A, B, ExponentialDecay(DeltaTime, Lambda));
+}
+
+inline float UAlsMath::DampAngle(const float A, const float B, const float DeltaTime, const float Smoothing)
+{
+	return Smoothing <= 0.0f ? B : FRotator::NormalizeAxis(A + FRotator::NormalizeAxis(B - A) * Damp(DeltaTime, Smoothing));
+}
+
+inline float UAlsMath::ExponentialDecayAngle(const float A, const float B, const float DeltaTime, const float Lambda)
+{
+	return Lambda <= 0.0f ? B : FRotator::NormalizeAxis(A + FRotator::NormalizeAxis(B - A) * ExponentialDecay(DeltaTime, Lambda));
+}
+
+inline float UAlsMath::InterpolateAngleConstant(const float CurrentAngle, const float TargetAngle,
+                                                const float DeltaTime, const float InterpolationSpeed)
+{
+	return FRotator::NormalizeAxis(InterpolationSpeed > 0.0f && CurrentAngle != TargetAngle
+		                               ? FMath::FixedTurn(CurrentAngle, TargetAngle, InterpolationSpeed * DeltaTime)
+		                               : TargetAngle);
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
