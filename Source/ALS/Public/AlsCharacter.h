@@ -149,8 +149,6 @@ public:
 
 	virtual void OnJumped_Implementation() override;
 
-	virtual void Landed(const FHitResult& Hit) override;
-
 private:
 	void PhysicsRotation(float DeltaTime);
 
@@ -415,11 +413,6 @@ private:
 	// Landing
 
 private:
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastOnLandedNetworked();
-
-	void OnLandedNetworked();
-
 	void OnLandedGroundFrictionReset() const;
 
 	// Mantling

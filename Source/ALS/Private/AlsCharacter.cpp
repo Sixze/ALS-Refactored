@@ -239,21 +239,6 @@ void AAlsCharacter::OnJumped_Implementation()
 	}
 }
 
-void AAlsCharacter::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-
-	if (IsLocallyControlled())
-	{
-		OnLandedNetworked();
-	}
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		MulticastOnLandedNetworked();
-	}
-}
-
 void AAlsCharacter::PhysicsRotation(const float DeltaTime)
 {
 	RefreshRollingPhysics(DeltaTime);
@@ -621,41 +606,58 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const EAlsLocomotionMode Previou
 {
 	ApplyDesiredStance();
 
-	// ReSharper disable once CppIncompleteSwitchStatement
-	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
-	switch (LocomotionMode)
+	if (LocomotionMode == EAlsLocomotionMode::Grounded)
 	{
-		case EAlsLocomotionMode::Grounded:
-			if (!LocomotionState.bRotationLocked)
+		if (PreviousMode == EAlsLocomotionMode::InAir)
+		{
+			if (RagdollingSettings.bStartRagdollingOnLand &&
+			    LocomotionState.Velocity.Z <= -RagdollingSettings.RagdollingOnLandSpeedThreshold)
 			{
-				RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
-			}
-			break;
-
-		case EAlsLocomotionMode::InAir:
-			if (!LocomotionAction.IsValid())
-			{
-				// If the character enters the air, set the in air rotation.
-
-				if (!LocomotionState.bRotationLocked)
-				{
-					if (InAirRotationMode == EAlsInAirRotationMode::RotateToVelocityOnJump && LocomotionState.bMoving)
-					{
-						RefreshTargetYawAngle(LocomotionState.VelocityYawAngle, false);
-					}
-					else if (InAirRotationMode == EAlsInAirRotationMode::KeepWorldRotation)
-					{
-						RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
-					}
-				}
-			}
-			else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && RollingSettings.bInterruptRollingWhenInAir)
-			{
-				// If the character is currently rolling, enable the ragdolling.
-
 				StartRagdolling();
 			}
-			break;
+			else if (RollingSettings.bStartRollingOnLand &&
+			         LocomotionState.Velocity.Z <= -RollingSettings.RollingOnLandSpeedThreshold)
+			{
+				StartRolling(1.3f, LocomotionState.bHasSpeed
+					                   ? LocomotionState.VelocityYawAngle
+					                   : GetActorRotation().Yaw);
+			}
+			else
+			{
+				GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
+
+				GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
+			}
+		}
+		else if (!LocomotionState.bRotationLocked)
+		{
+			RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
+		}
+	}
+	else if (LocomotionMode == EAlsLocomotionMode::InAir)
+	{
+		if (!LocomotionAction.IsValid())
+		{
+			// If the character enters the air, set the in air rotation.
+
+			if (!LocomotionState.bRotationLocked)
+			{
+				if (InAirRotationMode == EAlsInAirRotationMode::RotateToVelocityOnJump && LocomotionState.bMoving)
+				{
+					RefreshTargetYawAngle(LocomotionState.VelocityYawAngle, false);
+				}
+				else if (InAirRotationMode == EAlsInAirRotationMode::KeepWorldRotation)
+				{
+					RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
+				}
+			}
+		}
+		else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && RollingSettings.bInterruptRollingWhenInAir)
+		{
+			// If the character is currently rolling, enable the ragdolling.
+
+			StartRagdolling();
+		}
 	}
 
 	OnLocomotionModeChanged(PreviousMode);
@@ -1027,7 +1029,7 @@ void AAlsCharacter::RefreshActorRotationInstant(const float TargetYawAngle, cons
 	auto NewRotation{GetActorRotation()};
 	NewRotation.Yaw = TargetYawAngle;
 
-	SetActorRotation(NewRotation);
+	SetActorRotation(NewRotation, Teleport);
 
 	RefreshLocomotionLocationAndRotation();
 }
@@ -1109,37 +1111,6 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 void AAlsCharacter::OnJumpedNetworked()
 {
 	AlsAnimationInstance->Jump();
-}
-
-void AAlsCharacter::MulticastOnLandedNetworked_Implementation()
-{
-	if (!IsLocallyControlled())
-	{
-		OnLandedNetworked();
-	}
-}
-
-void AAlsCharacter::OnLandedNetworked()
-{
-	const auto VerticalSpeed{FMath::Abs(GetCharacterMovement()->Velocity.Z)};
-
-	if (RagdollingSettings.bStartRagdollingOnLand && VerticalSpeed > RagdollingSettings.RagdollingOnLandSpeedThreshold)
-	{
-		StartRagdolling();
-		return;
-	}
-
-	if (RollingSettings.bStartRollingOnLand && VerticalSpeed >= RollingSettings.RollingOnLandSpeedThreshold)
-	{
-		StartRolling(1.3f, LocomotionState.bHasSpeed
-			                   ? LocomotionState.VelocityYawAngle
-			                   : GetActorRotation().Yaw);
-		return;
-	}
-
-	GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
-
-	GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
 }
 
 void AAlsCharacter::OnLandedGroundFrictionReset() const
