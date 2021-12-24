@@ -226,6 +226,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewState.Rotation, DeltaTime,
 	                                                      GeneralSettings.ViewSmoothRotationInterpolationSpeed);
+	ViewState.SmoothRotation.Normalize();
 
 	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
 	                                                   AlsCharacter->GetLocomotionState().Rotation.Yaw);
@@ -362,17 +363,12 @@ void UAlsAnimationInstance::HandleFootLockChangedBase(FAlsFootState& FootState, 
 	}
 
 	const auto& BasedMovement{AlsCharacter->GetBasedMovement()};
-	if (BasedMovement.HasRelativeRotation())
+	if (BasedMovement.HasRelativeLocation())
 	{
 		const auto BaseRotationInverted{BaseRotation.Inverse()};
 
 		FootState.LockRelativeLocation = BaseRotationInverted.RotateVector(FootState.LockLocation - BaseLocation);
 		FootState.LockRelativeRotation = BaseRotationInverted * FootState.LockRotation;
-	}
-	else if (BasedMovement.HasRelativeLocation())
-	{
-		FootState.LockRelativeLocation = FootState.LockLocation - BaseLocation;
-		FootState.LockRelativeRotation = FootState.LockRotation;
 	}
 	else if (IsValid(BasedMovement.MovementBase))
 	{
@@ -437,17 +433,12 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
 		{
-			if (BasedMovement.HasRelativeRotation())
+			if (BasedMovement.HasRelativeLocation())
 			{
 				const auto BaseRotationInverted{BaseRotation.Inverse()};
 
 				FootState.LockRelativeLocation = BaseRotationInverted.RotateVector(FootTransform.GetLocation() - BaseLocation);
 				FootState.LockRelativeRotation = BaseRotationInverted * FootTransform.GetRotation();
-			}
-			else if (BasedMovement.HasRelativeLocation())
-			{
-				FootState.LockRelativeLocation = FootTransform.GetLocation() - BaseLocation;
-				FootState.LockRelativeRotation = FootTransform.GetRotation();
 			}
 			else if (IsValid(BasedMovement.MovementBase))
 			{
@@ -468,15 +459,10 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		}
 	}
 
-	if (BasedMovement.HasRelativeRotation())
+	if (BasedMovement.HasRelativeLocation())
 	{
 		FootState.LockLocation = BaseLocation + BaseRotation.RotateVector(FootState.LockRelativeLocation);
 		FootState.LockRotation = BaseRotation * FootState.LockRelativeRotation;
-	}
-	else if (BasedMovement.HasRelativeLocation())
-	{
-		FootState.LockLocation = BaseLocation + FootState.LockRelativeLocation;
-		FootState.LockRotation = FootState.LockRelativeRotation;
 	}
 	else if (IsValid(BasedMovement.MovementBase))
 	{

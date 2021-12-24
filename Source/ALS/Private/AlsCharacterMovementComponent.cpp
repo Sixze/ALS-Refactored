@@ -123,7 +123,22 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	JumpOffJumpZFactor = 0.0f;
 
 	bAllowPhysicsRotationDuringAnimRootMotion = true;
+	bIgnoreBaseRotation = true; // bIgnoreBaseRotation == false is not supported.
 }
+
+#if WITH_EDITOR
+bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) const
+{
+	auto bCanEditChange{Super::CanEditChange(Property)};
+
+	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation))
+	{
+		bCanEditChange = false;
+	}
+
+	return bCanEditChange;
+}
+#endif
 
 void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
 {

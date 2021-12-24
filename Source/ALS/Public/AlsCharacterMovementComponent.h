@@ -102,6 +102,10 @@ public:
 public:
 	UAlsCharacterMovementComponent();
 
+#if WITH_EDITOR
+	virtual bool CanEditChange(const FProperty* Property) const override;
+#endif
+
 	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
 
 protected:
@@ -110,7 +114,6 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-public:
 	virtual float GetMaxAcceleration() const override;
 
 	virtual float GetMaxBrakingDeceleration() const override;
