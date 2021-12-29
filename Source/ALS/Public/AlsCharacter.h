@@ -2,11 +2,7 @@
 
 #include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
-#include "Settings/AlsInAirRotationMode.h"
 #include "Settings/AlsMantlingSettings.h"
-#include "Settings/AlsMovementSettings.h"
-#include "Settings/AlsRagdollingSettings.h"
-#include "Settings/AlsRollingSettings.h"
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
@@ -18,8 +14,9 @@
 
 #include "AlsCharacter.generated.h"
 
-enum class EAlsMantlingType : uint8;
 class UAlsCharacterMovementComponent;
+class UAlsCharacterSettings;
+class UAlsMovementSettings;
 class UAlsAnimationInstance;
 
 UCLASS()
@@ -27,62 +24,36 @@ class ALS_API AAlsCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-protected:
+private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
 	UAlsCharacterMovementComponent* AlsCharacterMovement;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess, ClampMin = 0))
-	float MovingSpeedThreshold{50.0f};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
+	UAlsCharacterSettings* Settings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bSprintHasPriorityOverAiming;
+	UAlsMovementSettings* MovementSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bRotateToVelocityWhenSprinting;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	EAlsInAirRotationMode InAirRotationMode;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	bool bAllowAimingWhenInAir{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
-		Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
 	EAlsStance DesiredStance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
-		Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
 	EAlsGait DesiredGait{EAlsGait::Running};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicate_DesiredAiming", Meta = (AllowPrivateAccess))
 	bool bDesiredAiming;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
-		Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
 	EAlsRotationMode DesiredRotationMode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated,
-		Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
 	EAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
 	FGameplayTag OverlayMode;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", DisplayName = "Mantling Settings")
-	FAlsGeneralMantlingSettings GeneralMantlingSettings;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	FAlsRagdollingSettings RagdollingSettings;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	FAlsRollingSettings RollingSettings;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	UAlsMovementSettings* MovementSettings;
-
-private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Instanced, Meta = (AllowPrivateAccess))
 	UAlsAnimationInstance* AlsAnimationInstance;
 

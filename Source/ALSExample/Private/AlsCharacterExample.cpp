@@ -8,6 +8,7 @@ AAlsCharacterExample::AAlsCharacterExample()
 {
 	AlsCamera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("AlsCamera"));
 	AlsCamera->SetupAttachment(GetMesh());
+	AlsCamera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 }
 
 void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)

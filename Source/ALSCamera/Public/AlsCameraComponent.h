@@ -2,60 +2,12 @@
 
 #include "Camera/CameraTypes.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 
 #include "AlsCameraComponent.generated.h"
 
+class UAlsCameraSettings;
 class AAlsCharacter;
-
-USTRUCT(BlueprintType)
-struct ALSCAMERA_API FAlsFirstPersonCameraSettings
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360))
-	float Fov{90.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName CameraSocket{TEXT("FirstPersonCamera")};
-};
-
-USTRUCT(BlueprintType)
-struct ALSCAMERA_API FAlsThirdPersonCameraSettings
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360))
-	float Fov{90.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FirstPivotSocket{UAlsConstants::RootBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName SecondPivotSocket{UAlsConstants::HeadBone()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float TraceRadius{15.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<ETraceTypeQuery> TraceChannel{UEngineTypes::ConvertToTraceType(ECC_Visibility)};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LeftTraceShoulderSocket{TEXT("ThirdPersonTraceShoulderLeft")};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RightTraceShoulderSocket{TEXT("ThirdPersonTraceShoulderRight")};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector TraceOverrideOffset{0.0f, 0.0f, 40.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowTraceDistanceSmoothing{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "bAllowTraceDistanceSmoothing"))
-	float TraceDistanceInterpolationSpeed{3.0f};
-};
 
 UCLASS()
 class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
@@ -63,24 +15,11 @@ class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsFirstPersonCameraSettings FirstPersonSettings;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	UAlsCameraSettings* Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsThirdPersonCameraSettings ThirdPersonSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess))
-	FPostProcessSettings PostProcessSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", AdvancedDisplay, Meta = (AllowPrivateAccess))
-	bool bUseLagSubstepping;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", AdvancedDisplay,
-		Meta = (AllowPrivateAccess, EditCondition = "bUseCameraLagSubstepping", ClampMin = 0.005, ClampMax = 0.5))
-	float LagSubstepDeltaTime{1.0f / 60.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
@@ -112,10 +51,6 @@ private:
 public:
 	UAlsCameraComponent();
 
-#if WITH_EDITORONLY_DATA
-	virtual void Serialize(FArchive& Archive) override;
-#endif
-
 	virtual void OnRegister() override;
 
 	virtual void Activate(bool bReset) override;
@@ -127,8 +62,6 @@ public:
 	float GetPostProcessWeight() const;
 
 	void SetPostProcessWeight(bool NewPostProcessWeight);
-
-	FPostProcessSettings& GetPostProcessSettingsMutable();
 
 	bool IsRightShoulder() const;
 
@@ -187,11 +120,6 @@ inline float UAlsCameraComponent::GetPostProcessWeight() const
 inline void UAlsCameraComponent::SetPostProcessWeight(const bool NewPostProcessWeight)
 {
 	PostProcessWeight = UAlsMath::Clamp01(NewPostProcessWeight);
-}
-
-inline FPostProcessSettings& UAlsCameraComponent::GetPostProcessSettingsMutable()
-{
-	return PostProcessSettings;
 }
 
 inline bool UAlsCameraComponent::IsRightShoulder() const

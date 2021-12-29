@@ -2,13 +2,6 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
-#include "Settings/AlsDynamicTransitionSettings.h"
-#include "Settings/AlsFeetSettings.h"
-#include "Settings/AlsGeneralAnimationSettings.h"
-#include "Settings/AlsInAirSettings.h"
-#include "Settings/AlsMovementAnimationSettings.h"
-#include "Settings/AlsRotateInPlaceSettings.h"
-#include "Settings/AlsTurnInPlaceSettings.h"
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsMovementDirection.h"
@@ -28,6 +21,7 @@
 
 #include "AlsAnimationInstance.generated.h"
 
+class UAlsAnimationInstanceSettings;
 class AAlsCharacter;
 
 UCLASS()
@@ -37,25 +31,7 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsGeneralAnimationSettings GeneralSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsFeetSettings FeetSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsMovementAnimationSettings MovementSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsRotateInPlaceSettings RotateInPlaceSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsGeneralTurnInPlaceSettings TurnInPlaceSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsDynamicTransitionSettings DynamicTransitionSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	FAlsInAirSettings InAirSettings;
+	UAlsAnimationInstanceSettings* Settings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
@@ -135,9 +111,9 @@ private:
 	FTimerHandle JumpResetTimer;
 
 public:
-	UAlsAnimationInstance();
-
 	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeBeginPlay() override;
 
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
@@ -335,18 +311,4 @@ inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewM
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)
 {
 	MovementState.HipsDirection = NewDirection;
-}
-
-inline UAnimSequenceBase* UAlsAnimationInstance::SelectDynamicTransitionForLeftFoot() const
-{
-	return Stance.IsCrouching()
-		       ? DynamicTransitionSettings.CrouchingTransitionLeftAnimation
-		       : DynamicTransitionSettings.StandingTransitionLeftAnimation;
-}
-
-inline UAnimSequenceBase* UAlsAnimationInstance::SelectDynamicTransitionForRightFoot() const
-{
-	return Stance.IsCrouching()
-		       ? DynamicTransitionSettings.CrouchingTransitionRightAnimation
-		       : DynamicTransitionSettings.StandingTransitionRightAnimation;
 }

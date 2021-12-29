@@ -10,6 +10,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "RootMotionSource/AlsRootMotionSource_Mantling.h"
+#include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
@@ -18,13 +19,13 @@
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
 	return LocomotionMode == EAlsLocomotionMode::Grounded &&
-	       TryStartMantling(GeneralMantlingSettings.GroundedTrace);
+	       TryStartMantling(Settings->Mantling.GroundedTrace);
 }
 
 bool AAlsCharacter::TryStartMantlingInAir()
 {
 	return LocomotionMode == EAlsLocomotionMode::InAir && IsLocallyControlled() &&
-	       TryStartMantling(GeneralMantlingSettings.InAirTrace);
+	       TryStartMantling(Settings->Mantling.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart() const
@@ -34,7 +35,7 @@ bool AAlsCharacter::IsMantlingAllowedToStart() const
 
 bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
-	if (!GeneralMantlingSettings.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
+	if (!Settings->Mantling.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
 		return false;
 	}
@@ -48,7 +49,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		ForwardTraceAngle = LocomotionState.bHasInput
 			                    ? LocomotionState.VelocityYawAngle +
 			                      FMath::ClampAngle(LocomotionState.InputYawAngle - LocomotionState.VelocityYawAngle,
-			                                        -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle)
+			                                        -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle)
 			                    : LocomotionState.VelocityYawAngle;
 	}
 	else
@@ -59,13 +60,13 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 
 	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - ActorRotation.Yaw};
-	if (FMath::Abs(ForwardTraceDeltaAngle) > GeneralMantlingSettings.TraceAngleThreshold)
+	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
 	}
 
 	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : GeneralMantlingSettings.MantlingTraceObjectTypes)
+	for (const auto ObjectType : Settings->Mantling.MantlingTraceObjectTypes)
 	{
 		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
 	}
@@ -73,7 +74,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirection2D(
 			ActorRotation.Yaw +
-			FMath::ClampAngle(ForwardTraceDeltaAngle, -GeneralMantlingSettings.MaxReachAngle, GeneralMantlingSettings.MaxReachAngle))
+			FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -113,7 +114,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	if (!ForwardTraceHit.IsValidBlockingHit() ||
 	    !IsValid(TargetPrimitive) ||
-	    TargetPrimitive->GetComponentVelocity().SizeSquared() > FMath::Square(GeneralMantlingSettings.TargetPrimitiveSpeedThreshold) ||
+	    TargetPrimitive->GetComponentVelocity().SizeSquared() > FMath::Square(Settings->Mantling.TargetPrimitiveSpeedThreshold) ||
 	    !TargetPrimitive->CanCharacterStepUp(this) ||
 	    GetCharacterMovement()->IsWalkable(ForwardTraceHit))
 	{
@@ -574,7 +575,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	// half of the capsule from going through the floor when the ragdoll is laying on the ground.
 
 	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : RagdollingSettings.GroundTraceObjectTypes)
+	for (const auto ObjectType : Settings->Ragdolling.GroundTraceObjectTypes)
 	{
 		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
 	}
@@ -714,7 +715,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdollFacedUpward)
 {
-	return bRagdollFacedUpward ? RagdollingSettings.GetUpBackMontage : RagdollingSettings.GetUpFrontMontage;
+	return bRagdollFacedUpward ? Settings->Ragdolling.GetUpBackMontage : Settings->Ragdolling.GetUpFrontMontage;
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}
@@ -723,7 +724,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 {
 	if (LocomotionMode == EAlsLocomotionMode::Grounded)
 	{
-		StartRolling(PlayRate, RollingSettings.bRotateToInputOnStart && LocomotionState.bHasInput
+		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle
 			                       : GetActorRotation().Yaw);
 	}
@@ -767,7 +768,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 
 UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 {
-	return RollingSettings.Montage;
+	return Settings->Rolling.Montage;
 }
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
@@ -808,7 +809,7 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 
 	auto TargetRotation{GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};
 
-	if (RollingSettings.RotationInterpolationSpeed <= 0.0f)
+	if (Settings->Rolling.RotationInterpolationSpeed <= 0.0f)
 	{
 		TargetRotation.Yaw = LocomotionState.TargetYawAngle;
 
@@ -817,7 +818,7 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	else
 	{
 		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(TargetRotation.Yaw, LocomotionState.TargetYawAngle,
-		                                                     DeltaTime, RollingSettings.RotationInterpolationSpeed);
+		                                                     DeltaTime, Settings->Rolling.RotationInterpolationSpeed);
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
 	}

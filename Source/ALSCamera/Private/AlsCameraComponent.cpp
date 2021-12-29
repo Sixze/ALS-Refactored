@@ -1,6 +1,7 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraAnimationInstance.h"
+#include "AlsCameraSettings.h"
 #include "AlsCharacter.h"
 #include "DisplayDebugHelpers.h"
 #include "DrawDebugHelpers.h"
@@ -20,18 +21,6 @@ UAlsCameraComponent::UAlsCameraComponent()
 	AnimClass = UAlsCameraAnimationInstance::StaticClass();
 }
 
-#if WITH_EDITORONLY_DATA
-void UAlsCameraComponent::Serialize(FArchive& Archive)
-{
-	Super::Serialize(Archive);
-
-	if (Archive.IsLoading())
-	{
-		PostProcessSettings.OnAfterLoad();
-	}
-}
-#endif
-
 void UAlsCameraComponent::OnRegister()
 {
 	AlsCharacter = Cast<AAlsCharacter>(GetOwner());
@@ -49,14 +38,19 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 	Super::Activate(bReset);
 
-	TickCamera(0.0f, false);
+	if (IsValid(GetAnimInstance()) && IsValid(Settings) && IsValid(AlsCharacter))
+	{
+		TickCamera(0.0f, false);
+	}
 }
 
 void UAlsCameraComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	check(IsValid(GetAnimInstance()));
+	check(IsValid(Settings));
+	check(IsValid(AlsCharacter));
 
-	ensure(IsValid(SkeletalMesh) && IsValid(AlsCharacter));
+	Super::BeginPlay();
 }
 
 void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -68,23 +62,23 @@ void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick 
 
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 {
-	return AlsCharacter->GetMesh()->GetSocketLocation(FirstPersonSettings.CameraSocket);
+	return AlsCharacter->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocket);
 }
 
 FTransform UAlsCameraComponent::GetThirdPersonPivotTransform() const
 {
 	return {
 		GetComponentRotation(),
-		(AlsCharacter->GetMesh()->GetSocketLocation(ThirdPersonSettings.FirstPivotSocket) +
-		 AlsCharacter->GetMesh()->GetSocketLocation(ThirdPersonSettings.SecondPivotSocket)) * 0.5f
+		(AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocket) +
+		 AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocket)) * 0.5f
 	};
 }
 
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
 {
 	return AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder
-		                                                  ? ThirdPersonSettings.RightTraceShoulderSocket
-		                                                  : ThirdPersonSettings.LeftTraceShoulderSocket);
+		                                                  ? Settings->ThirdPerson.RightTraceShoulderSocket
+		                                                  : Settings->ThirdPerson.LeftTraceShoulderSocket);
 }
 
 void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
@@ -93,20 +87,16 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 	ViewInfo.Rotation = CameraRotation;
 	ViewInfo.FOV = CameraFov;
 
-	ViewInfo.PostProcessBlendWeight = PostProcessWeight;
-	if (PostProcessWeight > 0.0f)
+	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
+
+	if (ViewInfo.PostProcessBlendWeight)
 	{
-		ViewInfo.PostProcessSettings = PostProcessSettings;
+		ViewInfo.PostProcessSettings = Settings->PostProcess;
 	}
 }
 
 void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag)
 {
-	if (!IsValid(AlsCharacter) || !IsValid(GetAnimInstance()))
-	{
-		return;
-	}
-
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraShapesDisplayName())};
 #else
@@ -135,7 +125,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 		PivotLocation = PivotTargetLocation;
 
 		CameraLocation = GetFirstPersonCameraLocation();
-		CameraFov = FirstPersonSettings.Fov;
+		CameraFov = Settings->FirstPerson.Fov;
 		return;
 	}
 
@@ -191,12 +181,12 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	if (FirstPersonOverride <= 0.0f)
 	{
 		CameraLocation = CameraResultLocation;
-		CameraFov = ThirdPersonSettings.Fov;
+		CameraFov = Settings->ThirdPerson.Fov;
 	}
 	else
 	{
 		CameraLocation = FMath::Lerp(CameraResultLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
-		CameraFov = FMath::Lerp(ThirdPersonSettings.Fov, FirstPersonSettings.Fov, FirstPersonOverride);
+		CameraFov = FMath::Lerp(Settings->ThirdPerson.Fov, Settings->FirstPerson.Fov, FirstPersonOverride);
 	}
 }
 
@@ -210,7 +200,9 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	const auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve())};
 
-	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || RotationLag <= 0.0f)
+	if (!Settings->CameraLagSubstepping.bUseLagSubstepping ||
+	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
+	    RotationLag <= 0.0f)
 	{
 		return UAlsMath::ExponentialDecay(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
 	}
@@ -223,7 +215,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
-		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
+		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
 		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			NewCameraRotation = FMath::RInterpTo(NewCameraRotation, CameraInitialRotation + SubstepRotationSpeed * SubstepTime,
@@ -253,7 +245,9 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve())};
 
 	// ReSharper disable once CppRedundantParentheses
-	if (!bUseLagSubstepping || DeltaTime <= LagSubstepDeltaTime || (LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f))
+	if (Settings->CameraLagSubstepping.bUseLagSubstepping ||
+	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
+	    (LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f))
 	{
 		return CameraYawRotation.RotateVector({
 			UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
@@ -269,7 +263,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
-		const auto SubstepTime{SubstepNumber * LagSubstepDeltaTime};
+		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
 		if (SubstepTime < DeltaTime - SMALL_NUMBER)
 		{
 			const auto SubstepRelativePivotTargetLocation{RelativePivotInitialLagLocation + SubstepMovementSpeed * SubstepTime};
@@ -332,14 +326,14 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	auto TraceStart{
 		FMath::Lerp(
 			GetThirdPersonTraceStartLocation(),
-			PivotTargetLocation + PivotOffset + ThirdPersonSettings.TraceOverrideOffset,
+			PivotTargetLocation + PivotOffset + Settings->ThirdPerson.TraceOverrideOffset,
 			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurve())))
 	};
 
 	const auto TraceEnd{CameraTargetLocation};
 
-	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(ThirdPersonSettings.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere(ThirdPersonSettings.TraceRadius)};
+	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius)};
 
 	auto TraceResult{TraceEnd};
 
@@ -367,14 +361,14 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraTraces)
 	{
-		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, ThirdPersonSettings.TraceRadius,
+		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius,
 		                                  Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
 	}
 #endif
 
 	// Apply trace distance smoothing.
 
-	if (!ThirdPersonSettings.bAllowTraceDistanceSmoothing || !bAllowLag)
+	if (!Settings->ThirdPerson.bAllowTraceDistanceSmoothing || !bAllowLag)
 	{
 		NewTraceDistanceRatio = 1.0f;
 		return TraceResult;
@@ -394,7 +388,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		                        ? TargetTraceDistanceRatio
 		                        : UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
-		                                                     ThirdPersonSettings.TraceDistanceInterpolationSpeed);
+		                                                     Settings->ThirdPerson.TraceDistanceInterpolationSpeed);
 
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }
@@ -405,8 +399,8 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 
 	constexpr auto Epsilon{1.0f};
 
-	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(ThirdPersonSettings.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere(ThirdPersonSettings.TraceRadius + Epsilon)};
+	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius + Epsilon)};
 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.Num() <= 0)
@@ -477,7 +471,7 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
-	                                                 FCollisionShape::MakeSphere(ThirdPersonSettings.TraceRadius),
+	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 
