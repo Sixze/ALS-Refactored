@@ -250,13 +250,15 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	if (IsSpineRotationAllowed())
 	{
-		ViewState.SpineYawAngle = ViewState.YawAngle;
+		ViewState.SpineYawAngle = ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			                          ? ViewState.YawAngle - 360.0f
+			                          : ViewState.YawAngle;
 	}
 
 	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
 	const auto AimManualAmount{GetCurveValueClamped01(UAlsConstants::AimManualCurve())};
 
-	ViewState.SpineYawAngle *= AimAllowedAmount * AimManualAmount;
+	ViewState.SpineYawAngle = FRotator::NormalizeAxis(ViewState.SpineYawAngle * AimAllowedAmount * AimManualAmount);
 	ViewState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
 }
 
@@ -952,33 +954,33 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 	// Choose settings on the turn angle and stance.
 
-	FAlsTurnInPlaceSettings* TurnInPlaceSettings;
+	FAlsTurnInPlaceSettings* TurnInPlaceSettings{nullptr};
 	if (Stance.IsStanding())
 	{
 		if (FMath::Abs(TurnAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
-			TurnInPlaceSettings = TurnAngle < 0.0f
+			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? &Settings->TurnInPlace.StandingTurn90Left
 				                      : &Settings->TurnInPlace.StandingTurn90Right;
 		}
 		else
 		{
-			TurnInPlaceSettings = TurnAngle < 0.0f
+			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? &Settings->TurnInPlace.StandingTurn180Left
 				                      : &Settings->TurnInPlace.StandingTurn180Right;
 		}
 	}
-	else
+	else if (Stance.IsCrouching())
 	{
 		if (FMath::Abs(TurnAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
-			TurnInPlaceSettings = TurnAngle < 0.0f
+			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? &Settings->TurnInPlace.CrouchingTurn90Left
 				                      : &Settings->TurnInPlace.CrouchingTurn90Right;
 		}
 		else
 		{
-			TurnInPlaceSettings = TurnAngle < 0.0f
+			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? &Settings->TurnInPlace.CrouchingTurn180Left
 				                      : &Settings->TurnInPlace.CrouchingTurn180Right;
 		}
@@ -986,7 +988,9 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 	// If the animation is not playing or set to be overriden, play the turn animation as a dynamic montage.
 
-	if (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(TurnInPlaceSettings->Animation, UAlsConstants::TurnInPlaceSlot()))
+	if (TurnInPlaceSettings == nullptr ||
+	    // ReSharper disable once CppRedundantParentheses
+	    (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(TurnInPlaceSettings->Animation, UAlsConstants::TurnInPlaceSlot())))
 	{
 		return;
 	}
@@ -996,13 +1000,11 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 	// Scale the rotation yaw delta (gets scaled in animation graph) to compensate for play rate and turn angle (if allowed).
 
+	TurnInPlaceState.PlayRate = TurnInPlaceSettings->PlayRate * PlayRateScale;
+
 	if (TurnInPlaceSettings->bScalePlayRateByAnimatedTurnAngle)
 	{
-		TurnInPlaceState.PlayRate = TurnInPlaceSettings->PlayRate * PlayRateScale * TurnAngle / TurnInPlaceSettings->AnimatedTurnAngle;
-	}
-	else
-	{
-		TurnInPlaceState.PlayRate = TurnInPlaceSettings->PlayRate * PlayRateScale;
+		TurnInPlaceState.PlayRate *= FMath::Abs(TurnAngle / TurnInPlaceSettings->AnimatedTurnAngle);
 	}
 
 	TurnInPlaceState.bDisableFootLock = Settings->TurnInPlace.bDisableFootLock;

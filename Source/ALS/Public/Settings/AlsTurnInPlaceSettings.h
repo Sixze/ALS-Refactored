@@ -18,7 +18,7 @@ struct ALS_API FAlsTurnInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bScalePlayRateByAnimatedTurnAngle{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
 	float AnimatedTurnAngle{0.0f};
 };
 

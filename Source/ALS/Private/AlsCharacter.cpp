@@ -759,10 +759,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > Settings->MovingSpeedThreshold;
 
-	const auto NewAcceleration{(LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime};
-	LocomotionState.Acceleration = NewAcceleration.SizeSquared() > SMALL_NUMBER || IsLocallyControlled()
-		                               ? NewAcceleration
-		                               : LocomotionState.Acceleration * 0.5f;
+	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 
 	RefreshLocomotionLocationAndRotation();
 }

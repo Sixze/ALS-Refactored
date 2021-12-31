@@ -541,11 +541,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}
 
-	const auto RootBoneVelocity{GetMesh()->GetPhysicsLinearVelocity(UAlsConstants::RootBone())};
-
-	RagdollingState.RootBoneVelocity = RootBoneVelocity.SizeSquared() > SMALL_NUMBER || IsLocallyControlled()
-		                                   ? RootBoneVelocity
-		                                   : RagdollingState.RootBoneVelocity * 0.5f;
+	RagdollingState.RootBoneVelocity = GetMesh()->GetPhysicsLinearVelocity(UAlsConstants::RootBone());
 
 	// Use the velocity to scale the ragdoll's joint strength for physical animation.
 
