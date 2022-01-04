@@ -2,7 +2,6 @@
 
 #include "AnimGraphNode_BlendListBase.h"
 #include "Node/AlsAnimNode_GameplayTagsBlend.h"
-
 #include "AlsAnimGraphNode_GameplayTagsBlend.generated.h"
 
 UCLASS()

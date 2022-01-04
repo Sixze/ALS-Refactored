@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AIController.h"
-
 #include "AlsAiController.generated.h"
 
 UCLASS()

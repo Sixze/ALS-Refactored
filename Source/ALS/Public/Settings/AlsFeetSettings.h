@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Engine/EngineTypes.h"
-
 #include "AlsFeetSettings.generated.h"
 
 class UCurveFloat;

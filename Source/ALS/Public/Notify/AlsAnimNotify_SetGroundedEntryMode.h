@@ -2,7 +2,6 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-
 #include "AlsAnimNotify_SetGroundedEntryMode.generated.h"
 
 UCLASS(DisplayName = "Als Set Grounded Entry Mode Animation Notify")

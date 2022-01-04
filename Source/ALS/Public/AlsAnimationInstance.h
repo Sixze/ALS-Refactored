@@ -18,7 +18,6 @@
 #include "State/Structures/AlsRotateInPlaceState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
 #include "State/Structures/AlsViewAnimationState.h"
-
 #include "AlsAnimationInstance.generated.h"
 
 class UAlsAnimationInstanceSettings;

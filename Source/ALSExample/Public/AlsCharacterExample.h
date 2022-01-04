@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AlsCharacter.h"
-
 #include "AlsCharacterExample.generated.h"
 
 class UAlsCameraComponent;

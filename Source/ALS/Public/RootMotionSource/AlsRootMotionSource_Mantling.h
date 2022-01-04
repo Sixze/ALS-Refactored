@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "GameFramework/RootMotionSource.h"
-
 #include "AlsRootMotionSource_Mantling.generated.h"
 
 struct FAlsMantlingParameters;

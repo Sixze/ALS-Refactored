@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Units/RigUnit.h"
-
 #include "AlsRigUnit_Math.generated.h"
 
 USTRUCT(Meta = (Abstract, NodeColor = "0.05 0.25 0.05"))

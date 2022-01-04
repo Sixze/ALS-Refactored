@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "AnimationModifier.h"
-
 #include "AlsAnimationModifier_CopyCurves.generated.h"
 
 UCLASS(DisplayName = "Als Copy Curves Animation Modifier")

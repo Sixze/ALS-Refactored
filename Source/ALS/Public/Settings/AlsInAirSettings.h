@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Engine/EngineTypes.h"
-
 #include "AlsInAirSettings.generated.h"
 
 class UCurveFloat;

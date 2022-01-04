@@ -4,7 +4,6 @@
 #include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
-
 #include "AlsAnimNotifyState_EarlyBlendOut.generated.h"
 
 class UAnimMontage;

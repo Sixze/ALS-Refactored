@@ -2,7 +2,6 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-
 #include "AlsAnimNotifyState_SetLocomotionAction.generated.h"
 
 UCLASS(DisplayName = "Als Set Locomotion Action Animation Notify State")

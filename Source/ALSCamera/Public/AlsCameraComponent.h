@@ -3,7 +3,6 @@
 #include "Camera/CameraTypes.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Utility/AlsMath.h"
-
 #include "AlsCameraComponent.generated.h"
 
 class UAlsCameraSettings;

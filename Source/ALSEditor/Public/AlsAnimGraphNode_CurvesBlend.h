@@ -2,7 +2,6 @@
 
 #include "AnimGraphNode_BlendListBase.h"
 #include "Node/AlsAnimNode_CurvesBlend.h"
-
 #include "AlsAnimGraphNode_CurvesBlend.generated.h"
 
 UCLASS()

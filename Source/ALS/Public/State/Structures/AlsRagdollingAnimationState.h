@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Animation/PoseSnapshot.h"
-
 #include "AlsRagdollingAnimationState.generated.h"
 
 USTRUCT(BlueprintType)

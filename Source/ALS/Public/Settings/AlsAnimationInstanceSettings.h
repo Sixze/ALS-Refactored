@@ -8,7 +8,6 @@
 #include "AlsRotateInPlaceSettings.h"
 #include "AlsTurnInPlaceSettings.h"
 #include "Engine/DataAsset.h"
-
 #include "AlsAnimationInstanceSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

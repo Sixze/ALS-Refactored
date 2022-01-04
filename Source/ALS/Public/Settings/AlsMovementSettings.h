@@ -4,7 +4,6 @@
 #include "State/Enumerations/AlsGait.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
-
 #include "AlsMovementSettings.generated.h"
 
 class UCurveVector;

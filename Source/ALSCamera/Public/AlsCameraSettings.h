@@ -4,7 +4,6 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/Scene.h"
 #include "Utility/AlsConstants.h"
-
 #include "AlsCameraSettings.generated.h"
 
 USTRUCT(BlueprintType)

@@ -2,7 +2,6 @@
 
 #include "AnimationModifier.h"
 #include "Utility/AlsConstants.h"
-
 #include "AlsAnimationModifier_CreateLayeringCurves.generated.h"
 
 UCLASS(DisplayName = "Als Create Layering Curves Animation Modifier")

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Animation/AnimNodeBase.h"
-
 #include "AlsAnimNode_CurvesBlend.generated.h"
 
 UENUM(BlueprintType)

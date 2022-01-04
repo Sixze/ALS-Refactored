@@ -3,7 +3,6 @@
 #include "GameplayTagContainer.h"
 #include "Engine/EngineTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-
 #include "AlsUtility.generated.h"
 
 class ACharacter;

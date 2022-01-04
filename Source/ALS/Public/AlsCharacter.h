@@ -11,7 +11,6 @@
 #include "State/Structures/AlsLocomotionState.h"
 #include "State/Structures/AlsRagdollingState.h"
 #include "State/Structures/AlsViewState.h"
-
 #include "AlsCharacter.generated.h"
 
 class UAlsCharacterMovementComponent;

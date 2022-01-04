@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Kismet/KismetMathLibrary.h"
-
 #include "AlsFeetState.generated.h"
 
 class UPhysicalMaterial;

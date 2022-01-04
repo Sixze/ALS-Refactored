@@ -7,7 +7,6 @@
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
-
 #include "AlsCameraAnimationInstance.generated.h"
 
 class AAlsCharacter;

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Animation/AnimMontage.h"
-
 #include "AlsRollingSettings.generated.h"
 
 USTRUCT(BlueprintType)

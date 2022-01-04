@@ -4,7 +4,6 @@
 #include "Chaos/ChaosEngineInterface.h"
 #include "Engine/DataAsset.h"
 #include "Engine/EngineTypes.h"
-
 #include "AlsAnimNotify_FootstepEffects.generated.h"
 
 class USoundBase;

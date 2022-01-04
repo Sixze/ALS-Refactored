@@ -2,7 +2,6 @@
 
 #include "GameplayTagContainer.h"
 #include "AnimNodes/AnimNode_BlendListBase.h"
-
 #include "AlsAnimNode_GameplayTagsBlend.generated.h"
 
 USTRUCT()

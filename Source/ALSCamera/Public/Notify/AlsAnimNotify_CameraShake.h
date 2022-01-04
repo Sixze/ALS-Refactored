@@ -2,7 +2,6 @@
 
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Templates/SubclassOf.h"
-
 #include "AlsAnimNotify_CameraShake.generated.h"
 
 class UCameraShakeBase;

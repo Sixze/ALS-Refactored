@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "AnimationModifier.h"
-
 #include "AlsAnimationModifier_CalculateRotationYawSpeed.generated.h"
 
 // This animation modifier calculates the root rotation speed and is used to create the rotation yaw

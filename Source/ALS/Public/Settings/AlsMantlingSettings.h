@@ -3,7 +3,6 @@
 #include "Engine/DataAsset.h"
 #include "Engine/EngineTypes.h"
 #include "State/Enumerations/AlsMantlingType.h"
-
 #include "AlsMantlingSettings.generated.h"
 
 class UAnimMontage;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-
 #include "AlsCameraConstants.generated.h"
 
 UCLASS(Meta = (BlueprintThreadSafe))

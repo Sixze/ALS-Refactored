@@ -2,7 +2,6 @@
 
 #include "Kismet/KismetMathLibrary.h"
 #include "State/Enumerations/AlsMovementDirection.h"
-
 #include "AlsMath.generated.h"
 
 class UCapsuleComponent;

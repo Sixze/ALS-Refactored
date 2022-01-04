@@ -5,7 +5,6 @@
 #include "AlsRagdollingSettings.h"
 #include "AlsRollingSettings.h"
 #include "Engine/DataAsset.h"
-
 #include "AlsCharacterSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

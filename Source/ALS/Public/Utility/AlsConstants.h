@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-
 #include "AlsConstants.generated.h"
 
 UCLASS(Meta = (BlueprintThreadSafe))
