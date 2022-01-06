@@ -13,6 +13,11 @@
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
+UAlsAnimationInstance::UAlsAnimationInstance()
+{
+	bReceiveNotifiesFromLinkedInstances = true;
+}
+
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();

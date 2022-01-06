@@ -110,6 +110,8 @@ private:
 	FTimerHandle JumpResetTimer;
 
 public:
+	UAlsAnimationInstance();
+
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;
