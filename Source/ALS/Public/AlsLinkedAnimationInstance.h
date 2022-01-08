@@ -13,7 +13,4 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	UAlsAnimationInstance* Parent;
-
-public:
-	UAlsLinkedAnimationInstance();
 };

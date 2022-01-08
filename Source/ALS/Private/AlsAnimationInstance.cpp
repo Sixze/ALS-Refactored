@@ -13,11 +13,6 @@
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
-UAlsAnimationInstance::UAlsAnimationInstance()
-{
-	bReceiveNotifiesFromLinkedInstances = true;
-}
-
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -60,6 +55,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
+	RefreshPose();
 	RefreshView(DeltaTime);
 
 	RefreshFeet(DeltaTime);
@@ -206,10 +202,15 @@ void UAlsAnimationInstance::RefreshLayering()
 
 	LayeringState.LegsBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerLegsCurve());
 	LayeringState.LegsSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerLegsSlotCurve());
+}
 
-	LayeringState.PoseStandingBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseStandCurve());
-	LayeringState.PoseCrouchingBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseCrouchCurve());
-	LayeringState.PoseInAirBlendAmount = GetCurveValueClamped01(UAlsConstants::PoseAirCurve());
+void UAlsAnimationInstance::RefreshPose()
+{
+	PoseState.MovingAmount = GetCurveValueClamped01(UAlsConstants::PoseMovingCurve());
+	PoseState.StandingAmount = GetCurveValueClamped01(UAlsConstants::PoseStandingCurve());
+	PoseState.CrouchingAmount = GetCurveValueClamped01(UAlsConstants::PoseCrouchingCurve());
+	PoseState.GroundedAmount = GetCurveValueClamped01(UAlsConstants::PoseGroundedCurve());
+	PoseState.InAirAmount = GetCurveValueClamped01(UAlsConstants::PoseInAirCurve());
 }
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
@@ -702,7 +703,7 @@ float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 
 	return FMath::Lerp(StandingStrideBlend,
 	                   Settings->Movement.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
-	                   LayeringState.PoseCrouchingBlendAmount);
+	                   PoseState.CrouchingAmount);
 }
 
 float UAlsAnimationInstance::CalculateWalkRunBlendAmount() const

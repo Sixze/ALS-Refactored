@@ -14,6 +14,7 @@
 #include "State/Structures/AlsLeanState.h"
 #include "State/Structures/AlsLocomotionAnimationState.h"
 #include "State/Structures/AlsMovementState.h"
+#include "State/Structures/AlsPoseState.h"
 #include "State/Structures/AlsRagdollingAnimationState.h"
 #include "State/Structures/AlsRotateInPlaceState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
@@ -80,6 +81,9 @@ private:
 	FAlsLayeringState LayeringState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsPoseState PoseState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsViewAnimationState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
@@ -110,8 +114,6 @@ private:
 	FTimerHandle JumpResetTimer;
 
 public:
-	UAlsAnimationInstance();
-
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;
@@ -137,6 +139,8 @@ private:
 	void RefreshLocomotion(float DeltaTime);
 
 	void RefreshLayering();
+
+	void RefreshPose();
 
 	void RefreshView(float DeltaTime);
 

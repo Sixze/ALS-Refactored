@@ -288,6 +288,43 @@ public:
 		return Name;
 	}
 
+	// Pose Animation Curves
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseMovingCurve()
+	{
+		static const FName Name{TEXT("PoseMoving")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseStandingCurve()
+	{
+		static const FName Name{TEXT("PoseStanding")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseCrouchingCurve()
+	{
+		static const FName Name{TEXT("PoseCrouching")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseGroundedCurve()
+	{
+		static const FName Name{TEXT("PoseGrounded")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseInAirCurve()
+	{
+		static const FName Name{TEXT("PoseInAir")};
+		return Name;
+	}
+
 	// Feet Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
@@ -333,27 +370,6 @@ public:
 	}
 
 	// Other Animation Curves
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseStandCurve()
-	{
-		static const FName Name{TEXT("PoseStand")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseCrouchCurve()
-	{
-		static const FName Name{TEXT("PoseCrouch")};
-		return Name;
-	}
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseAirCurve()
-	{
-		static const FName Name{TEXT("PoseAir")};
-		return Name;
-	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& GaitAmountCurve()

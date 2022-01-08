@@ -1,0 +1,24 @@
+﻿#pragma once
+
+#include "AlsPoseState.generated.h"
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsPoseState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float MovingAmount{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float StandingAmount{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float CrouchingAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float GroundedAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float InAirAmount{0.0f};
+};

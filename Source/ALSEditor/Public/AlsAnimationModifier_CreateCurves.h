@@ -46,16 +46,18 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	TArray<FAlsAnimationCurve> Curves
 	{
+		{UAlsConstants::PoseMovingCurve()},
+		{UAlsConstants::PoseStandingCurve()},
+		{UAlsConstants::PoseCrouchingCurve()},
+		{UAlsConstants::PoseInAirCurve()},
+		{UAlsConstants::PoseGroundedCurve()},
+
 		{UAlsConstants::FootLeftIkCurve()},
 		{UAlsConstants::FootLeftLockCurve()},
 		{UAlsConstants::FootRightIkCurve()},
 		{UAlsConstants::FootRightLockCurve()},
 		{UAlsConstants::FootPlantedCurve()},
 		{UAlsConstants::FeetCrossingCurve()},
-
-		{UAlsConstants::PoseStandCurve()},
-		{UAlsConstants::PoseCrouchCurve()},
-		{UAlsConstants::PoseAirCurve()},
 
 		{UAlsConstants::GaitAmountCurve()},
 		{UAlsConstants::AllowTransitionsCurve()},
