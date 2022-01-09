@@ -284,7 +284,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		FeetState.Right.LockLocation = FVector::ZeroVector;
 	}
 
-	FeetState.FootPlanted = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
+	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
+	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurve());
 
 	FeetState.Left.IkAmount = GetCurveValueClamped01(UAlsConstants::FootLeftIkCurve());
 	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
@@ -613,6 +614,8 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const flo
 
 void UAlsAnimationInstance::RefreshMovement(const float DeltaTime)
 {
+	MovementState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurve()), -1.0f, 1.0f);
+
 	if (!LocomotionMode.IsGrounded() || !LocomotionState.bMoving)
 	{
 		return;

@@ -81,7 +81,10 @@ struct ALS_API FAlsFeetState
 	// foot is still in the air. The foot planted curve also determines which foot is planted (or
 	// about to plant). Positive values mean the right foot is planted, negative values mean the left.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
-	float FootPlanted{0.0f};
+	float FootPlantedAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float FeetCrossingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsFootState Left;

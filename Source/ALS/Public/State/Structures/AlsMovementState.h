@@ -39,6 +39,9 @@ struct ALS_API FAlsMovementState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EAlsHipsDirection HipsDirection = EAlsHipsDirection::Forward;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
+	float HipsDirectionLockAmount{0.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsVelocityBlendState VelocityBlend;
 
