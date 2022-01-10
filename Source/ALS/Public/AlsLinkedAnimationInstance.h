@@ -13,4 +13,9 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	UAlsAnimationInstance* Parent;
+
+public:
+	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeBeginPlay() override;
 };
