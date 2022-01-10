@@ -793,10 +793,11 @@ void UAlsAnimationInstance::PlayTransitionFromStandingIdleOnly(UAnimSequenceBase
 	}
 }
 
-void UAlsAnimationInstance::StopTransitionAndTurnInPlaceSlotAnimations(const float BlendOutTime)
+void UAlsAnimationInstance::StopTransitionAndTurnInPlaceAnimations(const float BlendOutTime)
 {
 	StopSlotAnimation(BlendOutTime, UAlsConstants::TransitionSlot());
-	StopSlotAnimation(BlendOutTime, UAlsConstants::TurnInPlaceSlot());
+	StopSlotAnimation(BlendOutTime, UAlsConstants::TurnInPlaceStandingSlot());
+	StopSlotAnimation(BlendOutTime, UAlsConstants::TurnInPlaceCrouchingSlot());
 }
 
 void UAlsAnimationInstance::RefreshDynamicTransitions()
@@ -964,8 +965,12 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	// Choose settings on the turn angle and stance.
 
 	FAlsTurnInPlaceSettings* TurnInPlaceSettings{nullptr};
+	FName TurnInPlaceSlotName;
+
 	if (Stance.IsStanding())
 	{
+		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceStandingSlot();
+
 		if (FMath::Abs(TurnAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
 			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
@@ -981,6 +986,8 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 	}
 	else if (Stance.IsCrouching())
 	{
+		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceCrouchingSlot();
+
 		if (FMath::Abs(TurnAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
 			TurnInPlaceSettings = TurnAngle <= 0.0f || TurnAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
@@ -999,12 +1006,12 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 	if (TurnInPlaceSettings == nullptr ||
 	    // ReSharper disable once CppRedundantParentheses
-	    (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(TurnInPlaceSettings->Animation, UAlsConstants::TurnInPlaceSlot())))
+	    (!bAllowRestartIfPlaying && IsPlayingSlotAnimation(TurnInPlaceSettings->Animation, TurnInPlaceSlotName)))
 	{
 		return;
 	}
 
-	PlaySlotAnimationAsDynamicMontage(TurnInPlaceSettings->Animation, UAlsConstants::TurnInPlaceSlot(), 0.2f, 0.2f,
+	PlaySlotAnimationAsDynamicMontage(TurnInPlaceSettings->Animation, TurnInPlaceSlotName, 0.2f, 0.2f,
 	                                  TurnInPlaceSettings->PlayRate * PlayRateScale, 1, 0.0f, StartTime);
 
 	// Scale the rotation yaw delta (gets scaled in animation graph) to compensate for play rate and turn angle (if allowed).

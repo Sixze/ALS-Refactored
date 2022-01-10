@@ -220,7 +220,7 @@ public:
 	                                        float PlayRate = 1.0f, float StartTime = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void StopTransitionAndTurnInPlaceSlotAnimations(float BlendOutTime = 0.2f);
+	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);
 
 private:
 	void RefreshDynamicTransitions();

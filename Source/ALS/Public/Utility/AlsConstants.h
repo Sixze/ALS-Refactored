@@ -105,9 +105,16 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
-	static const FName& TurnInPlaceSlot()
+	static const FName& TurnInPlaceStandingSlot()
 	{
-		static const FName Name{TEXT("TurnInPlace")};
+		static const FName Name{TEXT("TurnInPlaceStanding")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
+	static const FName& TurnInPlaceCrouchingSlot()
+	{
+		static const FName Name{TEXT("TurnInPlaceCrouching")};
 		return Name;
 	}
 
