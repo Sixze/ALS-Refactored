@@ -199,9 +199,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void ActivatePivot();
 
-private:
-	void OnPivotResetTimerEnded();
-
 	// Transitions
 
 public:
@@ -228,8 +225,6 @@ private:
 	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
 	                           float PlayRate = 1.0f, float StartTime = 0.0f, float AllowanceDelayTime = 0.0f);
 
-	void OnDynamicTransitionAllowanceTimerEnded();
-
 	// Rotate In Place
 
 protected:
@@ -252,9 +247,6 @@ private:
 
 public:
 	void Jump();
-
-private:
-	void OnJumpResetTimerEnded();
 
 	// In Air
 

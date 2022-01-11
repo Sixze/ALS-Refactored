@@ -755,13 +755,12 @@ void UAlsAnimationInstance::ActivatePivot()
 
 	if (MovementState.bPivotActive)
 	{
-		GetWorld()->GetTimerManager().SetTimer(PivotResetTimer, this, &ThisClass::OnPivotResetTimerEnded, 0.1f, false);
+		GetWorld()->GetTimerManager().SetTimer(PivotResetTimer,
+		                                       FTimerDelegate::CreateWeakLambda(this, [&bPivotActive = MovementState.bPivotActive]
+		                                       {
+			                                       bPivotActive = false;
+		                                       }), 0.1f, false);
 	}
-}
-
-void UAlsAnimationInstance::OnPivotResetTimerEnded()
-{
-	MovementState.bPivotActive = false;
 }
 
 UAnimSequenceBase* UAlsAnimationInstance::SelectDynamicTransitionForLeftFoot() const
@@ -839,16 +838,14 @@ void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, 
 	{
 		bAllowDynamicTransitions = false;
 
-		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionsAllowanceTimer, this,
-		                                       &ThisClass::OnDynamicTransitionAllowanceTimerEnded, AllowanceDelayTime, false);
+		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionsAllowanceTimer,
+		                                       FTimerDelegate::CreateWeakLambda(this, [&bAllowDynamicTransitions = bAllowDynamicTransitions]
+		                                       {
+			                                       bAllowDynamicTransitions = true;
+		                                       }), AllowanceDelayTime, false);
 
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}
-}
-
-void UAlsAnimationInstance::OnDynamicTransitionAllowanceTimerEnded()
-{
-	bAllowDynamicTransitions = true;
 }
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
@@ -1031,12 +1028,11 @@ void UAlsAnimationInstance::Jump()
 	InAirState.bJumped = true;
 	InAirState.JumpPlayRate = UAlsMath::LerpClamped(1.2f, 1.5f, LocomotionState.Speed / 600.0f);
 
-	GetWorld()->GetTimerManager().SetTimer(JumpResetTimer, this, &ThisClass::OnJumpResetTimerEnded, 0.1f, false);
-}
-
-void UAlsAnimationInstance::OnJumpResetTimerEnded()
-{
-	InAirState.bJumped = false;
+	GetWorld()->GetTimerManager().SetTimer(JumpResetTimer,
+	                                       FTimerDelegate::CreateWeakLambda(this, [&bJumped = InAirState.bJumped]
+	                                       {
+		                                       bJumped = false;
+	                                       }), 0.1f, false);
 }
 
 void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)

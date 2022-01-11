@@ -2,6 +2,7 @@
 
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
+#include "TimerManager.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveVector.h"
@@ -496,6 +497,8 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 
+	GetWorldTimerManager().ClearTimer(RagdollingStopTimer);
+
 	RagdollingState.PullForce = 0.0f;
 
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
@@ -669,13 +672,19 @@ void AAlsCharacter::StopRagdollingImplementation()
 		return;
 	}
 
-	// Re-enable capsule collision and disable physics simulation on the mesh.
+	// Disable physics simulation of a mesh and enable capsule collision with a one
+	// frame delay to give the animation blueprint time to assume the final ragdoll pose.
 
-	GetMesh()->SetAllBodiesSimulatePhysics(false);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	GetWorldTimerManager().ClearTimer(RagdollingStopTimer);
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	RagdollingStopTimer = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
+	{
+		GetMesh()->SetAllBodiesSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		GetMesh()->SetCollisionObjectType(ECC_Pawn);
+
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}));
 
 	SetLocomotionAction(FGameplayTag::EmptyTag);
 

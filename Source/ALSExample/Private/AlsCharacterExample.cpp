@@ -91,8 +91,11 @@ void AAlsCharacterExample::InputSprintPressed()
 {
 	// Start the sprint with a slight delay to give the player enough time to start the roll with a double click instead.
 
-	GetWorldTimerManager().SetTimer(SprintStartTimer, this, &ThisClass::OnSprintStartTimerEnded,
-	                                0.1f, false);
+	GetWorldTimerManager().SetTimer(SprintStartTimer,
+	                                FTimerDelegate::CreateWeakLambda(this, [this]
+	                                {
+		                                SetDesiredGait(EAlsGait::Sprinting);
+	                                }), 0.1f, false);
 }
 
 void AAlsCharacterExample::InputSprintReleased()
@@ -105,11 +108,6 @@ void AAlsCharacterExample::InputSprintReleased()
 	{
 		SetDesiredGait(EAlsGait::Running);
 	}
-}
-
-void AAlsCharacterExample::OnSprintStartTimerEnded()
-{
-	SetDesiredGait(EAlsGait::Sprinting);
 }
 
 void AAlsCharacterExample::InputRoll()

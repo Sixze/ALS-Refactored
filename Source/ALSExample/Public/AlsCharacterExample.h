@@ -60,8 +60,6 @@ private:
 
 	void InputSprintReleased();
 
-	void OnSprintStartTimerEnded();
-
 	void InputRoll();
 
 	void InputWalk();

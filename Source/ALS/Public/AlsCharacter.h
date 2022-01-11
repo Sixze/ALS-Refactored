@@ -94,6 +94,8 @@ private:
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
+	FTimerHandle RagdollingStopTimer;
+
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
