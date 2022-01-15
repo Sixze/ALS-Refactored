@@ -12,25 +12,25 @@ struct ALS_API FAlsRootMotionSource_Mantling : public FRootMotionSource
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	UAlsMantlingSettings* MantlingSettings{nullptr};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	FVector_NetQuantize10 TargetRelativeLocation{ForceInit};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	FRotator TargetRelativeRotation{ForceInit};
 
-	UPROPERTY(EditAnywhere)
-	FVector_NetQuantize10 ActorLocationOffset{ForceInit};
+	UPROPERTY()
+	FVector_NetQuantize10 ActorFeetLocationOffset{ForceInit};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	FRotator ActorRotationOffset{ForceInit};
 
-	UPROPERTY(EditAnywhere, Meta = (ClampMin = 0))
+	UPROPERTY(Meta = (ClampMin = 0))
 	float MantlingHeight{0.0f};
 
 public:

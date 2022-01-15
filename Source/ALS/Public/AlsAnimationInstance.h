@@ -213,8 +213,8 @@ public:
 	                    float PlayRate = 1.0f, float StartTime = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
-	                                        float PlayRate = 1.0f, float StartTime = 0.0f);
+	void PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, float BlendInTime = 0.2f,
+	                                        float BlendOutTime = 0.2f, float PlayRate = 1.0f, float StartTime = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);

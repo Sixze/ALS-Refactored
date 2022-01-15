@@ -41,8 +41,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		return false;
 	}
 
-	auto ActorLocation{GetActorLocation()};
-	auto ActorRotation{GetActorRotation()};
+	const auto ActorLocation{GetActorLocation()};
+	const auto ActorYawAngle{GetActorRotation().Yaw};
 
 	float ForwardTraceAngle;
 	if (LocomotionState.bHasSpeed)
@@ -57,10 +57,10 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	{
 		ForwardTraceAngle = LocomotionState.bHasInput
 			                    ? LocomotionState.InputYawAngle
-			                    : ActorRotation.Yaw;
+			                    : ActorYawAngle;
 	}
 
-	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - ActorRotation.Yaw};
+	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - ActorYawAngle};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
@@ -74,7 +74,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirection2D(
-			ActorRotation.Yaw +
+			ActorYawAngle +
 			FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
 	};
 
@@ -87,9 +87,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto CapsuleRadius{Capsule->GetScaledCapsuleRadius()};
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
-	const auto CapsuleBottomLocation{
-		ActorLocation - GetActorQuat().RotateVector(FVector::UpVector) * CapsuleHalfHeight
-	};
+	const FVector CapsuleBottomLocation{ActorLocation.X, ActorLocation.Y, ActorLocation.Z - CapsuleHalfHeight};
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
 
@@ -138,12 +136,14 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto TargetLocationOffset{FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * TraceSettings.TargetLocationOffset};
 
 	const FVector DownwardTraceStart{
-		ForwardTraceHit.ImpactPoint.X - TargetLocationOffset.X, ForwardTraceHit.ImpactPoint.Y - TargetLocationOffset.Y,
+		ForwardTraceHit.ImpactPoint.X - TargetLocationOffset.X,
+		ForwardTraceHit.ImpactPoint.Y - TargetLocationOffset.Y,
 		CapsuleBottomLocation.Z + LedgeHeightDelta + 2.5f * TraceCapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST
 	};
 
 	const FVector DownwardTraceEnd{
-		DownwardTraceStart.X, DownwardTraceStart.Y,
+		DownwardTraceStart.X,
+		DownwardTraceStart.Y,
 		CapsuleBottomLocation.Z + TraceSettings.LedgeHeight.GetMin() + TraceCapsuleRadius - UCharacterMovementComponent::MAX_FLOOR_DIST
 	};
 
@@ -176,11 +176,14 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	const FVector TargetLocation{
-		DownwardTraceHit.ImpactPoint.X, DownwardTraceHit.ImpactPoint.Y,
-		DownwardTraceHit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST
+		DownwardTraceHit.ImpactPoint.X,
+		DownwardTraceHit.ImpactPoint.Y,
+		DownwardTraceHit.ImpactPoint.Z + UCharacterMovementComponent::MIN_FLOOR_DIST
 	};
 
-	if (GetWorld()->OverlapAnyTestByObjectType(TargetLocation, FQuat::Identity, ObjectQueryParameters,
+	const FVector TargetCapsuleLocation{TargetLocation.X, TargetLocation.Y, TargetLocation.Z + CapsuleHalfHeight};
+
+	if (GetWorld()->OverlapAnyTestByObjectType(TargetCapsuleLocation, FQuat::Identity, ObjectQueryParameters,
 	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
 	                                           {FreeSpaceTraceTag, false, this}))
 	{
@@ -195,8 +198,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
 			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
 
-			DrawDebugCapsule(Capsule->GetWorld(), TargetLocation, CapsuleHalfHeight, CapsuleRadius,
-			                 FQuat::Identity, FColor::Red, false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
+			DrawDebugCapsule(Capsule->GetWorld(), TargetCapsuleLocation, CapsuleHalfHeight,
+			                 CapsuleRadius, FQuat::Identity, FColor::Red, false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
 		}
 #endif
 
@@ -221,7 +224,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FAlsMantlingParameters Parameters;
 
 	Parameters.TargetPrimitive = TargetPrimitive;
-	Parameters.MantlingHeight = TargetLocation.Z - ActorLocation.Z;
+	Parameters.MantlingHeight = TargetLocation.Z - CapsuleBottomLocation.Z;
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
@@ -316,7 +319,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 			: FTransform{Parameters.TargetRelativeRotation, Parameters.TargetRelativeLocation}
 	};
 
-	const auto ActorLocationOffset{GetActorLocation() - TargetTransform.GetLocation()};
+	const auto ActorFeetLocationOffset{GetCharacterMovement()->GetActorFeetLocation() - TargetTransform.GetLocation()};
 	const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * GetActorQuat()};
 
 	// Clear the character movement mode and set the locomotion action to mantling.
@@ -340,7 +343,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	Mantling->TargetPrimitive = bUseRelativeLocation ? Parameters.TargetPrimitive : nullptr;
 	Mantling->TargetRelativeLocation = Parameters.TargetRelativeLocation;
 	Mantling->TargetRelativeRotation = Parameters.TargetRelativeRotation;
-	Mantling->ActorLocationOffset = ActorLocationOffset;
+	Mantling->ActorFeetLocationOffset = ActorFeetLocationOffset;
 	Mantling->ActorRotationOffset = ActorRotationOffset.Rotator();
 	Mantling->MantlingHeight = Parameters.MantlingHeight;
 

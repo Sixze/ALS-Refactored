@@ -2,7 +2,7 @@
 
 #include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacro.h"
 
@@ -57,7 +57,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(MantlingTime)};
 	if (BlendInAmount <= KINDA_SMALL_NUMBER)
 	{
-		LocationOffset = ActorLocationOffset;
+		LocationOffset = ActorFeetLocationOffset;
 		RotationOffset = ActorRotationOffset;
 	}
 	else
@@ -86,11 +86,11 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 			// Blend into the animation offset and final offset at the same time.
 			// Horizontal and vertical blends use different correction amounts.
 
-			LocationOffset.X = FMath::Lerp(ActorLocationOffset.X, AnimationLocationOffset.X, HorizontalCorrectionAmount) *
+			LocationOffset.X = FMath::Lerp(ActorFeetLocationOffset.X, AnimationLocationOffset.X, HorizontalCorrectionAmount) *
 			                   InterpolationAmount;
-			LocationOffset.Y = FMath::Lerp(ActorLocationOffset.Y, AnimationLocationOffset.Y, HorizontalCorrectionAmount) *
+			LocationOffset.Y = FMath::Lerp(ActorFeetLocationOffset.Y, AnimationLocationOffset.Y, HorizontalCorrectionAmount) *
 			                   InterpolationAmount;
-			LocationOffset.Z = FMath::Lerp(ActorLocationOffset.Z, AnimationLocationOffset.Z, VerticalCorrectionAmount) *
+			LocationOffset.Z = FMath::Lerp(ActorFeetLocationOffset.Z, AnimationLocationOffset.Z, VerticalCorrectionAmount) *
 			                   InterpolationAmount;
 
 			// Actor rotation offset must be normalized for this block of code to work properly.
@@ -103,7 +103,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 		if (BlendInAmount < 1.0f - KINDA_SMALL_NUMBER)
 		{
-			LocationOffset = FMath::Lerp<FVector>(ActorLocationOffset, LocationOffset, BlendInAmount);
+			LocationOffset = FMath::Lerp<FVector>(ActorFeetLocationOffset, LocationOffset, BlendInAmount);
 			RotationOffset = FMath::Lerp(ActorRotationOffset, RotationOffset, BlendInAmount);
 		}
 	}
@@ -115,8 +115,8 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	// Find the delta transform between the character and the target transform and divide by the delta time to get the velocity.
 
-	TargetTransform.AddToTranslation(-Character.GetActorLocation());
-	TargetTransform.ConcatenateRotation(Character.GetActorQuat().Inverse());
+	TargetTransform.AddToTranslation(-Movement.GetActorFeetLocation());
+	TargetTransform.ConcatenateRotation(Movement.UpdatedComponent->GetComponentQuat().Inverse());
 
 	RootMotionParams.Set(TargetTransform * ScalarRegister{1.0f / DeltaTime});
 	bSimulatedNeedsSmoothing = true;
@@ -140,7 +140,7 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	TargetRelativeRotation.NetSerialize(Archive, Map, bSuccessLocal);
 	bSuccess &= bSuccessLocal;
 
-	ActorLocationOffset.NetSerialize(Archive, Map, bSuccessLocal);
+	ActorFeetLocationOffset.NetSerialize(Archive, Map, bSuccessLocal);
 	bSuccess &= bSuccessLocal;
 
 	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
