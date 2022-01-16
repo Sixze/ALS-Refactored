@@ -37,8 +37,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	const auto PreviousLocomotionAction{LocomotionAction};
-
 	Stance = AlsCharacter->GetStance();
 	Gait = AlsCharacter->GetGait();
 	RotationMode = AlsCharacter->GetRotationMode();
@@ -46,12 +44,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	OverlayMode = AlsCharacter->GetOverlayMode();
 	LocomotionMode = AlsCharacter->GetLocomotionMode();
 	LocomotionAction = AlsCharacter->GetLocomotionAction();
-
-	if (PreviousLocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling &&
-	    LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling)
-	{
-		StopRagdolling();
-	}
 
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
@@ -70,7 +62,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshRagdolling();
 
 	SetPendingUpdate(false);
-	SetRotationYawSpeedChanged(true);
+	SetRecentlyUpdated(true);
 }
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
@@ -1147,6 +1139,11 @@ void UAlsAnimationInstance::StopRagdolling()
 	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
 	SnapshotPose(RagdollingState.FinalRagdollPose);
+}
+
+void UAlsAnimationInstance::FinalizeRagdolling()
+{
+	AlsCharacter->FinalizeRagdolling();
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

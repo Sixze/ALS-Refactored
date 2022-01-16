@@ -36,13 +36,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	AAlsCharacter* AlsCharacter;
 
-	// Used to indicate that the animation blueprint has not been updated for a long time
+	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may be incorrect (such as foot location used in foot locking).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bPendingUpdate;
 
+	// True if animation instance has been recently updated, false otherwise.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bRotationYawSpeedChanged{true};
+	bool bRecentlyUpdated{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
@@ -125,9 +126,9 @@ public:
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
 
-	bool IsRotationYawSpeedChanged() const;
+	bool IsRecentlyUpdated() const;
 
-	void SetRotationYawSpeedChanged(bool bChanged);
+	void SetRecentlyUpdated(bool bChanged);
 
 	EAlsRotationMode GetRotationMode() const;
 
@@ -262,7 +263,12 @@ private:
 private:
 	void RefreshRagdolling();
 
+public:
 	void StopRagdolling();
+
+private:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void FinalizeRagdolling();
 
 	// Utility
 
@@ -275,14 +281,14 @@ inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate
 	bPendingUpdate = bNewPendingUpdate;
 }
 
-inline bool UAlsAnimationInstance::IsRotationYawSpeedChanged() const
+inline bool UAlsAnimationInstance::IsRecentlyUpdated() const
 {
-	return bRotationYawSpeedChanged;
+	return bRecentlyUpdated;
 }
 
-inline void UAlsAnimationInstance::SetRotationYawSpeedChanged(const bool bChanged)
+inline void UAlsAnimationInstance::SetRecentlyUpdated(const bool bChanged)
 {
-	bRotationYawSpeedChanged = bChanged;
+	bRecentlyUpdated = bChanged;
 }
 
 inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const

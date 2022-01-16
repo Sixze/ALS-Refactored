@@ -1,8 +1,8 @@
 #include "AlsCharacter.h"
 
+#include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
-#include "TimerManager.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveVector.h"
@@ -476,6 +476,11 @@ void AAlsCharacter::StartRagdollingImplementation()
 		return;
 	}
 
+	if (!IsNetMode(NM_Client))
+	{
+		GetMesh()->bOnlyAllowAutonomousTickPose = false;
+	}
+
 	// Stop any active montages.
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
@@ -500,9 +505,8 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 
-	GetWorldTimerManager().ClearTimer(RagdollingStopTimer);
-
 	RagdollingState.PullForce = 0.0f;
+	RagdollingState.bPendingFinalization = false;
 
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
@@ -529,9 +533,9 @@ void AAlsCharacter::SetRagdollTargetLocation(const FVector& NewLocation)
 	}
 }
 
-void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector& NewTargetLocation)
+void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_NetQuantize& NewLocation)
 {
-	SetRagdollTargetLocation(NewTargetLocation);
+	SetRagdollTargetLocation(NewLocation);
 }
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
@@ -675,21 +679,39 @@ void AAlsCharacter::StopRagdollingImplementation()
 		return;
 	}
 
+	AlsAnimationInstance->StopRagdolling();
+
+	RagdollingState.bPendingFinalization = true;
+
+	SetLocomotionAction(FGameplayTag::EmptyTag);
+
+	OnRagdollingEnded();
+
+	if (RagdollingState.bGrounded &&
+	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
+	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	{
+		SetLocomotionAction(FAlsLocomotionActionTags::Get().GettingUp);
+	}
+}
+
+void AAlsCharacter::FinalizeRagdolling()
+{
+	if (!ensure(RagdollingState.bPendingFinalization))
+	{
+		return;
+	}
+
+	RagdollingState.bPendingFinalization = false;
+
 	// Disable physics simulation of a mesh and enable capsule collision with a one
 	// frame delay to give the animation blueprint time to assume the final ragdoll pose.
 
-	GetWorldTimerManager().ClearTimer(RagdollingStopTimer);
+	GetMesh()->SetAllBodiesSimulatePhysics(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
 
-	RagdollingStopTimer = GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
-	{
-		GetMesh()->SetAllBodiesSimulatePhysics(false);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		GetMesh()->SetCollisionObjectType(ECC_Pawn);
-
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}));
-
-	SetLocomotionAction(FGameplayTag::EmptyTag);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
@@ -711,13 +733,10 @@ void AAlsCharacter::StopRagdollingImplementation()
 	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = false;
 	SetReplicateMovement(true);
 
-	OnRagdollingEnded();
-
-	if (RagdollingState.bGrounded &&
-	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
-	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	if (!IsNetMode(NM_Client))
 	{
-		SetLocomotionAction(FAlsLocomotionActionTags::Get().GettingUp);
+		GetMesh()->bOnlyAllowAutonomousTickPose = GetRemoteRole() == ROLE_AutonomousProxy &&
+		                                          GetNetConnection() != nullptr && IsPawnControlled();
 	}
 }
 

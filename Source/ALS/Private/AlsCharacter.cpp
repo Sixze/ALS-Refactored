@@ -158,6 +158,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
 
 	Super::Tick(DeltaTime);
+
+	AlsAnimationInstance->SetRecentlyUpdated(false);
 }
 
 void AAlsCharacter::Jump()
@@ -855,7 +857,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 				Gait == EAlsGait::Sprinting
 					? LocomotionState.VelocityYawAngle
 					: FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw +
-					                          AlsAnimationInstance->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
+					                          GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
 			};
 
 			RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateActorRotationSpeed(), 500.0f);
@@ -913,21 +915,19 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 {
-	if (!AlsAnimationInstance->IsRotationYawSpeedChanged())
+	if (!AlsAnimationInstance->IsRecentlyUpdated())
 	{
 		// Skip actor rotation modification because animation blueprint has not been updated
 		// yet (probably animation blueprint has a lower tick rate than the character).
 		return;
 	}
 
-	AlsAnimationInstance->SetRotationYawSpeedChanged(false);
-
 	const auto AdjustedDeltaTime{FMath::Min(DeltaTime, 1.0f / 30.0f)};
 
 	const auto Time{GetWorld()->GetTimeSeconds()};
 	const auto SkippedTime{Time - LocomotionState.LastRotationYawSpeedApplyTime - AdjustedDeltaTime};
 
-	const auto RotationYawSpeed{AlsAnimationInstance->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
+	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
 	auto DeltaYawAngle{RotationYawSpeed * AdjustedDeltaTime};
 
 	if (SkippedTime > SMALL_NUMBER)

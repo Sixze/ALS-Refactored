@@ -94,8 +94,6 @@ private:
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
-	FTimerHandle RagdollingStopTimer;
-
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -462,6 +460,9 @@ private:
 
 	void StopRagdollingImplementation();
 
+public:
+	void FinalizeRagdolling();
+
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	UAnimMontage* SelectGetUpMontage(bool bRagdollFacedUpward);
@@ -473,7 +474,7 @@ private:
 	void SetRagdollTargetLocation(const FVector& NewLocation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRagdollTargetLocation(const FVector& NewLocation);
+	void ServerSetRagdollTargetLocation(const FVector_NetQuantize& NewLocation);
 
 	void RefreshRagdolling(float DeltaTime);
 
