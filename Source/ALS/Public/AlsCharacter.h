@@ -4,7 +4,6 @@
 #include "GameFramework/Character.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
@@ -66,7 +65,7 @@ private:
 	EAlsRotationMode RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	EAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
+	FGameplayTag LocomotionMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionAction;
@@ -238,10 +237,37 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetViewMode(EAlsViewMode NewMode);
 
-	// Overlay Mode
+	// Locomotion Mode
 
 public:
-	FGameplayTag GetOverlayMode() const;
+	const FGameplayTag& GetLocomotionMode() const;
+
+private:
+	void SetLocomotionMode(const FGameplayTag& NewModeTag);
+
+	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	void OnLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
+
+	// Locomotion Action
+
+public:
+	const FGameplayTag& GetLocomotionAction() const;
+
+	void SetLocomotionAction(const FGameplayTag& NewActionTag);
+
+	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
+
+// Overlay Mode
+
+public:
+	const FGameplayTag& GetOverlayMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
 	void SetOverlayMode(const FGameplayTag& NewModeTag);
@@ -256,33 +282,6 @@ private:
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnOverlayModeChanged(const FGameplayTag& PreviousModeTag);
-
-	// Locomotion Mode
-
-public:
-	EAlsLocomotionMode GetLocomotionMode() const;
-
-private:
-	void SetLocomotionMode(EAlsLocomotionMode NewMode);
-
-	void NotifyLocomotionModeChanged(EAlsLocomotionMode PreviousMode);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnLocomotionModeChanged(EAlsLocomotionMode PreviousMode);
-
-	// Locomotion Action
-
-public:
-	FGameplayTag GetLocomotionAction() const;
-
-	void SetLocomotionAction(const FGameplayTag& NewActionTag);
-
-	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
 	// Locomotion
 
@@ -565,19 +564,19 @@ inline EAlsViewMode AAlsCharacter::GetViewMode() const
 	return ViewMode;
 }
 
-inline FGameplayTag AAlsCharacter::GetOverlayMode() const
-{
-	return OverlayMode;
-}
-
-inline EAlsLocomotionMode AAlsCharacter::GetLocomotionMode() const
+inline const FGameplayTag& AAlsCharacter::GetLocomotionMode() const
 {
 	return LocomotionMode;
 }
 
-inline FGameplayTag AAlsCharacter::GetLocomotionAction() const
+inline const FGameplayTag& AAlsCharacter::GetLocomotionAction() const
 {
 	return LocomotionAction;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetOverlayMode() const
+{
+	return OverlayMode;
 }
 
 inline const FVector& AAlsCharacter::GetInputDirection() const

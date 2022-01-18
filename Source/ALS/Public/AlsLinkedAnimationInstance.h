@@ -15,6 +15,8 @@ private:
 	UAlsAnimationInstance* Parent;
 
 public:
+	UAlsLinkedAnimationInstance();
+
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;

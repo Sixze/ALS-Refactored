@@ -3,7 +3,6 @@
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsMovementDirection.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
@@ -61,16 +60,13 @@ private:
 	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag OverlayMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionMode LocomotionMode{EAlsLocomotionMode::Grounded};
+	FGameplayTag LocomotionMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsMovementDirection MovementDirection;
+	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag GroundedEntryMode;
@@ -92,6 +88,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLeanState LeanState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsMovementDirection MovementDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementState MovementState;
@@ -128,11 +127,11 @@ public:
 
 	bool IsRecentlyUpdated() const;
 
-	void SetRecentlyUpdated(bool bChanged);
+	void SetRecentlyUpdated(bool bNewRecentlyUpdated);
 
 	EAlsRotationMode GetRotationMode() const;
 
-	FAlsLocomotionMode GetLocomotionMode() const;
+	const FGameplayTag& GetLocomotionMode() const;
 
 	const FAlsFeetState& GetFeetState() const;
 
@@ -173,8 +172,10 @@ private:
 	// Grounded Movement
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (AutoCreateRefTerm = "NewModeTag"))
 	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void ResetGroundedEntryMode();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void SetHipsDirection(EAlsHipsDirection NewDirection);
@@ -286,9 +287,9 @@ inline bool UAlsAnimationInstance::IsRecentlyUpdated() const
 	return bRecentlyUpdated;
 }
 
-inline void UAlsAnimationInstance::SetRecentlyUpdated(const bool bChanged)
+inline void UAlsAnimationInstance::SetRecentlyUpdated(const bool bNewRecentlyUpdated)
 {
-	bRecentlyUpdated = bChanged;
+	bRecentlyUpdated = bNewRecentlyUpdated;
 }
 
 inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const
@@ -296,7 +297,7 @@ inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const
 	return RotationMode;
 }
 
-inline FAlsLocomotionMode UAlsAnimationInstance::GetLocomotionMode() const
+inline const FGameplayTag& UAlsAnimationInstance::GetLocomotionMode() const
 {
 	return LocomotionMode;
 }
@@ -309,6 +310,11 @@ inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewModeTag)
 {
 	GroundedEntryMode = NewModeTag;
+}
+
+inline void UAlsAnimationInstance::ResetGroundedEntryMode()
+{
+	GroundedEntryMode = FGameplayTag::EmptyTag;
 }
 
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)

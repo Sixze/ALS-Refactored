@@ -8,7 +8,6 @@ private:
 	static const FAlsGroundedEntryModeTags Instance;
 
 public:
-	FGameplayTag Default;
 	FGameplayTag FromRoll;
 
 public:

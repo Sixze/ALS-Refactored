@@ -3,6 +3,11 @@
 #include "AlsAnimationInstance.h"
 #include "Utility/AlsMacro.h"
 
+UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
+{
+	RootMotionMode = ERootMotionMode::NoRootMotionExtraction;
+}
+
 void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();

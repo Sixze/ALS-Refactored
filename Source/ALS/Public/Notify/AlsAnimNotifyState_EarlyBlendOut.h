@@ -1,7 +1,7 @@
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "State/Enumerations/AlsLocomotionMode.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "AlsAnimNotifyState_EarlyBlendOut.generated.h"
@@ -24,7 +24,7 @@ private:
 	bool bCheckLocomotionMode{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckLocomotionMode"))
-	EAlsLocomotionMode LocomotionModeEquals{EAlsLocomotionMode::InAir};
+	FGameplayTag LocomotionModeEquals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	bool bCheckStance{true};

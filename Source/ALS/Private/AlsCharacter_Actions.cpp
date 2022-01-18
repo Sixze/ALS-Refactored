@@ -16,16 +16,17 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
+#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
-	return LocomotionMode == EAlsLocomotionMode::Grounded &&
+	return LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
 	       TryStartMantling(Settings->Mantling.GroundedTrace);
 }
 
 bool AAlsCharacter::TryStartMantlingInAir()
 {
-	return LocomotionMode == EAlsLocomotionMode::InAir && IsLocallyControlled() &&
+	return LocomotionMode == FAlsLocomotionModeTags::Get().InAir && IsLocallyControlled() &&
 	       TryStartMantling(Settings->Mantling.InAirTrace);
 }
 
@@ -228,7 +229,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	Parameters.MantlingType = LocomotionMode == EAlsLocomotionMode::Grounded
+	Parameters.MantlingType = LocomotionMode == FAlsLocomotionModeTags::Get().Grounded
 		                          ? Parameters.MantlingHeight > 125.0f
 			                            ? EAlsMantlingType::High
 			                            : EAlsMantlingType::Low
@@ -749,7 +750,7 @@ void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 void AAlsCharacter::TryStartRolling(const float PlayRate)
 {
-	if (LocomotionMode == EAlsLocomotionMode::Grounded)
+	if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded)
 	{
 		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle

@@ -12,6 +12,7 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
+#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
@@ -41,9 +42,9 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Gait = AlsCharacter->GetGait();
 	RotationMode = AlsCharacter->GetRotationMode();
 	ViewMode = AlsCharacter->GetViewMode();
-	OverlayMode = AlsCharacter->GetOverlayMode();
 	LocomotionMode = AlsCharacter->GetLocomotionMode();
 	LocomotionAction = AlsCharacter->GetLocomotionAction();
+	OverlayMode = AlsCharacter->GetOverlayMode();
 
 	RefreshLocomotion(DeltaTime);
 	RefreshLayering();
@@ -103,7 +104,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 
 	// Allow movement animations if character is moving.
 
-	if (!LocomotionState.bMoving || !LocomotionMode.IsGrounded())
+	if (!LocomotionState.bMoving || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		return;
 	}
@@ -320,7 +321,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshFootLock(FeetState.Right, FootRightBone, UAlsConstants::FootRightLockCurve(),
 	                RelativeTransform, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
 
-	if (LocomotionMode.IsInAir())
+	if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir)
 	{
 		ResetFootOffset(FeetState.Left, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
 		ResetFootOffset(FeetState.Right, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
@@ -394,7 +395,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	const auto FootTransform{GetSkelMeshComponent()->GetSocketTransform(FootBoneName)};
 	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
 
-	if (LocomotionMode.IsInAir() && NewFootLockAmount > FootState.LockAmount)
+	if (NewFootLockAmount > FootState.LockAmount && LocomotionMode == FAlsLocomotionModeTags::Get().InAir)
 	{
 		// Smoothly disable foot locking if the character is in the air.
 
@@ -608,7 +609,7 @@ void UAlsAnimationInstance::RefreshMovement(const float DeltaTime)
 {
 	MovementState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurve()), -1.0f, 1.0f);
 
-	if (!LocomotionMode.IsGrounded() || !LocomotionState.bMoving)
+	if (!LocomotionState.bMoving || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		return;
 	}
@@ -793,7 +794,7 @@ void UAlsAnimationInstance::StopTransitionAndTurnInPlaceAnimations(const float B
 
 void UAlsAnimationInstance::RefreshDynamicTransitions()
 {
-	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !LocomotionState.bAllowTransitions)
+	if (LocomotionState.bMoving || !LocomotionState.bAllowTransitions || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		return;
 	}
@@ -849,7 +850,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 {
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !IsRotateInPlaceAllowed())
+	if (LocomotionState.bMoving || !IsRotateInPlaceAllowed() || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -903,7 +904,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	// Turn in place is allowed only if transitions are allowed, the character
 	// standing still and looking at the camera and not in first-person mode.
 
-	if (!LocomotionMode.IsGrounded() || LocomotionState.bMoving || !IsTurnInPlaceAllowed())
+	if (LocomotionState.bMoving || !IsTurnInPlaceAllowed() || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		TurnInPlaceState.ActivationDelayTime = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;
@@ -1029,7 +1030,7 @@ void UAlsAnimationInstance::Jump()
 
 void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 {
-	if (!LocomotionMode.IsInAir())
+	if (LocomotionMode != FAlsLocomotionModeTags::Get().InAir)
 	{
 		return;
 	}

@@ -12,6 +12,7 @@
 #include "Utility/AlsEnumerationUtility.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {
@@ -28,7 +29,8 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	}
 
 	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
-	if (bSkipEffectsWhenInAir && IsValid(AnimationInstance) && AnimationInstance->GetLocomotionMode() == EAlsLocomotionMode::InAir)
+	if (bSkipEffectsWhenInAir && IsValid(AnimationInstance) &&
+	    AnimationInstance->GetLocomotionMode() == FAlsLocomotionModeTags::Get().InAir)
 	{
 		return;
 	}
