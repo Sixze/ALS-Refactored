@@ -53,6 +53,9 @@ public:
 
 	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDelta) const override;
 
+	virtual void CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
+	                         APlayerController* PlayerController, const FVector& PreviousStartLocation) override;
+
 	virtual void PrepMoveFor(ACharacter* Character) override;
 };
 
@@ -111,8 +114,6 @@ protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	virtual float GetMaxAcceleration() const override;
 
 	virtual float GetMaxBrakingDeceleration() const override;

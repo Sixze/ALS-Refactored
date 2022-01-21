@@ -67,6 +67,20 @@ bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* 
 	       Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
 }
 
+void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
+                                APlayerController* PlayerController, const FVector& PreviousStartLocation)
+{
+	const auto* Movement{Character->GetCharacterMovement()};
+	const auto InitialRotation{Movement->UpdatedComponent->GetComponentRotation()};
+
+	FSavedMove_Character::CombineWith(PreviousMove, Character, PlayerController, PreviousStartLocation);
+
+	// Restore initial rotation after movement combining. Without this, any rotation applied in
+	// the character class will be discarded and the character will not be able to rotate properly.
+
+	Movement->UpdatedComponent->SetWorldRotation(InitialRotation, false, nullptr, Movement->GetTeleportType());
+}
+
 void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
 {
 	Super::PrepMoveFor(Character);
@@ -155,21 +169,6 @@ void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode P
 	// This removes some very noticeable changes in the mesh location when the character automatically uncrouches at the end of the roll.
 
 	bCrouchMaintainsBaseLocation = true;
-}
-
-void UAlsCharacterMovementComponent::TickComponent(const float DeltaTime, const ELevelTick TickType,
-                                                   FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// If move combining is enabled, then as a fallback flush server moves to ensure
-	// that local character rotation is applied correctly on autonomous proxy clients.
-
-	static const auto* MoveCombiningConsoleVariable{IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableMoveCombining"))};
-	if (MoveCombiningConsoleVariable != nullptr && MoveCombiningConsoleVariable->GetInt() != 0)
-	{
-		FlushServerMoves();
-	}
 }
 
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
