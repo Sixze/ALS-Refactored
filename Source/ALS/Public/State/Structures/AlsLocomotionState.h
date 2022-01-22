@@ -51,10 +51,4 @@ struct ALS_API FAlsLocomotionState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float LastRotationYawSpeedApplyTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LastRotationYawSpeed;
 };

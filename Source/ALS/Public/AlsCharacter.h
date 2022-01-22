@@ -264,7 +264,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
-// Overlay Mode
+	// Overlay Mode
 
 public:
 	const FGameplayTag& GetOverlayMode() const;
@@ -332,10 +332,13 @@ protected:
 
 	float CalculateActorRotationSpeed() const;
 
-private:
-	void ApplyRotationYawSpeed(float DeltaTime);
+public:
+	void ApplyRotationYawSpeedFromAnimationInstance(float DeltaTime);
 
-	void ResetRotationYawSpeed();
+private:
+	void ApplyRotationYawSpeedFromCharacter(float DeltaTime);
+
+	void ApplyRotationYawSpeed(float DeltaTime);
 
 	void RefreshInAirActorRotation(float DeltaTime);
 

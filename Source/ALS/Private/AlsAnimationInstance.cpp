@@ -63,7 +63,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshRagdolling();
 
 	SetPendingUpdate(false);
-	SetRecentlyUpdated(true);
+
+	AlsCharacter->ApplyRotationYawSpeedFromAnimationInstance(DeltaTime);
 }
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
@@ -581,9 +582,6 @@ void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const floa
 void UAlsAnimationInstance::RefreshFinalFootState(FAlsFootState& FootState, const FTransform& RelativeTransform,
                                                   const FVector& FinalLocation, const FQuat& FinalRotation)
 {
-	FootState.FinalLocation = FinalLocation;
-	FootState.FinalRotation = FinalRotation;
-
 	FootState.FinalRelativeLocation = RelativeTransform.TransformPosition(FinalLocation);
 	FootState.FinalRelativeRotation = RelativeTransform.TransformRotation(FinalRotation);
 }

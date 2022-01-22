@@ -53,12 +53,6 @@ struct ALS_API FAlsFootState
 	FQuat OffsetRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector FinalLocation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat FinalRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector FinalRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -40,10 +40,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bPendingUpdate;
 
-	// True if animation instance has been recently updated, false otherwise.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bRecentlyUpdated{true};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
 
@@ -124,10 +120,6 @@ public:
 
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
-
-	bool IsRecentlyUpdated() const;
-
-	void SetRecentlyUpdated(bool bNewRecentlyUpdated);
 
 	EAlsRotationMode GetRotationMode() const;
 
@@ -280,16 +272,6 @@ public:
 inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
 {
 	bPendingUpdate = bNewPendingUpdate;
-}
-
-inline bool UAlsAnimationInstance::IsRecentlyUpdated() const
-{
-	return bRecentlyUpdated;
-}
-
-inline void UAlsAnimationInstance::SetRecentlyUpdated(const bool bNewRecentlyUpdated)
-{
-	bRecentlyUpdated = bNewRecentlyUpdated;
 }
 
 inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const

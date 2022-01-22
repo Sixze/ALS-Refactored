@@ -159,8 +159,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
 
 	Super::Tick(DeltaTime);
-
-	AlsAnimationInstance->SetRecentlyUpdated(false);
 }
 
 void AAlsCharacter::Jump()
@@ -817,13 +815,14 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	if (LocomotionState.bRotationLocked || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded ||
 	    LocomotionAction.IsValid() || HasAnyRootMotion())
 	{
-		ResetRotationYawSpeed();
 		return;
 	}
 
 	if (!LocomotionState.bMoving)
 	{
 		// Not moving.
+
+		ApplyRotationYawSpeedFromCharacter(DeltaTime);
 
 		// ReSharper disable once CppRedundantParentheses
 		if ((!TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime) &&
@@ -832,13 +831,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 			RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
 		}
 
-		ApplyRotationYawSpeed(DeltaTime);
 		return;
 	}
 
 	// Moving.
-
-	ResetRotationYawSpeed();
 
 	if (TryRefreshCustomGroundedMovingActorRotation(DeltaTime))
 	{
@@ -914,32 +910,29 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, ViewState.YawSpeed);
 }
 
-void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
+void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
 {
-	if (!AlsAnimationInstance->IsRecentlyUpdated())
+	if (!LocomotionState.bRotationLocked && LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
+	    !LocomotionAction.IsValid() && !HasAnyRootMotion() && !LocomotionState.bMoving &&
+	    GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())
 	{
-		// Skip actor rotation modification because animation blueprint has not been updated
-		// yet (probably animation blueprint has a lower tick rate than the character).
+		ApplyRotationYawSpeed(DeltaTime);
+	}
+}
+
+void AAlsCharacter::ApplyRotationYawSpeedFromCharacter(const float DeltaTime)
+{
+	if (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())
+	{
 		return;
 	}
 
-	const auto AdjustedDeltaTime{FMath::Min(DeltaTime, 1.0f / 30.0f)};
+	ApplyRotationYawSpeed(DeltaTime);
+}
 
-	const auto Time{GetWorld()->GetTimeSeconds()};
-	const auto SkippedTime{Time - LocomotionState.LastRotationYawSpeedApplyTime - AdjustedDeltaTime};
-
-	const auto RotationYawSpeed{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve())};
-	auto DeltaYawAngle{RotationYawSpeed * AdjustedDeltaTime};
-
-	if (SkippedTime > SMALL_NUMBER)
-	{
-		// Try to guess how much the character should rotate if it hasn't been updated for a long time, and rotate
-		// by this amount. This is necessary so that the character always rotates approximately by the same angle,
-		// regardless of the frame rate or the difference in the tick rate of the animation blueprint and the character.
-
-		DeltaYawAngle += FMath::Lerp(LocomotionState.LastRotationYawSpeed, RotationYawSpeed, 0.5f) * SkippedTime;
-	}
-
+void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
+{
+	const auto DeltaYawAngle{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve()) * DeltaTime};
 	if (FMath::Abs(DeltaYawAngle) > KINDA_SMALL_NUMBER)
 	{
 		AddActorWorldRotation({0.0f, DeltaYawAngle, 0.0f});
@@ -948,15 +941,6 @@ void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 
 		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
 	}
-
-	LocomotionState.LastRotationYawSpeedApplyTime = Time;
-	LocomotionState.LastRotationYawSpeed = RotationYawSpeed;
-}
-
-void AAlsCharacter::ResetRotationYawSpeed()
-{
-	LocomotionState.LastRotationYawSpeedApplyTime = GetWorld()->GetTimeSeconds();
-	LocomotionState.LastRotationYawSpeed = 0.0f;
 }
 
 void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
