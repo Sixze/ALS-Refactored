@@ -9,6 +9,7 @@
 #include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsLocomotionState.h"
 #include "State/Structures/AlsRagdollingState.h"
+#include "State/Structures/AlsRollingState.h"
 #include "State/Structures/AlsViewState.h"
 #include "AlsCharacter.generated.h"
 
@@ -90,6 +91,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingState RagdollingState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	FAlsRollingState RollingState;
 
 	FTimerHandle LandedGroundFrictionResetTimer;
 
@@ -348,7 +352,11 @@ protected:
 	void RefreshInAirAimingActorRotation(float DeltaTime);
 
 protected:
-	void RefreshTargetYawAngle(float TargetYawAngle, bool bRefreshSmoothTargetYawAngle = true);
+	void RefreshTargetYawAngle(float TargetYawAngle);
+
+	void RefreshViewRelativeTargetYawAngle();
+
+	void RefreshTargetYawAngleUsingLocomotionRotation();
 
 	void RefreshActorRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
@@ -595,4 +603,23 @@ inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 inline const FAlsViewState& AAlsCharacter::GetViewState() const
 {
 	return ViewState;
+}
+
+inline void AAlsCharacter::RefreshTargetYawAngleUsingLocomotionRotation()
+{
+	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
+}
+
+inline void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
+{
+	LocomotionState.TargetYawAngle = TargetYawAngle;
+
+	RefreshViewRelativeTargetYawAngle();
+
+	LocomotionState.SmoothTargetYawAngle = TargetYawAngle;
+}
+
+inline void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
+{
+	LocomotionState.ViewRelativeTargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.TargetYawAngle);
 }

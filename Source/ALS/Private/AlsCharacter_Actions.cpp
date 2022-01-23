@@ -389,13 +389,10 @@ void AAlsCharacter::RefreshMantling()
 	}
 
 	const auto RootMotionSource{GetCharacterMovement()->GetRootMotionSourceByID(MantlingRootMotionSourceId)};
-	if (RootMotionSource.IsValid() &&
-	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) &&
-	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
-	{
-		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
-	}
-	else
+
+	if (!RootMotionSource.IsValid() ||
+	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) ||
+	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
 	{
 		StopMantling();
 		ForceNetUpdate();
@@ -629,10 +626,6 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	NewActorRotation.Yaw = RagdollingState.bFacedUpward ? PelvisRotation.Yaw - 180.0f : PelvisRotation.Yaw;
 
 	SetActorLocationAndRotation(NewActorLocation, NewActorRotation);
-
-	RefreshLocomotionLocationAndRotation();
-
-	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
 }
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
@@ -820,9 +813,9 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 {
 	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
 	{
-		RefreshActorRotationInstant(StartYawAngle);
+		RollingState.TargetYawAngle = TargetYawAngle;
 
-		RefreshTargetYawAngle(TargetYawAngle);
+		RefreshActorRotationInstant(StartYawAngle);
 
 		SetLocomotionAction(FAlsLocomotionActionTags::Get().Rolling);
 	}
@@ -839,13 +832,13 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 
 	if (Settings->Rolling.RotationInterpolationSpeed <= 0.0f)
 	{
-		TargetRotation.Yaw = LocomotionState.TargetYawAngle;
+		TargetRotation.Yaw = RollingState.TargetYawAngle;
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
 	else
 	{
-		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(TargetRotation.Yaw, LocomotionState.TargetYawAngle,
+		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(TargetRotation.Yaw, RollingState.TargetYawAngle,
 		                                                     DeltaTime, Settings->Rolling.RotationInterpolationSpeed);
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);

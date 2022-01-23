@@ -89,7 +89,7 @@ void AAlsCharacter::PostInitializeComponents()
 	// Set default rotation values.
 
 	RefreshLocomotionLocationAndRotation();
-	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
+	RefreshTargetYawAngleUsingLocomotionRotation();
 
 	LocomotionState.InputYawAngle = LocomotionState.Rotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.Rotation.Yaw;
@@ -140,6 +140,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		AlsAnimationInstance->SetPendingUpdate(true);
 	}
 
+	RefreshLocomotionLocationAndRotation();
+
 	RefreshRotationMode();
 
 	RefreshLocomotion(DeltaTime);
@@ -154,6 +156,16 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
+
+	if (LocomotionState.bRotationLocked)
+	{
+		RefreshViewRelativeTargetYawAngle();
+	}
+	else if (!LocomotionMode.IsValid() || LocomotionAction.IsValid())
+	{
+		RefreshLocomotionLocationAndRotation();
+		RefreshTargetYawAngleUsingLocomotionRotation();
+	}
 
 	LocomotionState.PreviousVelocity = LocomotionState.Velocity;
 	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
@@ -565,58 +577,35 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 {
 	ApplyDesiredStance();
 
-	if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded)
+	if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
+	    PreviousModeTag == FAlsLocomotionModeTags::Get().InAir)
 	{
-		if (PreviousModeTag == FAlsLocomotionModeTags::Get().InAir)
+		if (Settings->Ragdolling.bStartRagdollingOnLand &&
+		    LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
 		{
-			if (Settings->Ragdolling.bStartRagdollingOnLand &&
-			    LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
-			{
-				StartRagdolling();
-			}
-			else if (Settings->Rolling.bStartRollingOnLand &&
-			         LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
-			{
-				StartRolling(1.3f, LocomotionState.bHasSpeed
-					                   ? LocomotionState.VelocityYawAngle
-					                   : GetActorRotation().Yaw);
-			}
-			else
-			{
-				GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
-
-				GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
-			}
-		}
-		else if (!LocomotionState.bRotationLocked)
-		{
-			RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
-		}
-	}
-	else if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir)
-	{
-		if (!LocomotionAction.IsValid())
-		{
-			// If the character enters the air, set the in air rotation.
-
-			if (!LocomotionState.bRotationLocked)
-			{
-				if (Settings->InAirRotationMode == EAlsInAirRotationMode::RotateToVelocityOnJump && LocomotionState.bMoving)
-				{
-					RefreshTargetYawAngle(LocomotionState.VelocityYawAngle, false);
-				}
-				else if (Settings->InAirRotationMode == EAlsInAirRotationMode::KeepWorldRotation)
-				{
-					RefreshTargetYawAngle(LocomotionState.Rotation.Yaw, false);
-				}
-			}
-		}
-		else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && Settings->Rolling.bInterruptRollingWhenInAir)
-		{
-			// If the character is currently rolling, enable the ragdolling.
-
 			StartRagdolling();
 		}
+		else if (Settings->Rolling.bStartRollingOnLand &&
+		         LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
+		{
+			StartRolling(1.3f, LocomotionState.bHasSpeed
+				                   ? LocomotionState.VelocityYawAngle
+				                   : GetActorRotation().Yaw);
+		}
+		else
+		{
+			GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
+
+			GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
+		}
+	}
+	else if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir &&
+	         LocomotionAction == FAlsLocomotionActionTags::Get().Rolling &&
+	         Settings->Rolling.bInterruptRollingWhenInAir)
+	{
+		// If the character is currently rolling, then enable ragdolling.
+
+		StartRagdolling();
 	}
 
 	OnLocomotionModeChanged(PreviousModeTag);
@@ -761,8 +750,6 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > Settings->MovingSpeedThreshold;
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
-
-	RefreshLocomotionLocationAndRotation();
 }
 
 FRotator AAlsCharacter::GetViewRotation() const
@@ -812,9 +799,15 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked || LocomotionMode != FAlsLocomotionModeTags::Get().Grounded ||
-	    LocomotionAction.IsValid() || HasAnyRootMotion())
+	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
+	    LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
 	{
+		return;
+	}
+
+	if (HasAnyRootMotion())
+	{
+		RefreshTargetYawAngleUsingLocomotionRotation();
 		return;
 	}
 
@@ -824,13 +817,18 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 		ApplyRotationYawSpeedFromCharacter(DeltaTime);
 
-		// ReSharper disable once CppRedundantParentheses
-		if ((!TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime) &&
-		     RotationMode == EAlsRotationMode::Aiming) || ViewMode == EAlsViewMode::FirstPerson)
+		if (TryRefreshCustomGroundedNotMovingActorRotation(DeltaTime))
 		{
-			RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
+			return;
 		}
 
+		if (RotationMode == EAlsRotationMode::Aiming || ViewMode == EAlsViewMode::FirstPerson)
+		{
+			RefreshGroundedNotMovingAimingActorRotation(DeltaTime);
+			return;
+		}
+
+		RefreshTargetYawAngleUsingLocomotionRotation();
 		return;
 	}
 
@@ -844,8 +842,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	switch (RotationMode)
 	{
 		case EAlsRotationMode::VelocityDirection:
-			RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, CalculateActorRotationSpeed(),
-			                                800.0f);
+			RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, CalculateActorRotationSpeed(), 800.0f);
 			break;
 
 		case EAlsRotationMode::LookingDirection:
@@ -863,6 +860,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 
 		case EAlsRotationMode::Aiming:
 			RefreshGroundedMovingAimingActorRotation(DeltaTime);
+			break;
+
+		default:
+			RefreshTargetYawAngleUsingLocomotionRotation();
 			break;
 	}
 }
@@ -897,6 +898,10 @@ void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float Delt
 	{
 		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f)),
 		                     DeltaTime, 20.0f);
+	}
+	else
+	{
+		RefreshTargetYawAngleUsingLocomotionRotation();
 	}
 }
 
@@ -938,15 +943,19 @@ void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 		AddActorWorldRotation({0.0f, DeltaYawAngle, 0.0f});
 
 		RefreshLocomotionLocationAndRotation();
-
-		RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
+		RefreshTargetYawAngleUsingLocomotionRotation();
 	}
 }
 
 void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked || LocomotionMode != FAlsLocomotionModeTags::Get().InAir ||
-	    LocomotionAction.IsValid() || TryRefreshCustomInAirActorRotation(DeltaTime))
+	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
+	    LocomotionMode != FAlsLocomotionModeTags::Get().InAir)
+	{
+		return;
+	}
+
+	if (TryRefreshCustomInAirActorRotation(DeltaTime))
 	{
 		return;
 	}
@@ -955,18 +964,35 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 	{
 		case EAlsRotationMode::VelocityDirection:
 		case EAlsRotationMode::LookingDirection:
-			if (Settings->InAirRotationMode == EAlsInAirRotationMode::RotateToVelocityOnJump && LocomotionState.bMoving)
+			switch (Settings->InAirRotationMode)
 			{
-				RefreshActorRotation(LocomotionState.VelocityYawAngle, DeltaTime, 5.0f);
-			}
-			else if (Settings->InAirRotationMode == EAlsInAirRotationMode::KeepRelativeRotation)
-			{
-				RefreshActorRotation(ViewState.SmoothRotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle, DeltaTime, 5.0f);
+				case EAlsInAirRotationMode::RotateToVelocityOnJump:
+					if (LocomotionState.bMoving)
+					{
+						RefreshActorRotation(LocomotionState.VelocityYawAngle, DeltaTime, 5.0f);
+					}
+					else
+					{
+						RefreshTargetYawAngleUsingLocomotionRotation();
+					}
+					break;
+
+				case EAlsInAirRotationMode::KeepRelativeRotation:
+					RefreshActorRotation(ViewState.SmoothRotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle, DeltaTime, 5.0f);
+					break;
+
+				default:
+					RefreshTargetYawAngleUsingLocomotionRotation();
+					break;
 			}
 			break;
 
 		case EAlsRotationMode::Aiming:
 			RefreshInAirAimingActorRotation(DeltaTime);
+			break;
+
+		default:
+			RefreshTargetYawAngleUsingLocomotionRotation();
 			break;
 	}
 }
@@ -979,18 +1005,6 @@ bool AAlsCharacter::TryRefreshCustomInAirActorRotation(const float DeltaTime)
 void AAlsCharacter::RefreshInAirAimingActorRotation(const float DeltaTime)
 {
 	RefreshActorRotation(ViewState.SmoothRotation.Yaw, DeltaTime, 15.0f);
-}
-
-void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle, const bool bRefreshSmoothTargetYawAngle)
-{
-	LocomotionState.TargetYawAngle = TargetYawAngle;
-
-	if (bRefreshSmoothTargetYawAngle)
-	{
-		LocomotionState.SmoothTargetYawAngle = TargetYawAngle;
-	}
-
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - TargetYawAngle);
 }
 
 void AAlsCharacter::RefreshActorRotationInstant(const float TargetYawAngle, const ETeleportType Teleport)
@@ -1021,9 +1035,11 @@ void AAlsCharacter::RefreshActorRotationExtraSmooth(const float TargetYawAngle, 
                                                     const float ActorRotationInterpolationSpeed,
                                                     const float TargetYawAngleRotationSpeed)
 {
-	RefreshTargetYawAngle(TargetYawAngle, false);
+	LocomotionState.TargetYawAngle = TargetYawAngle;
 
-	// Interpolate the target rotation for extra smooth rotation behavior.
+	RefreshViewRelativeTargetYawAngle();
+
+	// Interpolate target yaw angle for extra smooth rotation.
 
 	LocomotionState.SmoothTargetYawAngle = UAlsMath::InterpolateAngleConstant(LocomotionState.SmoothTargetYawAngle,
 	                                                                          TargetYawAngle, DeltaTime, TargetYawAngleRotationSpeed);
