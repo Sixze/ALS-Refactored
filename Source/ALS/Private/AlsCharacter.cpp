@@ -117,11 +117,16 @@ void AAlsCharacter::BeginPlay()
 	OnOverlayModeChanged(OverlayMode);
 }
 
-void AAlsCharacter::Restart()
+void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
-	Super::Restart();
+	if (GetLocalRole() <= ROLE_SimulatedProxy && !ReplicatedBasedMovement.HasRelativeLocation())
+	{
+		// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
 
-	ApplyDesiredStance();
+		GetReplicatedMovement_Mutable().Rotation = GetActorRotation();
+	}
+
+	Super::PostNetReceiveLocationAndRotation();
 }
 
 void AAlsCharacter::Tick(const float DeltaTime)
@@ -171,6 +176,13 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
 
 	Super::Tick(DeltaTime);
+}
+
+void AAlsCharacter::Restart()
+{
+	Super::Restart();
+
+	ApplyDesiredStance();
 }
 
 void AAlsCharacter::Jump()

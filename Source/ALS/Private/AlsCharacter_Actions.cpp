@@ -199,8 +199,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
 			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
 
-			DrawDebugCapsule(Capsule->GetWorld(), TargetCapsuleLocation, CapsuleHalfHeight,
-			                 CapsuleRadius, FQuat::Identity, FColor::Red, false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
+			DrawDebugCapsule(GetWorld(), TargetCapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity,
+			                 FColor::Red, false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
 		}
 #endif
 

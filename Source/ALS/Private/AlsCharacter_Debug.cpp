@@ -392,7 +392,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
-	const auto FeetLocation{LocomotionState.Location - FVector(0.0f, 0.0f, GetCapsuleComponent()->Bounds.BoxExtent.Z)};
+	const auto FeetLocation{LocomotionState.Location - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight())};
 
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f},

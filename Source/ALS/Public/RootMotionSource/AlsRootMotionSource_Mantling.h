@@ -19,13 +19,13 @@ public:
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
 
 	UPROPERTY()
-	FVector_NetQuantize10 TargetRelativeLocation{ForceInit};
+	FVector TargetRelativeLocation{ForceInit};
 
 	UPROPERTY()
 	FRotator TargetRelativeRotation{ForceInit};
 
 	UPROPERTY()
-	FVector_NetQuantize10 ActorFeetLocationOffset{ForceInit};
+	FVector ActorFeetLocationOffset{ForceInit};
 
 	UPROPERTY()
 	FRotator ActorRotationOffset{ForceInit};

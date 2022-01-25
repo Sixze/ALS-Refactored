@@ -108,9 +108,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Restart() override;
+	virtual void PostNetReceiveLocationAndRotation() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void Restart() override;
 
 	virtual void Jump() override;
 

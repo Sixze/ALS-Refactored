@@ -1063,8 +1063,12 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 		return 0.0f;
 	}
 
-	const auto* Capsule{AlsCharacter->GetCapsuleComponent()};
 	const auto SweepStartLocation{AlsCharacter->GetLocomotionState().Location};
+
+	const auto* Capsule{AlsCharacter->GetCapsuleComponent()};
+
+	const auto CapsuleRadius{Capsule->GetScaledCapsuleRadius()};
+	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
 	auto VelocityDirection{LocomotionState.Velocity};
 	VelocityDirection.Z = FMath::Clamp(InAirState.VerticalVelocity, -4000.0f, -200.0f);
@@ -1081,17 +1085,15 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	}
 
 	FHitResult Hit;
-	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ObjectQueryParameters,
-	                                    FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(),
-	                                                                 Capsule->GetScaledCapsuleHalfHeight()),
+	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity,
+	                                    ObjectQueryParameters, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
 	                                    {ANSI_TO_TCHAR(__FUNCTION__), false, AlsCharacter});
 
 #if ENABLE_DRAW_DEBUG
 	if (UAlsUtility::ShouldDisplayDebug(AlsCharacter, UAlsConstants::TracesDisplayName()))
 	{
-		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
-		                                         Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight(),
-		                                         AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
+		UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator, CapsuleRadius,
+		                                         CapsuleHalfHeight, AlsCharacter->GetCharacterMovement()->IsWalkable(Hit),
 		                                         Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
 	}
 #endif

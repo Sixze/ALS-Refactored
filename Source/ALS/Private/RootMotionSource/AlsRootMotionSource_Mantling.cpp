@@ -103,7 +103,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 		if (BlendInAmount < 1.0f - KINDA_SMALL_NUMBER)
 		{
-			LocationOffset = FMath::Lerp<FVector>(ActorFeetLocationOffset, LocationOffset, BlendInAmount);
+			LocationOffset = FMath::Lerp(ActorFeetLocationOffset, LocationOffset, BlendInAmount);
 			RotationOffset = FMath::Lerp(ActorRotationOffset, RotationOffset, BlendInAmount);
 		}
 	}
@@ -126,25 +126,22 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 {
 	if (!Super::NetSerialize(Archive, Map, bSuccess))
 	{
+		bSuccess = false;
 		return false;
 	}
 
-	auto bSuccessLocal{true};
+	bSuccess = true;
 
 	Archive << MantlingSettings;
 	Archive << TargetPrimitive;
 
-	TargetRelativeLocation.NetSerialize(Archive, Map, bSuccessLocal);
-	bSuccess &= bSuccessLocal;
+	bSuccess &= SerializePackedVector<10, 24>(TargetRelativeLocation, Archive);
 
-	TargetRelativeRotation.NetSerialize(Archive, Map, bSuccessLocal);
-	bSuccess &= bSuccessLocal;
+	TargetRelativeRotation.SerializeCompressedShort(Archive);
 
-	ActorFeetLocationOffset.NetSerialize(Archive, Map, bSuccessLocal);
-	bSuccess &= bSuccessLocal;
+	bSuccess &= SerializePackedVector<10, 24>(ActorFeetLocationOffset, Archive);
 
-	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
-	bSuccess &= bSuccessLocal;
+	ActorRotationOffset.SerializeCompressedShort(Archive);
 
 	Archive << MantlingHeight;
 
