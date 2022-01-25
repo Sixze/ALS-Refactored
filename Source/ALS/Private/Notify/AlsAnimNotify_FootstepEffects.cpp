@@ -1,6 +1,7 @@
 #include "Notify/AlsAnimNotify_FootstepEffects.h"
 
 #include "AlsAnimationInstance.h"
+#include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -28,14 +29,15 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 		return;
 	}
 
-	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
-	if (bSkipEffectsWhenInAir && IsValid(AnimationInstance) &&
-	    AnimationInstance->GetLocomotionMode() == FAlsLocomotionModeTags::Get().InAir)
+	const auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
+
+	if (bSkipEffectsWhenInAir && IsValid(Character) && Character->GetLocomotionMode() == FAlsLocomotionModeTags::Get().InAir)
 	{
 		return;
 	}
 
 	const auto* World{MeshComponent->GetWorld()};
+	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
 
 	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootRightIkBone()};
 	const auto FootTransform{MeshComponent->GetSocketTransform(FootBoneName)};

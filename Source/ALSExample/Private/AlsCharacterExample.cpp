@@ -77,13 +77,13 @@ void AAlsCharacterExample::InputLookRight(const float Value)
 
 void AAlsCharacterExample::InputMoveForward(const float Value)
 {
-	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().SmoothRotation.Yaw),
+	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw),
 	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveRight"))));
 }
 
 void AAlsCharacterExample::InputMoveRight(const float Value)
 {
-	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().SmoothRotation.Yaw + 90.0f),
+	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw + 90.0f),
 	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveForward"))));
 }
 

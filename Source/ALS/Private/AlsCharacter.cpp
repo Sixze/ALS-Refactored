@@ -94,8 +94,8 @@ void AAlsCharacter::PostInitializeComponents()
 	LocomotionState.InputYawAngle = LocomotionState.Rotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.Rotation.Yaw;
 
-	ViewState.SmoothRotation = ViewRotation;
-	ViewState.PreviousSmoothYawAngle = ViewRotation.Yaw;
+	ViewState.Rotation = ViewRotation;
+	ViewState.PreviousYawAngle = ViewRotation.Yaw;
 }
 
 void AAlsCharacter::BeginPlay()
@@ -173,7 +173,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	}
 
 	LocomotionState.PreviousVelocity = LocomotionState.Velocity;
-	ViewState.PreviousSmoothYawAngle = ViewState.SmoothRotation.Yaw;
+	ViewState.PreviousYawAngle = ViewState.Rotation.Yaw;
 
 	Super::Tick(DeltaTime);
 }
@@ -797,16 +797,16 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}
 
-	// Interpolate view rotation to current control rotation for smooth character
+	// Interpolate view rotation to current raw view rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewRotation, DeltaTime, 30.0f);
-	ViewState.SmoothRotation.Normalize();
+	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewRotation, DeltaTime, 30.0f);
+	ViewState.Rotation.Normalize();
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
 
-	ViewState.YawSpeed = FMath::Abs((ViewState.SmoothRotation.Yaw - ViewState.PreviousSmoothYawAngle) / DeltaTime);
+	ViewState.YawSpeed = FMath::Abs((ViewState.Rotation.Yaw - ViewState.PreviousYawAngle) / DeltaTime);
 }
 
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
@@ -862,7 +862,7 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 			const auto TargetYawAngle{
 				Gait == EAlsGait::Sprinting
 					? LocomotionState.VelocityYawAngle
-					: FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw +
+					: FRotator::NormalizeAxis(ViewState.Rotation.Yaw +
 					                          GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
 			};
 
@@ -892,23 +892,23 @@ bool AAlsCharacter::TryRefreshCustomGroundedNotMovingActorRotation(const float D
 
 void AAlsCharacter::RefreshGroundedMovingAimingActorRotation(const float DeltaTime)
 {
-	RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 20.0f, 1000.0f);
+	RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, 20.0f, 1000.0f);
 }
 
 void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bHasInput)
 	{
-		RefreshActorRotationExtraSmooth(ViewState.SmoothRotation.Yaw, DeltaTime, 20.0f, 1000.0f);
+		RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, 20.0f, 1000.0f);
 		return;
 	}
 
 	// Prevent the character from rotating past a certain angle.
 
-	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.Rotation.Yaw)};
+	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw)};
 	if (FMath::Abs(YawAngleDifference) > 70.0f)
 	{
-		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f)),
+		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.Rotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f)),
 		                     DeltaTime, 20.0f);
 	}
 	else
@@ -990,7 +990,7 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 					break;
 
 				case EAlsInAirRotationMode::KeepRelativeRotation:
-					RefreshActorRotation(ViewState.SmoothRotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle, DeltaTime, 5.0f);
+					RefreshActorRotation(ViewState.Rotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle, DeltaTime, 5.0f);
 					break;
 
 				default:
@@ -1016,7 +1016,7 @@ bool AAlsCharacter::TryRefreshCustomInAirActorRotation(const float DeltaTime)
 
 void AAlsCharacter::RefreshInAirAimingActorRotation(const float DeltaTime)
 {
-	RefreshActorRotation(ViewState.SmoothRotation.Yaw, DeltaTime, 15.0f);
+	RefreshActorRotation(ViewState.Rotation.Yaw, DeltaTime, 15.0f);
 }
 
 void AAlsCharacter::RefreshActorRotationInstant(const float TargetYawAngle, const ETeleportType Teleport)

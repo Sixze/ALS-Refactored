@@ -1,6 +1,7 @@
 #include "AlsLinkedAnimationInstance.h"
 
 #include "AlsAnimationInstance.h"
+#include "AlsCharacter.h"
 #include "Utility/AlsMacro.h"
 
 UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
@@ -13,6 +14,7 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Parent = Cast<UAlsAnimationInstance>(GetSkelMeshComponent()->GetAnimInstance());
+	Character = Cast<AAlsCharacter>(GetOwningActor());
 }
 
 void UAlsLinkedAnimationInstance::NativeBeginPlay()

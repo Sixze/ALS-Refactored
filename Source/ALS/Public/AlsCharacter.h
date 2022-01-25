@@ -77,6 +77,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionState LocomotionState;
 
+	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
 	FRotator ViewRotation;
 
@@ -623,5 +624,5 @@ inline void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
 
 inline void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw - LocomotionState.TargetYawAngle);
+	LocomotionState.ViewRelativeTargetYawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle);
 }

@@ -33,7 +33,7 @@ private:
 	UAlsAnimationInstanceSettings* Settings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	AAlsCharacter* AlsCharacter;
+	AAlsCharacter* Character;
 
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may be incorrect (such as foot location used in foot locking).
@@ -54,15 +54,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag LocomotionMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag LocomotionAction;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag GroundedEntryMode;
@@ -120,10 +111,6 @@ public:
 
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
-
-	EAlsRotationMode GetRotationMode() const;
-
-	const FGameplayTag& GetLocomotionMode() const;
 
 	const FAlsFeetState& GetFeetState() const;
 
@@ -272,16 +259,6 @@ public:
 inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
 {
 	bPendingUpdate = bNewPendingUpdate;
-}
-
-inline EAlsRotationMode UAlsAnimationInstance::GetRotationMode() const
-{
-	return RotationMode;
-}
-
-inline const FGameplayTag& UAlsAnimationInstance::GetLocomotionMode() const
-{
-	return LocomotionMode;
 }
 
 inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const

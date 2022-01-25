@@ -108,7 +108,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	const auto CameraTargetRotation{
 		AlsCharacter->IsLocallyControlled()
 			? AlsCharacter->GetViewRotation()
-			: AlsCharacter->GetViewState().SmoothRotation
+			: AlsCharacter->GetViewState().Rotation
 	};
 
 	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);

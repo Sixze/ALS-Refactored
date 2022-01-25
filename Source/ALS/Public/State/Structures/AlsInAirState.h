@@ -13,9 +13,6 @@ struct ALS_API FAlsInAirState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float JumpPlayRate{1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float VerticalVelocity{0.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float GroundPredictionAmount{1.0f};
 };

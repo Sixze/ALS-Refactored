@@ -4,6 +4,7 @@
 #include "AlsLinkedAnimationInstance.generated.h"
 
 class UAlsAnimationInstance;
+class AAlsCharacter;
 
 UCLASS()
 class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
@@ -13,6 +14,9 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	UAlsAnimationInstance* Parent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	AAlsCharacter* Character;
 
 public:
 	UAlsLinkedAnimationInstance();
