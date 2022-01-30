@@ -78,7 +78,8 @@ private:
 	FAlsLocomotionState LocomotionState;
 
 	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
+		ReplicatedUsing = "OnReplicate_ViewRotation", Meta = (AllowPrivateAccess))
 	FRotator ViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
@@ -101,6 +102,10 @@ private:
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+#if WITH_EDITOR
+	virtual bool CanEditChange(const FProperty* Property) const override;
+#endif
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
@@ -114,6 +119,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Restart() override;
+
+	virtual void FaceRotation(FRotator NewRotation, float DeltaTime) override final;
 
 	virtual void Jump() override;
 
@@ -317,11 +324,18 @@ private:
 	UFUNCTION(Server, Unreliable)
 	void ServerSetViewRotation(const FRotator& NewViewRotation);
 
+	UFUNCTION()
+	void OnReplicate_ViewRotation(const FRotator& PreviousViewRotation);
+
+	void CorrectViewInterpolation(const FRotator& PreviousViewRotation);
+
 public:
 	const FAlsViewState& GetViewState() const;
 
 private:
 	void RefreshView(float DeltaTime);
+
+	void RefreshViewInterpolation(float DeltaTime);
 
 	// Rotation
 

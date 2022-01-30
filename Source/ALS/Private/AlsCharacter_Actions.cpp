@@ -310,14 +310,15 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	// Calculate actor offsets (offsets between actor and target transform).
 
 	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
+	const auto TargetRelativeRotation{Parameters.TargetRelativeRotation.GetNormalized()};
 
 	const auto TargetTransform{
 		bUseRelativeLocation
 			? FTransform{
-				Parameters.TargetRelativeRotation, Parameters.TargetRelativeLocation,
+				TargetRelativeRotation, Parameters.TargetRelativeLocation,
 				Parameters.TargetPrimitive->GetComponentScale()
 			}.GetRelativeTransformReverse(Parameters.TargetPrimitive->GetComponentTransform())
-			: FTransform{Parameters.TargetRelativeRotation, Parameters.TargetRelativeLocation}
+			: FTransform{TargetRelativeRotation, Parameters.TargetRelativeLocation}
 	};
 
 	const auto ActorFeetLocationOffset{GetCharacterMovement()->GetActorFeetLocation() - TargetTransform.GetLocation()};
@@ -343,7 +344,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	Mantling->MantlingSettings = MantlingSettings;
 	Mantling->TargetPrimitive = bUseRelativeLocation ? Parameters.TargetPrimitive : nullptr;
 	Mantling->TargetRelativeLocation = Parameters.TargetRelativeLocation;
-	Mantling->TargetRelativeRotation = Parameters.TargetRelativeRotation;
+	Mantling->TargetRelativeRotation = TargetRelativeRotation;
 	Mantling->ActorFeetLocationOffset = ActorFeetLocationOffset;
 	Mantling->ActorRotationOffset = ActorRotationOffset.Rotator();
 	Mantling->MantlingHeight = Parameters.MantlingHeight;

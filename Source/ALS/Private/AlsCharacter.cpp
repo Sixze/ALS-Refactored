@@ -5,12 +5,14 @@
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
+#include "GameFramework/GameNetworkManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMath.h"
+#include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 #include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
@@ -37,7 +39,33 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
+
+#if WITH_EDITOR
+
+	// This will prevent the editor from combining component details with actor details.
+	// Component details can still be accessed from the actor's component hierarchy.
+
+	StaticClass()->FindPropertyByName(TEXT("Mesh"))->SetPropertyFlags(CPF_DisableEditOnInstance);
+	StaticClass()->FindPropertyByName(TEXT("CapsuleComponent"))->SetPropertyFlags(CPF_DisableEditOnInstance);
+	StaticClass()->FindPropertyByName(TEXT("CharacterMovement"))->SetPropertyFlags(CPF_DisableEditOnInstance);
+#endif
 }
+
+#if WITH_EDITOR
+bool AAlsCharacter::CanEditChange(const FProperty* Property) const
+{
+	auto bCanEditChange{Super::CanEditChange(Property)};
+
+	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationPitch) ||
+	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationYaw) ||
+	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationRoll))
+	{
+		bCanEditChange = false;
+	}
+
+	return bCanEditChange;
+}
+#endif
 
 void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -100,6 +128,9 @@ void AAlsCharacter::PostInitializeComponents()
 
 void AAlsCharacter::BeginPlay()
 {
+	checkf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
+	       TEXT("These settings are not allowed and must be turned off!"))
+
 	Super::BeginPlay();
 
 	// Update states to use the initial desired values.
@@ -183,6 +214,11 @@ void AAlsCharacter::Restart()
 	Super::Restart();
 
 	ApplyDesiredStance();
+}
+
+void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
+{
+	// Left empty intentionally.
 }
 
 void AAlsCharacter::Jump()
@@ -777,11 +813,61 @@ void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewRotation, this)
 
+		// The character movement component already sends the view rotation to the
+		// server if the movement is replicated, so we don't have to do it ourselves.
+
 		if (!IsReplicatingMovement() && GetLocalRole() == ROLE_AutonomousProxy)
 		{
 			ServerSetViewRotation(NewViewRotation);
 		}
 	}
+}
+
+void AAlsCharacter::OnReplicate_ViewRotation(const FRotator& PreviousViewRotation)
+{
+	ViewRotation.Normalize();
+
+	CorrectViewInterpolation(PreviousViewRotation);
+}
+
+void AAlsCharacter::CorrectViewInterpolation(const FRotator& PreviousViewRotation)
+{
+	// Based on UCharacterMovementComponent::SmoothCorrection().
+
+	if (!Settings->bViewInterpolationEnabled || GetLocalRole() >= ROLE_AutonomousProxy ||
+	    GetReplicatedServerLastTransformUpdateTimeStamp() <= 0.0f)
+	{
+		return;
+	}
+
+	const auto NewViewRotation{ViewRotation};
+
+	ViewState.InterpolationInitialRotation = PreviousViewRotation;
+	ViewState.InterpolationTargetRotation = NewViewRotation;
+	ViewRotation = PreviousViewRotation;
+
+	// Using server time lets us know how much time actually elapsed, regardless of packet lag variance.
+
+	const auto ServerDeltaTime{GetReplicatedServerLastTransformUpdateTimeStamp() - ViewState.InterpolationServerTimeStamp};
+
+	// Don't let the client fall too far behind or run ahead of new server time.
+
+	const auto MaxServerDeltaTime{UAlsUtility::GetDefaultObject<AGameNetworkManager>()->MaxClientSmoothingDeltaTime};
+	const auto MinServerDeltaTime{FMath::Min(GetCharacterMovement()->NetworkSimulatedSmoothLocationTime, MaxServerDeltaTime)};
+
+	// Calculate how far behind we can be after receiving a new server time.
+
+	const auto MinClientDeltaTime{FMath::Clamp(ServerDeltaTime * 1.25f, MinServerDeltaTime, MaxServerDeltaTime)};
+
+	ViewState.InterpolationServerTimeStamp = GetReplicatedServerLastTransformUpdateTimeStamp();
+
+	ViewState.InterpolationClientTimeStamp = FMath::Clamp(ViewState.InterpolationClientTimeStamp,
+	                                                      ViewState.InterpolationServerTimeStamp - MinClientDeltaTime,
+	                                                      ViewState.InterpolationServerTimeStamp);
+
+	// Compute actual delta between new server time and client simulation.
+
+	ViewState.InterpolationDuration = ViewState.InterpolationServerTimeStamp - ViewState.InterpolationClientTimeStamp;
 }
 
 void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
@@ -797,16 +883,49 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}
 
+	RefreshViewInterpolation(DeltaTime);
+
 	// Interpolate view rotation to current raw view rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
 	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewRotation, DeltaTime, 30.0f);
-	ViewState.Rotation.Normalize();
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
 
 	ViewState.YawSpeed = FMath::Abs((ViewState.Rotation.Yaw - ViewState.PreviousYawAngle) / DeltaTime);
+}
+
+void AAlsCharacter::RefreshViewInterpolation(const float DeltaTime)
+{
+	// Based on UCharacterMovementComponent::SmoothClientPosition_Interpolate()
+	// and UCharacterMovementComponent::SmoothClientPosition_UpdateVisuals().
+
+	if (!Settings->bViewInterpolationEnabled || GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	ViewState.InterpolationClientTimeStamp += DeltaTime;
+
+	const auto InterpolationAmount{
+		ViewState.InterpolationDuration <= SMALL_NUMBER || ViewState.InterpolationClientTimeStamp >= ViewState.InterpolationServerTimeStamp
+			? 1.0f
+			: FMath::Max(0.0f,
+			             1.0f - (ViewState.InterpolationServerTimeStamp - ViewState.InterpolationClientTimeStamp) /
+			             ViewState.InterpolationDuration)
+	};
+
+	if (InterpolationAmount < 1.0f - KINDA_SMALL_NUMBER)
+	{
+		ViewRotation = UAlsMath::LerpRotator(ViewState.InterpolationInitialRotation,
+		                                     ViewState.InterpolationTargetRotation, InterpolationAmount);
+	}
+	else
+	{
+		ViewRotation = ViewState.InterpolationTargetRotation;
+		ViewState.InterpolationClientTimeStamp = ViewState.InterpolationServerTimeStamp;
+	}
 }
 
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)

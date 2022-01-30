@@ -214,7 +214,6 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	ViewState.SmoothRotation = UAlsMath::ExponentialDecay(ViewState.SmoothRotation, Character->GetViewState().Rotation,
 	                                                      DeltaTime, Settings->General.ViewSmoothRotationInterpolationSpeed);
-	ViewState.SmoothRotation.Normalize();
 
 	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
 	                                                   Character->GetLocomotionState().Rotation.Yaw);
@@ -630,7 +629,8 @@ EAlsMovementDirection UAlsAnimationInstance::CalculateMovementDirection() const
 	}
 
 	return UAlsMath::CalculateMovementDirection(
-		FRotator::NormalizeAxis(Character->GetLocomotionState().VelocityYawAngle - Character->GetViewState().Rotation.Yaw), 70.0f, 5.0f);
+		FRotator::NormalizeAxis(Character->GetLocomotionState().VelocityYawAngle - Character->GetViewState().Rotation.Yaw),
+		70.0f, 5.0f);
 }
 
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)

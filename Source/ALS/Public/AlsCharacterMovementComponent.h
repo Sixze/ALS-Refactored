@@ -65,7 +65,7 @@ private:
 	using Super = FNetworkPredictionData_Client_Character;
 
 public:
-	FAlsNetworkPredictionData(const UCharacterMovementComponent& MovementComponent);
+	FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement);
 
 	virtual FSavedMovePtr AllocateNewMove() override;
 };
@@ -107,6 +107,8 @@ public:
 #if WITH_EDITOR
 	virtual bool CanEditChange(const FProperty* Property) const override;
 #endif
+
+	virtual void BeginPlay() override;
 
 	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
 

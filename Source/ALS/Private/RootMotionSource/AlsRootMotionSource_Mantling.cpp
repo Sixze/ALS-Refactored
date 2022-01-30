@@ -138,10 +138,12 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	bSuccess &= SerializePackedVector<10, 24>(TargetRelativeLocation, Archive);
 
 	TargetRelativeRotation.SerializeCompressedShort(Archive);
+	TargetRelativeRotation.Normalize();
 
 	bSuccess &= SerializePackedVector<10, 24>(ActorFeetLocationOffset, Archive);
 
 	ActorRotationOffset.SerializeCompressedShort(Archive);
+	ActorRotationOffset.Normalize();
 
 	Archive << MantlingHeight;
 

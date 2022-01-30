@@ -112,7 +112,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	};
 
 	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
-	CameraRotation.Normalize();
 
 	const auto PivotTargetTransform{GetThirdPersonPivotTransform()};
 
@@ -395,7 +394,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Location, const bool bDisplayDebugCameraTraces) const
 {
-	// Copied with modifications from ComponentEncroachesBlockingGeometry_WithAdjustment
+	// Based on ComponentEncroachesBlockingGeometry_WithAdjustment().
 
 	constexpr auto Epsilon{1.0f};
 

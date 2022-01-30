@@ -356,7 +356,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	const auto ColumnOffset{120.0f * Scale};
 
 	static const auto ViewRotationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewRotation), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsViewState, Rotation), false))
 	};
 
 	auto Color{FLinearColor::Red};
@@ -366,12 +366,12 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("R: %.2f P: %.2f Y: %.2f"),
-	                                                      ViewRotation.Roll, ViewRotation.Pitch, ViewRotation.Yaw));
+	                                                      ViewState.Rotation.Roll, ViewState.Rotation.Pitch, ViewState.Rotation.Yaw));
 	Text.Draw(Canvas->Canvas, {HorizontalPosition + ColumnOffset, VerticalPosition});
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCone(GetWorld(), GetPawnViewLocation(),
-	              ViewRotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
+	              ViewState.Rotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
 
@@ -454,7 +454,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	VerticalPosition += RowOffset;
 
-	static const auto TargetActorRotationText{
+	static const auto TargetYawAngleText{
 		FText::AsCultureInvariant(
 			FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(FAlsLocomotionState, SmoothTargetYawAngle), false))
 	};
@@ -462,7 +462,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Color = {0.0f, 0.75f, 1.0f};
 	Text.SetColor(Color);
 
-	Text.Text = TargetActorRotationText;
+	Text.Text = TargetYawAngleText;
 	Text.Draw(Canvas->Canvas, {HorizontalPosition, VerticalPosition});
 
 	Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%.2f"), LocomotionState.SmoothTargetYawAngle));
@@ -480,7 +480,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCapsule(GetWorld(), LocomotionState.Location, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), GetCapsuleComponent()->GetComponentQuat(),
+	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), LocomotionState.Rotation.Quaternion(),
 	                 FColor::Green, false, -1.0f, SDPG_World, 1.0f);
 #endif
 }

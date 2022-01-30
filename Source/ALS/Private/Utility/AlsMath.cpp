@@ -94,11 +94,7 @@ float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float Othe
 	// 		                                                 -1.0f, 1.0f)
 	//                                                  }));
 
-	return FMath::Clamp(AxisValue *
-	                    FMath::GetMappedRangeValueClamped({0.0f, 0.6f},
-	                                                      {1.0f, 1.2f},
-	                                                      FMath::Abs(OtherAxisValue)),
-	                    -1.0f, 1.0f);
+	return FMath::Clamp(AxisValue * FMath::GetMappedRangeValueClamped({0.0f, 0.6f}, {1.0f, 1.2f}, FMath::Abs(OtherAxisValue)), -1.0f, 1.0f);
 }
 
 EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleOffset)

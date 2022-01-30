@@ -96,7 +96,7 @@ void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
 	}
 }
 
-FAlsNetworkPredictionData::FAlsNetworkPredictionData(const UCharacterMovementComponent& MovementComponent) : Super(MovementComponent) {}
+FAlsNetworkPredictionData::FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement) : Super(Movement) {}
 
 FSavedMovePtr FAlsNetworkPredictionData::AllocateNewMove()
 {
@@ -136,8 +136,11 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	FallingLateralFriction = 1.0f;
 	JumpOffJumpZFactor = 0.0f;
 
-	bAllowPhysicsRotationDuringAnimRootMotion = true;
-	bIgnoreBaseRotation = true; // bIgnoreBaseRotation == false is not supported.
+	bNetworkAlwaysReplicateTransformUpdateTimestamp = true; // Required for view interpolation.
+
+	bIgnoreBaseRotation = true;
+
+	bAllowPhysicsRotationDuringAnimRootMotion = true; // Used to allow character rotation while rolling.
 }
 
 #if WITH_EDITOR
@@ -152,7 +155,15 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 
 	return bCanEditChange;
 }
+
 #endif
+
+void UAlsCharacterMovementComponent::BeginPlay()
+{
+	checkf(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."))
+
+	Super::BeginPlay();
+}
 
 void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
 {
