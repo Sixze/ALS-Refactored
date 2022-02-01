@@ -89,9 +89,6 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void AAlsCharacter::PostInitializeComponents()
 {
-	check(IsValid(Settings))
-	check(IsValid(MovementSettings))
-
 	Super::PostInitializeComponents();
 
 	// Make sure that the pose is always ticked on the server when the character is controlled
@@ -112,7 +109,7 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
-	AlsAnimationInstance = CastChecked<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	// Set default rotation values.
 
@@ -128,6 +125,10 @@ void AAlsCharacter::PostInitializeComponents()
 
 void AAlsCharacter::BeginPlay()
 {
+	check(IsValid(Settings))
+	check(IsValid(MovementSettings))
+	check(IsValid(AlsAnimationInstance))
+
 	checkf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 	       TEXT("These settings are not allowed and must be turned off!"))
 
