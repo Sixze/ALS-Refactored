@@ -40,6 +40,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bPendingUpdate;
 
+	// The animation curves will be relevant if the character is rendered or VisibilityBasedAnimTickOption
+	// is set to AlwaysTickPoseAndRefreshBones, otherwise the curves will have their old values even though
+	// the animation blueprint continues to update.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bAnimationCurvesRelevant;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bJustTeleported;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAllowDynamicTransitions{true};
 
@@ -112,6 +121,8 @@ public:
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
 
+	void SetAnimationCurvesRelevant(bool bNewRelevant);
+
 	const FAlsFeetState& GetFeetState() const;
 
 private:
@@ -131,11 +142,13 @@ protected:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	void HandleFootLockChangedBase(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
-	                               const FQuat& BaseRotation, const FTransform& RelativeTransform) const;
+	static void ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& RootTransform);
+
+	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
+	                               const FQuat& BaseRotation, const FTransform& RootRelativeTransform) const;
 
 	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
-	                     const FName& FootLockCurveName, const FTransform& RelativeTransform,
+	                     const FName& FootLockCurveName, const FTransform& RootRelativeTransform,
 	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,
@@ -143,7 +156,7 @@ private:
 
 	static void ResetFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation);
 
-	static void RefreshFinalFootState(FAlsFootState& FootState, const FTransform& RelativeTransform,
+	static void RefreshFinalFootState(FAlsFootState& FootState, const FTransform& MeshRelativeTransform,
 	                                  const FVector& FinalLocation, const FQuat& FinalRotation);
 
 	void RefreshPelvisOffset(float DeltaTime, float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ);
@@ -259,6 +272,11 @@ public:
 inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
 {
 	bPendingUpdate = bNewPendingUpdate;
+}
+
+inline void UAlsAnimationInstance::SetAnimationCurvesRelevant(const bool bNewRelevant)
+{
+	bAnimationCurvesRelevant = bNewRelevant;
 }
 
 inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const

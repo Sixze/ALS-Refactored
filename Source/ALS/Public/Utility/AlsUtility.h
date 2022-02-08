@@ -24,12 +24,6 @@ public:
 	static constexpr int32 DrawCircleSidesCount{16};
 
 public:
-	template <class T>
-	static T* GetDefaultObject()
-	{
-		return T::StaticClass()->template GetDefaultObject<T>();
-	}
-
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
 	static FString NameToDisplayString(const FName& Name, bool bIsBool = false);
 

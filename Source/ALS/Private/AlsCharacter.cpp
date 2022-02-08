@@ -12,7 +12,6 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMath.h"
-#include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 #include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
@@ -40,11 +39,10 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
 
-#if WITH_EDITOR
-
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
 
+#if WITH_EDITOR
 	StaticClass()->FindPropertyByName(TEXT("Mesh"))->SetPropertyFlags(CPF_DisableEditOnInstance);
 	StaticClass()->FindPropertyByName(TEXT("CapsuleComponent"))->SetPropertyFlags(CPF_DisableEditOnInstance);
 	StaticClass()->FindPropertyByName(TEXT("CharacterMovement"))->SetPropertyFlags(CPF_DisableEditOnInstance);
@@ -172,11 +170,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 			? EVisibilityBasedAnimTickOption::AlwaysTickPose
 			: EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 
-	if (!GetMesh()->bRecentlyRendered && GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
-	{
-		AlsAnimationInstance->SetPendingUpdate(true);
-	}
-
 	RefreshLocomotionLocationAndRotation();
 
 	RefreshRotationMode();
@@ -208,6 +201,16 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	ViewState.PreviousYawAngle = ViewState.Rotation.Yaw;
 
 	Super::Tick(DeltaTime);
+
+	if (!GetMesh()->bRecentlyRendered &&
+	    GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
+	{
+		AlsAnimationInstance->SetPendingUpdate(true);
+	}
+
+	AlsAnimationInstance->SetAnimationCurvesRelevant(
+		GetMesh()->bRecentlyRendered ||
+		GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
 }
 
 void AAlsCharacter::Restart()
@@ -853,7 +856,7 @@ void AAlsCharacter::CorrectViewInterpolation(const FRotator& PreviousViewRotatio
 
 	// Don't let the client fall too far behind or run ahead of new server time.
 
-	const auto MaxServerDeltaTime{UAlsUtility::GetDefaultObject<AGameNetworkManager>()->MaxClientSmoothingDeltaTime};
+	const auto MaxServerDeltaTime{GetDefault<AGameNetworkManager>()->MaxClientSmoothingDeltaTime};
 	const auto MinServerDeltaTime{FMath::Min(GetCharacterMovement()->NetworkSimulatedSmoothLocationTime, MaxServerDeltaTime)};
 
 	// Calculate how far behind we can be after receiving a new server time.

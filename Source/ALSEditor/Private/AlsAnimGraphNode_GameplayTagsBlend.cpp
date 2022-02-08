@@ -62,11 +62,11 @@ void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, con
 
 	if (bBlendPosePin)
 	{
-		Pin->PinFriendlyName = FText::Format(LOCTEXT("Pose", "{0} Pose"), {Pin->PinFriendlyName});
+		Pin->PinFriendlyName = FText::Format(LOCTEXT("Pose", "{PinName} Pose"), {{TEXT("PinName"), Pin->PinFriendlyName}});
 	}
 	else if (bBlendTimePin)
 	{
-		Pin->PinFriendlyName = FText::Format(LOCTEXT("BlendTime", "{0} Blend Time"), {Pin->PinFriendlyName});
+		Pin->PinFriendlyName = FText::Format(LOCTEXT("BlendTime", "{PinName} Blend Time"), {{TEXT("PinName"), Pin->PinFriendlyName}});
 	}
 }
 
