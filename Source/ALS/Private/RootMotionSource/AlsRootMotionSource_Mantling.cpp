@@ -1,7 +1,9 @@
 ﻿#include "RootMotionSource/AlsRootMotionSource_Mantling.h"
 
+#include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacro.h"
@@ -82,6 +84,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 			auto AnimationLocationOffset{TargetTransform.GetUnitAxis(EAxis::X) * MantlingSettings->StartRelativeLocation.X};
 			AnimationLocationOffset.Z = MantlingSettings->StartRelativeLocation.Z;
+			AnimationLocationOffset *= Character.GetCapsuleComponent()->GetComponentScale().Z;
 
 			// Blend into the animation offset and final offset at the same time.
 			// Horizontal and vertical blends use different correction amounts.

@@ -26,8 +26,8 @@ void UAlsAnimationInstance::NativeBeginPlay()
 	check(IsValid(Settings));
 	check(IsValid(Character));
 
-	Character->GetRootComponent()->TransformUpdated.AddWeakLambda(
-		this, [this](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
+	Character->GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
+		this, [&bJustTeleported = bJustTeleported](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
 		{
 			bJustTeleported |= TeleportType != ETeleportType::None;
 		});
@@ -253,18 +253,19 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped({-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
 	}
 
-	if (IsSpineRotationAllowed())
-	{
-		ViewState.SpineYawAngle = ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
-			                          ? ViewState.YawAngle - 360.0f
-			                          : ViewState.YawAngle;
-	}
-
 	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
 	const auto AimManualAmount{GetCurveValueClamped01(UAlsConstants::AimManualCurve())};
 
-	ViewState.SpineYawAngle = FRotator::NormalizeAxis(ViewState.SpineYawAngle * AimAllowedAmount * AimManualAmount);
 	ViewState.LookAmount = AimAllowedAmount * (1.0f - AimManualAmount);
+
+	if (IsSpineRotationAllowed())
+	{
+		ViewState.TargetSpineYawAngle = ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			                                ? ViewState.YawAngle - 360.0f
+			                                : ViewState.YawAngle;
+	}
+
+	ViewState.SpineYawAngle = FRotator::NormalizeAxis(ViewState.TargetSpineYawAngle * AimAllowedAmount * AimManualAmount);
 }
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
@@ -293,12 +294,12 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		}
 	}
 
-	const auto& RootTransform{Character->GetRootComponent()->GetComponentTransform()};
+	const auto& CapsuleTransform{Character->GetCapsuleComponent()->GetComponentTransform()};
 
 	if (bJustTeleported)
 	{
-		ProcessFootLockTeleport(FeetState.Left, RootTransform);
-		ProcessFootLockTeleport(FeetState.Right, RootTransform);
+		ProcessFootLockTeleport(FeetState.Left, CapsuleTransform);
+		ProcessFootLockTeleport(FeetState.Right, CapsuleTransform);
 	}
 
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
@@ -319,7 +320,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 			: UAlsConstants::FootRightIkVirtualBone()
 	};
 
-	const auto RootRelativeTransform{RootTransform.Inverse()};
+	const auto CapsuleRelativeTransform{CapsuleTransform.Inverse()};
 
 	const auto& BasedMovement{Character->GetBasedMovement()};
 	if (BasedMovement.MovementBase != FeetState.BasePrimitive || BasedMovement.BoneName != FeetState.BaseBoneName)
@@ -331,19 +332,19 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		FQuat BaseRotation;
 		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, BaseLocation, BaseRotation);
 
-		ProcessFootLockBaseChange(FeetState.Left, FootLeftBone, BaseLocation, BaseRotation, RootRelativeTransform);
-		ProcessFootLockBaseChange(FeetState.Right, FootRightBone, BaseLocation, BaseRotation, RootRelativeTransform);
+		ProcessFootLockBaseChange(FeetState.Left, FootLeftBone, BaseLocation, BaseRotation, CapsuleRelativeTransform);
+		ProcessFootLockBaseChange(FeetState.Right, FootRightBone, BaseLocation, BaseRotation, CapsuleRelativeTransform);
 	}
 
 	FVector FinalFootLeftLocation;
 	FQuat FinalFootLeftRotation;
 	RefreshFootLock(FeetState.Left, FootLeftBone, UAlsConstants::FootLeftLockCurve(),
-	                RootRelativeTransform, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
+	                CapsuleRelativeTransform, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
 
 	FVector FinalFootRightLocation;
 	FQuat FinalFootRightRotation;
 	RefreshFootLock(FeetState.Right, FootRightBone, UAlsConstants::FootRightLockCurve(),
-	                RootRelativeTransform, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
+	                CapsuleRelativeTransform, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
 
 	const auto MeshRelativeTransform{GetSkelMeshComponent()->GetComponentTransform().Inverse()};
 
@@ -378,17 +379,20 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset.Z, TargetFootRightLocationOffset.Z);
 }
 
-void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& RootTransform)
+void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& CapsuleTransform) const
 {
 	if (!FootState.LockLocation.IsZero())
 	{
-		FootState.LockLocation = RootTransform.TransformPosition(FootState.LockRootRelativeLocation);
-		FootState.LockRotation = RootTransform.TransformRotation(FootState.LockRootRelativeRotation);
+		auto LockCapsuleRelativeLocation{FootState.LockCapsuleRelativeLocation};
+		LockCapsuleRelativeLocation.Z -= Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+		FootState.LockLocation = CapsuleTransform.TransformPosition(LockCapsuleRelativeLocation);
+		FootState.LockRotation = CapsuleTransform.TransformRotation(FootState.LockCapsuleRelativeRotation);
 	}
 }
 
 void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
-                                                      const FQuat& BaseRotation, const FTransform& RootRelativeTransform) const
+                                                      const FQuat& BaseRotation, const FTransform& CapsuleRelativeTransform) const
 {
 	if (FootState.LockLocation.IsZero())
 	{
@@ -398,8 +402,10 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 		FootState.LockRotation = FootTransform.GetRotation();
 	}
 
-	FootState.LockRootRelativeLocation = RootRelativeTransform.TransformPosition(FootState.LockLocation);
-	FootState.LockRootRelativeRotation = RootRelativeTransform.TransformRotation(FootState.LockRotation);
+	FootState.LockCapsuleRelativeLocation = CapsuleRelativeTransform.TransformPosition(FootState.LockLocation);
+	FootState.LockCapsuleRelativeLocation.Z += Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+	FootState.LockCapsuleRelativeRotation = CapsuleRelativeTransform.TransformRotation(FootState.LockRotation);
 
 	const auto& BasedMovement{Character->GetBasedMovement()};
 	if (BasedMovement.HasRelativeLocation())
@@ -417,7 +423,7 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 }
 
 void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
-                                            const FName& FootLockCurveName, const FTransform& RootRelativeTransform,
+                                            const FName& FootLockCurveName, const FTransform& CapsuleRelativeTransform,
                                             const float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const
 {
 	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
@@ -444,8 +450,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 			FootState.LockLocation = FVector::ZeroVector;
 			FootState.LockRotation = FQuat::Identity;
 
-			FootState.LockRootRelativeLocation = FVector::ZeroVector;
-			FootState.LockRootRelativeRotation = FQuat::Identity;
+			FootState.LockCapsuleRelativeLocation = FVector::ZeroVector;
+			FootState.LockCapsuleRelativeRotation = FQuat::Identity;
 
 			FootState.LockBaseRelativeLocation = FVector::ZeroVector;
 			FootState.LockBaseRelativeRotation = FQuat::Identity;
@@ -500,8 +506,10 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		FootState.LockRotation = BaseRotation * FootState.LockBaseRelativeRotation;
 	}
 
-	FootState.LockRootRelativeLocation = RootRelativeTransform.TransformPosition(FootState.LockLocation);
-	FootState.LockRootRelativeRotation = RootRelativeTransform.TransformRotation(FootState.LockRotation);
+	FootState.LockCapsuleRelativeLocation = CapsuleRelativeTransform.TransformPosition(FootState.LockLocation);
+	FootState.LockCapsuleRelativeLocation.Z += Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+
+	FootState.LockCapsuleRelativeRotation = CapsuleRelativeTransform.TransformRotation(FootState.LockRotation);
 
 	FinalLocation = FMath::Lerp(FootTransform.GetLocation(), FootState.LockLocation, FootState.LockAmount);
 	FinalRotation = FQuat::Slerp(FootTransform.GetRotation(), FootState.LockRotation, FootState.LockAmount);
@@ -518,6 +526,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		return;
 	}
 
+	const auto MeshScale{GetSkelMeshComponent()->GetComponentScale().Z};
+
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
 	auto FootLocation{FinalLocation};
@@ -528,8 +538,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     FootLocation + FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward},
-	                                     FootLocation - FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward},
+	                                     FootLocation + FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * MeshScale},
+	                                     FootLocation - FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * MeshScale},
 	                                     UEngineTypes::ConvertToCollisionChannel(Settings->Feet.IkTraceChannel),
 	                                     QueryParameters);
 
@@ -556,14 +566,16 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	if (Character->GetCharacterMovement()->IsWalkable(Hit))
 	{
+		const auto ScaledFootHeight{Settings->Feet.FootHeight * MeshScale};
+
 		// Find the difference in location from the impact location and the expected (flat) floor location. These values
 		// are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
 
 		TargetLocationOffset = Hit.ImpactPoint +
-		                       Hit.ImpactNormal * Settings->Feet.FootHeight -
+		                       Hit.ImpactNormal * ScaledFootHeight -
 		                       FootLocation;
 
-		TargetLocationOffset.Z -= Settings->Feet.FootHeight;
+		TargetLocationOffset.Z -= ScaledFootHeight;
 
 		// Calculate the rotation offset.
 
@@ -619,7 +631,9 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const flo
 
 	// Set the new offset to be the lowest foot offset.
 
-	const auto TargetPelvisOffsetZ{FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ)};
+	const auto TargetPelvisOffsetZ{
+		FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) / GetSkelMeshComponent()->GetComponentScale().Z
+	};
 
 	// Interpolate current offset to the new target value.
 
@@ -831,10 +845,14 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 
 	const auto SkeletalMesh{GetSkelMeshComponent()};
 
+	const auto FootIkDistanceThresholdSquared{
+		FMath::Square(Settings->DynamicTransition.FootIkDistanceThreshold * GetSkelMeshComponent()->GetComponentScale().Z)
+	};
+
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Settings->General.bUseFootIkBones
 		                                                         ? UAlsConstants::FootLeftIkBone()
 		                                                         : UAlsConstants::FootLeftIkVirtualBone()),
-	                         FeetState.Left.LockLocation) > FMath::Square(Settings->DynamicTransition.FootIkDistanceThreshold))
+	                         FeetState.Left.LockLocation) > FootIkDistanceThresholdSquared)
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 		return;
@@ -843,7 +861,7 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Settings->General.bUseFootIkBones
 		                                                         ? UAlsConstants::FootRightIkBone()
 		                                                         : UAlsConstants::FootRightIkVirtualBone()),
-	                         FeetState.Right.LockLocation) > FMath::Square(Settings->DynamicTransition.FootIkDistanceThreshold))
+	                         FeetState.Right.LockLocation) > FootIkDistanceThresholdSquared)
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), 0.2f, 0.2f, 1.5f, 0.8f, 0.1f);
 	}
@@ -1100,8 +1118,9 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	VelocityDirection.Normalize();
 
 	const auto SweepVector{
-		VelocityDirection * FMath::GetMappedRangeValueClamped({0.0f, -4000.0f}, {50.0f, 2000.0f},
-		                                                      Character->GetLocomotionState().Velocity.Z)
+		VelocityDirection *
+		FMath::GetMappedRangeValueClamped({0.0f, -4000.0f}, {50.0f, 2000.0f}, Character->GetLocomotionState().Velocity.Z) *
+		GetSkelMeshComponent()->GetComponentScale().Z
 	};
 
 	FCollisionObjectQueryParams ObjectQueryParameters;

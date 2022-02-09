@@ -1052,9 +1052,10 @@ float AAlsCharacter::CalculateActorRotationSpeed() const
 
 void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
 {
-	if (!LocomotionState.bRotationLocked && LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
-	    !LocomotionAction.IsValid() && !HasAnyRootMotion() && !LocomotionState.bMoving &&
-	    GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())
+	if (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled() &&
+	    !LocomotionState.bRotationLocked && !LocomotionAction.IsValid() &&
+	    LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
+	    !HasAnyRootMotion() && !LocomotionState.bMoving)
 	{
 		ApplyRotationYawSpeed(DeltaTime);
 	}

@@ -85,6 +85,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto* Capsule{GetCapsuleComponent()};
 
+	const auto CapsuleScale{Capsule->GetComponentScale().Z};
 	const auto CapsuleRadius{Capsule->GetScaledCapsuleRadius()};
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
@@ -92,16 +93,17 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
 
-	const auto LedgeHeightDelta{TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()};
+	const auto LedgeHeightDelta{(TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * CapsuleScale};
 
 	// Trace forward to find a object the character cannot walk on.
 
 	static const FName ForwardTraceTag{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * CapsuleRadius};
-	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.X + TraceSettings.LedgeHeight.Y) * 0.5f - UCharacterMovementComponent::MAX_FLOOR_DIST;
+	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.X + TraceSettings.LedgeHeight.Y) *
+		0.5f * CapsuleScale - UCharacterMovementComponent::MAX_FLOOR_DIST;
 
-	auto ForwardTraceEnd{ForwardTraceStart + ForwardTraceDirection * (CapsuleRadius + TraceSettings.ReachDistance + 1.0f)};
+	auto ForwardTraceEnd{ForwardTraceStart + ForwardTraceDirection * (CapsuleRadius + (TraceSettings.ReachDistance + 1.0f) * CapsuleScale)};
 
 	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
@@ -134,7 +136,9 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	static const FName DownwardTraceTag{FString::Format(TEXT("{0} (Downward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
-	const auto TargetLocationOffset{FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * TraceSettings.TargetLocationOffset};
+	const auto TargetLocationOffset{
+		FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * (TraceSettings.TargetLocationOffset * CapsuleScale)
+	};
 
 	const FVector DownwardTraceStart{
 		ForwardTraceHit.ImpactPoint.X - TargetLocationOffset.X,
@@ -145,7 +149,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const FVector DownwardTraceEnd{
 		DownwardTraceStart.X,
 		DownwardTraceStart.Y,
-		CapsuleBottomLocation.Z + TraceSettings.LedgeHeight.GetMin() + TraceCapsuleRadius - UCharacterMovementComponent::MAX_FLOOR_DIST
+		CapsuleBottomLocation.Z +
+		TraceSettings.LedgeHeight.GetMin() * CapsuleScale + TraceCapsuleRadius - UCharacterMovementComponent::MAX_FLOOR_DIST
 	};
 
 	FHitResult DownwardTraceHit;
@@ -225,7 +230,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FAlsMantlingParameters Parameters;
 
 	Parameters.TargetPrimitive = TargetPrimitive;
-	Parameters.MantlingHeight = TargetLocation.Z - CapsuleBottomLocation.Z;
+	Parameters.MantlingHeight = (TargetLocation.Z - CapsuleBottomLocation.Z) / CapsuleScale;
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 

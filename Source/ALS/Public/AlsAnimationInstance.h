@@ -142,13 +142,13 @@ protected:
 private:
 	void RefreshFeet(float DeltaTime);
 
-	static void ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& RootTransform);
+	void ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& CapsuleTransform) const;
 
 	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
-	                               const FQuat& BaseRotation, const FTransform& RootRelativeTransform) const;
+	                               const FQuat& BaseRotation, const FTransform& CapsuleRelativeTransform) const;
 
 	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
-	                     const FName& FootLockCurveName, const FTransform& RootRelativeTransform,
+	                     const FName& FootLockCurveName, const FTransform& CapsuleRelativeTransform,
 	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,

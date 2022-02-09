@@ -6,6 +6,7 @@
 #include "DisplayDebugHelpers.h"
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraTypes.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/Canvas.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsUtility.h"
@@ -295,20 +296,22 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 
 FVector UAlsCameraComponent::CalculatePivotOffset(const FQuat& PivotTargetRotation) const
 {
-	return PivotTargetRotation.RotateVector({
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
-	});
+	return PivotTargetRotation.RotateVector(
+		FVector{
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
+		} * AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraOffset() const
 {
-	return CameraRotation.RotateVector({
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurve()),
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurve()),
-		GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurve())
-	});
+	return CameraRotation.RotateVector(
+		FVector{
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurve()),
+			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurve())
+		} * AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
@@ -319,6 +322,8 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 #else
 	const auto bDisplayDebugCameraTraces{false};
 #endif
+
+	const auto CapsuleScale{AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z};
 
 	static const FName MainTraceTag{FString::Format(TEXT("{0} (Main Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
@@ -332,7 +337,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto TraceEnd{CameraTargetLocation};
 
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * CapsuleScale)};
 
 	auto TraceResult{TraceEnd};
 
@@ -360,7 +365,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraTraces)
 	{
-		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius,
+		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * CapsuleScale,
 		                                  Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
 	}
 #endif
@@ -398,8 +403,10 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 
 	constexpr auto Epsilon{1.0f};
 
+	const auto CapsuleScale{AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z};
+
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius + Epsilon)};
+	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + Epsilon) * CapsuleScale)};
 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.Num() <= 0)
@@ -470,7 +477,7 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
-	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius),
+	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * CapsuleScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 

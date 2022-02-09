@@ -23,10 +23,10 @@ struct ALS_API FAlsFootState
 	FQuat LockRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector LockRootRelativeLocation{ForceInit};
+	FVector LockCapsuleRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat LockRootRelativeRotation{ForceInit};
+	FQuat LockCapsuleRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LockBaseRelativeLocation{ForceInit};

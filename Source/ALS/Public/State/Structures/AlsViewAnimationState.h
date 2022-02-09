@@ -34,9 +34,12 @@ struct ALS_API FAlsViewAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float PitchAmount{0.5f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
-	float SpineYawAngle{0.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float LookAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
+	float TargetSpineYawAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180))
+	float SpineYawAngle{0.0f};
 };
