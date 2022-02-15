@@ -11,7 +11,7 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
 	float Fov{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -19,11 +19,20 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 };
 
 USTRUCT(BlueprintType)
+struct ALSCAMERA_API FAlsTraceDistanceSmoothingSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	float InterpolationSpeed{3.0f};
+};
+
+USTRUCT(BlueprintType)
 struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
 	float Fov{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -32,7 +41,7 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SecondPivotSocket{UAlsConstants::HeadBone()};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float TraceRadius{15.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -47,11 +56,12 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector TraceOverrideOffset{0.0f, 0.0f, 40.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowTraceDistanceSmoothing{true};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (InlineEditConditionToggle))
+	bool bUseTraceDistanceSmoothing{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "bAllowTraceDistanceSmoothing"))
-	float TraceDistanceInterpolationSpeed{3.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Use Trace Distance Smoothing",
+		Meta = (EditCondition = "bUseTraceDistanceSmoothing"))
+	FAlsTraceDistanceSmoothingSettings TraceDistanceSmoothing;
 };
 
 USTRUCT(BlueprintType)
@@ -59,10 +69,7 @@ struct ALSCAMERA_API FAlsCameraLagSubsteppingSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bUseLagSubstepping;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "bUseCameraLagSubstepping", ClampMin = 0.005, ClampMax = 0.5))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0.005, ClampMax = 0.5, ForceUnits = "s"))
 	float LagSubstepDeltaTime{1.0f / 60.0f};
 };
 
@@ -78,7 +85,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsThirdPersonCameraSettings ThirdPerson;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (InlineEditConditionToggle))
+	bool bUseLagSubstepping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", DisplayName = "Use Lag Substepping",
+		Meta = (AllowPrivateAccess, EditCondition = "bUseLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess))

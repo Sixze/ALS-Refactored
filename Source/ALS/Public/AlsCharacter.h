@@ -18,7 +18,7 @@ class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
 
-UCLASS()
+UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -53,7 +53,8 @@ private:
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
 	FGameplayTag OverlayMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Instanced, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
+		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
 	UAlsAnimationInstance* AlsAnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))

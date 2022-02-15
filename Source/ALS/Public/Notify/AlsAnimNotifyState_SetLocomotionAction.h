@@ -4,7 +4,7 @@
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "AlsAnimNotifyState_SetLocomotionAction.generated.h"
 
-UCLASS(DisplayName = "Als Set Locomotion Action Animation Notify State")
+UCLASS(DisplayName = "Als Set Locomotion Action Animation Notify State", Meta = (ShowWorldContextPin))
 class ALS_API UAlsAnimNotifyState_SetLocomotionAction : public UAnimNotifyState
 {
 	GENERATED_BODY()

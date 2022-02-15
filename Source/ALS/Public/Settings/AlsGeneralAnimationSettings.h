@@ -15,7 +15,7 @@ struct ALS_API FAlsGeneralAnimationSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bUseFootIkBones{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float MovingSpeedSmoothThreshold{150.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))

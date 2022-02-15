@@ -10,7 +10,7 @@ struct ALS_API FAlsTurnInPlaceState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ActivationDelayTime{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

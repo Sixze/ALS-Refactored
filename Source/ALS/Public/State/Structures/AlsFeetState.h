@@ -100,6 +100,6 @@ struct ALS_API FAlsFeetState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FFloatSpringState PelvisSpringState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z", Meta = (ForceUnits = "cm"))
 	float PelvisOffsetZ{0.0f};
 };

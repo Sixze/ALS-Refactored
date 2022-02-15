@@ -8,7 +8,9 @@
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS()
+UCLASS(HideCategories = ("ComponentTick", "Clothing", "Physics", "MasterPoseComponent",
+	"Collision", "Lighting", "ClothingSimulation", "Rendering", "Navigation", "HLOD",
+	"VirtualTexture", "SkeletalMesh", "Optimization", "MaterialParameters", "Mobile"))
 class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
@@ -41,7 +43,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
 	float TraceDistanceRatio{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient,
+		Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
 	float CameraFov;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))

@@ -200,7 +200,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	const auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurve())};
 
-	if (!Settings->CameraLagSubstepping.bUseLagSubstepping ||
+	if (!Settings->bUseLagSubstepping ||
 	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
 	    RotationLag <= 0.0f)
 	{
@@ -245,7 +245,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurve())};
 
 	// ReSharper disable once CppRedundantParentheses
-	if (Settings->CameraLagSubstepping.bUseLagSubstepping ||
+	if (Settings->bUseLagSubstepping ||
 	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
 	    (LocationLagX <= 0.0f && LocationLagY <= 0.0f && LocationLagZ <= 0.0f))
 	{
@@ -372,7 +372,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	// Apply trace distance smoothing.
 
-	if (!Settings->ThirdPerson.bAllowTraceDistanceSmoothing || !bAllowLag)
+	if (!Settings->ThirdPerson.bUseTraceDistanceSmoothing || !bAllowLag)
 	{
 		NewTraceDistanceRatio = 1.0f;
 		return TraceResult;
@@ -392,7 +392,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		                        ? TargetTraceDistanceRatio
 		                        : UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
-		                                                     Settings->ThirdPerson.TraceDistanceInterpolationSpeed);
+		                                                     Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationSpeed);
 
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }

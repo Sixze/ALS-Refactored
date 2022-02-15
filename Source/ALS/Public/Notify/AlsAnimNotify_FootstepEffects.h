@@ -63,13 +63,13 @@ struct ALS_API FAlsFootstepEffectSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
 	TSoftObjectPtr<UMaterialInterface> DecalMaterial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (AllowPreserveRatio))
 	FVector DecalSize{10.0f, 20.0f, 20.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float DecalDuration{4.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float DecalFadeOutDuration{2.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
@@ -109,7 +109,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<ETraceTypeQuery> SurfaceTraceChannel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float SurfaceTraceDistance{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Foot Left Y Axis")
@@ -122,7 +122,8 @@ public:
 	TArray<FAlsFootstepEffectSettings> Effects;
 };
 
-UCLASS(DisplayName = "Als Footstep Effects Animation Notify")
+UCLASS(DisplayName = "Als Footstep Effects Animation Notify",
+	AutoExpandCategories = ("Settings|Sound", "Settings|Decal", "Settings|Particle System"), Meta = (ShowWorldContextPin))
 class ALS_API UAlsAnimNotify_FootstepEffects : public UAnimNotify
 {
 	GENERATED_BODY()
@@ -140,10 +141,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
 	bool bSpawnSound{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
 	float SoundVolumeMultiplier{1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
 	float SoundPitchMultiplier{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (AllowPrivateAccess))

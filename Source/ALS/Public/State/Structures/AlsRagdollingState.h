@@ -10,7 +10,7 @@ struct ALS_API FAlsRagdollingState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector RootBoneVelocity{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ForceUnits = "N"))
 	float PullForce{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -12,13 +12,13 @@ struct ALS_API FAlsTurnInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimSequenceBase* Animation{nullptr};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bScalePlayRateByAnimatedTurnAngle{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float AnimatedTurnAngle{0.0f};
 };
 
@@ -27,16 +27,17 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float ViewYawAngleThreshold{45.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "deg/s"))
 	float ViewYawSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D ViewYawAngleToActivationDelay{0, 0.75f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Turn 180 Angle Threshold", Meta = (ClampMin = 0, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Turn 180 Angle Threshold",
+		Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float Turn180AngleThreshold{130.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -83,10 +83,10 @@ struct ALS_API FAlsMantlingTraceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	FVector2D LedgeHeight{50.0f, 225.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float ReachDistance{75.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float TargetLocationOffset{15.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
@@ -101,14 +101,14 @@ struct ALS_API FAlsGeneralMantlingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAllowMantling{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float TraceAngleThreshold{110.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float MaxReachAngle{50.0f};
 
 	// If a dynamic object has a speed bigger than this value, then do not start mantling.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ForceUnits = "cm/s"))
 	float TargetPrimitiveSpeedThreshold{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

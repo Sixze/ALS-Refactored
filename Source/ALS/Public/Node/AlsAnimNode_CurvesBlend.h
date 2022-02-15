@@ -6,17 +6,17 @@
 UENUM(BlueprintType)
 enum class EAlsCurvesBlendMode : uint8
 {
-	// Blend poses using blend amount.
+	// Blend poses using blend amount. Same as ECurveBlendOption::BlendByWeight.
 	BlendByAmount,
-	// Only set the value if the curves pose has the curve value.
+	// Only set the value if the curves pose has the curve value. Same as ECurveBlendOption::Override.
 	Combine,
-	// Only set the value if the source pose doesn't have the curve value.
+	// Only set the value if the source pose doesn't have the curve value. Same as ECurveBlendOption::DoNotOverride.
 	CombinePreserved,
-	// Find the highest curve value from multiple poses and use that.
+	// Find the highest curve value from multiple poses and use that. Same as ECurveBlendOption::UseMaxValue.
 	UseMaxValue,
-	// Find the lowest curve value from multiple poses and use that.
+	// Find the lowest curve value from multiple poses and use that. Same as  ECurveBlendOption::UseMinValue.
 	UseMinValue,
-	// Completely override source pose.
+	// Completely override source pose. Same as ECurveBlendOption::UseBasePose.
 	Override
 };
 
@@ -36,7 +36,7 @@ public:
 	float BlendAmount{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::Override};
+	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::BlendByAmount};
 
 public:
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;

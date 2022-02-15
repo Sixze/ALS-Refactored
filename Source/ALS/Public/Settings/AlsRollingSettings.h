@@ -25,7 +25,7 @@ struct ALS_API FAlsRollingSettings
 	bool bStartRollingOnLand{true};
 
 	// If character landed with a speed greater than specified value, then start rolling.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand", ForceUnits = "cm/s"))
 	float RollingOnLandSpeedThreshold{600.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -30,7 +30,7 @@ public:
 	UPROPERTY()
 	FRotator ActorRotationOffset{ForceInit};
 
-	UPROPERTY(Meta = (ClampMin = 0))
+	UPROPERTY(Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float MantlingHeight{0.0f};
 
 public:
@@ -49,7 +49,7 @@ public:
 
 	virtual FString ToSimpleString() const override;
 
-	virtual void AddReferencedObjects(class FReferenceCollector& Collector) override;
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 };
 
 template <>

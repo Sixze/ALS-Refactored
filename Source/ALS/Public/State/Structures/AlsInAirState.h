@@ -10,7 +10,7 @@ struct ALS_API FAlsInAirState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bJumped{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float JumpPlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))

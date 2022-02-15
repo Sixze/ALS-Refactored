@@ -3,13 +3,13 @@
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "AlsAnimNotifyState_SetRootMotionScale.generated.h"
 
-UCLASS(DisplayName = "Als Set Root Motion Scale Animation Notify State")
+UCLASS(DisplayName = "Als Set Root Motion Scale Animation Notify State", Meta = (ShowWorldContextPin))
 class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
 	float TranslationScale{1.0f};
 
 public:

@@ -9,7 +9,7 @@ struct ALS_API FAlsDynamicTransitionSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FootIkDistanceThreshold{8.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
