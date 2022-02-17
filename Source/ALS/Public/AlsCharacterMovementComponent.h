@@ -128,6 +128,9 @@ protected:
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 
 public:
+	virtual void SmoothCorrection(const FVector& OldLocation, const FQuat& OldRotation,
+	                              const FVector& NewLocation, const FQuat& NewRotation) override;
+
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 protected:

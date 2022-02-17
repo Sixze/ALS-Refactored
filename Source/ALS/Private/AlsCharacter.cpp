@@ -149,7 +149,7 @@ void AAlsCharacter::BeginPlay()
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
-	if (GetLocalRole() <= ROLE_SimulatedProxy && !ReplicatedBasedMovement.HasRelativeLocation())
+	if (GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
 

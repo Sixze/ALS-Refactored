@@ -13,8 +13,8 @@ FString UAlsAnimNotifyState_EarlyBlendOut::GetNotifyName_Implementation() const
 	return TEXT("Als Early Blend Out");
 }
 
-void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation,
-                                                   const float DeltaTime)
+void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* MeshComponent,
+                                                   UAnimSequenceBase* Animation, const float DeltaTime)
 {
 	Super::NotifyTick(MeshComponent, Animation, DeltaTime);
 

@@ -247,6 +247,23 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	Super::PhysCustom(DeltaTime, Iterations);
 }
 
+void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation, const FQuat& OldRotation,
+                                                      const FVector& NewLocation, const FQuat& NewRotation)
+{
+	constexpr auto TeleportDistanceThresholdSquared{50.0f * 50.0f};
+
+	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
+	    FVector::DistSquared2D(OldLocation, NewLocation) <= TeleportDistanceThresholdSquared)
+	{
+		// By default, the engine treats any movement of the simulated proxy as teleportation, and because of this, foot locking cannot
+		// work properly. Instead, treat movement as teleportation only if the character has moved more than some threshold distance.
+
+		bJustTeleported = false;
+	}
+
+	Super::SmoothCorrection(OldLocation, OldRotation, NewLocation, NewRotation);
+}
+
 FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
 {
 	if (ClientPredictionData == nullptr)
