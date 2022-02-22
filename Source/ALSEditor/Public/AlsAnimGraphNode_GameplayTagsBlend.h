@@ -22,7 +22,7 @@ public:
 
 	virtual FText GetTooltipText() const override;
 
-	virtual void ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& OldPins) override;
+	virtual void ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& PreviousPins) override;
 
 	virtual FString GetNodeCategory() const override;
 

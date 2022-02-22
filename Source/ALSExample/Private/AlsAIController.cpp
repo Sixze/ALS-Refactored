@@ -1,18 +1,18 @@
-#include "AlsAiController.h"
+#include "AlsAIController.h"
 
-AAlsAiController::AAlsAiController()
+AAlsAIController::AAlsAIController()
 {
 	bAttachToPawn = true;
 }
 
-void AAlsAiController::OnPossess(APawn* NewPawn)
+void AAlsAIController::OnPossess(APawn* NewPawn)
 {
 	Super::OnPossess(NewPawn);
 
 	RunBehaviorTree(BehaviourTree);
 }
 
-FVector AAlsAiController::GetFocalPointOnActor(const AActor* Actor) const
+FVector AAlsAIController::GetFocalPointOnActor(const AActor* Actor) const
 {
 	const auto* FocusedPawn{Cast<APawn>(Actor)};
 	if (!IsValid(FocusedPawn))

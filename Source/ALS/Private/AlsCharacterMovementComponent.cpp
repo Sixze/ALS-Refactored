@@ -230,7 +230,7 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 		return;
 	}
 
-	Iterations++;
+	Iterations += 1;
 	bJustTeleported = false;
 
 	RestorePreAdditiveRootMotionVelocity();
@@ -250,7 +250,7 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation, const FQuat& OldRotation,
                                                       const FVector& NewLocation, const FQuat& NewRotation)
 {
-	constexpr auto TeleportDistanceThresholdSquared{50.0f * 50.0f};
+	static constexpr auto TeleportDistanceThresholdSquared{50.0f * 50.0f};
 
 	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
 	    FVector::DistSquared2D(OldLocation, NewLocation) <= TeleportDistanceThresholdSquared)
@@ -354,15 +354,21 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 
 	if (Speed <= GaitSettings.WalkSpeed)
 	{
-		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, {0.0f, 1.0f}, Speed);
+		static const FVector2D GaitAmount{0.0f, 1.0f};
+
+		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, GaitAmount, Speed);
 	}
 
 	if (Speed <= GaitSettings.RunSpeed)
 	{
-		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, {1.0f, 2.0f}, Speed);
+		static const FVector2D GaitAmount{1.0f, 2.0f};
+
+		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, GaitAmount, Speed);
 	}
 
-	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
+	static const FVector2D GaitAmount{2.0f, 3.0f};
+
+	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, GaitAmount, Speed);
 }
 
 void UAlsCharacterMovementComponent::SetMovementModeLocked(const bool bNewMovementModeLocked)

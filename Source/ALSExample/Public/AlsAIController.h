@@ -1,10 +1,10 @@
 #pragma once
 
 #include "AIController.h"
-#include "AlsAiController.generated.h"
+#include "AlsAIController.generated.h"
 
-UCLASS()
-class ALSEXAMPLE_API AAlsAiController : public AAIController
+UCLASS(DisplayName = "Als AI Controller")
+class ALSEXAMPLE_API AAlsAIController : public AAIController
 {
 	GENERATED_BODY()
 
@@ -13,7 +13,7 @@ private:
 	UBehaviorTree* BehaviourTree;
 
 public:
-	AAlsAiController();
+	AAlsAIController();
 
 protected:
 	virtual void OnPossess(APawn* NewPawn) override;

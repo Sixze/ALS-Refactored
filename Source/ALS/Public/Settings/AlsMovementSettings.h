@@ -28,10 +28,10 @@ struct ALS_API FAlsMovementGaitSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveVector* AccelerationAndDecelerationAndGroundFrictionCurve{nullptr};
 
-	// Gait amount to rotation speed curve.
+	// Gait amount to rotation interpolation speed curve.
 	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running and 3 is sprinting.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationSpeedCurve{nullptr};
+	UCurveFloat* RotationInterpolationSpeedCurve{nullptr};
 
 	float GetSpeedForGait(const EAlsGait Gait) const;
 };

@@ -7,23 +7,20 @@
 
 class ACharacter;
 
-inline const TCHAR* ToString(const bool bValue)
-{
-	return bValue ? TEXT("True") : TEXT("False");
-}
-
 UCLASS()
 class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	static constexpr float DrawImpactPointSize{32.0f};
-	static constexpr float DrawLineThickness{1.0f};
-	static constexpr float DrawArrowSize{50.0f};
-	static constexpr int32 DrawCircleSidesCount{16};
+	static constexpr auto DrawImpactPointSize{32.0f};
+	static constexpr auto DrawLineThickness{1.0f};
+	static constexpr auto DrawArrowSize{50.0f};
+	static constexpr auto DrawCircleSidesCount{16};
 
 public:
+	static constexpr const TCHAR* BoolToString(const bool bValue);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
 	static FString NameToDisplayString(const FName& Name, bool bIsBool = false);
 
@@ -91,3 +88,8 @@ public:
 	                                                   const FLinearColor& SweepColor, const FLinearColor& HitColor,
 	                                                   float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 };
+
+constexpr const TCHAR* UAlsUtility::BoolToString(const bool bValue)
+{
+	return bValue ? TEXT("True") : TEXT("False");
+}

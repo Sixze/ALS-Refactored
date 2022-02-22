@@ -2,7 +2,7 @@
 
 #include "GameplayTagsManager.h"
 
-const FAlsLocomotionModeTags FAlsLocomotionModeTags::Instance{};
+const FAlsLocomotionModeTags FAlsLocomotionModeTags::Instance;
 
 void FAlsLocomotionModeTags::AddTags()
 {

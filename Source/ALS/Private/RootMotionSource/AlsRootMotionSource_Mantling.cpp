@@ -57,7 +57,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	FRotator RotationOffset;
 
 	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(MantlingTime)};
-	if (BlendInAmount <= KINDA_SMALL_NUMBER)
+	if (!FAnimWeight::IsRelevant(BlendInAmount))
 	{
 		LocationOffset = ActorFeetLocationOffset;
 		RotationOffset = ActorRotationOffset;
@@ -73,7 +73,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		const auto HorizontalCorrectionAmount{InterpolationAndCorrectionAmounts.Y};
 		const auto VerticalCorrectionAmount{InterpolationAndCorrectionAmounts.Z};
 
-		if (InterpolationAmount <= KINDA_SMALL_NUMBER)
+		if (!FAnimWeight::IsRelevant(InterpolationAmount))
 		{
 			LocationOffset = FVector::ZeroVector;
 			RotationOffset = FRotator::ZeroRotator;
@@ -104,7 +104,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		// Initial blend in allows the actor to blend into the interpolation and correction curves at
 		// the midpoint. This prevents pops when mantling an object lower than the animated mantling.
 
-		if (BlendInAmount < 1.0f - KINDA_SMALL_NUMBER)
+		if (!FAnimWeight::IsFullWeight(BlendInAmount))
 		{
 			LocationOffset = FMath::Lerp(ActorFeetLocationOffset, LocationOffset, BlendInAmount);
 			RotationOffset = FMath::Lerp(ActorRotationOffset, RotationOffset, BlendInAmount);

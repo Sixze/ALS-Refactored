@@ -21,16 +21,16 @@ FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 	return FString::Format(TEXT("Als Footstep Effects: {0}"), {GetEnumValueString(FootBone)});
 }
 
-void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
+void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation)
 {
-	Super::Notify(MeshComponent, Animation);
+	Super::Notify(Mesh, Animation);
 
-	if (!IsValid(MeshComponent) || !IsValid(FootstepEffectsSettings))
+	if (!IsValid(Mesh) || !IsValid(FootstepEffectsSettings))
 	{
 		return;
 	}
 
-	const auto* Character{Cast<AAlsCharacter>(MeshComponent->GetOwner())};
+	const auto* Character{Cast<AAlsCharacter>(Mesh->GetOwner())};
 
 	if (bSkipEffectsWhenInAir && IsValid(Character) && Character->GetLocomotionMode() == FAlsLocomotionModeTags::Get().InAir)
 	{
@@ -39,11 +39,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 
 	const auto CapsuleScale{IsValid(Character) ? Character->GetCapsuleComponent()->GetComponentScale().Z : 1.0f};
 
-	const auto* World{MeshComponent->GetWorld()};
-	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(MeshComponent->GetAnimInstance())};
+	const auto* World{Mesh->GetWorld()};
+	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(Mesh->GetAnimInstance())};
 
 	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootRightIkBone()};
-	const auto FootTransform{MeshComponent->GetSocketTransform(FootBoneName)};
+	const auto FootTransform{Mesh->GetSocketTransform(FootBoneName)};
 
 	FVector HitLocation;
 	FVector HitNormal;
@@ -59,7 +59,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	};
 
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(MeshComponent->GetOwner(), UAlsConstants::TracesDisplayName())};
+	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(Mesh->GetOwner(), UAlsConstants::TracesDisplayName())};
 #endif
 
 	if (FeetState != nullptr && FeetState->bOffsetHitValid)
@@ -73,7 +73,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 	}
 	else
 	{
-		FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, MeshComponent->GetOwner()};
+		FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, Mesh->GetOwner()};
 		QueryParameters.bReturnPhysicalMaterial = true;
 
 		FHitResult Hit;
@@ -158,7 +158,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 			VolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 		}
 
-		if (VolumeMultiplier >= KINDA_SMALL_NUMBER && EffectSettings->Sound.LoadSynchronous())
+		if (FAnimWeight::IsRelevant(VolumeMultiplier) && EffectSettings->Sound.LoadSynchronous())
 		{
 			UAudioComponent* Audio{nullptr};
 
@@ -178,8 +178,8 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 					break;
 
 				case EAlsFootstepSoundSpawnType::SpawnAttachedToFootBone:
-					Audio = UGameplayStatics::SpawnSoundAttached(EffectSettings->Sound.Get(), MeshComponent, FootBoneName,
-					                                             FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget,
+					Audio = UGameplayStatics::SpawnSoundAttached(EffectSettings->Sound.Get(), Mesh, FootBoneName, FVector::ZeroVector,
+					                                             FRotator::ZeroRotator, EAttachLocation::SnapToTarget,
 					                                             true, VolumeMultiplier, SoundPitchMultiplier);
 					break;
 			}
@@ -244,11 +244,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* MeshComponen
 			break;
 
 			case EAlsFootstepParticleEffectSpawnType::SpawnAttachedToFootBone:
-				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), MeshComponent, FootBoneName,
+				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), Mesh, FootBoneName,
 				                                             EffectSettings->ParticleSystemLocationOffset * CapsuleScale,
 				                                             EffectSettings->ParticleSystemFootLeftRotationOffset,
-				                                             FVector::OneVector * CapsuleScale,
-				                                             EAttachLocation::KeepRelativeOffset, true, ENCPoolMethod::AutoRelease);
+				                                             FVector::OneVector * CapsuleScale, EAttachLocation::KeepRelativeOffset,
+				                                             true, ENCPoolMethod::AutoRelease);
 				break;
 		}
 	}

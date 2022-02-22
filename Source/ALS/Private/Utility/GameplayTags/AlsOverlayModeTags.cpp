@@ -2,7 +2,7 @@
 
 #include "GameplayTagsManager.h"
 
-const FAlsOverlayModeTags FAlsOverlayModeTags::Instance{};
+const FAlsOverlayModeTags FAlsOverlayModeTags::Instance;
 
 void FAlsOverlayModeTags::AddTags()
 {

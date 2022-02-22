@@ -79,13 +79,14 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	constexpr auto AngleDelta{UAlsMath::TwoPi / DrawCircleSidesCount};
+	static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+
 	auto PreviousVertex{Center + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, AngleDelta * i);
+		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
 		const auto NextVertex{Center + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
@@ -110,13 +111,14 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	constexpr auto AngleDelta{UAlsMath::TwoPi / DrawCircleSidesCount};
+	static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+
 	auto PreviousVertex{Center + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, AngleDelta * i);
+		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
 		const auto NextVertex{Center + Radius * Cos * XAxis + Radius * Sin * YAxis};
 

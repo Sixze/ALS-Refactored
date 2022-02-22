@@ -31,11 +31,11 @@ FText UAlsAnimGraphNode_GameplayTagsBlend::GetTooltipText() const
 	return LOCTEXT("Tooltip", "Blend Poses by Gameplay Tag");
 }
 
-void UAlsAnimGraphNode_GameplayTagsBlend::ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& EdGraphPins)
+void UAlsAnimGraphNode_GameplayTagsBlend::ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& PreviousPins)
 {
 	Node.RefreshPoses();
 
-	Super::ReallocatePinsDuringReconstruction(EdGraphPins);
+	Super::ReallocatePinsDuringReconstruction(PreviousPins);
 }
 
 FString UAlsAnimGraphNode_GameplayTagsBlend::GetNodeCategory() const

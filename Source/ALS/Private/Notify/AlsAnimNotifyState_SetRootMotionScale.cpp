@@ -14,23 +14,23 @@ FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() c
 	return FString::Format(TEXT("Als Set Root Motion Scale: {0}"), {TranslationScale});
 }
 
-void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation,
+void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
                                                          const float TotalDuration)
 {
-	Super::NotifyBegin(MeshComponent, Animation, TotalDuration);
+	Super::NotifyBegin(Mesh, Animation, TotalDuration);
 
-	auto* Character{Cast<ACharacter>(MeshComponent->GetOwner())};
+	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
 	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		Character->SetAnimRootMotionTranslationScale(TranslationScale);
 	}
 }
 
-void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation)
+void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation)
 {
-	Super::NotifyEnd(MeshComponent, Animation);
+	Super::NotifyEnd(Mesh, Animation);
 
-	auto* Character{Cast<ACharacter>(MeshComponent->GetOwner())};
+	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
 	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		if (FMath::IsNearlyEqual(Character->GetAnimRootMotionTranslationScale(), TranslationScale))

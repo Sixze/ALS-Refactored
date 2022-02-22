@@ -75,8 +75,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirection2D(
-			ActorYawAngle +
-			FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
+			ActorYawAngle + FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -235,7 +234,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Determine the mantling type by checking the movement mode and mantling height.
 
 	Parameters.MantlingType = LocomotionMode == FAlsLocomotionModeTags::Get().Grounded
-		                          ? Parameters.MantlingHeight > 125.0f
+		                          ? Parameters.MantlingHeight > Settings->Mantling.MantlingHighHeightThreshold
 			                            ? EAlsMantlingType::High
 			                            : EAlsMantlingType::Low
 		                          : EAlsMantlingType::InAir;
@@ -487,7 +486,9 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	// Stop any active montages.
 
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.2f);
+	static constexpr auto BlendOutTime{0.2f};
+
+	GetMesh()->GetAnimInstance()->Montage_Stop(BlendOutTime);
 
 	// When networked, disable replicate movement reset ragdolling target location and pull force variables.
 
@@ -559,13 +560,18 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 	// Use the velocity to scale the ragdoll's joint strength for physical animation.
 
-	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(RagdollingState.RootBoneVelocity.Size() / 1000.0f) * 25000.0f,
+	static constexpr auto ReferenceSpeed{1000.0f};
+	static constexpr auto Stiffness{25000.0f};
+
+	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(RagdollingState.RootBoneVelocity.Size() / ReferenceSpeed) * Stiffness,
 	                                          0.0f, 0.0f, false);
 
 	// Disable Gravity if falling faster than -4000 to prevent continual
 	// acceleration. This also prevents the ragdoll from going through the floor.
 
-	GetMesh()->SetEnableGravity(RagdollingState.RootBoneVelocity.Z > -4000.0f);
+	static constexpr auto VerticalVelocityThreshold{-4000.0f};
+
+	GetMesh()->SetEnableGravity(RagdollingState.RootBoneVelocity.Z > VerticalVelocityThreshold);
 
 	RefreshRagdollingActorTransform(DeltaTime);
 }
@@ -573,7 +579,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 {
 	const auto bLocallyControlled{IsLocallyControlled()};
-
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBone())};
 
 	if (bLocallyControlled)
@@ -603,17 +608,22 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 	if (RagdollingState.bGrounded)
 	{
-		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 2.0f;
+		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 1.0f;
 	}
 
 	if (!bLocallyControlled)
 	{
-		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, 750.0f, DeltaTime, 0.6f);
+		static constexpr auto PullForce{750.0f};
+		static constexpr auto InterpolationSpeed{0.6f};
 
-		const auto RagdollSpeedSquared{FVector2D{RagdollingState.RootBoneVelocity.X, RagdollingState.RootBoneVelocity.Y}.SizeSquared()};
+		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, PullForce, DeltaTime, InterpolationSpeed);
+
+		const auto RootBoneHorizontalSpeedSquared{
+			FVector2D{RagdollingState.RootBoneVelocity.X, RagdollingState.RootBoneVelocity.Y}.SizeSquared()
+		};
 
 		const auto PullForceSocketName{
-			RagdollSpeedSquared > FMath::Square(300.0f)
+			RootBoneHorizontalSpeedSquared > FMath::Square(300.0f)
 				? UAlsConstants::Spine03Bone()
 				: UAlsConstants::PelvisBone()
 		};
@@ -626,7 +636,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 	const auto PelvisRotation{PelvisTransform.Rotator()};
 
-	RagdollingState.bFacedUpward = PelvisRotation.Roll < 0.0f;
+	RagdollingState.bFacedUpward = PelvisRotation.Roll <= 0.0f;
 
 	auto NewActorRotation{GetActorRotation()};
 	NewActorRotation.Yaw = RagdollingState.bFacedUpward ? PelvisRotation.Yaw - 180.0f : PelvisRotation.Yaw;

@@ -98,7 +98,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsRollingState RollingState;
 
-	FTimerHandle LandedGroundFrictionResetTimer;
+	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
 	AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -352,7 +352,7 @@ protected:
 
 	void RefreshGroundedNotMovingAimingActorRotation(float DeltaTime);
 
-	float CalculateActorRotationSpeed() const;
+	float CalculateActorRotationInterpolationSpeed() const;
 
 public:
 	void ApplyRotationYawSpeedFromAnimationInstance(float DeltaTime);
@@ -407,11 +407,6 @@ private:
 	void MulticastOnJumpedNetworked();
 
 	void OnJumpedNetworked();
-
-	// Landing
-
-private:
-	void OnLandedGroundFrictionReset() const;
 
 	// Mantling
 

@@ -12,8 +12,8 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr float TwoPi{6.2831853071795864769252867665590057683943387987502116419498891846f};
-	static constexpr float CounterClockwiseRotationAngleThreshold{5.0f};
+	static constexpr auto TwoPi{6.2831853071795864769252867665590057683943387987502116419498891846f};
+	static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
@@ -96,10 +96,10 @@ public:
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
-	static float FixGamepadDiagonalValues(float AxisValue, float OtherAxisValue);
+	static float NormalizeInputAxis(float AxisValue, float OtherAxisValue);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
-	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleOffset);
+	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
 };
 
 inline float UAlsMath::Clamp01(const float Value)

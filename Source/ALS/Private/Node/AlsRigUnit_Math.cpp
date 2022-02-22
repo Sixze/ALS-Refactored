@@ -1,5 +1,6 @@
 #include "Node/AlsRigUnit_Math.h"
 
+#include "Animation/AnimTypes.h"
 #include "Units/RigUnitContext.h"
 
 static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
@@ -75,7 +76,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	if (Weight <= KINDA_SMALL_NUMBER)
+	if (!FAnimWeight::IsRelevant(Weight))
 	{
 		return;
 	}
@@ -88,12 +89,12 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 
 	FVector RetargetingOffset;
 
-	if (RetargetingWeight >= 1.0f - KINDA_SMALL_NUMBER)
+	if (FAnimWeight::IsFullWeight(RetargetingWeight))
 	{
 		RetargetingOffset = Hierarchy->GetGlobalTransform(RightHandBone).GetLocation() -
 		                    Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation();
 	}
-	else if (RetargetingWeight <= KINDA_SMALL_NUMBER)
+	else if (!FAnimWeight::IsRelevant(RetargetingWeight))
 	{
 		RetargetingOffset = Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation() -
 		                    Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation();

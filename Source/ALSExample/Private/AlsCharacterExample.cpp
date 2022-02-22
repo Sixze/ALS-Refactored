@@ -78,24 +78,26 @@ void AAlsCharacterExample::InputLookRight(const float Value)
 void AAlsCharacterExample::InputMoveForward(const float Value)
 {
 	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw),
-	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveRight"))));
+	                 UAlsMath::NormalizeInputAxis(Value, GetInputAxisValue("MoveRight")));
 }
 
 void AAlsCharacterExample::InputMoveRight(const float Value)
 {
 	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw + 90.0f),
-	                 UAlsMath::FixGamepadDiagonalValues(Value, GetInputAxisValue(TEXT("MoveForward"))));
+	                 UAlsMath::NormalizeInputAxis(Value, GetInputAxisValue("MoveForward")));
 }
 
 void AAlsCharacterExample::InputSprintPressed()
 {
 	// Start the sprint with a slight delay to give the player enough time to start the roll with a double click instead.
 
+	static constexpr auto StartDelay{0.1f};
+
 	GetWorldTimerManager().SetTimer(SprintStartTimer,
 	                                FTimerDelegate::CreateWeakLambda(this, [this]
 	                                {
 		                                SetDesiredGait(EAlsGait::Sprinting);
-	                                }), 0.1f, false);
+	                                }), StartDelay, false);
 }
 
 void AAlsCharacterExample::InputSprintReleased()
@@ -114,7 +116,9 @@ void AAlsCharacterExample::InputRoll()
 {
 	GetWorldTimerManager().ClearTimer(SprintStartTimer);
 
-	TryStartRolling(1.3f);
+	static constexpr auto PlayRate{1.3f};
+
+	TryStartRolling(PlayRate);
 }
 
 void AAlsCharacterExample::InputWalk()

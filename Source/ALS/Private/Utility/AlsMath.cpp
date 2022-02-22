@@ -1,11 +1,12 @@
 #include "Utility/AlsMath.h"
 
 #include "DrawDebugHelpers.h"
+#include "Engine/Engine.h"
 
 namespace SpringInterpolationConstants
 {
-	static constexpr float MaxDeltaTime{0.1f};
-	static constexpr float SubstepDeltaTime{1.0f / 60.0f};
+	static constexpr auto MaxDeltaTime{0.1f};
+	static constexpr auto SubstepDeltaTime{1.0f / 60.0f};
 }
 
 float UAlsMath::InterpolateFloatSpringStable(const float Current, const float Target, FFloatSpringState& SpringState,
@@ -76,40 +77,40 @@ FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To,
 	const auto Theta{FMath::Acos(Dot) * Alpha};
 	const auto FromPerpendicular{(To - From * Dot).GetSafeNormal()};
 
-	float Sin;
-	float Cos;
+	float Sin, Cos;
 	FMath::SinCos(&Sin, &Cos, Theta);
 
 	return From * Cos + FromPerpendicular * Sin;
 }
 
-float UAlsMath::FixGamepadDiagonalValues(const float AxisValue, const float OtherAxisValue)
+float UAlsMath::NormalizeInputAxis(const float AxisValue, const float OtherAxisValue)
 {
-	// GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red,
-	//                                  FString::Format(TEXT("Value: {0}, OtherAxis: {1} Result: {2}"), {
-	// 	                                                 AxisValue, OtherAxisValue, FMath::Clamp(AxisValue *
-	// 			                                                 FMath::GetMappedRangeValueClamped({0.0f, 0.6f},
-	// 				                                                 {1.0f, 1.2f},
-	// 				                                                 FMath::Abs(OtherAxisValue)),
-	// 		                                                 -1.0f, 1.0f)
+	const auto MagnitudeSquared{AxisValue * AxisValue + OtherAxisValue * OtherAxisValue};
+
+	// GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red,
+	//                                  FString::Format(TEXT("Axis: {0}, OtherAxis: {1} Result: {2}"), {
+	// 	                                                 AxisValue, OtherAxisValue,
+	// 	                                                 (MagnitudeSquared <= 1.0f
+	// 		                                                  ? AxisValue
+	// 		                                                  : AxisValue * FMath::InvSqrt(MagnitudeSquared))
 	//                                                  }));
 
-	return FMath::Clamp(AxisValue * FMath::GetMappedRangeValueClamped({0.0f, 0.6f}, {1.0f, 1.2f}, FMath::Abs(OtherAxisValue)), -1.0f, 1.0f);
+	return MagnitudeSquared <= 1.0f ? AxisValue : AxisValue * FMath::InvSqrt(MagnitudeSquared);
 }
 
-EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleOffset)
+EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleThreshold)
 {
-	if (Angle >= -ForwardHalfAngle - AngleOffset && Angle <= ForwardHalfAngle + AngleOffset)
+	if (Angle >= -ForwardHalfAngle - AngleThreshold && Angle <= ForwardHalfAngle + AngleThreshold)
 	{
 		return EAlsMovementDirection::Forward;
 	}
 
-	if (Angle >= ForwardHalfAngle - AngleOffset && Angle <= 180.0f - ForwardHalfAngle + AngleOffset)
+	if (Angle >= ForwardHalfAngle - AngleThreshold && Angle <= 180.0f - ForwardHalfAngle + AngleThreshold)
 	{
 		return EAlsMovementDirection::Right;
 	}
 
-	if (Angle <= -(ForwardHalfAngle - AngleOffset) && Angle >= -(180.0f - ForwardHalfAngle + AngleOffset))
+	if (Angle <= -(ForwardHalfAngle - AngleThreshold) && Angle >= -(180.0f - ForwardHalfAngle + AngleThreshold))
 	{
 		return EAlsMovementDirection::Left;
 	}

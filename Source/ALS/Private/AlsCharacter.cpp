@@ -464,12 +464,14 @@ bool AAlsCharacter::CanSprint() const
 	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
 	// if there is input and it is faced forward relative to the camera + or - 50 degrees.
 
+	static constexpr auto ViewRelativeAngleThreshold{50.0f};
+
 	return LocomotionState.bHasInput &&
 	       (RotationMode != EAlsRotationMode::Aiming || Settings->bSprintHasPriorityOverAiming) &&
 	       // ReSharper disable once CppRedundantParentheses
 	       ((ViewMode != EAlsViewMode::FirstPerson &&
 	         (DesiredRotationMode == EAlsRotationMode::VelocityDirection || Settings->bRotateToVelocityWhenSprinting)) ||
-	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - ViewRotation.Yaw)) < 50.0f);
+	        FMath::Abs(FRotator::NormalizeAxis(LocomotionState.InputYawAngle - ViewRotation.Yaw)) < ViewRelativeAngleThreshold);
 }
 
 void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
@@ -640,15 +642,28 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 		else if (Settings->Rolling.bStartRollingOnLand &&
 		         LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
 		{
-			StartRolling(1.3f, LocomotionState.bHasSpeed
-				                   ? LocomotionState.VelocityYawAngle
-				                   : GetActorRotation().Yaw);
+			static constexpr auto PlayRate{1.3f};
+
+			StartRolling(PlayRate, LocomotionState.bHasSpeed
+				                       ? LocomotionState.VelocityYawAngle
+				                       : GetActorRotation().Yaw);
 		}
 		else
 		{
-			GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput ? 0.5f : 3.0f;
+			static constexpr auto HasInputBrakingFrictionFactor{0.5f};
+			static constexpr auto NoInputBrakingFrictionFactor{3.0f};
 
-			GetWorldTimerManager().SetTimer(LandedGroundFrictionResetTimer, this, &ThisClass::OnLandedGroundFrictionReset, 0.5f, false);
+			GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput
+				                                                ? HasInputBrakingFrictionFactor
+				                                                : NoInputBrakingFrictionFactor;
+
+			static constexpr auto ResetDelay{0.5f};
+
+			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer, FTimerDelegate::CreateWeakLambda(
+				                                this, [&BrakingFrictionFactor = GetCharacterMovement()->BrakingFrictionFactor]
+				                                {
+					                                BrakingFrictionFactor = 0.0f;
+				                                }), ResetDelay, false);
 		}
 	}
 	else if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir &&
@@ -790,7 +805,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	// might be useful to know the last orientation of movement even after the character has stopped.
 
 	LocomotionState.Speed = LocomotionState.Velocity.Size2D();
-	LocomotionState.bHasSpeed = LocomotionState.Speed > 1.0f;
+	LocomotionState.bHasSpeed = LocomotionState.Speed >= 1.0f;
 
 	if (LocomotionState.bHasSpeed)
 	{
@@ -892,7 +907,9 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	// Interpolate view rotation to current raw view rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
-	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewRotation, DeltaTime, 30.0f);
+	static constexpr auto InterpolationSpeed{30.0f};
+
+	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewRotation, DeltaTime, InterpolationSpeed);
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
@@ -920,7 +937,7 @@ void AAlsCharacter::RefreshViewInterpolation(const float DeltaTime)
 			             ViewState.InterpolationDuration)
 	};
 
-	if (InterpolationAmount < 1.0f - KINDA_SMALL_NUMBER)
+	if (!FAnimWeight::IsFullWeight(InterpolationAmount))
 	{
 		ViewRotation = UAlsMath::LerpRotator(ViewState.InterpolationInitialRotation,
 		                                     ViewState.InterpolationTargetRotation, InterpolationAmount);
@@ -977,8 +994,13 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 	switch (RotationMode)
 	{
 		case EAlsRotationMode::VelocityDirection:
-			RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, CalculateActorRotationSpeed(), 800.0f);
-			break;
+		{
+			static constexpr auto TargetYawAngleRotationSpeed{800.0f};
+
+			RefreshActorRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime, CalculateActorRotationInterpolationSpeed(),
+			                                TargetYawAngleRotationSpeed);
+		}
+		break;
 
 		case EAlsRotationMode::LookingDirection:
 		{
@@ -989,7 +1011,10 @@ void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 					                          GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurve()))
 			};
 
-			RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateActorRotationSpeed(), 500.0f);
+			static constexpr auto TargetYawAngleRotationSpeed{500.0f};
+
+			RefreshActorRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateActorRotationInterpolationSpeed(),
+			                                TargetYawAngleRotationSpeed);
 		}
 		break;
 
@@ -1015,24 +1040,35 @@ bool AAlsCharacter::TryRefreshCustomGroundedNotMovingActorRotation(const float D
 
 void AAlsCharacter::RefreshGroundedMovingAimingActorRotation(const float DeltaTime)
 {
-	RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, 20.0f, 1000.0f);
+	static constexpr auto ActorRotationInterpolationSpeed{20.0f};
+	static constexpr auto TargetYawAngleRotationSpeed{1000.0f};
+
+	RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, ActorRotationInterpolationSpeed, TargetYawAngleRotationSpeed);
 }
 
 void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bHasInput)
 	{
-		RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, 20.0f, 1000.0f);
+		static constexpr auto ActorRotationInterpolationSpeed{20.0f};
+		static constexpr auto TargetYawAngleRotationSpeed{1000.0f};
+
+		RefreshActorRotationExtraSmooth(ViewState.Rotation.Yaw, DeltaTime, ActorRotationInterpolationSpeed, TargetYawAngleRotationSpeed);
 		return;
 	}
 
 	// Prevent the character from rotating past a certain angle.
 
-	const auto YawAngleDifference{FRotator::NormalizeAxis(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw)};
-	if (FMath::Abs(YawAngleDifference) > 70.0f)
+	static constexpr auto ViewRelativeActorYawAngleThreshold{70.0f};
+
+	const auto ViewRelativeActorYawAngle{FRotator::NormalizeAxis(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw)};
+	if (FMath::Abs(ViewRelativeActorYawAngle) > ViewRelativeActorYawAngleThreshold)
 	{
-		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.Rotation.Yaw + (YawAngleDifference > 0.0f ? -70.0f : 70.0f)),
-		                     DeltaTime, 20.0f);
+		static constexpr auto ActorRotationInterpolationSpeed{20.0f};
+		RefreshActorRotation(FRotator::NormalizeAxis(ViewState.Rotation.Yaw + (ViewRelativeActorYawAngle >= 0.0f
+			                                                                       ? -ViewRelativeActorYawAngleThreshold
+			                                                                       : ViewRelativeActorYawAngleThreshold)),
+		                     DeltaTime, ActorRotationInterpolationSpeed);
 	}
 	else
 	{
@@ -1040,14 +1076,18 @@ void AAlsCharacter::RefreshGroundedNotMovingAimingActorRotation(const float Delt
 	}
 }
 
-float AAlsCharacter::CalculateActorRotationSpeed() const
+float AAlsCharacter::CalculateActorRotationInterpolationSpeed() const
 {
 	// Calculate the rotation speed by using the rotation speed curve in the movement gait settings. Using
 	// the curve in conjunction with the gait amount gives you a high level of control over the rotation
 	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
 
-	return AlsCharacterMovement->GetGaitSettings().RotationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
-	       FMath::GetMappedRangeValueClamped({0.0f, 300.0f}, {1.0f, 3.0f}, ViewState.YawSpeed);
+	static constexpr auto ReferenceViewYawSpeed{300.0f};
+	static constexpr auto InterpolationSpeedMultiplier{3.0f};
+
+	return AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve->
+	                             GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
+	       UAlsMath::LerpClamped(1.0f, InterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
 }
 
 void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
@@ -1074,7 +1114,7 @@ void AAlsCharacter::ApplyRotationYawSpeedFromCharacter(const float DeltaTime)
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 {
 	const auto DeltaYawAngle{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurve()) * DeltaTime};
-	if (FMath::Abs(DeltaYawAngle) > KINDA_SMALL_NUMBER)
+	if (FMath::Abs(DeltaYawAngle) > SMALL_NUMBER)
 	{
 		AddActorWorldRotation({0.0f, DeltaYawAngle, 0.0f});
 
@@ -1096,6 +1136,8 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 		return;
 	}
 
+	static constexpr auto ActorRotationInterpolationSpeed{5.0f};
+
 	switch (RotationMode)
 	{
 		case EAlsRotationMode::VelocityDirection:
@@ -1105,7 +1147,7 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 				case EAlsInAirRotationMode::RotateToVelocityOnJump:
 					if (LocomotionState.bMoving)
 					{
-						RefreshActorRotation(LocomotionState.VelocityYawAngle, DeltaTime, 5.0f);
+						RefreshActorRotation(LocomotionState.VelocityYawAngle, DeltaTime, ActorRotationInterpolationSpeed);
 					}
 					else
 					{
@@ -1114,7 +1156,8 @@ void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 					break;
 
 				case EAlsInAirRotationMode::KeepRelativeRotation:
-					RefreshActorRotation(ViewState.Rotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle, DeltaTime, 5.0f);
+					RefreshActorRotation(ViewState.Rotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle,
+					                     DeltaTime, ActorRotationInterpolationSpeed);
 					break;
 
 				default:
@@ -1140,7 +1183,9 @@ bool AAlsCharacter::TryRefreshCustomInAirActorRotation(const float DeltaTime)
 
 void AAlsCharacter::RefreshInAirAimingActorRotation(const float DeltaTime)
 {
-	RefreshActorRotation(ViewState.Rotation.Yaw, DeltaTime, 15.0f);
+	static constexpr auto ActorRotationInterpolationSpeed{15.0f};
+
+	RefreshActorRotation(ViewState.Rotation.Yaw, DeltaTime, ActorRotationInterpolationSpeed);
 }
 
 void AAlsCharacter::RefreshActorRotationInstant(const float TargetYawAngle, const ETeleportType Teleport)
@@ -1234,9 +1279,4 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 void AAlsCharacter::OnJumpedNetworked()
 {
 	AlsAnimationInstance->Jump();
-}
-
-void AAlsCharacter::OnLandedGroundFrictionReset() const
-{
-	GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 }

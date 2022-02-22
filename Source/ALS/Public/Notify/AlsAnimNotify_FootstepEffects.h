@@ -162,5 +162,5 @@ private:
 public:
 	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void Notify(USkeletalMeshComponent* MeshComponent, UAnimSequenceBase* Animation) override;
+	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation) override;
 };

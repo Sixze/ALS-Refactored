@@ -2,7 +2,7 @@
 
 #include "GameplayTagsManager.h"
 
-const FAlsGroundedEntryModeTags FAlsGroundedEntryModeTags::Instance{};
+const FAlsGroundedEntryModeTags FAlsGroundedEntryModeTags::Instance;
 
 void FAlsGroundedEntryModeTags::AddTags()
 {
