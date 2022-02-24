@@ -38,7 +38,7 @@ private:
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may be incorrect (such as foot location used in foot locking).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bPendingUpdate;
+	bool bPendingUpdate{true};
 
 	// The animation curves will be relevant if the character is rendered or VisibilityBasedAnimTickOption
 	// is set to AlwaysTickPoseAndRefreshBones, otherwise the curves will have their old values even though
@@ -154,7 +154,7 @@ private:
 	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,
 	                       FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	static void ResetFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation);
+	void ResetFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	static void RefreshFinalFootState(FAlsFootState& FootState, const FTransform& MeshRelativeTransform,
 	                                  const FVector& FinalLocation, const FQuat& FinalRotation);

@@ -71,6 +71,9 @@ struct ALS_API FAlsFeetState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bReinitializationRequired{true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPrimitiveComponent* BasePrimitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
