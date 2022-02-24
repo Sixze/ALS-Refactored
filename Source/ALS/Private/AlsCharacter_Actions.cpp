@@ -397,7 +397,8 @@ void AAlsCharacter::RefreshMantling()
 
 	if (!RootMotionSource.IsValid() ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) ||
-	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
+	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval) ||
+	    LocomotionAction != FAlsLocomotionActionTags::Get().Mantling)
 	{
 		StopMantling();
 		ForceNetUpdate();
