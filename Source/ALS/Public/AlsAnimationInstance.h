@@ -68,9 +68,6 @@ private:
 	FGameplayTag GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionAnimationState LocomotionState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLayeringState LayeringState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
@@ -80,16 +77,22 @@ private:
 	FAlsViewAnimationState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsFeetState FeetState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLeanState LeanState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementDirection MovementDirection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsLocomotionAnimationState LocomotionState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementState MovementState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsInAirState InAirState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsFeetState FeetState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRotateInPlaceState RotateInPlaceState;
@@ -98,16 +101,13 @@ private:
 	FAlsTurnInPlaceState TurnInPlaceState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsInAirState InAirState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingAnimationState RagdollingState;
-
-	FTimerHandle DynamicTransitionsAllowanceTimer;
 
 	FTimerHandle PivotResetTimer;
 
 	FTimerHandle JumpResetTimer;
+
+	FTimerHandle DynamicTransitionsAllowanceTimer;
 
 public:
 	virtual void NativeInitializeAnimation() override;
@@ -126,16 +126,63 @@ public:
 	const FAlsFeetState& GetFeetState() const;
 
 private:
-	void RefreshLocomotion(float DeltaTime);
-
 	void RefreshLayering();
 
 	void RefreshPose();
 
+	// View
+
+private:
 	void RefreshView(float DeltaTime);
 
 protected:
 	virtual bool IsSpineRotationAllowed();
+
+	// Locomotion
+
+private:
+	void RefreshLocomotion(float DeltaTime);
+
+	// Grounded
+
+public:
+	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void ResetGroundedEntryMode();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void SetHipsDirection(EAlsHipsDirection NewDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void ActivatePivot();
+
+private:
+	void RefreshGrounded(float DeltaTime);
+
+	EAlsMovementDirection CalculateMovementDirection() const;
+
+	void RefreshVelocityBlend(const float DeltaTime);
+
+	float CalculateStrideBlendAmount() const;
+
+	float CalculateWalkRunBlendAmount() const;
+
+	float CalculateStandingPlayRate() const;
+
+	float CalculateCrouchingPlayRate() const;
+
+	// In Air
+
+public:
+	void Jump();
+
+private:
+	void RefreshInAir(float DeltaTime);
+
+	float CalculateGroundPredictionAmount() const;
+
+	FAlsLeanState CalculateInAirLeanAmount() const;
 
 	// Feet
 
@@ -161,38 +208,6 @@ private:
 
 	void RefreshPelvisOffset(float DeltaTime, float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ);
 
-	// Grounded Movement
-
-public:
-	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void ResetGroundedEntryMode();
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void SetHipsDirection(EAlsHipsDirection NewDirection);
-
-private:
-	void RefreshMovement(float DeltaTime);
-
-	EAlsMovementDirection CalculateMovementDirection() const;
-
-	void RefreshVelocityBlend(const float DeltaTime);
-
-	float CalculateStrideBlendAmount() const;
-
-	float CalculateWalkRunBlendAmount() const;
-
-	float CalculateStandingPlayRate() const;
-
-	float CalculateCrouchingPlayRate() const;
-
-	// Pivot
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void ActivatePivot();
-
 	// Transitions
 
 public:
@@ -214,7 +229,7 @@ public:
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);
 
 private:
-	void RefreshDynamicTransitions();
+	void RefreshTransitions();
 
 	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
 	                           float PlayRate = 1.0f, float StartTime = 0.0f, float AllowanceDelay = 0.0f);
@@ -236,20 +251,6 @@ private:
 	void RefreshTurnInPlace(float DeltaTime);
 
 	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartIfPlaying = false);
-
-	// Jump
-
-public:
-	void Jump();
-
-	// In Air
-
-private:
-	void RefreshInAir(float DeltaTime);
-
-	float CalculateGroundPredictionAmount() const;
-
-	FAlsLeanState CalculateInAirLeanAmount() const;
 
 	// Ragdolling
 

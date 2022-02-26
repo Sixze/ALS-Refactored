@@ -72,12 +72,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionAction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	FVector_NetQuantizeNormal InputDirection;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FAlsLocomotionState LocomotionState;
-
 	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
 		ReplicatedUsing = "OnReplicate_ViewRotation", Meta = (AllowPrivateAccess))
@@ -85,6 +79,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsViewState ViewState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
+	FVector_NetQuantizeNormal InputDirection;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	FAlsLocomotionState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	int32 MantlingRootMotionSourceId;
@@ -298,22 +298,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnOverlayModeChanged(const FGameplayTag& PreviousModeTag);
 
-	// Locomotion
-
-public:
-	const FVector& GetInputDirection() const;
-
-	const FAlsLocomotionState& GetLocomotionState() const;
-
-private:
-	void SetInputDirection(FVector NewInputDirection);
-
-	FTransform CalculateNetworkSmoothedTransform() const;
-
-	void RefreshLocomotionLocationAndRotation();
-
-	void RefreshLocomotion(float DeltaTime);
-
 	// View
 
 public:
@@ -337,6 +321,22 @@ private:
 	void RefreshView(float DeltaTime);
 
 	void RefreshViewInterpolation(float DeltaTime);
+
+	// Locomotion
+
+public:
+	const FVector& GetInputDirection() const;
+
+	const FAlsLocomotionState& GetLocomotionState() const;
+
+private:
+	void SetInputDirection(FVector NewInputDirection);
+
+	FTransform CalculateNetworkSmoothedTransform() const;
+
+	void RefreshLocomotionLocationAndRotation();
+
+	void RefreshLocomotion(float DeltaTime);
 
 	// Rotation
 
@@ -608,14 +608,14 @@ inline const FVector& AAlsCharacter::GetInputDirection() const
 	return InputDirection;
 }
 
-inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
-{
-	return LocomotionState;
-}
-
 inline const FAlsViewState& AAlsCharacter::GetViewState() const
 {
 	return ViewState;
+}
+
+inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
+{
+	return LocomotionState;
 }
 
 inline void AAlsCharacter::RefreshTargetYawAngleUsingLocomotionRotation()

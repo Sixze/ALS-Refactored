@@ -80,8 +80,8 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewRotation, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
@@ -111,14 +111,14 @@ void AAlsCharacter::PostInitializeComponents()
 
 	// Set default rotation values.
 
+	ViewState.Rotation = ViewRotation;
+	ViewState.PreviousYawAngle = ViewRotation.Yaw;
+
 	RefreshLocomotionLocationAndRotation();
 	RefreshTargetYawAngleUsingLocomotionRotation();
 
 	LocomotionState.InputYawAngle = LocomotionState.Rotation.Yaw;
 	LocomotionState.VelocityYawAngle = LocomotionState.Rotation.Yaw;
-
-	ViewState.Rotation = ViewRotation;
-	ViewState.PreviousYawAngle = ViewRotation.Yaw;
 }
 
 void AAlsCharacter::BeginPlay()
@@ -174,9 +174,9 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshRotationMode();
 
-	RefreshLocomotion(DeltaTime);
 	RefreshView(DeltaTime);
 
+	RefreshLocomotion(DeltaTime);
 	RefreshGait();
 
 	RefreshGroundedActorRotation(DeltaTime);
@@ -732,93 +732,6 @@ void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
 
 void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
 
-void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
-{
-	NewInputDirection = NewInputDirection.GetSafeNormal();
-
-	if (InputDirection != NewInputDirection)
-	{
-		InputDirection = NewInputDirection;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InputDirection, this)
-	}
-}
-
-FTransform AAlsCharacter::CalculateNetworkSmoothedTransform() const
-{
-	// If network smoothing is disabled, then return regular actor transform.
-
-	return GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled
-		       ? GetActorTransform()
-		       : GetActorTransform() * FTransform{
-			         GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) *
-			         GetBaseRotationOffset().Inverse(),
-			         GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
-		         };
-}
-
-void AAlsCharacter::RefreshLocomotionLocationAndRotation()
-{
-	const auto& ActorTransform{GetActorTransform()};
-
-	// If network smoothing is disabled, then return regular actor transform.
-
-	if (GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled)
-	{
-		LocomotionState.Location = ActorTransform.GetLocation();
-		LocomotionState.Rotation = ActorTransform.GetRotation().Rotator();
-		return;
-	}
-
-	const auto SmoothTransform{
-		ActorTransform * FTransform{
-			GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * GetBaseRotationOffset().Inverse(),
-			GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
-		}
-	};
-
-	LocomotionState.Location = SmoothTransform.GetLocation();
-	LocomotionState.Rotation = SmoothTransform.GetRotation().Rotator();
-}
-
-void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
-{
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
-	{
-		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
-	}
-
-	// If the character has input, update the input yaw angle.
-
-	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
-
-	if (LocomotionState.bHasInput)
-	{
-		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle2D(InputDirection);
-	}
-
-	LocomotionState.Velocity = GetVelocity();
-
-	// Determine if the character is moving by getting it's speed. The speed equals the length
-	// of the horizontal velocity, so it does not take vertical movement into account. If the
-	// character is moving, update the last velocity rotation. This value is saved because it
-	// might be useful to know the last orientation of movement even after the character has stopped.
-
-	LocomotionState.Speed = LocomotionState.Velocity.Size2D();
-	LocomotionState.bHasSpeed = LocomotionState.Speed >= 1.0f;
-
-	if (LocomotionState.bHasSpeed)
-	{
-		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle2D(LocomotionState.Velocity);
-	}
-
-	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
-
-	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > Settings->MovingSpeedThreshold;
-
-	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
-}
-
 FRotator AAlsCharacter::GetViewRotation() const
 {
 	return ViewRotation;
@@ -947,6 +860,93 @@ void AAlsCharacter::RefreshViewInterpolation(const float DeltaTime)
 		ViewRotation = ViewState.InterpolationTargetRotation;
 		ViewState.InterpolationClientTimeStamp = ViewState.InterpolationServerTimeStamp;
 	}
+}
+
+void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
+{
+	NewInputDirection = NewInputDirection.GetSafeNormal();
+
+	if (InputDirection != NewInputDirection)
+	{
+		InputDirection = NewInputDirection;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InputDirection, this)
+	}
+}
+
+FTransform AAlsCharacter::CalculateNetworkSmoothedTransform() const
+{
+	// If network smoothing is disabled, then return regular actor transform.
+
+	return GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled
+		       ? GetActorTransform()
+		       : GetActorTransform() * FTransform{
+			         GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) *
+			         GetBaseRotationOffset().Inverse(),
+			         GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
+		         };
+}
+
+void AAlsCharacter::RefreshLocomotionLocationAndRotation()
+{
+	const auto& ActorTransform{GetActorTransform()};
+
+	// If network smoothing is disabled, then return regular actor transform.
+
+	if (GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled)
+	{
+		LocomotionState.Location = ActorTransform.GetLocation();
+		LocomotionState.Rotation = ActorTransform.GetRotation().Rotator();
+		return;
+	}
+
+	const auto SmoothTransform{
+		ActorTransform * FTransform{
+			GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * GetBaseRotationOffset().Inverse(),
+			GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
+		}
+	};
+
+	LocomotionState.Location = SmoothTransform.GetLocation();
+	LocomotionState.Rotation = SmoothTransform.GetRotation().Rotator();
+}
+
+void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
+{
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
+	}
+
+	// If the character has input, update the input yaw angle.
+
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
+
+	if (LocomotionState.bHasInput)
+	{
+		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle2D(InputDirection);
+	}
+
+	LocomotionState.Velocity = GetVelocity();
+
+	// Determine if the character is moving by getting it's speed. The speed equals the length
+	// of the horizontal velocity, so it does not take vertical movement into account. If the
+	// character is moving, update the last velocity rotation. This value is saved because it
+	// might be useful to know the last orientation of movement even after the character has stopped.
+
+	LocomotionState.Speed = LocomotionState.Velocity.Size2D();
+	LocomotionState.bHasSpeed = LocomotionState.Speed >= 1.0f;
+
+	if (LocomotionState.bHasSpeed)
+	{
+		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle2D(LocomotionState.Velocity);
+	}
+
+	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
+
+	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > Settings->MovingSpeedThreshold;
+
+	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 }
 
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
