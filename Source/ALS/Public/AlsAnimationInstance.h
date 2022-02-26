@@ -3,16 +3,15 @@
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsMovementDirection.h"
 #include "State/Enumerations/AlsRotationMode.h"
 #include "State/Enumerations/AlsStance.h"
 #include "State/Enumerations/AlsViewMode.h"
 #include "State/Structures/AlsFeetState.h"
+#include "State/Structures/AlsGroundedState.h"
 #include "State/Structures/AlsInAirState.h"
 #include "State/Structures/AlsLayeringState.h"
 #include "State/Structures/AlsLeanState.h"
 #include "State/Structures/AlsLocomotionAnimationState.h"
-#include "State/Structures/AlsMovementState.h"
 #include "State/Structures/AlsPoseState.h"
 #include "State/Structures/AlsRagdollingAnimationState.h"
 #include "State/Structures/AlsRotateInPlaceState.h"
@@ -78,13 +77,10 @@ private:
 	FAlsLeanState LeanState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsMovementDirection MovementDirection;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsLocomotionAnimationState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsMovementState MovementState;
+	FAlsGroundedState GroundedState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsInAirState InAirState;
@@ -155,9 +151,11 @@ public:
 private:
 	void RefreshGrounded(float DeltaTime);
 
-	EAlsMovementDirection CalculateMovementDirection() const;
+	void RefreshMovementDirection();
 
 	void RefreshVelocityBlend(const float DeltaTime);
+
+	void RefreshRotationYawOffsets();
 
 	float CalculateStrideBlendAmount() const;
 
@@ -292,5 +290,5 @@ inline void UAlsAnimationInstance::ResetGroundedEntryMode()
 
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)
 {
-	MovementState.HipsDirection = NewDirection;
+	GroundedState.HipsDirection = NewDirection;
 }
