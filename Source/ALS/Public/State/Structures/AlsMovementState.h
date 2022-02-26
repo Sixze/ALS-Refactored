@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Engine/EngineTypes.h"
 #include "AlsMovementState.generated.h"
 
 UENUM(BlueprintType)
@@ -59,4 +60,6 @@ struct ALS_API FAlsMovementState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPivotActive{false};
+
+	FTimerHandle PivotResetTimer;
 };

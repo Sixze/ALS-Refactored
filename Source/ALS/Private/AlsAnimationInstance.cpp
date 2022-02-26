@@ -120,10 +120,10 @@ void UAlsAnimationInstance::RefreshPose()
 		return;
 	}
 
-	LocomotionState.GaitAmount = GetCurveValue(UAlsConstants::GaitAmountCurve());
-	LocomotionState.GaitWalkingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount);
-	LocomotionState.GaitRunningAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 1.0f);
-	LocomotionState.GaitSprintingAmount = UAlsMath::Clamp01(LocomotionState.GaitAmount - 2.0f);
+	PoseState.GaitAmount = FMath::Clamp(GetCurveValue(UAlsConstants::PoseGaitCurve()), 0.0f, 3.0f);
+	PoseState.GaitWalkingAmount = UAlsMath::Clamp01(PoseState.GaitAmount);
+	PoseState.GaitRunningAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 1.0f);
+	PoseState.GaitSprintingAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 2.0f);
 
 	PoseState.MovingAmount = GetCurveValueClamped01(UAlsConstants::PoseMovingCurve());
 
@@ -226,7 +226,7 @@ void UAlsAnimationInstance::ActivatePivot()
 	{
 		static constexpr auto ResetDelay{0.1f};
 
-		GetWorld()->GetTimerManager().SetTimer(PivotResetTimer,
+		GetWorld()->GetTimerManager().SetTimer(MovementState.PivotResetTimer,
 		                                       FTimerDelegate::CreateWeakLambda(this, [&bPivotActive = MovementState.bPivotActive]
 		                                       {
 			                                       bPivotActive = false;
@@ -251,13 +251,15 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 
 	if ((Acceleration | Character->GetLocomotionState().Velocity) >= 0.0f)
 	{
-		LocomotionState.RelativeAccelerationAmount = Character->GetLocomotionState().Rotation.UnrotateVector(
-			UAlsMath::ClampMagnitude01(Acceleration / Character->GetCharacterMovement()->GetMaxAcceleration()));
+		LocomotionState.RelativeAccelerationAmount = UAlsMath::ClampMagnitude01(
+			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration) /
+			Character->GetCharacterMovement()->GetMaxAcceleration());
 	}
 	else
 	{
-		LocomotionState.RelativeAccelerationAmount = Character->GetLocomotionState().Rotation.UnrotateVector(
-			UAlsMath::ClampMagnitude01(Acceleration / Character->GetCharacterMovement()->GetMaxBrakingDeceleration()));
+		LocomotionState.RelativeAccelerationAmount = UAlsMath::ClampMagnitude01(
+			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration) /
+			Character->GetCharacterMovement()->GetMaxBrakingDeceleration());
 	}
 
 	// Set the rotation yaw offsets. These values influence the rotation yaw offset curve in the
@@ -296,8 +298,6 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	}
 
 	LocomotionState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurve());
-
-	/////////////////////////////////////
 
 	MovementDirection = CalculateMovementDirection();
 
@@ -349,14 +349,12 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
-		Character->GetLocomotionState().Rotation.UnrotateVector(Character->GetLocomotionState().Velocity.GetSafeNormal())
+		Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity).GetSafeNormal()
 	};
 
 	const auto RelativeDirection{
 		RelativeVelocityDirection /
-		(FMath::Abs(RelativeVelocityDirection.X) +
-		 FMath::Abs(RelativeVelocityDirection.Y) +
-		 FMath::Abs(RelativeVelocityDirection.Z))
+		(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z))
 	};
 
 	if (!bPendingUpdate)
@@ -398,7 +396,7 @@ float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 	const auto StandingStrideBlend{
 		FMath::Lerp(Settings->Movement.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
 		            Settings->Movement.StrideBlendAmountRunCurve->GetFloatValue(Speed),
-		            LocomotionState.GaitRunningAmount)
+		            PoseState.GaitRunningAmount)
 	};
 
 	// Crouching stride blends.
@@ -425,13 +423,13 @@ float UAlsAnimationInstance::CalculateStandingPlayRate() const
 	const auto WalkRunSpeedAmount{
 		FMath::Lerp(Character->GetLocomotionState().Speed / Settings->Movement.AnimatedWalkSpeed,
 		            Character->GetLocomotionState().Speed / Settings->Movement.AnimatedRunSpeed,
-		            LocomotionState.GaitRunningAmount)
+		            PoseState.GaitRunningAmount)
 	};
 
 	const auto WalkRunSprintSpeedAmount{
 		FMath::Lerp(WalkRunSpeedAmount,
 		            Character->GetLocomotionState().Speed / Settings->Movement.AnimatedSprintSpeed,
-		            LocomotionState.GaitSprintingAmount)
+		            PoseState.GaitSprintingAmount)
 	};
 
 	return FMath::Clamp(WalkRunSprintSpeedAmount / (MovementState.StrideBlendAmount * GetSkelMeshComponent()->GetComponentScale().Z),
@@ -460,7 +458,7 @@ void UAlsAnimationInstance::Jump()
 
 	static constexpr auto ResetDelay{0.1f};
 
-	GetWorld()->GetTimerManager().SetTimer(JumpResetTimer,
+	GetWorld()->GetTimerManager().SetTimer(InAirState.JumpResetTimer,
 	                                       FTimerDelegate::CreateWeakLambda(this, [&bJumped = InAirState.bJumped]
 	                                       {
 		                                       bJumped = false;
@@ -577,7 +575,7 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 	static constexpr auto ReferenceSpeed{350.0f};
 
 	const auto RelativeVelocity{
-		Character->GetLocomotionState().Rotation.UnrotateVector(Character->GetLocomotionState().Velocity) /
+		Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity) /
 		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(Character->GetLocomotionState().Velocity.Z)
 	};
 
@@ -1037,13 +1035,12 @@ void UAlsAnimationInstance::RefreshTransitions()
 {
 	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
 
-	LocomotionState.bAllowTransitions = FAnimWeight::IsFullWeight(GetCurveValue(UAlsConstants::AllowTransitionsCurve()));
+	TransitionsState.bAllowTransitions = FAnimWeight::IsFullWeight(GetCurveValue(UAlsConstants::AllowTransitionsCurve()));
 
 	// Dynamic transitions.
 
-	if (!bAnimationCurvesRelevant ||
-	    Character->GetLocomotionState().bMoving || !LocomotionState.bAllowTransitions ||
-	    Character->GetLocomotionMode() != FAlsLocomotionModeTags::Get().Grounded)
+	if (!bAnimationCurvesRelevant || !TransitionsState.bAllowTransitions || !TransitionsState.bAllowDynamicTransition ||
+	    Character->GetLocomotionState().bMoving || Character->GetLocomotionMode() != FAlsLocomotionModeTags::Get().Grounded)
 	{
 		return;
 	}
@@ -1085,15 +1082,16 @@ void UAlsAnimationInstance::RefreshTransitions()
 void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, const float BlendInTime, const float BlendOutTime,
                                                   const float PlayRate, const float StartTime, const float AllowanceDelay)
 {
-	if (bAllowDynamicTransitions)
+	if (TransitionsState.bAllowDynamicTransition)
 	{
-		bAllowDynamicTransitions = false;
+		TransitionsState.bAllowDynamicTransition = false;
 
-		GetWorld()->GetTimerManager().SetTimer(DynamicTransitionsAllowanceTimer,
-		                                       FTimerDelegate::CreateWeakLambda(this, [&bAllowDynamicTransitions = bAllowDynamicTransitions]
-		                                       {
-			                                       bAllowDynamicTransitions = true;
-		                                       }), AllowanceDelay, false);
+		GetWorld()->GetTimerManager().SetTimer(TransitionsState.DynamicTransitionAllowanceTimer,
+		                                       FTimerDelegate::CreateWeakLambda(
+			                                       this, [&bAllowDynamicTransition = TransitionsState.bAllowDynamicTransition]
+			                                       {
+				                                       bAllowDynamicTransition = true;
+			                                       }), AllowanceDelay, false);
 
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}
@@ -1189,7 +1187,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	if (!LocomotionState.bAllowTransitions)
+	if (!TransitionsState.bAllowTransitions)
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
 		return;

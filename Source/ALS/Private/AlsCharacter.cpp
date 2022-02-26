@@ -896,7 +896,8 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 	if (GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled)
 	{
 		LocomotionState.Location = ActorTransform.GetLocation();
-		LocomotionState.Rotation = ActorTransform.GetRotation().Rotator();
+		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
+		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
 		return;
 	}
 
@@ -908,7 +909,8 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 	};
 
 	LocomotionState.Location = SmoothTransform.GetLocation();
-	LocomotionState.Rotation = SmoothTransform.GetRotation().Rotator();
+	LocomotionState.RotationQuaternion = SmoothTransform.GetRotation();
+	LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
 }
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)

@@ -16,6 +16,7 @@
 #include "State/Structures/AlsPoseState.h"
 #include "State/Structures/AlsRagdollingAnimationState.h"
 #include "State/Structures/AlsRotateInPlaceState.h"
+#include "State/Structures/AlsTransitionsState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
 #include "State/Structures/AlsViewAnimationState.h"
 #include "AlsAnimationInstance.generated.h"
@@ -48,9 +49,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bJustTeleported;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bAllowDynamicTransitions{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsStance Stance;
@@ -95,6 +93,9 @@ private:
 	FAlsFeetState FeetState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FAlsTransitionsState TransitionsState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRotateInPlaceState RotateInPlaceState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
@@ -102,12 +103,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingAnimationState RagdollingState;
-
-	FTimerHandle PivotResetTimer;
-
-	FTimerHandle JumpResetTimer;
-
-	FTimerHandle DynamicTransitionsAllowanceTimer;
 
 public:
 	virtual void NativeInitializeAnimation() override;

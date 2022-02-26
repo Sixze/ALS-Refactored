@@ -16,18 +16,6 @@ struct ALS_API FAlsLocomotionAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -1, ClampMax = 1))
 	FVector RelativeAccelerationAmount{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 3))
-	float GaitAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitWalkingAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitRunningAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float GaitSprintingAmount{0.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float RotationYawOffsetForward{0.0f};
 
@@ -48,7 +36,4 @@ struct ALS_API FAlsLocomotionAnimationState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float SprintBlockAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowTransitions{false};
 };

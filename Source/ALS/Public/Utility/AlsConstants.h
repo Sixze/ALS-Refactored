@@ -298,6 +298,13 @@ public:
 	// Pose Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	static const FName& PoseGaitCurve()
+	{
+		static const FName Name{TEXT("PoseGait")};
+		return Name;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& PoseMovingCurve()
 	{
 		static const FName Name{TEXT("PoseMoving")};
@@ -377,13 +384,6 @@ public:
 	}
 
 	// Other Animation Curves
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& GaitAmountCurve()
-	{
-		static const FName Name{TEXT("GaitAmount")};
-		return Name;
-	}
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& RotationYawSpeedCurve()

@@ -52,4 +52,7 @@ struct ALS_API FAlsLocomotionState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FQuat RotationQuaternion{ForceInit};
 };
