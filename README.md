@@ -2,7 +2,12 @@
 
 ![Image](https://github.com/Sixze/ALS-Refactored/raw/main/Images/Header.gif)
 
-Completely refactored and bug fixed version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1) for **Unreal Engine 4.26, 4.27, 5.0 EA**.
+Completely refactored and bug fixed version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1).
+
+## Supported Unreal Engine Versions
+
+- 5.0
+- 4.26, 4.27, 5.0 EA ([4.8](https://github.com/Sixze/ALS-Refactored/releases/tag/4.8) and below)
 
 ## Supported Platforms
 
