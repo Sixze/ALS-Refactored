@@ -1,6 +1,5 @@
-#include "AlsCharacter.h"
-
 #include "AlsAnimationInstance.h"
+#include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
@@ -61,7 +60,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 			                    : ActorYawAngle;
 	}
 
-	const auto ForwardTraceDeltaAngle{ForwardTraceAngle - ActorYawAngle};
+	const auto ForwardTraceDeltaAngle{FRotator::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
@@ -398,7 +397,9 @@ void AAlsCharacter::RefreshMantling()
 	if (!RootMotionSource.IsValid() ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval) ||
-	    LocomotionAction != FAlsLocomotionActionTags::Get().Mantling)
+	    // ReSharper disable once CppRedundantParentheses
+	    (LocomotionAction.IsValid() && LocomotionAction != FAlsLocomotionActionTags::Get().Mantling) ||
+	    GetCharacterMovement()->MovementMode != MOVE_Custom)
 	{
 		StopMantling();
 		ForceNetUpdate();

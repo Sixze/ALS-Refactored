@@ -251,7 +251,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, cons
 			break;
 
 		default:
-			SetLocomotionMode({});
+			SetLocomotionMode(FGameplayTag::EmptyTag);
 			break;
 	}
 
