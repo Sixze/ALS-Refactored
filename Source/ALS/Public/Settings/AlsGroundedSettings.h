@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "AlsMovementAnimationSettings.generated.h"
+#include "AlsGroundedSettings.generated.h"
 
 class UCurveFloat;
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsMovementAnimationSettings
+struct ALS_API FAlsGroundedSettings
 {
 	GENERATED_BODY()
 
@@ -21,12 +21,6 @@ struct ALS_API FAlsMovementAnimationSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float AnimatedCrouchSpeed{150.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float VelocityBlendInterpolationSpeed{12.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float PivotActivationSpeedThreshold{200.0f};
-
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* StrideBlendAmountWalkCurve{nullptr};
@@ -34,4 +28,22 @@ struct ALS_API FAlsMovementAnimationSettings
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* StrideBlendAmountRunCurve{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* RotationYawOffsetForwardCurve{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* RotationYawOffsetBackwardCurve{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* RotationYawOffsetLeftCurve{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCurveFloat* RotationYawOffsetRightCurve{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	float VelocityBlendInterpolationSpeed{12.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	float PivotActivationSpeedThreshold{200.0f};
 };

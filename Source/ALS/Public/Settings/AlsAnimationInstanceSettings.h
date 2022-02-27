@@ -3,8 +3,8 @@
 #include "AlsDynamicTransitionSettings.h"
 #include "AlsFeetSettings.h"
 #include "AlsGeneralAnimationSettings.h"
+#include "AlsGroundedSettings.h"
 #include "AlsInAirSettings.h"
-#include "AlsMovementAnimationSettings.h"
 #include "AlsRotateInPlaceSettings.h"
 #include "AlsTurnInPlaceSettings.h"
 #include "Engine/DataAsset.h"
@@ -20,22 +20,22 @@ public:
 	FAlsGeneralAnimationSettings General;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsFeetSettings Feet;
+	FAlsGroundedSettings Grounded;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsMovementAnimationSettings Movement;
+	FAlsInAirSettings InAir;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsDynamicTransitionSettings DynamicTransition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsFeetSettings Feet;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsRotateInPlaceSettings RotateInPlace;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsGeneralTurnInPlaceSettings TurnInPlace;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsDynamicTransitionSettings DynamicTransition;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsInAirSettings InAir;
 
 public:
 	UAlsAnimationInstanceSettings();

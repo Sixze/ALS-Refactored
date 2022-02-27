@@ -26,16 +26,4 @@ struct ALS_API FAlsGeneralAnimationSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float LeanInterpolationSpeed{4.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetForwardCurve{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetBackwardCurve{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetLeftCurve{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetRightCurve{nullptr};
 };
