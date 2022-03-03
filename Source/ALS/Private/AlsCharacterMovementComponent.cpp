@@ -115,7 +115,7 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	MaxAcceleration = 1500.0f;
 
 	BrakingFrictionFactor = 0.0f;
-	CrouchedHalfHeight = 56.0f;
+	SetCrouchedHalfHeight(56.0f);
 	bRunPhysicsWithNoController = true;
 
 	MinAnalogWalkSpeed = 25.0f;
@@ -186,7 +186,7 @@ float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)
+	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).X
 		       : Super::GetMaxAcceleration();
 }
@@ -195,14 +195,14 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 {
 	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)
+	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).Y
 		       : Super::GetMaxBrakingDeceleration();
 }
 
 void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 {
-	if (HasValidData() && (IsValid(CharacterOwner->Controller) || bRunPhysicsWithNoController))
+	if (HasValidData() && (bRunPhysicsWithNoController || !CharacterOwner->Controller.IsNull()))
 	{
 		Super::PhysicsRotation(DeltaTime);
 
@@ -212,7 +212,7 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 
 void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const int32 Iterations)
 {
-	if (IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve))
+	if (!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
@@ -301,9 +301,10 @@ void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* N
 
 void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
-	GaitSettings = IsValid(MovementSettings)
-		               ? *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(Stance)
-		               : FAlsMovementGaitSettings{};
+	GaitSettings = MovementSettings.IsNull()
+		               ? FAlsMovementGaitSettings{}
+		               : *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(
+			               Stance);
 
 	RefreshMaxWalkSpeed();
 }

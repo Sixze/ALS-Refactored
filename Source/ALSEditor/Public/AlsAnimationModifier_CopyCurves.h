@@ -10,7 +10,7 @@ class ALSEDITOR_API UAlsAnimationModifier_CopyCurves : public UAnimationModifier
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	UAnimSequence* SourceSequence;
+	TSoftObjectPtr<UAnimSequence> SourceSequence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	bool bCopyAllCurves{true};

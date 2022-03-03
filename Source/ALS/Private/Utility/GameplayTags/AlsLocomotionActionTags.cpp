@@ -1,15 +1,9 @@
 ﻿#include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
-#include "GameplayTagsManager.h"
-
-const FAlsLocomotionActionTags FAlsLocomotionActionTags::Instance;
-
-void FAlsLocomotionActionTags::AddTags()
+namespace AlsLocomotionActionTags
 {
-	auto& TagsManager{UGameplayTagsManager::Get()};
-
-	Mantling = TagsManager.AddNativeGameplayTag(TEXT("Als.LocomotionAction.Mantling"));
-	Ragdolling = TagsManager.AddNativeGameplayTag(TEXT("Als.LocomotionAction.Ragdolling"));
-	GettingUp = TagsManager.AddNativeGameplayTag(TEXT("Als.LocomotionAction.GettingUp"));
-	Rolling = TagsManager.AddNativeGameplayTag(TEXT("Als.LocomotionAction.Rolling"));
+	UE_DEFINE_GAMEPLAY_TAG(Mantling, TEXT("Als.LocomotionAction.Mantling"))
+	UE_DEFINE_GAMEPLAY_TAG(Ragdolling, TEXT("Als.LocomotionAction.Ragdolling"))
+	UE_DEFINE_GAMEPLAY_TAG(GettingUp, TEXT("Als.LocomotionAction.GettingUp"))
+	UE_DEFINE_GAMEPLAY_TAG(Rolling, TEXT("Als.LocomotionAction.Rolling"))
 }

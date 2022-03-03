@@ -15,9 +15,10 @@ FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() cons
 	                       });
 }
 
-void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation)
+void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
+                                                 const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(Mesh, Animation);
+	Super::Notify(Mesh, Animation, EventReference);
 
 	auto* AnimationInstance{Cast<UAlsAnimationInstance>(Mesh->GetAnimInstance())};
 	if (IsValid(AnimationInstance))

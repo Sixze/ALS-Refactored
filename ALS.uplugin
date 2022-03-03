@@ -10,6 +10,7 @@
 	"DocsURL": "https://github.com/Sixze/ALS-Refactored",
 	"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1",
 	"SupportURL": "https://github.com/Sixze/ALS-Refactored/issues",
+	"EngineVersion": "5.0.0",
 	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
@@ -39,11 +40,15 @@
 	],
 	"Plugins": [
 		{
-			"Name": "GameplayTagsEditor",
+			"Name": "ControlRig",
 			"Enabled": true
 		},
 		{
-			"Name": "ControlRig",
+			"Name": "GameplayCameras",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayTagsEditor",
 			"Enabled": true
 		},
 		{

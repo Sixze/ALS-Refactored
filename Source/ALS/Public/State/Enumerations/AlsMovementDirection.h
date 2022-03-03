@@ -12,7 +12,7 @@ enum class EAlsMovementDirection : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsMovementDirection
+struct ALS_API FAlsMovementDirectionCache
 {
 	GENERATED_BODY()
 
@@ -33,9 +33,9 @@ private:
 	bool bRight{false};
 
 public:
-	FAlsMovementDirection() = default;
+	FAlsMovementDirectionCache() = default;
 
-	FAlsMovementDirection(const EAlsMovementDirection InitialMovementDirection)
+	FAlsMovementDirectionCache(const EAlsMovementDirection InitialMovementDirection)
 	{
 		*this = InitialMovementDirection;
 	}

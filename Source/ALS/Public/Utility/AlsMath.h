@@ -4,8 +4,6 @@
 #include "State/Enumerations/AlsMovementDirection.h"
 #include "AlsMath.generated.h"
 
-class UCapsuleComponent;
-
 UCLASS()
 class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 {

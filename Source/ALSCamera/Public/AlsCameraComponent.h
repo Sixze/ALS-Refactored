@@ -8,22 +8,22 @@
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(HideCategories = ("ComponentTick", "Clothing", "Physics", "MasterPoseComponent",
-	"Collision", "Lighting", "ClothingSimulation", "Rendering", "Navigation", "HLOD",
-	"VirtualTexture", "SkeletalMesh", "Optimization", "MaterialParameters", "Mobile"))
+UCLASS(HideCategories = ("ComponentTick", "Clothing", "Physics", "MasterPoseComponent", "Collision",
+	"AnimationRig", "Lighting", "Deformer", "Rendering", "HLOD", "Navigation", "VirtualTexture", "SkeletalMesh",
+	"Optimization", "LOD", "MaterialParameters", "TextureStreaming", "Mobile", "RayTracing"))
 class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	UAlsCameraSettings* Settings;
+	TObjectPtr<UAlsCameraSettings> Settings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	AAlsCharacter* AlsCharacter;
+	TObjectPtr<AAlsCharacter> AlsCharacter;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FVector PivotTargetLocation;

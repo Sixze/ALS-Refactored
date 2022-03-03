@@ -1,22 +1,8 @@
 ﻿#pragma once
 
-#include "GameplayTagContainer.h"
+#include "NativeGameplayTags.h"
 
-struct ALS_API FAlsGroundedEntryModeTags : public FGameplayTagNativeAdder
+namespace AlsGroundedEntryModeTags
 {
-private:
-	static const FAlsGroundedEntryModeTags Instance;
-
-public:
-	FGameplayTag FromRoll;
-
-public:
-	virtual void AddTags() override;
-
-	static const FAlsGroundedEntryModeTags& Get();
-};
-
-inline const FAlsGroundedEntryModeTags& FAlsGroundedEntryModeTags::Get()
-{
-	return Instance;
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(FromRoll)
 }

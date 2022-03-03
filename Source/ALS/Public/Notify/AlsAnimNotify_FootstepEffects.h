@@ -130,7 +130,7 @@ class ALS_API UAlsAnimNotify_FootstepEffects : public UAnimNotify
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	UAlsFootstepEffectsSettings* FootstepEffectsSettings;
+	TObjectPtr<UAlsFootstepEffectsSettings> FootstepEffectsSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	EAlsFootBone FootBone{EAlsFootBone::Left};
@@ -162,5 +162,6 @@ private:
 public:
 	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation) override;
+	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
+	                    const FAnimNotifyEventReference& EventReference) override;
 };

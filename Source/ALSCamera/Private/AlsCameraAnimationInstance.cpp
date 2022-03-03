@@ -15,7 +15,7 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (DeltaTime <= SMALL_NUMBER || !IsValid(AlsCharacter) || !IsValid(AlsCamera))
+	if (DeltaTime <= SMALL_NUMBER || AlsCharacter.IsNull() || AlsCamera.IsNull())
 	{
 		return;
 	}

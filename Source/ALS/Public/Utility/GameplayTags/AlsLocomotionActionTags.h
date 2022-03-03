@@ -1,25 +1,11 @@
 ﻿#pragma once
 
-#include "GameplayTagContainer.h"
+#include "NativeGameplayTags.h"
 
-struct ALS_API FAlsLocomotionActionTags : public FGameplayTagNativeAdder
+namespace AlsLocomotionActionTags
 {
-private:
-	static const FAlsLocomotionActionTags Instance;
-
-public:
-	FGameplayTag Mantling;
-	FGameplayTag Ragdolling;
-	FGameplayTag GettingUp;
-	FGameplayTag Rolling;
-
-public:
-	virtual void AddTags() override;
-
-	static const FAlsLocomotionActionTags& Get();
-};
-
-inline const FAlsLocomotionActionTags& FAlsLocomotionActionTags::Get()
-{
-	return Instance;
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Mantling)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ragdolling)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GettingUp)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Rolling)
 }

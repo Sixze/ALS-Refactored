@@ -81,7 +81,7 @@ private:
 	FAlsCharacterNetworkMoveDataContainer MoveDataContainer;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	UAlsMovementSettings* MovementSettings;
+	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsMovementGaitSettings GaitSettings;

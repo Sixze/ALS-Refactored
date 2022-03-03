@@ -10,7 +10,7 @@ enum class EAlsViewMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsViewMode
+struct ALS_API FAlsViewModeCache
 {
 	GENERATED_BODY()
 
@@ -25,9 +25,9 @@ private:
 	bool bThirdPerson{false};
 
 public:
-	FAlsViewMode() = default;
+	FAlsViewModeCache() = default;
 
-	FAlsViewMode(const EAlsViewMode InitialGroundedEntryMode)
+	FAlsViewModeCache(const EAlsViewMode InitialGroundedEntryMode)
 	{
 		*this = InitialGroundedEntryMode;
 	}

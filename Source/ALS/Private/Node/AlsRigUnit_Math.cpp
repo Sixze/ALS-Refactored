@@ -30,9 +30,9 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 
 	if (Context.State == EControlRigState::Init)
 	{
-		// CachedItemAIndex.Reset();
-		// CachedItemBIndex.Reset();
-		// CachedItemCIndex.Reset();
+		CachedItemA.Reset();
+		CachedItemB.Reset();
+		CachedItemC.Reset();
 	}
 	else if (bInitial)
 	{
@@ -45,19 +45,19 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 		return;
 	}
 
-	// if (!CachedItemAIndex.UpdateCache(ItemA, Hierarchy) ||
-	//     !CachedItemBIndex.UpdateCache(ItemB, Hierarchy) ||
-	//     !CachedItemCIndex.UpdateCache(ItemC, Hierarchy))
-	// {
-	// 	return;
-	// }
+	if (!CachedItemA.UpdateCache(ItemA, Hierarchy) ||
+	    !CachedItemB.UpdateCache(ItemB, Hierarchy) ||
+	    !CachedItemC.UpdateCache(ItemC, Hierarchy))
+	{
+		return;
+	}
 
 	if (!bInitial)
 	{
-		EndLocation = {Hierarchy->GetGlobalTransform(ItemB).GetLocation()};
+		EndLocation = {Hierarchy->GetGlobalTransform(CachedItemB).GetLocation()};
 
-		if (TryCalculatePoleVector(Hierarchy->GetGlobalTransform(ItemA).GetLocation(), EndLocation,
-		                           Hierarchy->GetGlobalTransform(ItemC).GetLocation(), StartLocation, Direction))
+		if (TryCalculatePoleVector(Hierarchy->GetGlobalTransform(CachedItemA).GetLocation(), EndLocation,
+		                           Hierarchy->GetGlobalTransform(CachedItemC).GetLocation(), StartLocation, Direction))
 		{
 			bSuccess = true;
 			return;
@@ -65,11 +65,11 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 	}
 
 	StartLocation = FVector::ZeroVector;
-	EndLocation = Hierarchy->GetInitialGlobalTransform(ItemB).GetLocation();
+	EndLocation = Hierarchy->GetInitialGlobalTransform(CachedItemB).GetLocation();
 	Direction = FVector::ZeroVector;
 
-	bSuccess = TryCalculatePoleVector(Hierarchy->GetInitialGlobalTransform(ItemA).GetLocation(), EndLocation,
-	                                  Hierarchy->GetInitialGlobalTransform(ItemC).GetLocation(), StartLocation, Direction);
+	bSuccess = TryCalculatePoleVector(Hierarchy->GetInitialGlobalTransform(CachedItemA).GetLocation(), EndLocation,
+	                                  Hierarchy->GetInitialGlobalTransform(CachedItemC).GetLocation(), StartLocation, Direction);
 }
 
 FAlsRigUnit_HandIkRetargeting_Execute()
@@ -81,8 +81,25 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 		return;
 	}
 
+	if (Context.State == EControlRigState::Init)
+	{
+		CachedLeftHandBone.Reset();
+		CachedLeftHandIkBone.Reset();
+		CachedRightHandBone.Reset();
+		CachedRightHandIkBone.Reset();
+		CachedBonesToMove.Reset();
+	}
+
 	auto* Hierarchy{ExecuteContext.Hierarchy};
 	if (Hierarchy == nullptr)
+	{
+		return;
+	}
+
+	if (!CachedLeftHandBone.UpdateCache(LeftHandBone, Hierarchy) ||
+	    !CachedLeftHandIkBone.UpdateCache(LeftHandIkBone, Hierarchy) ||
+	    !CachedRightHandBone.UpdateCache(RightHandBone, Hierarchy) ||
+	    !CachedRightHandIkBone.UpdateCache(RightHandIkBone, Hierarchy))
 	{
 		return;
 	}
@@ -91,21 +108,21 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 
 	if (FAnimWeight::IsFullWeight(RetargetingWeight))
 	{
-		RetargetingOffset = Hierarchy->GetGlobalTransform(RightHandBone).GetLocation() -
-		                    Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation();
+		RetargetingOffset = Hierarchy->GetGlobalTransform(CachedRightHandBone).GetLocation() -
+		                    Hierarchy->GetGlobalTransform(CachedRightHandIkBone).GetLocation();
 	}
 	else if (!FAnimWeight::IsRelevant(RetargetingWeight))
 	{
-		RetargetingOffset = Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation() -
-		                    Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation();
+		RetargetingOffset = Hierarchy->GetGlobalTransform(CachedLeftHandBone).GetLocation() -
+		                    Hierarchy->GetGlobalTransform(CachedLeftHandIkBone).GetLocation();
 	}
 	else
 	{
-		RetargetingOffset = FMath::Lerp(Hierarchy->GetGlobalTransform(LeftHandBone).GetLocation(),
-		                                Hierarchy->GetGlobalTransform(RightHandBone).GetLocation(),
+		RetargetingOffset = FMath::Lerp(Hierarchy->GetGlobalTransform(CachedLeftHandBone).GetLocation(),
+		                                Hierarchy->GetGlobalTransform(CachedRightHandBone).GetLocation(),
 		                                RetargetingWeight) -
-		                    FMath::Lerp(Hierarchy->GetGlobalTransform(LeftHandIkBone).GetLocation(),
-		                                Hierarchy->GetGlobalTransform(RightHandIkBone).GetLocation(),
+		                    FMath::Lerp(Hierarchy->GetGlobalTransform(CachedLeftHandIkBone).GetLocation(),
+		                                Hierarchy->GetGlobalTransform(CachedRightHandIkBone).GetLocation(),
 		                                RetargetingWeight);
 	}
 
@@ -116,17 +133,27 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 		return;
 	}
 
-	for (const auto& Bone : BonesToMove)
+	if (CachedBonesToMove.Num() != BonesToMove.Num())
 	{
-		const auto BoneIndex{Hierarchy->GetIndex(Bone)};
-		if (BoneIndex == INDEX_NONE)
+		CachedBonesToMove.Reset();
+		CachedBonesToMove.SetNum(CachedBonesToMove.Num());
+	}
+
+	for (auto i{0}; i < BonesToMove.Num(); i++)
+	{
+		if (Context.State == EControlRigState::Init)
+		{
+			CachedBonesToMove[i].Reset();
+		}
+
+		if (!CachedBonesToMove[i].UpdateCache(BonesToMove[i], Hierarchy))
 		{
 			continue;
 		}
 
-		auto BoneTransform{Hierarchy->GetGlobalTransform(Bone.Type, BoneIndex)};
+		auto BoneTransform{Hierarchy->GetGlobalTransform(CachedBonesToMove[i])};
 		BoneTransform.AddToTranslation(RetargetingOffset);
 
-		Hierarchy->SetGlobalTransform(Bone.Type, BoneIndex, BoneTransform, bPropagateToChildren);
+		Hierarchy->SetGlobalTransform(CachedBonesToMove[i], BoneTransform, bPropagateToChildren);
 	}
 }

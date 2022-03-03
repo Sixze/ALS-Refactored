@@ -13,10 +13,10 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	UAlsAnimationInstance* Parent;
+	TObjectPtr<UAlsAnimationInstance> Parent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	AAlsCharacter* Character;
+	TObjectPtr<AAlsCharacter> Character;
 
 public:
 	UAlsLinkedAnimationInstance();

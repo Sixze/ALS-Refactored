@@ -10,7 +10,7 @@ enum class EAlsStance : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsStance
+struct ALS_API FAlsStanceCache
 {
 	GENERATED_BODY()
 
@@ -25,9 +25,9 @@ private:
 	bool bCrouching{false};
 
 public:
-	FAlsStance() = default;
+	FAlsStanceCache() = default;
 
-	FAlsStance(const EAlsStance InitialStance)
+	FAlsStanceCache(const EAlsStance InitialStance)
 	{
 		*this = InitialStance;
 	}

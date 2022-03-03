@@ -10,7 +10,7 @@ struct ALS_API FAlsTurnInPlaceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimSequenceBase* Animation{nullptr};
+	TObjectPtr<UAnimSequenceBase> Animation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.2f};

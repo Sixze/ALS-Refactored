@@ -12,20 +12,12 @@ void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAn
 
 	UAnimationBlueprintLibrary::AddCurve(Sequence, UAlsConstants::RotationYawSpeedCurve());
 
-#if ENGINE_MAJOR_VERSION >= 5
 	const auto FrameRate{Sequence->GetSamplingFrameRate().AsDecimal()};
-#else
-	const auto FrameRate{Sequence->GetFrameRate()};
-#endif
 
 	FTransform CurrentPoseTransform;
 	FTransform NextPoseTransform;
 
-#if ENGINE_MAJOR_VERSION >= 5
 	for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
-#else
-	for (auto i{0}; i < Sequence->GetNumberOfFrames(); i++)
-#endif
 	{
 		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBone(), i, false, CurrentPoseTransform);
 

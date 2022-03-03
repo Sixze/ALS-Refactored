@@ -1,5 +1,6 @@
-#include "AlsAnimationInstance.h"
 #include "AlsCharacter.h"
+
+#include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
@@ -19,13 +20,13 @@
 
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
-	return LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
+	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
 	       TryStartMantling(Settings->Mantling.GroundedTrace);
 }
 
 bool AAlsCharacter::TryStartMantlingInAir()
 {
-	return LocomotionMode == FAlsLocomotionModeTags::Get().InAir && IsLocallyControlled() &&
+	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
 	       TryStartMantling(Settings->Mantling.InAirTrace);
 }
 
@@ -232,7 +233,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	Parameters.MantlingType = LocomotionMode == FAlsLocomotionModeTags::Get().Grounded
+	Parameters.MantlingType = LocomotionMode == AlsLocomotionModeTags::Grounded
 		                          ? Parameters.MantlingHeight > Settings->Mantling.MantlingHighHeightThreshold
 			                            ? EAlsMantlingType::High
 			                            : EAlsMantlingType::Low
@@ -292,9 +293,9 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		return;
 	}
 
-	auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
-	if (!IsValid(MantlingSettings) || !IsValid(MantlingSettings->BlendInCurve) ||
-	    !IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve))
+	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
+	if (!IsValid(MantlingSettings) || MantlingSettings->BlendInCurve.IsNull() ||
+	    MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull())
 	{
 		return;
 	}
@@ -356,7 +357,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (IsValid(MantlingSettings->Montage))
+	if (!MantlingSettings->Montage.IsNull())
 	{
 		// Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
 
@@ -371,7 +372,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		                                               EMontagePlayReturnType::MontageLength,
 		                                               MontageStartTime, false))
 		{
-			SetLocomotionAction(FAlsLocomotionActionTags::Get().Mantling);
+			SetLocomotionAction(AlsLocomotionActionTags::Mantling);
 		}
 	}
 
@@ -398,7 +399,7 @@ void AAlsCharacter::RefreshMantling()
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval) ||
 	    // ReSharper disable once CppRedundantParentheses
-	    (LocomotionAction.IsValid() && LocomotionAction != FAlsLocomotionActionTags::Get().Mantling) ||
+	    (LocomotionAction.IsValid() && LocomotionAction != AlsLocomotionActionTags::Mantling) ||
 	    GetCharacterMovement()->MovementMode != MOVE_Custom)
 	{
 		StopMantling();
@@ -414,6 +415,7 @@ void AAlsCharacter::StopMantling()
 	}
 
 	const auto RootMotionSource{GetCharacterMovement()->GetRootMotionSourceByID(MantlingRootMotionSourceId)};
+
 	if (RootMotionSource.IsValid() &&
 	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) &&
 	    !RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval))
@@ -438,7 +440,7 @@ void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
 bool AAlsCharacter::IsRagdollingAllowedToStart() const
 {
-	return LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling;
+	return LocomotionAction != AlsLocomotionActionTags::Ragdolling;
 }
 
 void AAlsCharacter::StartRagdolling()
@@ -502,7 +504,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	AlsCharacterMovement->SetMovementModeLocked(true);
 
-	SetLocomotionAction(FAlsLocomotionActionTags::Get().Ragdolling);
+	SetLocomotionAction(AlsLocomotionActionTags::Ragdolling);
 
 	// Disable capsule collision and enable mesh physics simulation starting from the pelvis.
 
@@ -547,7 +549,7 @@ void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 {
-	if (LocomotionAction != FAlsLocomotionActionTags::Get().Ragdolling)
+	if (LocomotionAction != AlsLocomotionActionTags::Ragdolling)
 	{
 		return;
 	}
@@ -648,7 +650,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionAction == FAlsLocomotionActionTags::Get().Ragdolling;
+	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
 }
 
 bool AAlsCharacter::TryStopRagdolling()
@@ -703,7 +705,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
 	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
 	{
-		SetLocomotionAction(FAlsLocomotionActionTags::Get().GettingUp);
+		SetLocomotionAction(AlsLocomotionActionTags::GettingUp);
 	}
 }
 
@@ -761,7 +763,7 @@ void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 void AAlsCharacter::TryStartRolling(const float PlayRate)
 {
-	if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded)
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 	{
 		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle
@@ -773,7 +775,7 @@ bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
 	return !LocomotionAction.IsValid() ||
 	       // ReSharper disable once CppRedundantParentheses
-	       (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling &&
+	       (LocomotionAction == AlsLocomotionActionTags::Rolling &&
 	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
 
@@ -835,13 +837,13 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 
 		RefreshActorRotationInstant(StartYawAngle);
 
-		SetLocomotionAction(FAlsLocomotionActionTags::Get().Rolling);
+		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
 	}
 }
 
 void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 {
-	if (LocomotionAction != FAlsLocomotionActionTags::Get().Rolling)
+	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
 	{
 		return;
 	}

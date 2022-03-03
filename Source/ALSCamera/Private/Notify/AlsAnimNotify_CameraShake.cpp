@@ -9,24 +9,17 @@ FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 	return FString::Format(TEXT("Als Camera Shake: {0}"), {IsValid(CameraShakeClass) ? CameraShakeClass->GetName() : TEXT("None")});
 }
 
-void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation)
+void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
+                                        const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(Mesh, Animation);
+	Super::Notify(Mesh, Animation, EventReference);
 
 	const auto* Pawn{Cast<APawn>(Mesh->GetOwner())};
-	if (!IsValid(Pawn))
-	{
-		return;
-	}
+	const auto* Player{IsValid(Pawn) ? Cast<APlayerController>(Pawn->GetController()) : nullptr};
+	auto* CameraManager{IsValid(Player) ? Player->PlayerCameraManager.Get() : nullptr};
 
-	const auto* Player{Cast<APlayerController>(Pawn->GetController())};
-	if (!IsValid(Player))
+	if (IsValid(CameraManager))
 	{
-		return;
-	}
-
-	if (IsValid(Player->PlayerCameraManager))
-	{
-		Player->PlayerCameraManager->StartCameraShake(CameraShakeClass, CameraShakeScale);
+		CameraManager->StartCameraShake(CameraShakeClass, CameraShakeScale);
 	}
 }

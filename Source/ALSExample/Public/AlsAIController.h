@@ -10,7 +10,7 @@ class ALSEXAMPLE_API AAlsAIController : public AAIController
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	UBehaviorTree* BehaviourTree;
+	TObjectPtr<UBehaviorTree> BehaviourTree;
 
 public:
 	AAlsAIController();

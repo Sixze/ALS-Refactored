@@ -12,30 +12,32 @@ class ALSEXAMPLE_API AAlsCharacterExample : public AAlsCharacter
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	UAlsCameraComponent* AlsCamera;
+	TObjectPtr<UAlsCameraComponent> AlsCamera;
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
-	float LookUpMouseSensitivity{1.0f};
+	float LookUpMouseSensitivity{2.5f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
-	float LookRightMouseSensitivity{1.0f};
+	float LookRightMouseSensitivity{2.5f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
-		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg"))
-	float LookUpRate{45.0f};
+		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg/s"))
+	float LookUpRate{90.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
-		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg"))
-	float LookRightRate{90.0f};
+		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg/s"))
+	float LookRightRate{240.0f};
 
 private:
 	FTimerHandle SprintStartTimer;
 
 public:
 	AAlsCharacterExample();
+
+	virtual void PossessedBy(AController* NewController) override;
 
 	// Camera
 

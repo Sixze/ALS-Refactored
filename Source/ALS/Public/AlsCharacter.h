@@ -25,13 +25,13 @@ class ALS_API AAlsCharacter : public ACharacter
 
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
-	UAlsCharacterMovementComponent* AlsCharacterMovement;
+	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	UAlsCharacterSettings* Settings;
+	TObjectPtr<UAlsCharacterSettings> Settings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
-	UAlsMovementSettings* MovementSettings;
+	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
 	EAlsStance DesiredStance;
@@ -55,7 +55,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
 		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
-	UAlsAnimationInstance* AlsAnimationInstance;
+	TObjectPtr<UAlsAnimationInstance> AlsAnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsStance Stance;

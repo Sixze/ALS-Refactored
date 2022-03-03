@@ -6,8 +6,6 @@
 #include "State/Enumerations/AlsStance.h"
 #include "AlsAnimNotifyState_EarlyBlendOut.generated.h"
 
-class UAnimMontage;
-
 UCLASS(DisplayName = "Als Early Blend Out Animation Notify State", Meta = (ShowWorldContextPin))
 class ALS_API UAlsAnimNotifyState_EarlyBlendOut : public UAnimNotifyState
 {
@@ -43,5 +41,6 @@ public:
 
 	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void NotifyTick(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation, float DeltaTime) override;
+	virtual void NotifyTick(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
+	                        float DeltaTime, const FAnimNotifyEventReference& EventReference) override;
 };

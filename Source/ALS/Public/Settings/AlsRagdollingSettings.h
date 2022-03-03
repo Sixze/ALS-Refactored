@@ -19,8 +19,8 @@ struct ALS_API FAlsRagdollingSettings
 	TArray<TEnumAsByte<EObjectTypeQuery>> GroundTraceObjectTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* GetUpFrontMontage{nullptr};
+	TObjectPtr<UAnimMontage> GetUpFrontMontage{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* GetUpBackMontage{nullptr};
+	TObjectPtr<UAnimMontage> GetUpBackMontage{nullptr};
 };

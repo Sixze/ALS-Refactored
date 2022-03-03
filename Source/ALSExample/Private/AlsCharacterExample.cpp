@@ -3,12 +3,26 @@
 #include "AlsCameraComponent.h"
 #include "TimerManager.h"
 #include "Components/InputComponent.h"
+#include "GameFramework/PlayerController.h"
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
 	AlsCamera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("AlsCamera"));
 	AlsCamera->SetupAttachment(GetMesh());
 	AlsCamera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
+}
+
+void AAlsCharacterExample::PossessedBy(AController* NewController)
+{
+	auto* Player{Cast<APlayerController>(NewController)};
+	if (IsValid(Player))
+	{
+		Player->InputYawScale_DEPRECATED = 1.0f;
+		Player->InputPitchScale_DEPRECATED = 1.0f;
+		Player->InputRollScale_DEPRECATED = 1.0f;
+	}
+
+	Super::PossessedBy(NewController);
 }
 
 void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
@@ -57,7 +71,7 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void AAlsCharacterExample::InputLookUpMouse(const float Value)
 {
-	AddControllerPitchInput(-Value * LookUpMouseSensitivity);
+	AddControllerPitchInput(Value * LookUpMouseSensitivity);
 }
 
 void AAlsCharacterExample::InputLookRightMouse(const float Value)
@@ -67,7 +81,7 @@ void AAlsCharacterExample::InputLookRightMouse(const float Value)
 
 void AAlsCharacterExample::InputLookUp(const float Value)
 {
-	AddControllerPitchInput(-Value * LookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Value * LookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AAlsCharacterExample::InputLookRight(const float Value)

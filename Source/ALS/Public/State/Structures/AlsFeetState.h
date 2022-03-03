@@ -74,7 +74,7 @@ struct ALS_API FAlsFeetState
 	bool bReinitializationRequired{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPrimitiveComponent* BasePrimitive{nullptr};
+	TObjectPtr<UPrimitiveComponent> BasePrimitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName BaseBoneName;

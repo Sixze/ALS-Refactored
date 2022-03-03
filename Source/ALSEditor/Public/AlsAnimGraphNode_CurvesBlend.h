@@ -19,8 +19,4 @@ public:
 	virtual FText GetTooltipText() const override;
 
 	virtual FString GetNodeCategory() const override;
-
-#if ENGINE_MAJOR_VERSION >= 5
-	virtual void GetOutputLinkAttributes(FNodeAttributeArray& Attributes) const override;
-#endif
 };

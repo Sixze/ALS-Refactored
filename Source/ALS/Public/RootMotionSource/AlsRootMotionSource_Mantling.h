@@ -3,7 +3,6 @@
 #include "GameFramework/RootMotionSource.h"
 #include "AlsRootMotionSource_Mantling.generated.h"
 
-struct FAlsMantlingParameters;
 class UAlsMantlingSettings;
 
 USTRUCT()
@@ -13,7 +12,7 @@ struct ALS_API FAlsRootMotionSource_Mantling : public FRootMotionSource
 
 public:
 	UPROPERTY()
-	UAlsMantlingSettings* MantlingSettings{nullptr};
+	TObjectPtr<UAlsMantlingSettings> MantlingSettings{nullptr};
 
 	UPROPERTY()
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;

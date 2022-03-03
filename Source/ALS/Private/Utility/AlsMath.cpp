@@ -87,14 +87,6 @@ float UAlsMath::NormalizeInputAxis(const float AxisValue, const float OtherAxisV
 {
 	const auto MagnitudeSquared{AxisValue * AxisValue + OtherAxisValue * OtherAxisValue};
 
-	// GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red,
-	//                                  FString::Format(TEXT("Axis: {0}, OtherAxis: {1} Result: {2}"), {
-	// 	                                                 AxisValue, OtherAxisValue,
-	// 	                                                 (MagnitudeSquared <= 1.0f
-	// 		                                                  ? AxisValue
-	// 		                                                  : AxisValue * FMath::InvSqrt(MagnitudeSquared))
-	//                                                  }));
-
 	return MagnitudeSquared <= 1.0f ? AxisValue : AxisValue * FMath::InvSqrt(MagnitudeSquared);
 }
 

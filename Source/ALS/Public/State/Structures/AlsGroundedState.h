@@ -68,7 +68,7 @@ struct ALS_API FAlsGroundedState
 	FTimerHandle PivotResetTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsMovementDirection MovementDirection;
+	FAlsMovementDirectionCache MovementDirection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsVelocityBlendState VelocityBlend;

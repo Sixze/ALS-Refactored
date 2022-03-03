@@ -23,23 +23,23 @@ struct ALS_API FAlsGroundedSettings
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* StrideBlendAmountWalkCurve{nullptr};
+	TObjectPtr<UCurveFloat> StrideBlendAmountWalkCurve{nullptr};
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* StrideBlendAmountRunCurve{nullptr};
+	TObjectPtr<UCurveFloat> StrideBlendAmountRunCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetForwardCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetForwardCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetBackwardCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetBackwardCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetLeftCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetLeftCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCurveFloat* RotationYawOffsetRightCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetRightCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float VelocityBlendInterpolationSpeed{12.0f};

@@ -4,7 +4,8 @@
 
 void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
-	if (!IsValid(SourceSequence))
+	auto* SourceSequenceObject{SourceSequence.LoadSynchronous()};
+	if (!IsValid(SourceSequenceObject))
 	{
 		return;
 	}
@@ -17,7 +18,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 
 	if (bCopyAllCurves)
 	{
-		for (const auto& Curve : SourceSequence->GetCurveData().FloatCurves)
+		for (const auto& Curve : SourceSequenceObject->GetCurveData().FloatCurves)
 		{
 			if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, Curve.Name.DisplayName, ERawCurveTrackTypes::RCT_Float))
 			{
@@ -26,7 +27,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 
 			UAnimationBlueprintLibrary::AddCurve(Sequence, Curve.Name.DisplayName);
 
-			UAnimationBlueprintLibrary::GetFloatKeys(SourceSequence, Curve.Name.DisplayName, CurveTimes, CurveValues);
+			UAnimationBlueprintLibrary::GetFloatKeys(SourceSequenceObject, Curve.Name.DisplayName, CurveTimes, CurveValues);
 			UAnimationBlueprintLibrary::AddFloatCurveKeys(Sequence, Curve.Name.DisplayName, CurveTimes, CurveValues);
 		}
 	}
@@ -34,7 +35,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 	{
 		for (const auto& CurveName : CurveNames)
 		{
-			if (!UAnimationBlueprintLibrary::DoesCurveExist(SourceSequence, CurveName, ERawCurveTrackTypes::RCT_Float))
+			if (!UAnimationBlueprintLibrary::DoesCurveExist(SourceSequenceObject, CurveName, ERawCurveTrackTypes::RCT_Float))
 			{
 				continue;
 			}
@@ -46,7 +47,7 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 
 			UAnimationBlueprintLibrary::AddCurve(Sequence, CurveName);
 
-			UAnimationBlueprintLibrary::GetFloatKeys(SourceSequence, CurveName, CurveTimes, CurveValues);
+			UAnimationBlueprintLibrary::GetFloatKeys(SourceSequenceObject, CurveName, CurveTimes, CurveValues);
 			UAnimationBlueprintLibrary::AddFloatCurveKeys(Sequence, CurveName, CurveTimes, CurveValues);
 		}
 	}

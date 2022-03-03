@@ -123,9 +123,9 @@ void AAlsCharacter::PostInitializeComponents()
 
 void AAlsCharacter::BeginPlay()
 {
-	check(IsValid(Settings))
-	check(IsValid(MovementSettings))
-	check(IsValid(AlsAnimationInstance))
+	check(!Settings.IsNull())
+	check(!MovementSettings.IsNull())
+	check(!AlsAnimationInstance.IsNull())
 
 	checkf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 	       TEXT("These settings are not allowed and must be turned off!"))
@@ -228,7 +228,7 @@ void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTi
 void AAlsCharacter::Jump()
 {
 	if (Stance == EAlsStance::Standing && !LocomotionAction.IsValid() &&
-	    LocomotionMode == FAlsLocomotionModeTags::Get().Grounded)
+	    LocomotionMode == AlsLocomotionModeTags::Grounded)
 	{
 		Super::Jump();
 	}
@@ -243,11 +243,11 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, cons
 	{
 		case MOVE_Walking:
 		case MOVE_NavWalking:
-			SetLocomotionMode(FAlsLocomotionModeTags::Get().Grounded);
+			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
 			break;
 
 		case MOVE_Falling:
-			SetLocomotionMode(FAlsLocomotionModeTags::Get().InAir);
+			SetLocomotionMode(AlsLocomotionModeTags::InAir);
 			break;
 
 		default:
@@ -262,7 +262,7 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling)
+	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
 	{
 		SetStance(DesiredStance); // Keep desired stance when rolling.
 		return;
@@ -324,7 +324,7 @@ void AAlsCharacter::ApplyDesiredStance()
 {
 	if (!LocomotionAction.IsValid())
 	{
-		if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded)
+		if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 		{
 			switch (DesiredStance)
 			{
@@ -337,12 +337,12 @@ void AAlsCharacter::ApplyDesiredStance()
 					break;
 			}
 		}
-		else if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir)
+		else if (LocomotionMode == AlsLocomotionModeTags::InAir)
 		{
 			UnCrouch();
 		}
 	}
-	else if (LocomotionAction == FAlsLocomotionActionTags::Get().Rolling && Settings->Rolling.bCrouchOnStart)
+	else if (LocomotionAction == AlsLocomotionActionTags::Rolling && Settings->Rolling.bCrouchOnStart)
 	{
 		Crouch();
 	}
@@ -400,7 +400,7 @@ void AAlsCharacter::OnGaitChanged_Implementation(EAlsGait PreviousGait) {}
 
 void AAlsCharacter::RefreshGait()
 {
-	if (LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
+	if (LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -548,7 +548,7 @@ void AAlsCharacter::RefreshRotationMode()
 		if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
 		    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
 		{
-			SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == FAlsLocomotionModeTags::Get().InAir
+			SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == AlsLocomotionModeTags::InAir
 				                ? EAlsRotationMode::LookingDirection
 				                : EAlsRotationMode::Aiming);
 			return;
@@ -571,7 +571,7 @@ void AAlsCharacter::RefreshRotationMode()
 	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
 	    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
 	{
-		SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == FAlsLocomotionModeTags::Get().InAir
+		SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == AlsLocomotionModeTags::InAir
 			                ? EAlsRotationMode::LookingDirection
 			                : EAlsRotationMode::Aiming);
 		return;
@@ -631,8 +631,8 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 {
 	ApplyDesiredStance();
 
-	if (LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
-	    PreviousModeTag == FAlsLocomotionModeTags::Get().InAir)
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded &&
+	    PreviousModeTag == AlsLocomotionModeTags::InAir)
 	{
 		if (Settings->Ragdolling.bStartRagdollingOnLand &&
 		    LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
@@ -666,8 +666,8 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 				                                }), ResetDelay, false);
 		}
 	}
-	else if (LocomotionMode == FAlsLocomotionModeTags::Get().InAir &&
-	         LocomotionAction == FAlsLocomotionActionTags::Get().Rolling &&
+	else if (LocomotionMode == AlsLocomotionModeTags::InAir &&
+	         LocomotionAction == AlsLocomotionActionTags::Rolling &&
 	         Settings->Rolling.bInterruptRollingWhenInAir)
 	{
 		// If the character is currently rolling, then enable ragdolling.
@@ -954,7 +954,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 void AAlsCharacter::RefreshGroundedActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
-	    LocomotionMode != FAlsLocomotionModeTags::Get().Grounded)
+	    LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -1096,7 +1096,7 @@ void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float Delta
 {
 	if (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled() &&
 	    !LocomotionState.bRotationLocked && !LocomotionAction.IsValid() &&
-	    LocomotionMode == FAlsLocomotionModeTags::Get().Grounded &&
+	    LocomotionMode == AlsLocomotionModeTags::Grounded &&
 	    !HasAnyRootMotion() && !LocomotionState.bMoving)
 	{
 		ApplyRotationYawSpeed(DeltaTime);
@@ -1128,7 +1128,7 @@ void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 void AAlsCharacter::RefreshInAirActorRotation(const float DeltaTime)
 {
 	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
-	    LocomotionMode != FAlsLocomotionModeTags::Get().InAir)
+	    LocomotionMode != AlsLocomotionModeTags::InAir)
 	{
 		return;
 	}

@@ -30,10 +30,10 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	UAlsAnimationInstanceSettings* Settings;
+	TObjectPtr<UAlsAnimationInstanceSettings> Settings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	AAlsCharacter* Character;
+	TObjectPtr<AAlsCharacter> Character;
 
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may be incorrect (such as foot location used in foot locking).
@@ -50,16 +50,16 @@ private:
 	bool bJustTeleported;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsStance Stance;
+	FAlsStanceCache Stance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsGait Gait;
+	FAlsGaitCache Gait;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsRotationMode RotationMode;
+	FAlsRotationModeCache RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
+	FAlsViewModeCache ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag GroundedEntryMode;

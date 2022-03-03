@@ -17,7 +17,7 @@ struct ALS_API FAlsViewState
 
 	// Used for remembering how much time has passed between server corrections.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float InterpolationDuration;
+	float InterpolationDuration{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator InterpolationInitialRotation{ForceInit};

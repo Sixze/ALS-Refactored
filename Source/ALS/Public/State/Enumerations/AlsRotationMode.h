@@ -11,7 +11,7 @@ enum class EAlsRotationMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsRotationMode
+struct ALS_API FAlsRotationModeCache
 {
 	GENERATED_BODY()
 
@@ -29,9 +29,9 @@ private:
 	bool bAiming{false};
 
 public:
-	FAlsRotationMode() = default;
+	FAlsRotationModeCache() = default;
 
-	FAlsRotationMode(const EAlsRotationMode InitialRotationMode)
+	FAlsRotationModeCache(const EAlsRotationMode InitialRotationMode)
 	{
 		*this = InitialRotationMode;
 	}

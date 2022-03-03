@@ -1,6 +1,5 @@
 #include "Node/AlsAnimNode_CurvesBlend.h"
 
-#include "AnimationRuntime.h"
 #include "Animation/AnimInstanceProxy.h"
 
 void FAlsAnimNode_CurvesBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)

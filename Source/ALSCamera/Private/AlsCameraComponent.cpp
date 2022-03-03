@@ -36,7 +36,7 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 	Super::Activate(bReset);
 
-	if (IsValid(GetAnimInstance()) && IsValid(Settings) && IsValid(AlsCharacter))
+	if (IsValid(GetAnimInstance()) && !Settings.IsNull() && !AlsCharacter.IsNull())
 	{
 		TickCamera(0.0f, false);
 	}
@@ -44,9 +44,9 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 void UAlsCameraComponent::BeginPlay()
 {
-	check(IsValid(GetAnimInstance()));
-	check(IsValid(Settings));
-	check(IsValid(AlsCharacter));
+	check(IsValid(GetAnimInstance()))
+	check(!Settings.IsNull())
+	check(!AlsCharacter.IsNull())
 
 	Super::BeginPlay();
 }
@@ -85,7 +85,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 	ViewInfo.Rotation = CameraRotation;
 	ViewInfo.FOV = CameraFov;
 
-	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
+	ViewInfo.PostProcessBlendWeight = !Settings.IsNull() ? PostProcessWeight : 0.0f;
 
 	if (ViewInfo.PostProcessBlendWeight)
 	{
@@ -384,7 +384,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 		return TraceResult;
 	}
 
-	const auto TargetTraceDistanceRatio{(TraceResult - TraceStart).Size() / TraceDistance};
+	const auto TargetTraceDistanceRatio{static_cast<float>((TraceResult - TraceStart).Size() / TraceDistance)};
 
 	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		                        ? TargetTraceDistanceRatio
@@ -426,7 +426,9 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 			continue;
 		}
 
-		if (!Overlap.Component->ComputePenetration(MtdResult, CollisionShape, Location, FQuat::Identity))
+		const auto* OverlapBodyInstance{Overlap.Component->GetBodyInstance(NAME_None, true, Overlap.ItemIndex)};
+		if (OverlapBodyInstance == nullptr ||
+		    !OverlapBodyInstance->OverlapTest(Location, FQuat::Identity, CollisionShape, &MtdResult))
 		{
 			Overlaps.Reset();
 			return false;

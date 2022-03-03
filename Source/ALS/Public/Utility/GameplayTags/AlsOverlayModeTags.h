@@ -1,34 +1,20 @@
 ﻿#pragma once
 
-#include "GameplayTagContainer.h"
+#include "NativeGameplayTags.h"
 
-struct ALS_API FAlsOverlayModeTags : public FGameplayTagNativeAdder
+namespace AlsLocomotionActionTags
 {
-private:
-	static const FAlsOverlayModeTags Instance;
-
-public:
-	FGameplayTag Default;
-	FGameplayTag Masculine;
-	FGameplayTag Feminine;
-	FGameplayTag Injured;
-	FGameplayTag HandsTied;
-	FGameplayTag M4;
-	FGameplayTag PistolOneHanded;
-	FGameplayTag PistolTwoHanded;
-	FGameplayTag Bow;
-	FGameplayTag Torch;
-	FGameplayTag Binoculars;
-	FGameplayTag Box;
-	FGameplayTag Barrel;
-
-public:
-	virtual void AddTags() override;
-
-	static const FAlsOverlayModeTags& Get();
-};
-
-inline const FAlsOverlayModeTags& FAlsOverlayModeTags::Get()
-{
-	return Instance;
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Default)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Masculine)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Feminine)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Injured)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HandsTied)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(M4)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PistolOneHanded)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PistolTwoHanded)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Bow)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Torch)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Binoculars)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Box)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Barrel)
 }

@@ -3,13 +3,13 @@
 #include "Units/RigUnit.h"
 #include "AlsRigUnit_Math.generated.h"
 
-USTRUCT(Meta = (Abstract, NodeColor = "0.05 0.25 0.05"))
+USTRUCT(Meta = (Abstract, NodeColor = "0.462745 1.0 0.329412"))
 struct ALS_API FAlsRigUnit_MathBase : public FRigUnit
 {
 	GENERATED_BODY()
 };
 
-USTRUCT(Meta = (Abstract, NodeColor = "0.4 0.05 0.4"))
+USTRUCT(Meta = (Abstract, NodeColor = "0 0.364706 1.0"))
 struct ALS_API FAlsRigUnit_HighLevelBaseMutable : public FRigUnitMutable
 {
 	GENERATED_BODY()
@@ -46,14 +46,14 @@ public:
 	UPROPERTY(Meta = (Output))
 	FVector Direction{FVector::ForwardVector};
 
-	// UPROPERTY()
-	// FCachedRigElement CachedItemAIndex;
-	//
-	// UPROPERTY()
-	// FCachedRigElement CachedItemBIndex;
-	//
-	// UPROPERTY()
-	// FCachedRigElement CachedItemCIndex;
+	UPROPERTY()
+	FCachedRigElement CachedItemA;
+
+	UPROPERTY()
+	FCachedRigElement CachedItemB;
+
+	UPROPERTY()
+	FCachedRigElement CachedItemC;
 
 public:
 	RIGVM_METHOD()
@@ -90,6 +90,21 @@ public:
 
 	UPROPERTY(Meta = (Input, Constant))
 	bool bPropagateToChildren{false};
+
+	UPROPERTY()
+	FCachedRigElement CachedLeftHandBone;
+
+	UPROPERTY()
+	FCachedRigElement CachedLeftHandIkBone;
+
+	UPROPERTY()
+	FCachedRigElement CachedRightHandBone;
+
+	UPROPERTY()
+	FCachedRigElement CachedRightHandIkBone;
+
+	UPROPERTY()
+	TArray<FCachedRigElement> CachedBonesToMove;
 
 public:
 	RIGVM_METHOD()

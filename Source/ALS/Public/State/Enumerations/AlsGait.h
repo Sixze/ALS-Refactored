@@ -11,7 +11,7 @@ enum class EAlsGait : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsGait
+struct ALS_API FAlsGaitCache
 {
 	GENERATED_BODY()
 
@@ -29,9 +29,9 @@ private:
 	bool bSprinting{false};
 
 public:
-	FAlsGait() = default;
+	FAlsGaitCache() = default;
 
-	FAlsGait(const EAlsGait InitialGait)
+	FAlsGaitCache(const EAlsGait InitialGait)
 	{
 		*this = InitialGait;
 	}

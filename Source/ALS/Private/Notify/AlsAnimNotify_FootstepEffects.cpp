@@ -21,18 +21,19 @@ FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 	return FString::Format(TEXT("Als Footstep Effects: {0}"), {GetEnumValueString(FootBone)});
 }
 
-void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation)
+void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
+                                            const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(Mesh, Animation);
+	Super::Notify(Mesh, Animation, EventReference);
 
-	if (!IsValid(Mesh) || !IsValid(FootstepEffectsSettings))
+	if (!IsValid(Mesh) || FootstepEffectsSettings.IsNull())
 	{
 		return;
 	}
 
 	const auto* Character{Cast<AAlsCharacter>(Mesh->GetOwner())};
 
-	if (bSkipEffectsWhenInAir && IsValid(Character) && Character->GetLocomotionMode() == FAlsLocomotionModeTags::Get().InAir)
+	if (bSkipEffectsWhenInAir && IsValid(Character) && Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir)
 	{
 		return;
 	}
@@ -109,7 +110,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	const auto SurfaceType{
 		HitPhysicalMaterial.IsValid()
 			? HitPhysicalMaterial->SurfaceType
-			: TEnumAsByte<EPhysicalSurface>(SurfaceType_Default)
+			: TEnumAsByte{SurfaceType_Default}
 	};
 
 	const FAlsFootstepEffectSettings* EffectSettings{nullptr};

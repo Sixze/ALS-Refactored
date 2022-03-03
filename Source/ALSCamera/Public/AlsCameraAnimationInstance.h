@@ -18,22 +18,22 @@ class ALSCAMERA_API UAlsCameraAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	AAlsCharacter* AlsCharacter;
+	TObjectPtr<AAlsCharacter> AlsCharacter;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	UAlsCameraComponent* AlsCamera;
+	TObjectPtr<UAlsCameraComponent> AlsCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsStance Stance;
+	FAlsStanceCache Stance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsGait Gait;
+	FAlsGaitCache Gait;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsRotationMode RotationMode;
+	FAlsRotationModeCache RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsViewMode ViewMode{EAlsViewMode::ThirdPerson};
+	FAlsViewModeCache ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionMode;

@@ -34,35 +34,19 @@ FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
 float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 {
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
-	{
-		return 0.0f;
-	}
+	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
 
-	const auto* PlayerController{World->GetFirstPlayerController()};
-	if (!IsValid(PlayerController) || !IsValid(PlayerController->PlayerState))
-	{
-		return 0.0f;
-	}
-
-	return PlayerController->PlayerState->ExactPing * 0.001f;
+	return !IsValid(PlayerController) || !IsValid(PlayerController->PlayerState)
+		       ? 0.0f
+		       : PlayerController->PlayerState->ExactPing * 0.001f;
 }
 
 bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
 {
-	if (!IsValid(Actor))
-	{
-		return false;
-	}
+	const auto* PlayerController{IsValid(Actor) ? Actor->GetWorld()->GetFirstPlayerController() : nullptr};
+	auto* Hud{IsValid(PlayerController) ? PlayerController->GetHUD() : nullptr};
 
-	const auto* PlayerController{Actor->GetWorld()->GetFirstPlayerController()};
-	if (!IsValid(PlayerController) || !IsValid(PlayerController->GetHUD()))
-	{
-		return false;
-	}
-
-	return PlayerController->GetHUD()->ShouldDisplayDebug(DisplayName) &&
-	       PlayerController->GetHUD()->GetCurrentDebugTargetActor() == Actor;
+	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
 }
 
 void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,

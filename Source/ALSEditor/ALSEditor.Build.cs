@@ -20,7 +20,7 @@ public class ALSEditor : ModuleRules
 
 			PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"BlueprintGraph"
+				"BlueprintGraph", "AnimationBlueprintLibrary"
 			});
 		}
 	}

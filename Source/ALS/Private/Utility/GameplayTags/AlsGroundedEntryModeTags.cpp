@@ -1,12 +1,6 @@
 ﻿#include "Utility/GameplayTags/AlsGroundedEntryModeTags.h"
 
-#include "GameplayTagsManager.h"
-
-const FAlsGroundedEntryModeTags FAlsGroundedEntryModeTags::Instance;
-
-void FAlsGroundedEntryModeTags::AddTags()
+namespace AlsGroundedEntryModeTags
 {
-	auto& TagsManager{UGameplayTagsManager::Get()};
-
-	FromRoll = TagsManager.AddNativeGameplayTag(TEXT("Als.GroundedEntryMode.FromRoll"));
+	UE_DEFINE_GAMEPLAY_TAG(FromRoll, TEXT("Als.GroundedEntryMode.FromRoll"))
 }
