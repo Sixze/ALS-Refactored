@@ -197,14 +197,16 @@ bool UAlsAnimationInstance::IsSpineRotationAllowed()
 
 void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 {
-	if (Character->GetLocomotionState().bHasInput && RotationMode.IsVelocityDirection())
+	const auto& CharacterLocomotionState{Character->GetLocomotionState()};
+
+	if (CharacterLocomotionState.bHasInput && RotationMode.IsVelocityDirection())
 	{
 		// Get the delta between character rotation and current input yaw angle and map it to a range from
 		// 0 to 1. This value is used in the aiming to make the character look toward the current input.
 
 		const auto InputYawAngle{
 			static_cast<float>(FRotator::NormalizeAxis(
-				Character->GetLocomotionState().InputYawAngle - Character->GetLocomotionState().Rotation.Yaw))
+				CharacterLocomotionState.InputYawAngle - CharacterLocomotionState.Rotation.Yaw))
 		};
 
 		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
@@ -215,8 +217,9 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 			                                 : InputYawAmount;
 	}
 
-	LocomotionState.bMovingSmooth = Character->GetLocomotionState().bHasInput ||
-	                                Character->GetLocomotionState().Speed > Settings->General.MovingSmoothSpeedThreshold;
+	// ReSharper disable once CppRedundantParentheses
+	LocomotionState.bMovingSmooth = (CharacterLocomotionState.bHasInput && CharacterLocomotionState.bHasSpeed) ||
+	                                CharacterLocomotionState.Speed > Settings->General.MovingSmoothSpeedThreshold;
 }
 
 void UAlsAnimationInstance::ActivatePivot()
@@ -741,7 +744,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 	if (NewFootLockAmount > FootState.LockAmount && Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir)
 	{
-		// Smoothly disable foot locking if the character is in the air.
+		// Smoothly disable foot lock if the character is in the air.
 
 		static constexpr auto DecreaseSpeed{0.6f};
 
@@ -780,14 +783,14 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	const auto bNewAmountIsEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
 	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
 
-	// Only update the foot lock amount if the new value is less than the current, or it equals 1. This makes it
-	// so that the foot can only blend out of the locked position or lock to a new position and never blend in.
+	// Update the foot lock amount only if the new amount is less than the current amount or equal to 1. This
+	// allows the foot to blend out from a locked location or lock to a new location, but never blend in.
 
 	if (bNewAmountIsEqualOne || bNewAmountIsLessThanPrevious)
 	{
 		FootState.LockAmount = NewFootLockAmount;
 
-		// If the new foot lock amount equals 1 and the previous is less than 1, save the new lock location and rotation.
+		// If the new foot lock amount is 1 and the previous amount is less than 1, then save the new foot lock location and rotation.
 
 		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
 		{

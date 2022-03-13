@@ -946,7 +946,9 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
 
-	LocomotionState.bMoving = LocomotionState.bHasInput || LocomotionState.Speed > Settings->MovingSpeedThreshold;
+	// ReSharper disable once CppRedundantParentheses
+	LocomotionState.bMoving = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||
+	                          LocomotionState.Speed > Settings->MovingSpeedThreshold;
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 }
