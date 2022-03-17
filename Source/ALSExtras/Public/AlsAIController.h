@@ -4,7 +4,7 @@
 #include "AlsAIController.generated.h"
 
 UCLASS(DisplayName = "Als AI Controller")
-class ALSEXAMPLE_API AAlsAIController : public AAIController
+class ALSEXTRAS_API AAlsAIController : public AAIController
 {
 	GENERATED_BODY()
 

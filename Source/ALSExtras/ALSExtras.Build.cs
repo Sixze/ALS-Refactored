@@ -1,8 +1,8 @@
 using UnrealBuildTool;
 
-public class ALSExample : ModuleRules
+public class ALSExtras : ModuleRules
 {
-	public ALSExample(ReadOnlyTargetRules Target) : base(Target)
+	public ALSExtras(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 

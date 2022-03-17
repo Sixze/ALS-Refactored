@@ -28,7 +28,7 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "ALSExample",
+			"Name": "ALSExtras",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		},

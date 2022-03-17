@@ -6,7 +6,7 @@
 class UAlsCameraComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
-class ALSEXAMPLE_API AAlsCharacterExample : public AAlsCharacter
+class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 {
 	GENERATED_BODY()
 
