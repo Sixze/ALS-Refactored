@@ -1,8 +1,11 @@
 #include "AlsCharacterExample.h"
 
 #include "AlsCameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
 #include "Components/InputComponent.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 
 AAlsCharacterExample::AAlsCharacterExample()
@@ -12,17 +15,33 @@ AAlsCharacterExample::AAlsCharacterExample()
 	AlsCamera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 }
 
-void AAlsCharacterExample::PossessedBy(AController* NewController)
+void AAlsCharacterExample::NotifyControllerChanged()
 {
-	auto* Player{Cast<APlayerController>(NewController)};
-	if (IsValid(Player))
+	const auto* PreviousPlayer{Cast<APlayerController>(PreviousController)};
+	if (IsValid(PreviousPlayer))
 	{
-		Player->InputYawScale_DEPRECATED = 1.0f;
-		Player->InputPitchScale_DEPRECATED = 1.0f;
-		Player->InputRollScale_DEPRECATED = 1.0f;
+		auto* EnhancedInputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PreviousPlayer->GetLocalPlayer())};
+		if (IsValid(EnhancedInputSubsystem))
+		{
+			EnhancedInputSubsystem->RemoveMappingContext(InputMappingContext);
+		}
 	}
 
-	Super::PossessedBy(NewController);
+	auto* NewPlayer{Cast<APlayerController>(GetController())};
+	if (IsValid(NewPlayer))
+	{
+		NewPlayer->InputYawScale_DEPRECATED = 1.0f;
+		NewPlayer->InputPitchScale_DEPRECATED = 1.0f;
+		NewPlayer->InputRollScale_DEPRECATED = 1.0f;
+
+		auto* EnhancedInputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewPlayer->GetLocalPlayer())};
+		if (IsValid(EnhancedInputSubsystem))
+		{
+			EnhancedInputSubsystem->AddMappingContext(InputMappingContext, 0);
+		}
+	}
+
+	Super::NotifyControllerChanged();
 }
 
 void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
@@ -36,112 +55,62 @@ void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& V
 	AlsCamera->GetViewInfo(ViewInfo);
 }
 
-void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(Input);
 
-	PlayerInputComponent->BindAxis(TEXT("LookUpMouse"), this, &ThisClass::InputLookUpMouse);
-	PlayerInputComponent->BindAxis(TEXT("LookRightMouse"), this, &ThisClass::InputLookRightMouse);
-
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ThisClass::InputLookUp);
-	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &ThisClass::InputLookRight);
-
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ThisClass::InputMoveForward);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ThisClass::InputMoveRight);
-
-	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ThisClass::InputSprintPressed);
-	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ThisClass::InputSprintReleased);
-	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_DoubleClick, this, &ThisClass::InputRoll);
-
-	PlayerInputComponent->BindAction(TEXT("Walk"), IE_Pressed, this, &ThisClass::InputWalk);
-	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ThisClass::InputCrouch);
-
-	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ThisClass::InputJumpPressed);
-	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ThisClass::InputJumpReleased);
-
-	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ThisClass::InputAimPressed);
-	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ThisClass::InputAimReleased);
-
-	PlayerInputComponent->BindAction(TEXT("Ragdoll"), IE_Pressed, this, &ThisClass::InputRagdollPressed);
-
-	PlayerInputComponent->BindAction(TEXT("RotationMode"), IE_Pressed, this, &ThisClass::InputRotationModePressed);
-	PlayerInputComponent->BindAction(TEXT("ViewMode"), IE_Pressed, this, &ThisClass::InputViewModePressed);
-	PlayerInputComponent->BindAction(TEXT("SwitchShoulder"), IE_Pressed, this, &ThisClass::InputSwitchShoulderPressed);
-}
-
-void AAlsCharacterExample::InputLookUpMouse(const float Value)
-{
-	AddControllerPitchInput(Value * LookUpMouseSensitivity);
-}
-
-void AAlsCharacterExample::InputLookRightMouse(const float Value)
-{
-	AddControllerYawInput(Value * LookRightMouseSensitivity);
-}
-
-void AAlsCharacterExample::InputLookUp(const float Value)
-{
-	AddControllerPitchInput(Value * LookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AAlsCharacterExample::InputLookRight(const float Value)
-{
-	AddControllerYawInput(Value * LookRightRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AAlsCharacterExample::InputMoveForward(const float Value)
-{
-	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw),
-	                 UAlsMath::NormalizeInputAxis(Value, GetInputAxisValue("MoveRight")));
-}
-
-void AAlsCharacterExample::InputMoveRight(const float Value)
-{
-	AddMovementInput(UAlsMath::AngleToDirection2D(GetViewState().Rotation.Yaw + 90.0f),
-	                 UAlsMath::NormalizeInputAxis(Value, GetInputAxisValue("MoveForward")));
-}
-
-void AAlsCharacterExample::InputSprintPressed()
-{
-	// Start the sprint with a slight delay to give the player enough time to start the roll with a double click instead.
-
-	static constexpr auto StartDelay{0.1f};
-
-	GetWorldTimerManager().SetTimer(SprintStartTimer,
-	                                FTimerDelegate::CreateWeakLambda(this, [this]
-	                                {
-		                                SetDesiredGait(EAlsGait::Sprinting);
-	                                }), StartDelay, false);
-}
-
-void AAlsCharacterExample::InputSprintReleased()
-{
-	if (GetWorldTimerManager().TimerExists(SprintStartTimer))
+	auto* EnhancedInput{Cast<UEnhancedInputComponent>(Input)};
+	if (IsValid(EnhancedInput))
 	{
-		GetWorldTimerManager().ClearTimer(SprintStartTimer);
-	}
-	else
-	{
-		SetDesiredGait(EAlsGait::Running);
+		EnhancedInput->BindAction(LookMouseAction, ETriggerEvent::Triggered, this, &ThisClass::InputLookMouse);
+		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::InputLook);
+		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::InputMove);
+		EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ThisClass::InputSprint);
+		EnhancedInput->BindAction(WalkAction, ETriggerEvent::Triggered, this, &ThisClass::InputWalk);
+		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ThisClass::InputCrouch);
+		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ThisClass::InputJump);
+		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::InputAim);
+		EnhancedInput->BindAction(RagdollAction, ETriggerEvent::Triggered, this, &ThisClass::InputRagdoll);
+		EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ThisClass::InputRoll);
+		EnhancedInput->BindAction(RotationModeAction, ETriggerEvent::Triggered, this, &ThisClass::InputRotationMode);
+		EnhancedInput->BindAction(ViewModeAction, ETriggerEvent::Triggered, this, &ThisClass::InputViewMode);
+		EnhancedInput->BindAction(SwitchShoulderAction, ETriggerEvent::Triggered, this, &ThisClass::InputSwitchShoulder);
 	}
 }
 
-void AAlsCharacterExample::InputRoll()
+void AAlsCharacterExample::InputLookMouse(const FInputActionValue& ActionValue)
 {
-	GetWorldTimerManager().ClearTimer(SprintStartTimer);
+	const auto Value{ActionValue.Get<FVector2D>()};
 
-	static constexpr auto PlayRate{1.3f};
+	AddControllerPitchInput(Value.Y * LookUpMouseSensitivity);
+	AddControllerYawInput(Value.X * LookRightMouseSensitivity);
+}
 
-	TryStartRolling(PlayRate);
+void AAlsCharacterExample::InputLook(const FInputActionValue& ActionValue)
+{
+	const auto Value{ActionValue.Get<FVector2D>()};
+
+	AddControllerPitchInput(Value.Y * LookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(Value.X * LookRightRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)
+{
+	const auto Value{UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
+
+	const auto ForwardDirection{UAlsMath::AngleToDirectionXY(GetViewState().Rotation.Yaw)};
+	const auto RightDirection{UAlsMath::PerpendicularCounterClockwiseXY(ForwardDirection)};
+
+	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);
+}
+
+void AAlsCharacterExample::InputSprint(const FInputActionValue& ActionValue)
+{
+	SetDesiredGait(ActionValue.Get<bool>() ? EAlsGait::Sprinting : EAlsGait::Running);
 }
 
 void AAlsCharacterExample::InputWalk()
 {
-	if (GetWorldTimerManager().TimerExists(SprintStartTimer))
-	{
-		return;
-	}
-
 	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
 	// ReSharper disable once CppIncompleteSwitchStatement
 	switch (GetDesiredGait())
@@ -170,43 +139,40 @@ void AAlsCharacterExample::InputCrouch()
 	}
 }
 
-void AAlsCharacterExample::InputJumpPressed()
+void AAlsCharacterExample::InputJump(const FInputActionValue& ActionValue)
 {
-	if (TryStopRagdolling())
+	if (ActionValue.Get<bool>())
 	{
-		return;
-	}
+		if (TryStopRagdolling())
+		{
+			return;
+		}
 
-	if (TryStartMantlingGrounded())
+		if (TryStartMantlingGrounded())
+		{
+			return;
+		}
+
+		if (GetStance() == EAlsStance::Crouching)
+		{
+			SetDesiredStance(EAlsStance::Standing);
+			return;
+		}
+
+		Jump();
+	}
+	else
 	{
-		return;
+		StopJumping();
 	}
-
-	if (GetStance() == EAlsStance::Crouching)
-	{
-		SetDesiredStance(EAlsStance::Standing);
-		return;
-	}
-
-	Jump();
 }
 
-void AAlsCharacterExample::InputJumpReleased()
+void AAlsCharacterExample::InputAim(const FInputActionValue& ActionValue)
 {
-	StopJumping();
+	SetDesiredAiming(ActionValue.Get<bool>());
 }
 
-void AAlsCharacterExample::InputAimPressed()
-{
-	SetDesiredAiming(true);
-}
-
-void AAlsCharacterExample::InputAimReleased()
-{
-	SetDesiredAiming(false);
-}
-
-void AAlsCharacterExample::InputRagdollPressed()
+void AAlsCharacterExample::InputRagdoll()
 {
 	if (!TryStopRagdolling())
 	{
@@ -214,14 +180,21 @@ void AAlsCharacterExample::InputRagdollPressed()
 	}
 }
 
-void AAlsCharacterExample::InputRotationModePressed()
+void AAlsCharacterExample::InputRoll()
+{
+	static constexpr auto PlayRate{1.3f};
+
+	TryStartRolling(PlayRate);
+}
+
+void AAlsCharacterExample::InputRotationMode()
 {
 	SetDesiredRotationMode(GetDesiredRotationMode() != EAlsRotationMode::VelocityDirection
 		                       ? EAlsRotationMode::VelocityDirection
 		                       : EAlsRotationMode::LookingDirection);
 }
 
-void AAlsCharacterExample::InputViewModePressed()
+void AAlsCharacterExample::InputViewMode()
 {
 	SetViewMode(GetViewMode() == EAlsViewMode::FirstPerson
 		            ? EAlsViewMode::ThirdPerson
@@ -229,7 +202,7 @@ void AAlsCharacterExample::InputViewModePressed()
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void AAlsCharacterExample::InputSwitchShoulderPressed()
+void AAlsCharacterExample::InputSwitchShoulder()
 {
 	AlsCamera->SetRightShoulder(!AlsCamera->IsRightShoulder());
 }

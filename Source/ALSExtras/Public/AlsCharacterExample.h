@@ -4,6 +4,9 @@
 #include "AlsCharacterExample.generated.h"
 
 class UAlsCameraComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
@@ -15,6 +18,48 @@ private:
 	TObjectPtr<UAlsCameraComponent> AlsCamera;
 
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputMappingContext* InputMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* LookMouseAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* LookAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* SprintAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* WalkAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* CrouchAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* AimAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* RagdollAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* RollAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* RotationModeAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* ViewModeAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (AllowPrivateAccess))
+	UInputAction* SwitchShoulderAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
 	float LookUpMouseSensitivity{2.5f};
@@ -31,13 +76,10 @@ public:
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg/s"))
 	float LookRightRate{240.0f};
 
-private:
-	FTimerHandle SprintStartTimer;
-
 public:
 	AAlsCharacterExample();
 
-	virtual void PossessedBy(AController* NewController) override;
+	virtual void NotifyControllerChanged() override;
 
 	// Camera
 
@@ -47,46 +89,34 @@ protected:
 	// Input
 
 protected:
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
 
 private:
-	void InputLookUpMouse(float Value);
+	void InputLookMouse(const FInputActionValue& ActionValue);
 
-	void InputLookRightMouse(float Value);
+	void InputLook(const FInputActionValue& ActionValue);
 
-	void InputLookUp(float Value);
+	void InputMove(const FInputActionValue& ActionValue);
 
-	void InputLookRight(float Value);
-
-	void InputMoveForward(float Value);
-
-	void InputMoveRight(float Value);
-
-	void InputSprintPressed();
-
-	void InputSprintReleased();
-
-	void InputRoll();
+	void InputSprint(const FInputActionValue& ActionValue);
 
 	void InputWalk();
 
 	void InputCrouch();
 
-	void InputJumpPressed();
+	void InputJump(const FInputActionValue& ActionValue);
 
-	void InputJumpReleased();
+	void InputAim(const FInputActionValue& ActionValue);
 
-	void InputAimPressed();
+	void InputRagdoll();
 
-	void InputAimReleased();
+	void InputRoll();
 
-	void InputRotationModePressed();
+	void InputRotationMode();
 
-	void InputRagdollPressed();
+	void InputViewMode();
 
-	void InputViewModePressed();
-
-	void InputSwitchShoulderPressed();
+	void InputSwitchShoulder();
 
 	// Debug
 

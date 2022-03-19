@@ -68,23 +68,32 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
 	static FVector ClampMagnitude01(const FVector& Vector);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
+	static FVector2D ClampMagnitude012D(const FVector2D& Vector);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
 	static FVector2D RadianToDirection(float Radian);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
-	static FVector RadianToDirection3D(float Radian);
+	static FVector RadianToDirectionXY(float Radian);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
 	static FVector2D AngleToDirection(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
-	static FVector AngleToDirection2D(float Angle);
+	static FVector AngleToDirectionXY(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
 	static float DirectionToAngle(const FVector2D& Direction);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
-	static float DirectionToAngle2D(const FVector& Direction);
+	static float DirectionToAngleXY(const FVector& Direction);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
+	static FVector PerpendicularClockwiseXY(const FVector& Vector);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
+	static FVector PerpendicularCounterClockwiseXY(const FVector& Vector);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector",
 		DisplayName = "Angle Between (Skip Normalization)", Meta = (AutoCreateRefTerm = "From, To"))
@@ -92,9 +101,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", DisplayName = "Slerp (Skip Normalization)")
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
-	static float NormalizeInputAxis(float AxisValue, float OtherAxisValue);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
@@ -238,6 +244,18 @@ inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
 	return {Vector.X * Scale, Vector.Y * Scale, Vector.Z * Scale};
 }
 
+inline FVector2D UAlsMath::ClampMagnitude012D(const FVector2D& Vector)
+{
+	const auto MagnitudeSquared{Vector.SizeSquared()};
+	if (MagnitudeSquared <= 1.0f)
+	{
+		return Vector;
+	}
+
+	const auto Scale{FMath::InvSqrt(MagnitudeSquared)};
+	return {Vector.X * Scale, Vector.Y * Scale};
+}
+
 inline FVector2D UAlsMath::RadianToDirection(const float Radian)
 {
 	float Sin, Cos;
@@ -246,7 +264,7 @@ inline FVector2D UAlsMath::RadianToDirection(const float Radian)
 	return {Cos, Sin};
 }
 
-inline FVector UAlsMath::RadianToDirection3D(const float Radian)
+inline FVector UAlsMath::RadianToDirectionXY(const float Radian)
 {
 	float Sin, Cos;
 	FMath::SinCos(&Sin, &Cos, Radian);
@@ -259,9 +277,9 @@ inline FVector2D UAlsMath::AngleToDirection(const float Angle)
 	return RadianToDirection(FMath::DegreesToRadians(Angle));
 }
 
-inline FVector UAlsMath::AngleToDirection2D(const float Angle)
+inline FVector UAlsMath::AngleToDirectionXY(const float Angle)
 {
-	return RadianToDirection3D(FMath::DegreesToRadians(Angle));
+	return RadianToDirectionXY(FMath::DegreesToRadians(Angle));
 }
 
 inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
@@ -269,9 +287,19 @@ inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
 
-inline float UAlsMath::DirectionToAngle2D(const FVector& Direction)
+inline float UAlsMath::DirectionToAngleXY(const FVector& Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+}
+
+inline FVector UAlsMath::PerpendicularClockwiseXY(const FVector& Vector)
+{
+	return {Vector.Y, -Vector.X, Vector.Z};
+}
+
+inline FVector UAlsMath::PerpendicularCounterClockwiseXY(const FVector& Vector)
+{
+	return {-Vector.Y, Vector.X, Vector.Z};
 }
 
 inline float UAlsMath::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)

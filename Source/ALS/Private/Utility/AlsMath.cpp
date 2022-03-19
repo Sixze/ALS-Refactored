@@ -83,13 +83,6 @@ FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To,
 	return From * Cos + FromPerpendicular * Sin;
 }
 
-float UAlsMath::NormalizeInputAxis(const float AxisValue, const float OtherAxisValue)
-{
-	const auto MagnitudeSquared{AxisValue * AxisValue + OtherAxisValue * OtherAxisValue};
-
-	return MagnitudeSquared <= 1.0f ? AxisValue : AxisValue * FMath::InvSqrt(MagnitudeSquared);
-}
-
 EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleThreshold)
 {
 	if (Angle >= -ForwardHalfAngle - AngleThreshold && Angle <= ForwardHalfAngle + AngleThreshold)

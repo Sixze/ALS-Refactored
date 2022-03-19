@@ -40,10 +40,6 @@
 	],
 	"Plugins": [
 		{
-			"Name": "ControlRig",
-			"Enabled": true
-		},
-		{
 			"Name": "GameplayCameras",
 			"Enabled": true
 		},
@@ -52,11 +48,19 @@
 			"Enabled": true
 		},
 		{
-			"Name": "Niagara",
+			"Name": "ControlRig",
+			"Enabled": true
+		},
+		{
+			"Name": "EnhancedInput",
 			"Enabled": true
 		},
 		{
 			"Name": "Metasound",
+			"Enabled": true
+		},
+		{
+			"Name": "Niagara",
 			"Enabled": true
 		}
 	]

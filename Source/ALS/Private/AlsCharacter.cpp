@@ -926,7 +926,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasInput)
 	{
-		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngle2D(InputDirection);
+		LocomotionState.InputYawAngle = UAlsMath::DirectionToAngleXY(InputDirection);
 	}
 
 	LocomotionState.Velocity = GetVelocity();
@@ -941,7 +941,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	if (LocomotionState.bHasSpeed)
 	{
-		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngle2D(LocomotionState.Velocity);
+		LocomotionState.VelocityYawAngle = UAlsMath::DirectionToAngleXY(LocomotionState.Velocity);
 	}
 
 	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.

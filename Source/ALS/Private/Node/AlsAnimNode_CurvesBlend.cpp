@@ -42,10 +42,7 @@ void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread)
 
-	auto SourcePoseContext{Output};
-	SourcePose.Evaluate(SourcePoseContext);
-
-	Output = SourcePoseContext;
+	SourcePose.Evaluate(Output);
 
 	if (!FAnimWeight::IsRelevant(BlendAmount))
 	{
