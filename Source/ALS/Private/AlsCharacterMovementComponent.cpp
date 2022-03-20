@@ -255,7 +255,7 @@ void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation
 	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
 	    FVector::DistSquared2D(OldLocation, NewLocation) <= TeleportDistanceThresholdSquared)
 	{
-		// By default, the engine treats any movement of the simulated proxy as teleportation, and because of this, the foot lock cannot
+		// By default, the engine treats any movement of the simulated proxy as teleportation, and because of this, foot locking cannot
 		// work properly. Instead, treat movement as teleportation only if the character has moved more than some threshold distance.
 
 		bJustTeleported = false;

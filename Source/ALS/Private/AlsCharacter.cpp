@@ -28,12 +28,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
 	GetMesh()->SetAnimInstanceClass(UAlsAnimationInstance::StaticClass());
 
-	// Required for the flail animation to work correctly when ragdolling.
-
-	GetMesh()->bUpdateJointsFromAnimation = true;
-
-	// If this option is enabled, then it can cause problems with animation curves (for example, aiming will not work correctly).
-	// https://answers.unrealengine.com/questions/1001006/view.html
+	GetMesh()->bUpdateJointsFromAnimation = true; // Required for the flail animation to work properly when ragdolling.
 
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 
@@ -1096,7 +1091,9 @@ float AAlsCharacter::CalculateActorRotationInterpolationSpeed() const
 
 void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
 {
-	if (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled() &&
+	// ReSharper disable once CppRedundantParentheses
+	if ((GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
+	     (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())) &&
 	    !LocomotionState.bRotationLocked && !LocomotionAction.IsValid() &&
 	    LocomotionMode == AlsLocomotionModeTags::Grounded &&
 	    !HasAnyRootMotion() && !LocomotionState.bMoving)
@@ -1107,7 +1104,9 @@ void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float Delta
 
 void AAlsCharacter::ApplyRotationYawSpeedFromCharacter(const float DeltaTime)
 {
-	if (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())
+	// ReSharper disable once CppRedundantParentheses
+	if (GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
+	    (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled()))
 	{
 		return;
 	}
