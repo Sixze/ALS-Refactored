@@ -7,6 +7,7 @@
 UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
 {
 	RootMotionMode = ERootMotionMode::NoRootMotionExtraction;
+	bUseMainInstanceMontageEvaluationData = true;
 }
 
 void UAlsLinkedAnimationInstance::NativeInitializeAnimation()

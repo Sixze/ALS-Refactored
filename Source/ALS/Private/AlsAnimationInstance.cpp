@@ -240,12 +240,15 @@ void UAlsAnimationInstance::ActivatePivot()
 
 void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 {
+	// Always sample sprint block curve, otherwise issues with inertial blending may occur.
+
+	GroundedState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurve());
+	GroundedState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurve()), -1.0f, 1.0f);
+
 	if (!Character->GetLocomotionState().bMoving || Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
-
-	GroundedState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurve()), -1.0f, 1.0f);
 
 	RefreshMovementDirection();
 	RefreshVelocityBlend(DeltaTime);
@@ -293,8 +296,6 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 		GroundedState.SprintAccelerationAmount = 0.0f;
 	}
 
-	GroundedState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurve());
-
 	GroundedState.StrideBlendAmount = CalculateStrideBlendAmount();
 	GroundedState.WalkRunBlendAmount = CalculateWalkRunBlendAmount();
 
@@ -326,6 +327,7 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
 	{
 		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
+		return;
 	}
 
 	static constexpr auto ForwardHalfAngle{70.0f};
