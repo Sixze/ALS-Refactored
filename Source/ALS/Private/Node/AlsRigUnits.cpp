@@ -1,32 +1,57 @@
-#include "Node/AlsRigUnit_Math.h"
+#include "Node/AlsRigUnits.h"
 
 #include "Animation/AnimTypes.h"
 #include "Units/RigUnitContext.h"
+#include "Utility/AlsMath.h"
 
 static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
-                                   FVector& StartLocation, FVector& Direction)
+                                   FVector& ProjectionLocation, FVector& Direction)
 {
 	auto AcVector{CLocation - ALocation};
+	auto AbVector{BLocation - ALocation};
+
 	if (!AcVector.Normalize())
 	{
-		return false;
+		if (!AbVector.Normalize())
+		{
+			return false;
+		}
+
+		ProjectionLocation = ALocation;
+		Direction = AbVector;
+
+		return true;
 	}
 
-	const auto AbVector{BLocation - ALocation};
 	if (AbVector.IsNearlyZero())
 	{
 		return false;
 	}
 
-	StartLocation = ALocation + AbVector.ProjectOnToNormal(AcVector);
-	Direction = (BLocation - StartLocation).GetSafeNormal();
+	ProjectionLocation = ALocation + AbVector.ProjectOnToNormal(AcVector);
+	Direction = (BLocation - ProjectionLocation).GetSafeNormal();
 
 	return true;
+}
+
+FAlsRigUnit_ExponentialDecayVector_Execute()
+{
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
+
+	Current = Context.State == EControlRigState::Init
+		          ? Target
+		          : UAlsMath::ExponentialDecay(Current, Target, Context.DeltaTime, Lambda);
 }
 
 FAlsRigUnit_CalculatePoleVector_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
+
+	const auto* Hierarchy{Context.Hierarchy};
+	if (Hierarchy == nullptr)
+	{
+		return;
+	}
 
 	if (Context.State == EControlRigState::Init)
 	{
@@ -35,12 +60,6 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 		CachedItemC.Reset();
 	}
 	else if (bInitial)
-	{
-		return;
-	}
-
-	const auto* Hierarchy{Context.Hierarchy};
-	if (Hierarchy == nullptr)
 	{
 		return;
 	}
@@ -54,29 +73,36 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 
 	if (!bInitial)
 	{
-		EndLocation = {Hierarchy->GetGlobalTransform(CachedItemB).GetLocation()};
+		const auto NewEndLocation{Hierarchy->GetGlobalTransform(CachedItemB).GetLocation()};
 
-		if (TryCalculatePoleVector(Hierarchy->GetGlobalTransform(CachedItemA).GetLocation(), EndLocation,
+		if (TryCalculatePoleVector(Hierarchy->GetGlobalTransform(CachedItemA).GetLocation(), NewEndLocation,
 		                           Hierarchy->GetGlobalTransform(CachedItemC).GetLocation(), StartLocation, Direction))
 		{
+			EndLocation = NewEndLocation;
 			bSuccess = true;
 			return;
 		}
 	}
 
-	StartLocation = FVector::ZeroVector;
-	EndLocation = Hierarchy->GetInitialGlobalTransform(CachedItemB).GetLocation();
-	Direction = FVector::ZeroVector;
+	const auto NewEndLocation{Hierarchy->GetInitialGlobalTransform(CachedItemB).GetLocation()};
 
-	bSuccess = TryCalculatePoleVector(Hierarchy->GetInitialGlobalTransform(CachedItemA).GetLocation(), EndLocation,
-	                                  Hierarchy->GetInitialGlobalTransform(CachedItemC).GetLocation(), StartLocation, Direction);
+	if (TryCalculatePoleVector(Hierarchy->GetInitialGlobalTransform(CachedItemA).GetLocation(), NewEndLocation,
+	                           Hierarchy->GetInitialGlobalTransform(CachedItemC).GetLocation(), StartLocation, Direction))
+	{
+		EndLocation = NewEndLocation;
+		bSuccess = true;
+		return;
+	}
+
+	bSuccess = false;
 }
 
 FAlsRigUnit_HandIkRetargeting_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	if (!FAnimWeight::IsRelevant(Weight))
+	auto* Hierarchy{ExecuteContext.Hierarchy};
+	if (Hierarchy == nullptr)
 	{
 		return;
 	}
@@ -88,11 +114,6 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 		CachedRightHandBone.Reset();
 		CachedRightHandIkBone.Reset();
 		CachedBonesToMove.Reset();
-	}
-
-	auto* Hierarchy{ExecuteContext.Hierarchy};
-	if (Hierarchy == nullptr)
-	{
 		return;
 	}
 
@@ -100,6 +121,11 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 	    !CachedLeftHandIkBone.UpdateCache(LeftHandIkBone, Hierarchy) ||
 	    !CachedRightHandBone.UpdateCache(RightHandBone, Hierarchy) ||
 	    !CachedRightHandIkBone.UpdateCache(RightHandIkBone, Hierarchy))
+	{
+		return;
+	}
+
+	if (!FAnimWeight::IsRelevant(Weight))
 	{
 		return;
 	}

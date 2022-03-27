@@ -1,66 +1,43 @@
 #include "Utility/AlsMath.h"
 
-#include "DrawDebugHelpers.h"
-#include "Engine/Engine.h"
-
-namespace SpringInterpolationConstants
+template <class T, class U>
+T UAlsMath::SpringDamp(const T& Current, const T& Target, U& SpringState, const float DeltaTime,
+                       const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	static constexpr auto MaxDeltaTime{0.1f};
-	static constexpr auto SubstepDeltaTime{1.0f / 60.0f};
+	if (DeltaTime <= SMALL_NUMBER)
+	{
+		return Current;
+	}
+
+	if (!SpringState.bStateValid)
+	{
+		SpringState.Velocity = {};
+		SpringState.PreviousTarget = Target;
+		SpringState.bStateValid = true;
+
+		return Target;
+	}
+
+	T Result{Current};
+	FMath::SpringDamper(Result, SpringState.Velocity, Target,
+	                    (Target - SpringState.PreviousTarget) * (Clamp01(TargetVelocityAmount) / DeltaTime),
+	                    DeltaTime, Frequency, DampingRatio);
+
+	SpringState.PreviousTarget = Target;
+
+	return Result;
 }
 
-float UAlsMath::InterpolateFloatSpringStable(const float Current, const float Target, FFloatSpringState& SpringState,
-                                             const float Stiffness, const float CriticalDampingFactor, float DeltaTime, const float Mass)
+float UAlsMath::SpringDampFloat(const float Current, const float Target, FAlsSpringFloatState& SpringState,
+                                const float DeltaTime, const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	// Clamp to avoid large delta time.
-	DeltaTime = FMath::Min(DeltaTime, SpringInterpolationConstants::MaxDeltaTime);
-
-	auto Result{Current};
-	auto PreviousSubstepTime{0.0f};
-
-	for (auto SubstepNumber{1};; SubstepNumber++)
-	{
-		const auto SubstepTime{SubstepNumber * SpringInterpolationConstants::SubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
-		{
-			Result = UKismetMathLibrary::FloatSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
-			                                               SpringInterpolationConstants::SubstepDeltaTime, Mass);
-
-			PreviousSubstepTime = SubstepTime;
-		}
-		else
-		{
-			return UKismetMathLibrary::FloatSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
-			                                             DeltaTime - PreviousSubstepTime, Mass);
-		}
-	}
+	return SpringDamp(Current, Target, SpringState, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }
 
-FVector UAlsMath::InterpolateVectorSpringStable(const FVector& Current, const FVector& Target, FVectorSpringState& SpringState,
-                                                const float Stiffness, const float CriticalDampingFactor, float DeltaTime, const float Mass)
+FVector UAlsMath::SpringDampVector(const FVector& Current, const FVector& Target, FAlsSpringVectorState& SpringState,
+                                   const float DeltaTime, const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	// Clamp to avoid large delta time.
-	DeltaTime = FMath::Min(DeltaTime, SpringInterpolationConstants::MaxDeltaTime);
-
-	auto Result{Current};
-	auto PreviousSubstepTime{0.0f};
-
-	for (auto SubstepNumber{1};; SubstepNumber++)
-	{
-		const auto SubstepTime{SubstepNumber * SpringInterpolationConstants::SubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
-		{
-			Result = UKismetMathLibrary::VectorSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
-			                                                SpringInterpolationConstants::SubstepDeltaTime, Mass);
-
-			PreviousSubstepTime = SubstepTime;
-		}
-		else
-		{
-			return UKismetMathLibrary::VectorSpringInterp(Result, Target, SpringState, Stiffness, CriticalDampingFactor,
-			                                              DeltaTime - PreviousSubstepTime, Mass);
-		}
-	}
+	return SpringDamp(Current, Target, SpringState, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }
 
 FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To, const float Alpha)

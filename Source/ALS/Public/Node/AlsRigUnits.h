@@ -1,22 +1,28 @@
 #pragma once
 
 #include "Units/RigUnit.h"
-#include "AlsRigUnit_Math.generated.h"
+#include "AlsRigUnits.generated.h"
 
-USTRUCT(Meta = (Abstract, NodeColor = "0.462745 1.0 0.329412"))
+USTRUCT(Meta = (Abstract, NodeColor = "0.05 0.25 0.05"))
 struct ALS_API FAlsRigUnit_MathBase : public FRigUnit
 {
 	GENERATED_BODY()
 };
 
-USTRUCT(Meta = (Abstract, NodeColor = "0 0.364706 1.0"))
-struct ALS_API FAlsRigUnit_HighLevelBaseMutable : public FRigUnitMutable
+USTRUCT(Meta = (Abstract, NodeColor = "0 0.35 1.0"))
+struct ALS_API FAlsRigUnit_HighLevelBase : public FRigUnitMutable
+{
+	GENERATED_BODY()
+};
+
+USTRUCT(Meta = (Abstract, NodeColor = "0.25 0.05 0.05"))
+struct ALS_API FAlsRigUnit_SimulationBase : public FRigUnit
 {
 	GENERATED_BODY()
 };
 
 // Calculates the intersection location and direction of the perpendicular to line AC through point B.
-USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS|Als", Varying))
+USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS|Als"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 {
 	GENERATED_BODY()
@@ -38,10 +44,10 @@ public:
 	bool bSuccess{false};
 
 	UPROPERTY(Meta = (Output))
-	FVector StartLocation{FVector::ZeroVector};
+	FVector StartLocation{ForceInit};
 
 	UPROPERTY(Meta = (Output))
-	FVector EndLocation{FVector::ZeroVector};
+	FVector EndLocation{ForceInit};
 
 	UPROPERTY(Meta = (Output))
 	FVector Direction{FVector::ForwardVector};
@@ -60,8 +66,28 @@ public:
 	virtual void Execute(const FRigUnitContext& Context) override;
 };
 
+USTRUCT(DisplayName = "Exponential Decay (Vector)", Meta = (Category = "ALS|Als"))
+struct ALS_API FAlsRigUnit_ExponentialDecayVector : public FAlsRigUnit_SimulationBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(Meta = (Input))
+	FVector Target{ForceInit};
+
+	UPROPERTY(Meta = (Input, ClampMin = 0))
+	float Lambda{1.0f};
+
+	UPROPERTY(Meta = (Output))
+	FVector Current{ForceInit};
+
+public:
+	RIGVM_METHOD()
+	virtual void Execute(const FRigUnitContext& Context) override;
+};
+
 USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS|Als"))
-struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBaseMutable
+struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBase
 {
 	GENERATED_BODY()
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Kismet/KismetMathLibrary.h"
+#include "Utility/AlsMath.h"
 #include "AlsFeetState.generated.h"
 
 class UPhysicalMaterial;
@@ -50,7 +50,7 @@ struct ALS_API FAlsFootState
 	bool bOffsetHitValid{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVectorSpringState OffsetSpringState;
+	FAlsSpringVectorState OffsetSpringState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector OffsetLocation{ForceInit};
@@ -101,7 +101,7 @@ struct ALS_API FAlsFeetState
 	float PelvisOffsetAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FFloatSpringState PelvisSpringState;
+	FAlsSpringFloatState PelvisSpringState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z", Meta = (ForceUnits = "cm"))
 	float PelvisOffsetZ{0.0f};

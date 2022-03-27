@@ -9,7 +9,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
-#include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 #include "Utility/GameplayTags/AlsLocomotionModeTags.h"
@@ -747,7 +746,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		static constexpr auto DecreaseSpeed{0.6f};
 
-		NewFootLockAmount = !FeetState.bReinitializationRequired
+		NewFootLockAmount = !(FeetState.bReinitializationRequired)
 			                    ? FMath::Max(0.0f, FootState.LockAmount - DeltaTime * DecreaseSpeed)
 			                    : 0.0f;
 	}
@@ -836,6 +835,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
 		FootState.bOffsetHitValid = false;
+		FootState.OffsetSpringState.Reset();
+
 		TargetLocationOffset = FVector::ZeroVector;
 		return;
 	}
@@ -909,14 +910,13 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	if (!FeetState.bReinitializationRequired)
 	{
-		static constexpr auto LocationInterpolationStiffness{20.0f};
-		static constexpr auto LocationInterpolationCriticalDampingFactor{4.0f};
-		static constexpr auto LocationInterpolationMass{4.0f};
+		static constexpr auto LocationInterpolationFrequency{0.4f};
+		static constexpr auto LocationInterpolationDampingRatio{4.0f};
+		static constexpr auto LocationInterpolationTargetVelocityAmount{1.0f};
 
-		FootState.OffsetLocation = UAlsMath::InterpolateVectorSpringStable(FootState.OffsetLocation, TargetLocationOffset,
-		                                                                   FootState.OffsetSpringState, LocationInterpolationStiffness,
-		                                                                   LocationInterpolationCriticalDampingFactor,
-		                                                                   DeltaTime, LocationInterpolationMass);
+		FootState.OffsetLocation = UAlsMath::SpringDamp(FootState.OffsetLocation, TargetLocationOffset,
+		                                                FootState.OffsetSpringState, DeltaTime, LocationInterpolationFrequency,
+		                                                LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
 
 		static constexpr auto RotationInterpolationSpeed{30.0f};
 
@@ -938,25 +938,17 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 void UAlsAnimationInstance::ResetFootOffset(FAlsFootState& FootState, const float DeltaTime,
                                             FVector& FinalLocation, FQuat& FinalRotation) const
 {
+	FootState.OffsetSpringState.Reset();
+
 	if (!FeetState.bReinitializationRequired)
 	{
-		static constexpr auto LocationInterpolationStiffness{20.0f};
-		static constexpr auto LocationInterpolationCriticalDampingFactor{4.0f};
-		static constexpr auto LocationInterpolationMass{4.0f};
+		static constexpr auto InterpolationSpeed{15.0f};
 
-		FootState.OffsetLocation = UAlsMath::InterpolateVectorSpringStable(FootState.OffsetLocation, FVector::ZeroVector,
-		                                                                   FootState.OffsetSpringState, LocationInterpolationStiffness,
-		                                                                   LocationInterpolationCriticalDampingFactor,
-		                                                                   DeltaTime, LocationInterpolationMass);
-
-		static constexpr auto RotationInterpolationSpeed{15.0f};
-
-		FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, RotationInterpolationSpeed);
+		FootState.OffsetLocation = FMath::VInterpTo(FootState.OffsetLocation, FVector::ZeroVector, DeltaTime, InterpolationSpeed);
+		FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, InterpolationSpeed);
 	}
 	else
 	{
-		FootState.OffsetSpringState.Reset();
-
 		FootState.OffsetLocation = FVector::ZeroVector;
 		FootState.OffsetRotation = FQuat::Identity;
 	}
@@ -991,20 +983,21 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const flo
 	// Set the new offset to be the lowest foot offset.
 
 	const auto TargetPelvisOffsetZ{
-		FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) / GetSkelMeshComponent()->GetComponentScale().Z
+		FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) /
+		static_cast<float>(GetSkelMeshComponent()->GetComponentScale().Z)
 	};
 
 	// Interpolate current offset to the new target value.
 
 	if (!FeetState.bReinitializationRequired)
 	{
-		static constexpr auto InterpolationStiffness{10.0f};
-		static constexpr auto InterpolationCriticalDampingFactor{2.0f};
-		static constexpr auto InterpolationMass{10.0f};
+		static constexpr auto InterpolationFrequency{0.2f};
+		static constexpr auto InterpolationDampingRatio{2.0f};
+		static constexpr auto InterpolationTargetVelocityAmount{0.5f};
 
-		FeetState.PelvisOffsetZ = UAlsMath::InterpolateFloatSpringStable(FeetState.PelvisOffsetZ, TargetPelvisOffsetZ,
-		                                                                 FeetState.PelvisSpringState, InterpolationStiffness,
-		                                                                 InterpolationCriticalDampingFactor, DeltaTime, InterpolationMass);
+		FeetState.PelvisOffsetZ = UAlsMath::SpringDamp(FeetState.PelvisOffsetZ, TargetPelvisOffsetZ,
+		                                               FeetState.PelvisSpringState, DeltaTime, InterpolationFrequency,
+		                                               InterpolationDampingRatio, InterpolationTargetVelocityAmount);
 	}
 	else
 	{

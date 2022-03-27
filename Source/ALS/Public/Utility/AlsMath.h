@@ -1,8 +1,52 @@
 #pragma once
 
-#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "State/Enumerations/AlsMovementDirection.h"
 #include "AlsMath.generated.h"
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsSpringFloatState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Velocity{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float PreviousTarget{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bStateValid{false};
+
+	void Reset()
+	{
+		Velocity = 0.f;
+		PreviousTarget = 0.f;
+		bStateValid = false;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsSpringVectorState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Velocity{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector PreviousTarget{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bStateValid{false};
+
+	void Reset()
+	{
+		Velocity = FVector::ZeroVector;
+		PreviousTarget = FVector::ZeroVector;
+		bStateValid = false;
+	}
+};
 
 UCLASS()
 class ALS_API UAlsMath : public UBlueprintFunctionLibrary
@@ -57,13 +101,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
 
+	template <class T, class U>
+	static T SpringDamp(const T& Current, const T& Target, U& SpringState, const float DeltaTime,
+	                    const float Frequency, const float DampingRatio, float TargetVelocityAmount = 1.0f);
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math")
-	static float InterpolateFloatSpringStable(float Current, float Target, UPARAM(ref) FFloatSpringState& SpringState,
-	                                          float Stiffness, float CriticalDampingFactor, float DeltaTime, float Mass = 1.0f);
+	static float SpringDampFloat(float Current, float Target, UPARAM(ref) FAlsSpringFloatState& SpringState,
+	                             float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math", Meta = (AutoCreateRefTerm = "Current, Target"))
-	static FVector InterpolateVectorSpringStable(const FVector& Current, const FVector& Target, UPARAM(ref) FVectorSpringState& SpringState,
-	                                             float Stiffness, float CriticalDampingFactor, float DeltaTime, float Mass = 1.0f);
+	static FVector SpringDampVector(const FVector& Current, const FVector& Target, UPARAM(ref) FAlsSpringVectorState& SpringState,
+	                                float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
 	static FVector ClampMagnitude01(const FVector& Vector);
@@ -166,7 +214,7 @@ inline float UAlsMath::ExponentialDecay(const float DeltaTime, const float Lambd
 {
 	// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
 
-	return 1.0f - FMath::Exp(-Lambda * DeltaTime);
+	return 1.0f - FMath::InvExpApprox(Lambda * DeltaTime);
 }
 
 template <class T>
