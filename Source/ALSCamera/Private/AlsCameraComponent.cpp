@@ -85,7 +85,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 	ViewInfo.Rotation = CameraRotation;
 	ViewInfo.FOV = CameraFov;
 
-	ViewInfo.PostProcessBlendWeight = !Settings.IsNull() ? PostProcessWeight : 0.0f;
+	ViewInfo.PostProcessBlendWeight = Settings.IsNull() ? 0.0f : PostProcessWeight;
 
 	if (ViewInfo.PostProcessBlendWeight)
 	{
@@ -104,9 +104,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	// Calculate camera rotation. Use raw rotation locally and smooth rotation on remote clients.
 
 	const auto CameraTargetRotation{
-		AlsCharacter->IsLocallyControlled()
-			? AlsCharacter->GetViewRotation()
-			: AlsCharacter->GetViewState().Rotation
+		AlsCharacter->IsLocallyControlled() ? AlsCharacter->GetViewRotation() : AlsCharacter->GetViewState().Rotation
 	};
 
 	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
@@ -369,7 +367,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	// Apply trace distance smoothing.
 
-	if (!Settings->ThirdPerson.bUseTraceDistanceSmoothing || !bAllowLag)
+	if (!bAllowLag || !Settings->ThirdPerson.bUseTraceDistanceSmoothing)
 	{
 		NewTraceDistanceRatio = 1.0f;
 		return TraceResult;
@@ -449,12 +447,9 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	}
 
 	auto AdjustmentDirection{Adjustment};
-	if (!AdjustmentDirection.Normalize())
-	{
-		return false;
-	}
 
-	if (UAlsMath::AngleBetweenSkipNormalization((GetOwner()->GetActorLocation() - Location).GetSafeNormal(),
+	if (!AdjustmentDirection.Normalize() ||
+	    UAlsMath::AngleBetweenSkipNormalization((GetOwner()->GetActorLocation() - Location).GetSafeNormal(),
 	                                            AdjustmentDirection) > 90.0f + 1.0f)
 	{
 		return false;

@@ -17,8 +17,8 @@ FVector AAlsAIController::GetFocalPointOnActor(const AActor* Actor) const
 	const auto* FocusedPawn{Cast<APawn>(Actor)};
 	if (!IsValid(FocusedPawn))
 	{
-		return Super::GetFocalPointOnActor(Actor);
+		return FocusedPawn->GetPawnViewLocation();
 	}
 
-	return FocusedPawn->GetPawnViewLocation();
+	return Super::GetFocalPointOnActor(Actor);
 }

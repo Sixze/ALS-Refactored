@@ -56,9 +56,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 	else
 	{
-		ForwardTraceAngle = LocomotionState.bHasInput
-			                    ? LocomotionState.InputYawAngle
-			                    : ActorYawAngle;
+		ForwardTraceAngle = LocomotionState.bHasInput ? LocomotionState.InputYawAngle : ActorYawAngle;
 	}
 
 	const auto ForwardTraceDeltaAngle{FRotator::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
@@ -233,11 +231,11 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	Parameters.MantlingType = LocomotionMode == AlsLocomotionModeTags::Grounded
-		                          ? Parameters.MantlingHeight > Settings->Mantling.MantlingHighHeightThreshold
-			                            ? EAlsMantlingType::High
-			                            : EAlsMantlingType::Low
-		                          : EAlsMantlingType::InAir;
+	Parameters.MantlingType = LocomotionMode != AlsLocomotionModeTags::Grounded
+		                          ? EAlsMantlingType::InAir
+		                          : Parameters.MantlingHeight > Settings->Mantling.MantlingHighHeightThreshold
+		                          ? EAlsMantlingType::High
+		                          : EAlsMantlingType::Low;
 
 	// If the target primitive can't move, then use world coordinates in order to
 	// save some performance by skipping some coordinate space transformations later.
@@ -627,9 +625,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		};
 
 		const auto PullForceSocketName{
-			RootBoneHorizontalSpeedSquared > FMath::Square(300.0f)
-				? UAlsConstants::Spine03Bone()
-				: UAlsConstants::PelvisBone()
+			RootBoneHorizontalSpeedSquared > FMath::Square(300.0f) ? UAlsConstants::Spine03Bone() : UAlsConstants::PelvisBone()
 		};
 
 		GetMesh()->AddForce((RagdollTargetLocation - GetMesh()->GetSocketLocation(PullForceSocketName)) * RagdollingState.PullForce,

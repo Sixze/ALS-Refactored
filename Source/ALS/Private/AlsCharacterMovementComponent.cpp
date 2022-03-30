@@ -187,7 +187,7 @@ float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
 	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).X
+		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
 		       : Super::GetMaxAcceleration();
 }
 
@@ -196,7 +196,7 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
 	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).Y
+		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
 		       : Super::GetMaxBrakingDeceleration();
 }
 
@@ -216,7 +216,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
-		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->GetVectorValue(CalculateGaitAmount()).Z;
+		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
 	}
 
 	Super::PhysWalking(DeltaTime, Iterations);
@@ -303,8 +303,8 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
 	GaitSettings = MovementSettings.IsNull()
 		               ? FAlsMovementGaitSettings{}
-		               : *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)->GetMovementGaitSettingsForStance(
-			               Stance);
+		               : *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)
+		                                  ->GetMovementGaitSettingsForStance(Stance);
 
 	RefreshMaxWalkSpeed();
 }

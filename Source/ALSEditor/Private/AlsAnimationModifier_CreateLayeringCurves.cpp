@@ -4,7 +4,18 @@
 
 void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
-	for (const auto& CurveName : CurveNames)
+	CreateCurves(Sequence, CurveNames, CurveValue);
+
+	if (bAddSlotCurves)
+	{
+		CreateCurves(Sequence, SlotCurveNames, SlotCurveValue);
+	}
+}
+
+void UAlsAnimationModifier_CreateLayeringCurves::CreateCurves(UAnimSequence* Sequence, const TArray<FName>& Names,
+                                                              const float Value) const
+{
+	for (const auto& CurveName : Names)
 	{
 		if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, CurveName, ERawCurveTrackTypes::RCT_Float))
 		{
@@ -22,42 +33,12 @@ void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSeq
 		{
 			for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
 			{
-				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(i), CurveValue);
+				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(i), Value);
 			}
 		}
 		else
 		{
-			UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(0), CurveValue);
-		}
-	}
-
-	if (bAddSlotCurves)
-	{
-		for (const auto& SlotCurveName : SlotCurveNames)
-		{
-			if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, SlotCurveName, ERawCurveTrackTypes::RCT_Float))
-			{
-				if (!bOverrideExistingCurves)
-				{
-					continue;
-				}
-
-				UAnimationBlueprintLibrary::RemoveCurve(Sequence, SlotCurveName);
-			}
-
-			UAnimationBlueprintLibrary::AddCurve(Sequence, SlotCurveName);
-
-			if (bAddKeyOnEachFrame)
-			{
-				for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
-				{
-					UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, SlotCurveName, Sequence->GetTimeAtFrame(i), SlotCurveValue);
-				}
-			}
-			else
-			{
-				UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, SlotCurveName, Sequence->GetTimeAtFrame(0), SlotCurveValue);
-			}
+			UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, CurveName, Sequence->GetTimeAtFrame(0), Value);
 		}
 	}
 }

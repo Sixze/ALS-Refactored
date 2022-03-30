@@ -88,9 +88,9 @@ void AAlsCharacter::PostInitializeComponents()
 	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
 
 	GetMesh()->VisibilityBasedAnimTickOption =
-		!IsNetMode(NM_Standalone) && GetLocalRole() >= ROLE_Authority && GetRemoteRole() == ROLE_AutonomousProxy
-			? EVisibilityBasedAnimTickOption::AlwaysTickPose
-			: EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
+			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
+			: EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
 
@@ -161,9 +161,9 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
 
 	GetMesh()->VisibilityBasedAnimTickOption =
-		!IsNetMode(NM_Standalone) && GetLocalRole() >= ROLE_Authority && GetRemoteRole() == ROLE_AutonomousProxy
-			? EVisibilityBasedAnimTickOption::AlwaysTickPose
-			: EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
+			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
+			: EVisibilityBasedAnimTickOption::AlwaysTickPose;
 
 	RefreshLocomotionLocationAndRotation();
 
@@ -441,16 +441,17 @@ EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 
-	if (LocomotionState.Speed > AlsCharacterMovement->GetGaitSettings().RunSpeed + 10.0f)
+	if (LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10.0f)
 	{
-		return MaxAllowedGait == EAlsGait::Sprinting
-			       ? EAlsGait::Sprinting
-			       : EAlsGait::Running;
+		return EAlsGait::Walking;
 	}
 
-	return LocomotionState.Speed >= AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10.0f
-		       ? EAlsGait::Running
-		       : EAlsGait::Walking;
+	if (LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().RunSpeed + 10.0f || MaxAllowedGait != EAlsGait::Sprinting)
+	{
+		return EAlsGait::Running;
+	}
+
+	return EAlsGait::Sprinting;
 }
 
 bool AAlsCharacter::CanSprint() const
@@ -543,9 +544,9 @@ void AAlsCharacter::RefreshRotationMode()
 		if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
 		    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
 		{
-			SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == AlsLocomotionModeTags::InAir
-				                ? EAlsRotationMode::LookingDirection
-				                : EAlsRotationMode::Aiming);
+			SetRotationMode(Settings->bAllowAimingWhenInAir || LocomotionMode != AlsLocomotionModeTags::InAir
+				                ? EAlsRotationMode::Aiming
+				                : EAlsRotationMode::LookingDirection);
 			return;
 		}
 
@@ -566,9 +567,9 @@ void AAlsCharacter::RefreshRotationMode()
 	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
 	    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
 	{
-		SetRotationMode(!Settings->bAllowAimingWhenInAir && LocomotionMode == AlsLocomotionModeTags::InAir
-			                ? EAlsRotationMode::LookingDirection
-			                : EAlsRotationMode::Aiming);
+		SetRotationMode(Settings->bAllowAimingWhenInAir || LocomotionMode != AlsLocomotionModeTags::InAir
+			                ? EAlsRotationMode::Aiming
+			                : EAlsRotationMode::LookingDirection);
 		return;
 	}
 
@@ -639,9 +640,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 		{
 			static constexpr auto PlayRate{1.3f};
 
-			StartRolling(PlayRate, LocomotionState.bHasSpeed
-				                       ? LocomotionState.VelocityYawAngle
-				                       : GetActorRotation().Yaw);
+			StartRolling(PlayRate, LocomotionState.bHasSpeed ? LocomotionState.VelocityYawAngle : GetActorRotation().Yaw);
 		}
 		else
 		{
@@ -838,7 +837,8 @@ void AAlsCharacter::RefreshViewInterpolation(const float DeltaTime)
 	ViewState.InterpolationClientTimeStamp += DeltaTime;
 
 	const auto InterpolationAmount{
-		ViewState.InterpolationDuration <= SMALL_NUMBER || ViewState.InterpolationClientTimeStamp >= ViewState.InterpolationServerTimeStamp
+		ViewState.InterpolationClientTimeStamp >= ViewState.InterpolationServerTimeStamp ||
+		ViewState.InterpolationDuration <= SMALL_NUMBER
 			? 1.0f
 			: FMath::Max(0.0f,
 			             1.0f - (ViewState.InterpolationServerTimeStamp - ViewState.InterpolationClientTimeStamp) /
@@ -1084,19 +1084,23 @@ float AAlsCharacter::CalculateActorRotationInterpolationSpeed() const
 	static constexpr auto ReferenceViewYawSpeed{300.0f};
 	static constexpr auto InterpolationSpeedMultiplier{3.0f};
 
-	return AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve->
-	                             GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
+	return AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve
+	                           ->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
 	       UAlsMath::LerpClamped(1.0f, InterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
 }
 
 void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
 {
+	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
+	    LocomotionMode != AlsLocomotionModeTags::Grounded ||
+	    HasAnyRootMotion() || LocomotionState.bMoving)
+	{
+		return;
+	}
+
 	// ReSharper disable once CppRedundantParentheses
-	if ((GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
-	     (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled())) &&
-	    !LocomotionState.bRotationLocked && !LocomotionAction.IsValid() &&
-	    LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	    !HasAnyRootMotion() && !LocomotionState.bMoving)
+	if (GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
+	    (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled()))
 	{
 		ApplyRotationYawSpeed(DeltaTime);
 	}

@@ -1,11 +1,9 @@
 ﻿#include "AlsCameraSettings.h"
 
 #if WITH_EDITORONLY_DATA
-void UAlsCameraSettings::Serialize(const FStructuredArchive::FRecord Record)
+void UAlsCameraSettings::Serialize(FArchive& Archive)
 {
-	const auto& Archive{Record.GetUnderlyingArchive()};
-
-	Super::Serialize(Record);
+	UObject::Serialize(Archive);
 
 	if (Archive.IsLoading())
 	{

@@ -44,13 +44,13 @@ void AAlsCharacterExample::NotifyControllerChanged()
 
 void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
 {
-	if (!AlsCamera->IsActive())
+	if (AlsCamera->IsActive())
 	{
-		Super::CalcCamera(DeltaTime, ViewInfo);
+		AlsCamera->GetViewInfo(ViewInfo);
 		return;
 	}
 
-	AlsCamera->GetViewInfo(ViewInfo);
+	Super::CalcCamera(DeltaTime, ViewInfo);
 }
 
 void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
@@ -187,16 +187,14 @@ void AAlsCharacterExample::InputRoll()
 
 void AAlsCharacterExample::InputRotationMode()
 {
-	SetDesiredRotationMode(GetDesiredRotationMode() != EAlsRotationMode::VelocityDirection
+	SetDesiredRotationMode(GetDesiredRotationMode() == EAlsRotationMode::LookingDirection
 		                       ? EAlsRotationMode::VelocityDirection
 		                       : EAlsRotationMode::LookingDirection);
 }
 
 void AAlsCharacterExample::InputViewMode()
 {
-	SetViewMode(GetViewMode() == EAlsViewMode::FirstPerson
-		            ? EAlsViewMode::ThirdPerson
-		            : EAlsViewMode::FirstPerson);
+	SetViewMode(GetViewMode() == EAlsViewMode::ThirdPerson ? EAlsViewMode::FirstPerson : EAlsViewMode::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
@@ -205,12 +203,12 @@ void AAlsCharacterExample::InputSwitchShoulder()
 	AlsCamera->SetRightShoulder(!AlsCamera->IsRightShoulder());
 }
 
-void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalPosition)
+void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalLocation)
 {
 	if (AlsCamera->IsActive())
 	{
-		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalPosition);
+		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalLocation);
 	}
 
-	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalPosition);
+	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalLocation);
 }

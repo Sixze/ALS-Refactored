@@ -97,6 +97,6 @@ public:
 
 public:
 #if WITH_EDITORONLY_DATA
-	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+	virtual void Serialize(FArchive& Archive) override;
 #endif
 };

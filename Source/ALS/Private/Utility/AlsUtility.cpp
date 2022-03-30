@@ -16,7 +16,10 @@ FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)
 
 float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
 {
-	return ensure(IsValid(Character)) ? Character->GetMesh()->GetAnimInstance()->GetCurveValue(CurveName) : 0.0f;
+	const auto* Mesh{IsValid(Character) ? Character->GetMesh() : nullptr};
+	const auto* AnimationInstance{IsValid(Mesh) ? Mesh->GetAnimInstance() : nullptr};
+
+	return ensure(IsValid(AnimationInstance)) ? AnimationInstance->GetCurveValue(CurveName) : 0.0f;
 }
 
 FGameplayTagContainer UAlsUtility::GetChildTags(const FGameplayTag& Tag)
@@ -35,10 +38,9 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 {
 	const auto* World{WorldContext->GetWorld()};
 	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
+	const auto* PlayerState{IsValid(PlayerController) ? PlayerController->PlayerState.Get() : nullptr};
 
-	return !IsValid(PlayerController) || !IsValid(PlayerController->PlayerState)
-		       ? 0.0f
-		       : PlayerController->PlayerState->ExactPing * 0.001f;
+	return IsValid(PlayerState) ? PlayerState->ExactPing * 0.001f : 0.0f;
 }
 
 bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
@@ -155,8 +157,7 @@ void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FV
 
 	if (bHit && Hit.bBlockingHit)
 	{
-		DrawDebugPoint(World, Hit.ImpactPoint, DrawImpactPointSize,
-		               HitColor.ToFColor(true), bPersistent, Duration, DepthPriority);
+		DrawDebugPoint(World, Hit.ImpactPoint, DrawImpactPointSize, HitColor.ToFColor(true), bPersistent, Duration, DepthPriority);
 	}
 #endif
 }

@@ -243,7 +243,7 @@ protected:
 private:
 	void RefreshTurnInPlace(float DeltaTime);
 
-	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartIfPlaying = false);
+	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartWhenPlaying = false);
 
 	// Ragdolling
 

@@ -52,11 +52,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	TWeakObjectPtr<UPhysicalMaterial> HitPhysicalMaterial;
 
 	const auto* FeetState{
-		IsValid(AnimationInstance)
-			? (FootBone == EAlsFootBone::Left
-				   ? &AnimationInstance->GetFeetState().Left
-				   : &AnimationInstance->GetFeetState().Right)
-			: nullptr
+		!IsValid(AnimationInstance)
+			? nullptr
+			: FootBone == EAlsFootBone::Left
+			? &AnimationInstance->GetFeetState().Left
+			: &AnimationInstance->GetFeetState().Right
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -107,12 +107,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		}
 	}
 
-	const auto SurfaceType{
-		HitPhysicalMaterial.IsValid()
-			? HitPhysicalMaterial->SurfaceType
-			: TEnumAsByte{SurfaceType_Default}
-	};
-
+	const auto SurfaceType{HitPhysicalMaterial.IsValid() ? HitPhysicalMaterial->SurfaceType.GetValue() : SurfaceType_Default};
 	const FAlsFootstepEffectSettings* EffectSettings{nullptr};
 
 	for (const auto& Effect : FootstepEffectsSettings->Effects)
@@ -137,10 +132,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	const auto FootstepLocation{HitLocation};
 
 	const auto FootstepRotation{
-		FRotationMatrix::MakeFromZY(HitNormal, FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
-			                                                                            ? FootstepEffectsSettings->FootLeftYAxis
-			                                                                            : FootstepEffectsSettings->FootRightYAxis)).
-		Rotator()
+		FRotationMatrix::MakeFromZY(HitNormal,
+		                            FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
+			                                                                 ? FootstepEffectsSettings->FootLeftYAxis
+			                                                                 : FootstepEffectsSettings->FootRightYAxis))
+		.Rotator()
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -159,7 +155,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 			VolumeMultiplier *= 1.0f - UAlsMath::Clamp01(AnimationInstance->GetCurveValue(UAlsConstants::FootstepSoundBlockCurve()));
 		}
 
-		if (FAnimWeight::IsRelevant(VolumeMultiplier) && EffectSettings->Sound.LoadSynchronous())
+		if (FAnimWeight::IsRelevant(VolumeMultiplier) && IsValid(EffectSettings->Sound.LoadSynchronous()))
 		{
 			UAudioComponent* Audio{nullptr};
 
@@ -192,7 +188,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		}
 	}
 
-	if (bSpawnDecal && EffectSettings->DecalMaterial.LoadSynchronous())
+	if (bSpawnDecal && IsValid(EffectSettings->DecalMaterial.LoadSynchronous()))
 	{
 		const auto DecalRotation{
 			FootstepRotation + (FootBone == EAlsFootBone::Left
@@ -222,7 +218,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		}
 	}
 
-	if (bSpawnParticleSystem && EffectSettings->ParticleSystem.LoadSynchronous())
+	if (bSpawnParticleSystem && IsValid(EffectSettings->ParticleSystem.LoadSynchronous()))
 	{
 		switch (EffectSettings->ParticleSystemSpawnType)
 		{

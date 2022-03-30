@@ -65,4 +65,7 @@ private:
 
 public:
 	virtual void OnApply_Implementation(UAnimSequence* Sequence) override;
+
+private:
+	void CreateCurves(UAnimSequence* Sequence, const TArray<FName>& Names, float Value) const;
 };

@@ -156,7 +156,11 @@ public:
 
 inline float UAlsMath::Clamp01(const float Value)
 {
-	return Value <= 0.0f ? 0.0f : Value >= 1.0f ? 1.0f : Value;
+	return Value <= 0.0f
+		       ? 0.0f
+		       : Value >= 1.0f
+		       ? 1.0f
+		       : Value;
 }
 
 inline float UAlsMath::LerpClamped(const float A, const float B, const float Alpha)
@@ -220,33 +224,45 @@ inline float UAlsMath::ExponentialDecay(const float DeltaTime, const float Lambd
 template <class T>
 T UAlsMath::Damp(const T& Current, const T& Target, const float DeltaTime, const float Smoothing)
 {
-	return Smoothing <= 0.0f ? Target : FMath::Lerp(Current, Target, Damp(DeltaTime, Smoothing));
+	return Smoothing > 0.0f
+		       ? FMath::Lerp(Current, Target, Damp(DeltaTime, Smoothing))
+		       : Target;
 }
 
 template <class T>
 T UAlsMath::ExponentialDecay(const T& Current, const T& Target, const float DeltaTime, const float Lambda)
 {
-	return Lambda <= 0.0f ? Target : FMath::Lerp(Current, Target, ExponentialDecay(DeltaTime, Lambda));
+	return Lambda > 0.0f
+		       ? FMath::Lerp(Current, Target, ExponentialDecay(DeltaTime, Lambda))
+		       : Target;
 }
 
 inline FRotator UAlsMath::Damp(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
 {
-	return Smoothing <= 0.0f ? Target : LerpRotator(Current, Target, Damp(DeltaTime, Smoothing));
+	return Smoothing > 0.0f
+		       ? LerpRotator(Current, Target, Damp(DeltaTime, Smoothing))
+		       : Target;
 }
 
 inline FRotator UAlsMath::ExponentialDecay(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Lambda)
 {
-	return Lambda <= 0.0f ? Target : LerpRotator(Current, Target, ExponentialDecay(DeltaTime, Lambda));
+	return Lambda > 0.0f
+		       ? LerpRotator(Current, Target, ExponentialDecay(DeltaTime, Lambda))
+		       : Target;
 }
 
 inline float UAlsMath::DampAngle(const float Current, const float Target, const float DeltaTime, const float Smoothing)
 {
-	return Smoothing <= 0.0f ? Target : LerpAngle(Current, Target, Damp(DeltaTime, Smoothing));
+	return Smoothing > 0.0f
+		       ? LerpAngle(Current, Target, Damp(DeltaTime, Smoothing))
+		       : Target;
 }
 
 inline float UAlsMath::ExponentialDecayAngle(const float Current, const float Target, const float DeltaTime, const float Lambda)
 {
-	return Lambda <= 0.0f ? Target : LerpAngle(Current, Target, ExponentialDecay(DeltaTime, Lambda));
+	return Lambda > 0.0f
+		       ? LerpAngle(Current, Target, ExponentialDecay(DeltaTime, Lambda))
+		       : Target;
 }
 
 inline FRotator UAlsMath::DampRotator(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
