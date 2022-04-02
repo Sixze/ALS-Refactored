@@ -250,7 +250,7 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation, const FQuat& OldRotation,
                                                       const FVector& NewLocation, const FQuat& NewRotation)
 {
-	static constexpr auto TeleportDistanceThresholdSquared{50.0f * 50.0f};
+	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 
 	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
 	    FVector::DistSquared2D(OldLocation, NewLocation) <= TeleportDistanceThresholdSquared)
@@ -351,23 +351,23 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 	// where 0 is stopped, 1 is walking, 2 is running and 3 is sprinting. This allows us to vary
 	// the movement speeds but still use the mapped range in calculations for consistent results.
 
-	const auto Speed{Velocity.Size2D()};
+	const auto Speed{UE_REAL_TO_FLOAT(Velocity.Size2D())};
 
 	if (Speed <= GaitSettings.WalkSpeed)
 	{
-		static const FVector2D GaitAmount{0.0f, 1.0f};
+		static const FVector2f GaitAmount{0.0f, 1.0f};
 
 		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, GaitAmount, Speed);
 	}
 
 	if (Speed <= GaitSettings.RunSpeed)
 	{
-		static const FVector2D GaitAmount{1.0f, 2.0f};
+		static const FVector2f GaitAmount{1.0f, 2.0f};
 
 		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, GaitAmount, Speed);
 	}
 
-	static const FVector2D GaitAmount{2.0f, 3.0f};
+	static const FVector2f GaitAmount{2.0f, 3.0f};
 
 	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, GaitAmount, Speed);
 }

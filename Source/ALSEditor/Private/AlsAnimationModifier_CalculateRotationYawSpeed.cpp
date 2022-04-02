@@ -25,7 +25,8 @@ void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAn
 		                                                false, NextPoseTransform);
 
 		UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, UAlsConstants::RotationYawSpeedCurve(), Sequence->GetTimeAtFrame(i),
-		                                             (NextPoseTransform.Rotator().Yaw - CurrentPoseTransform.Rotator().Yaw) *
+		                                             UE_REAL_TO_FLOAT(
+			                                             NextPoseTransform.Rotator().Yaw - CurrentPoseTransform.Rotator().Yaw) *
 		                                             FMath::Abs(Sequence->RateScale) * FrameRate);
 	}
 }

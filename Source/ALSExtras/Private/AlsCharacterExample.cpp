@@ -96,7 +96,7 @@ void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)
 {
 	const auto Value{UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
 
-	const auto ForwardDirection{UAlsMath::AngleToDirectionXY(GetViewState().Rotation.Yaw)};
+	const auto ForwardDirection{UAlsMath::AngleToDirectionXY(UE_REAL_TO_FLOAT(GetViewState().Rotation.Yaw))};
 	const auto RightDirection{UAlsMath::PerpendicularCounterClockwiseXY(ForwardDirection)};
 
 	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);

@@ -65,12 +65,12 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
-
 	auto PreviousVertex{Center + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
+		static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
@@ -97,12 +97,12 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
-
 	auto PreviousVertex{Center + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
+		static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
@@ -177,7 +177,7 @@ void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVecto
 
 	const auto AxisVector{End - Start};
 
-	DrawDebugCapsule(World, Start + AxisVector * 0.5f, AxisVector.Size() * 0.5f + Radius,
+	DrawDebugCapsule(World, Start + AxisVector * 0.5f, UE_REAL_TO_FLOAT(AxisVector.Size()) * 0.5f + Radius,
 	                 Radius, FRotationMatrix::MakeFromZ(AxisVector).ToQuat(),
 	                 FColor, bPersistent, Duration, DepthPriority, Thickness);
 

@@ -90,7 +90,7 @@ private:
 	int32 MantlingRootMotionSourceId;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
-	FVector_NetQuantize RagdollTargetLocation;
+	FVector_NetQuantize100 RagdollTargetLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsRagdollingState RagdollingState;
@@ -497,7 +497,7 @@ private:
 	void SetRagdollTargetLocation(const FVector& NewLocation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRagdollTargetLocation(const FVector_NetQuantize& NewLocation);
+	void ServerSetRagdollTargetLocation(const FVector_NetQuantize100& NewLocation);
 
 	void RefreshRagdolling(float DeltaTime);
 
@@ -620,7 +620,7 @@ inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 
 inline void AAlsCharacter::RefreshTargetYawAngleUsingLocomotionRotation()
 {
-	RefreshTargetYawAngle(LocomotionState.Rotation.Yaw);
+	RefreshTargetYawAngle(UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw));
 }
 
 inline void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
@@ -634,5 +634,6 @@ inline void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
 
 inline void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator::NormalizeAxis(ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle);
+	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(
+		UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - LocomotionState.TargetYawAngle);
 }

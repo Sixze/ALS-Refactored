@@ -137,11 +137,11 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
 	if (!Character->GetLocomotionAction().IsValid())
 	{
-		ViewState.YawAngle = FRotator::NormalizeAxis(Character->GetViewState().Rotation.Yaw -
-		                                             Character->GetLocomotionState().Rotation.Yaw);
+		ViewState.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Yaw) -
+		                                               UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Yaw));
 
-		ViewState.PitchAngle = FRotator::NormalizeAxis(Character->GetViewState().Rotation.Pitch -
-		                                               Character->GetLocomotionState().Rotation.Pitch);
+		ViewState.PitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Pitch) -
+		                                                 UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Pitch));
 	}
 
 	// Interpolate the view rotation value to achieve smooth view rotation changes. Interpolating
@@ -153,25 +153,27 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		                           : UAlsMath::ExponentialDecay(ViewState.SmoothRotation, Character->GetViewState().Rotation,
 		                                                        DeltaTime, Settings->General.ViewSmoothRotationInterpolationSpeed);
 
-	ViewState.SmoothYawAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Yaw -
-	                                                   Character->GetLocomotionState().Rotation.Yaw);
+	ViewState.SmoothYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.SmoothRotation.Yaw) -
+	                                                     UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Yaw));
 
-	ViewState.SmoothPitchAngle = FRotator::NormalizeAxis(ViewState.SmoothRotation.Pitch -
-	                                                     Character->GetLocomotionState().Rotation.Pitch);
+	ViewState.SmoothPitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.SmoothRotation.Pitch) -
+	                                                       UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Pitch));
 
 	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
 	// improve the blending of the view when rotating completely around the character. This allows
 	// you to keep the view responsive but still smoothly blend from left to right or right to left.
 
 	ViewState.SmoothYawAmount = (ViewState.SmoothYawAngle / 180.0f + 1.0f) * 0.5f;
-	ViewState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped(FVector2D{0.0f, 180.0f}, {0.5f, 0.0f},
+
+	ViewState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, 180.0f}, {0.5f, 0.0f},
 	                                                                  FMath::Abs(ViewState.SmoothYawAngle));
-	ViewState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped(FVector2D{0.0f, 180.0f}, {0.5f, 1.0f},
+
+	ViewState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, 180.0f}, {0.5f, 1.0f},
 	                                                                   FMath::Abs(ViewState.SmoothYawAngle));
 
 	if (!RotationMode.IsVelocityDirection())
 	{
-		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped(FVector2D{-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
+		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped(FVector2f{-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
 	}
 
 	const auto AimAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
@@ -186,7 +188,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 			                                : ViewState.YawAngle;
 	}
 
-	ViewState.SpineYawAngle = FRotator::NormalizeAxis(ViewState.TargetSpineYawAngle * AimAllowedAmount * AimManualAmount);
+	ViewState.SpineYawAngle = FRotator3f::NormalizeAxis(ViewState.TargetSpineYawAngle * AimAllowedAmount * AimManualAmount);
 }
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
@@ -204,8 +206,7 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 		// 0 to 1. This value is used in the aiming to make the character look toward the current input.
 
 		const auto InputYawAngle{
-			static_cast<float>(FRotator::NormalizeAxis(
-				CharacterLocomotionState.InputYawAngle - CharacterLocomotionState.Rotation.Yaw))
+			FRotator3f::NormalizeAxis(CharacterLocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(CharacterLocomotionState.Rotation.Yaw))
 		};
 
 		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
@@ -258,18 +259,18 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	// max braking deceleration and 1 equals the max acceleration of the character movement component.
 
 	const auto Acceleration{Character->GetLocomotionState().Acceleration};
-	FVector RelativeAccelerationAmount;
+	FVector3f RelativeAccelerationAmount;
 
 	if ((Acceleration | Character->GetLocomotionState().Velocity) >= 0.0f)
 	{
 		RelativeAccelerationAmount = UAlsMath::ClampMagnitude01(
-			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration) /
+			FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration)} /
 			Character->GetCharacterMovement()->GetMaxAcceleration());
 	}
 	else
 	{
 		RelativeAccelerationAmount = UAlsMath::ClampMagnitude01(
-			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration) /
+			FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration)} /
 			Character->GetCharacterMovement()->GetMaxBrakingDeceleration());
 	}
 
@@ -332,7 +333,8 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 	static constexpr auto ForwardHalfAngle{70.0f};
 
 	GroundedState.MovementDirection = UAlsMath::CalculateMovementDirection(
-		FRotator::NormalizeAxis(Character->GetLocomotionState().VelocityYawAngle - Character->GetViewState().Rotation.Yaw),
+		FRotator3f::NormalizeAxis(
+			Character->GetLocomotionState().VelocityYawAngle - UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Yaw)),
 		ForwardHalfAngle, 5.0f);
 }
 
@@ -343,7 +345,9 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
-		Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity).GetSafeNormal()
+		FVector3f{
+			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity)
+		}.GetSafeNormal()
 	};
 
 	const auto RelativeDirection{
@@ -387,7 +391,8 @@ void UAlsAnimationInstance::RefreshRotationYawOffsets()
 	// The curves allow for fine control over how the offset behaves for each movement direction.
 
 	const auto RotationYawOffset{
-		FRotator::NormalizeAxis(Character->GetLocomotionState().VelocityYawAngle - Character->GetViewState().Rotation.Yaw)
+		FRotator3f::NormalizeAxis(
+			Character->GetLocomotionState().VelocityYawAngle - UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Yaw))
 	};
 
 	GroundedState.RotationYawOffsets.ForwardAngle = Settings->Grounded.RotationYawOffsetForwardCurve->GetFloatValue(RotationYawOffset);
@@ -403,7 +408,7 @@ float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 	// blend independently while still matching the animation speed to the movement speed, preventing the character from needing
 	// to play a half walk + half run blend. The curves are used to map the stride amount to the speed for maximum control.
 
-	const auto Speed{Character->GetLocomotionState().Speed / GetSkelMeshComponent()->GetComponentScale().Z};
+	const auto Speed{UE_REAL_TO_FLOAT(Character->GetLocomotionState().Speed / GetSkelMeshComponent()->GetComponentScale().Z)};
 
 	const auto StandingStrideBlend{
 		FMath::Lerp(Settings->Grounded.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
@@ -444,8 +449,10 @@ float UAlsAnimationInstance::CalculateStandingPlayRate() const
 		            PoseState.GaitSprintingAmount)
 	};
 
-	return FMath::Clamp(WalkRunSprintSpeedAmount / (GroundedState.StrideBlendAmount * GetSkelMeshComponent()->GetComponentScale().Z),
-	                    0.0f, 3.0f);
+	return FMath::Clamp(
+		UE_REAL_TO_FLOAT(WalkRunSprintSpeedAmount /
+			(GroundedState.StrideBlendAmount * GetSkelMeshComponent()->GetComponentScale().Z)),
+		0.0f, 3.0f);
 }
 
 float UAlsAnimationInstance::CalculateCrouchingPlayRate() const
@@ -453,9 +460,10 @@ float UAlsAnimationInstance::CalculateCrouchingPlayRate() const
 	// Calculate the crouching play rate by dividing the character's speed by the animated speed. This value needs
 	// to be separate from the standing play rate to improve the blend from crouching to standing while in motion.
 
-	return FMath::Clamp(Character->GetLocomotionState().Speed /
-	                    (Settings->Grounded.AnimatedCrouchSpeed * GroundedState.StrideBlendAmount *
-	                     GetSkelMeshComponent()->GetComponentScale().Z), 0.0f, 2.0f);
+	return FMath::Clamp(
+		UE_REAL_TO_FLOAT(Character->GetLocomotionState().Speed /
+			(Settings->Grounded.AnimatedCrouchSpeed * GroundedState.StrideBlendAmount * GetSkelMeshComponent()->GetComponentScale().Z)),
+		0.0f, 2.0f);
 }
 
 void UAlsAnimationInstance::Jump()
@@ -536,8 +544,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	static constexpr auto MaxVerticalVelocity{-200.0f};
 
 	auto VelocityDirection{Character->GetLocomotionState().Velocity};
-	VelocityDirection.Z = FMath::Clamp(Character->GetLocomotionState().Velocity.Z,
-	                                   MinVerticalVelocity, MaxVerticalVelocity);
+	VelocityDirection.Z = FMath::Clamp(VelocityDirection.Z, MinVerticalVelocity, MaxVerticalVelocity);
 	VelocityDirection.Normalize();
 
 	static constexpr auto MinSweepDistance{150.0f};
@@ -545,7 +552,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 
 	const auto SweepVector{
 		VelocityDirection *
-		FMath::GetMappedRangeValueClamped(FVector2D{MaxVerticalVelocity, MinVerticalVelocity}, {MinSweepDistance, MaxSweepDistance},
+		FMath::GetMappedRangeValueClamped(FVector2f{MaxVerticalVelocity, MinVerticalVelocity}, {MinSweepDistance, MaxSweepDistance},
 		                                  Character->GetLocomotionState().Velocity.Z) * GetSkelMeshComponent()->GetComponentScale().Z
 	};
 
@@ -586,11 +593,11 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 	static constexpr auto ReferenceSpeed{350.0f};
 
 	const auto RelativeVelocity{
-		Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity) /
-		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(Character->GetLocomotionState().Velocity.Z)
+		FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity)} /
+		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(UE_REAL_TO_FLOAT(Character->GetLocomotionState().Velocity.Z))
 	};
 
-	return {static_cast<float>(RelativeVelocity.Y), static_cast<float>(RelativeVelocity.X)};
+	return {RelativeVelocity.Y, RelativeVelocity.X};
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
@@ -676,7 +683,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		RefreshFinalFootState(FeetState.Left, MeshRelativeTransform, FinalFootLeftLocation, FinalFootLeftRotation);
 		RefreshFinalFootState(FeetState.Right, MeshRelativeTransform, FinalFootRightLocation, FinalFootRightRotation);
 
-		RefreshPelvisOffset(DeltaTime, TargetFootLeftLocationOffset.Z, TargetFootRightLocationOffset.Z);
+		RefreshPelvisOffset(DeltaTime, UE_REAL_TO_FLOAT(TargetFootLeftLocationOffset.Z), UE_REAL_TO_FLOAT(TargetFootRightLocationOffset.Z));
 	}
 
 	FeetState.bReinitializationRequired = false;
@@ -979,8 +986,8 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float DeltaTime, const flo
 	// Set the new offset to be the lowest foot offset.
 
 	const auto TargetPelvisOffsetZ{
-		FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) /
-		static_cast<float>(GetSkelMeshComponent()->GetComponentScale().Z)
+		UE_REAL_TO_FLOAT(FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) /
+			GetSkelMeshComponent()->GetComponentScale().Z)
 	};
 
 	// Interpolate current offset to the new target value.
@@ -1122,8 +1129,9 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		RotateInPlaceState.bRotatingRight = false;
 
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? Settings->RotateInPlace.PlayRate.X
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
+			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
+			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1138,8 +1146,9 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? Settings->RotateInPlace.PlayRate.X
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
+			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
+			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1150,8 +1159,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	// This makes the character rotate faster when moving the camera faster.
 
 	const auto TargetPlayRate{
-		FMath::GetMappedRangeValueClamped(Settings->RotateInPlace.ReferenceViewYawSpeed,
-		                                  Settings->RotateInPlace.PlayRate, Character->GetViewState().YawSpeed)
+		FMath::GetMappedRangeValueClamped(FVector2f{Settings->RotateInPlace.ReferenceViewYawSpeed},
+		                                  FVector2f{Settings->RotateInPlace.PlayRate}, Character->GetViewState().YawSpeed)
 	};
 
 	RotateInPlaceState.PlayRate = bPendingUpdate
@@ -1217,7 +1226,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 
 	const auto ActivationDelay{
 		FMath::GetMappedRangeValueClamped({Settings->TurnInPlace.ViewYawAngleThreshold, 180.0f},
-		                                  Settings->TurnInPlace.ViewYawAngleToActivationDelay,
+		                                  FVector2f{Settings->TurnInPlace.ViewYawAngleToActivationDelay},
 		                                  FMath::Abs(ViewState.YawAngle))
 	};
 
@@ -1228,13 +1237,13 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	StartTurnInPlace(Character->GetViewState().Rotation.Yaw);
+	StartTurnInPlace(UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Yaw));
 }
 
 void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const float PlayRateScale,
                                              const float StartTime, const bool bAllowRestartWhenPlaying)
 {
-	const auto TurnAngle{FRotator::NormalizeAxis(TargetYawAngle - Character->GetLocomotionState().Rotation.Yaw)};
+	const auto TurnAngle{FRotator3f::NormalizeAxis(TargetYawAngle - UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Yaw))};
 
 	// Choose settings on the turn angle and stance.
 
@@ -1314,7 +1323,7 @@ void UAlsAnimationInstance::RefreshRagdolling()
 	static constexpr auto ReferenceSpeed{1000.0f};
 
 	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(
-		GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBone()).Size() / ReferenceSpeed);
+		UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBone()).Size() / ReferenceSpeed));
 }
 
 void UAlsAnimationInstance::StopRagdolling()

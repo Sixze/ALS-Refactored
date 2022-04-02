@@ -392,7 +392,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 #if ENABLE_DRAW_DEBUG
-	const auto FeetLocation{LocomotionState.Location - FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight())};
+	const auto FeetLocation{LocomotionState.Location - FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()}};
 
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f},
@@ -447,7 +447,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	                          FeetLocation,
 	                          FeetLocation +
 	                          UAlsMath::AngleToDirectionXY(LocomotionState.VelocityYawAngle) *
-	                          FMath::GetMappedRangeValueClamped(FVector2D{0.0f, GetCharacterMovement()->GetMaxSpeed()},
+	                          FMath::GetMappedRangeValueClamped(FVector2f{0.0f, GetCharacterMovement()->GetMaxSpeed()},
 	                                                            {50.0f, 75.0f}, LocomotionState.Speed),
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif

@@ -43,7 +43,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 
 	const auto ActorLocation{GetActorLocation()};
-	const auto ActorYawAngle{GetActorRotation().Yaw};
+	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 
 	float ForwardTraceAngle;
 	if (LocomotionState.bHasSpeed)
@@ -59,7 +59,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		ForwardTraceAngle = LocomotionState.bHasInput ? LocomotionState.InputYawAngle : ActorYawAngle;
 	}
 
-	const auto ForwardTraceDeltaAngle{FRotator::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
+	const auto ForwardTraceDeltaAngle{FRotator3f::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
@@ -90,7 +90,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
 
-	const auto LedgeHeightDelta{(TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * CapsuleScale};
+	const auto LedgeHeightDelta{UE_REAL_TO_FLOAT((TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * CapsuleScale)};
 
 	// Trace forward to find a object the character cannot walk on.
 
@@ -227,7 +227,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	FAlsMantlingParameters Parameters;
 
 	Parameters.TargetPrimitive = TargetPrimitive;
-	Parameters.MantlingHeight = (TargetLocation.Z - CapsuleBottomLocation.Z) / CapsuleScale;
+	Parameters.MantlingHeight = UE_REAL_TO_FLOAT((TargetLocation.Z - CapsuleBottomLocation.Z) / CapsuleScale);
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
@@ -362,7 +362,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		const auto MontageStartTime{
 			Parameters.MantlingType == EAlsMantlingType::InAir && IsLocallyControlled()
 				? StartTime - FMath::GetMappedRangeValueClamped(
-					  MantlingSettings->ReferenceHeight, {GetWorld()->GetDeltaSeconds(), 0.0f}, Parameters.MantlingHeight)
+					  FVector2f{MantlingSettings->ReferenceHeight}, {GetWorld()->GetDeltaSeconds(), 0.0f}, Parameters.MantlingHeight)
 				: StartTime
 		};
 
@@ -540,7 +540,7 @@ void AAlsCharacter::SetRagdollTargetLocation(const FVector& NewLocation)
 	}
 }
 
-void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_NetQuantize& NewLocation)
+void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_NetQuantize100& NewLocation)
 {
 	SetRagdollTargetLocation(NewLocation);
 }
@@ -565,7 +565,8 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	static constexpr auto ReferenceSpeed{1000.0f};
 	static constexpr auto Stiffness{25000.0f};
 
-	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(RagdollingState.RootBoneVelocity.Size() / ReferenceSpeed) * Stiffness,
+	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(UE_REAL_TO_FLOAT(
+		                                          RagdollingState.RootBoneVelocity.Size()) / ReferenceSpeed) * Stiffness,
 	                                          0.0f, 0.0f, false);
 
 	// Disable Gravity if falling faster than -4000 to prevent continual
@@ -620,9 +621,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, PullForce, DeltaTime, InterpolationSpeed);
 
-		const auto RootBoneHorizontalSpeedSquared{
-			FVector2D{RagdollingState.RootBoneVelocity.X, RagdollingState.RootBoneVelocity.Y}.SizeSquared()
-		};
+		const auto RootBoneHorizontalSpeedSquared{RagdollingState.RootBoneVelocity.SizeSquared2D()};
 
 		const auto PullForceSocketName{
 			RootBoneHorizontalSpeedSquared > FMath::Square(300.0f) ? UAlsConstants::Spine03Bone() : UAlsConstants::PelvisBone()
@@ -763,7 +762,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	{
 		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle
-			                       : GetActorRotation().Yaw);
+			                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
 	}
 }
 
@@ -788,7 +787,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 		return;
 	}
 
-	const auto StartYawAngle{GetActorRotation().Yaw};
+	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
@@ -854,8 +853,9 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 	else
 	{
-		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(TargetRotation.Yaw, RollingState.TargetYawAngle,
-		                                                     DeltaTime, Settings->Rolling.RotationInterpolationSpeed);
+		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
+		                                                     RollingState.TargetYawAngle, DeltaTime,
+		                                                     Settings->Rolling.RotationInterpolationSpeed);
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
 	}

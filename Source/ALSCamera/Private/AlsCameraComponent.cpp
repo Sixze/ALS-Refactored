@@ -382,7 +382,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 		return TraceResult;
 	}
 
-	const auto TargetTraceDistanceRatio{static_cast<float>((TraceResult - TraceStart).Size() / TraceDistance)};
+	const auto TargetTraceDistanceRatio{UE_REAL_TO_FLOAT((TraceResult - TraceStart).Size() / TraceDistance)};
 
 	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		                        ? TargetTraceDistanceRatio

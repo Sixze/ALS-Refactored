@@ -82,10 +82,6 @@ public:
 	template <class T>
 	static T ExponentialDecay(const T& Current, const T& Target, float DeltaTime, float Lambda);
 
-	static FRotator Damp(const FRotator& Current, const FRotator& Target, float DeltaTime, float Smoothing);
-
-	static FRotator ExponentialDecay(const FRotator& Current, const FRotator& Target, float DeltaTime, float Lambda);
-
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float DampAngle(float Current, float Target, float DeltaTime, float Smoothing);
 
@@ -132,10 +128,10 @@ public:
 	static FVector AngleToDirectionXY(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
-	static float DirectionToAngle(const FVector2D& Direction);
+	static double DirectionToAngle(const FVector2D& Direction);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Direction"))
-	static float DirectionToAngleXY(const FVector& Direction);
+	static double DirectionToAngleXY(const FVector& Direction);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
 	static FVector PerpendicularClockwiseXY(const FVector& Vector);
@@ -145,7 +141,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector",
 		DisplayName = "Angle Between (Skip Normalization)", Meta = (AutoCreateRefTerm = "From, To"))
-	static float AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
+	static double AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", DisplayName = "Slerp (Skip Normalization)")
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
@@ -170,14 +166,14 @@ inline float UAlsMath::LerpClamped(const float A, const float B, const float Alp
 
 inline float UAlsMath::LerpAngle(const float A, const float B, const float Alpha)
 {
-	auto Delta{FRotator::NormalizeAxis(B - A)};
+	auto Delta{FRotator3f::NormalizeAxis(B - A)};
 
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
 	}
 
-	return FRotator::NormalizeAxis(A + Delta * Alpha);
+	return FRotator3f::NormalizeAxis(A + Delta * Alpha);
 }
 
 inline FRotator UAlsMath::LerpRotator(const FRotator& A, const FRotator& B, const float Alpha)
@@ -237,6 +233,7 @@ T UAlsMath::ExponentialDecay(const T& Current, const T& Target, const float Delt
 		       : Target;
 }
 
+template <>
 inline FRotator UAlsMath::Damp(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
 {
 	return Smoothing > 0.0f
@@ -244,6 +241,7 @@ inline FRotator UAlsMath::Damp(const FRotator& Current, const FRotator& Target, 
 		       : Target;
 }
 
+template <>
 inline FRotator UAlsMath::ExponentialDecay(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Lambda)
 {
 	return Lambda > 0.0f
@@ -284,7 +282,7 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 		return Target;
 	}
 
-	auto Delta{FRotator::NormalizeAxis(Target - Current)};
+	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
 
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
@@ -293,7 +291,7 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 
 	const auto Alpha{InterpolationSpeed * DeltaTime};
 
-	return FRotator::NormalizeAxis(Current + FMath::Clamp(Delta, -Alpha, Alpha));
+	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -Alpha, Alpha));
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
@@ -346,12 +344,12 @@ inline FVector UAlsMath::AngleToDirectionXY(const float Angle)
 	return RadianToDirectionXY(FMath::DegreesToRadians(Angle));
 }
 
-inline float UAlsMath::DirectionToAngle(const FVector2D& Direction)
+inline double UAlsMath::DirectionToAngle(const FVector2D& Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
 
-inline float UAlsMath::DirectionToAngleXY(const FVector& Direction)
+inline double UAlsMath::DirectionToAngleXY(const FVector& Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
@@ -366,7 +364,7 @@ inline FVector UAlsMath::PerpendicularCounterClockwiseXY(const FVector& Vector)
 	return {-Vector.Y, Vector.X, Vector.Z};
 }
 
-inline float UAlsMath::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)
+inline double UAlsMath::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)
 {
 	return FMath::RadiansToDegrees(FMath::Acos(From | To));
 }

@@ -64,7 +64,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	}
 	else
 	{
-		const auto InterpolationAndCorrectionAmounts{
+		const FVector3f InterpolationAndCorrectionAmounts{
 			MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetVectorValue(
 				MantlingTime + MantlingSettings->CalculateStartTime(MantlingHeight))
 		};
@@ -134,19 +134,22 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	}
 
 	bSuccess = true;
+	auto bSuccessLocal{true};
 
 	Archive << MantlingSettings;
 	Archive << TargetPrimitive;
 
-	bSuccess &= SerializePackedVector<10, 24>(TargetRelativeLocation, Archive);
+	bSuccess &= SerializePackedVector<100, 30>(TargetRelativeLocation, Archive);
 
-	TargetRelativeRotation.SerializeCompressedShort(Archive);
+	TargetRelativeRotation.NetSerialize(Archive, Map, bSuccessLocal);
 	TargetRelativeRotation.Normalize();
+	bSuccess &= bSuccessLocal;
 
-	bSuccess &= SerializePackedVector<10, 24>(ActorFeetLocationOffset, Archive);
+	bSuccess &= SerializePackedVector<100, 30>(ActorFeetLocationOffset, Archive);
 
-	ActorRotationOffset.SerializeCompressedShort(Archive);
+	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
 	ActorRotationOffset.Normalize();
+	bSuccess &= bSuccessLocal;
 
 	Archive << MantlingHeight;
 

@@ -18,7 +18,7 @@ struct ALS_API FAlsMantlingParameters
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector_NetQuantize10 TargetRelativeLocation{ForceInit};
+	FVector_NetQuantize100 TargetRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator TargetRelativeRotation{ForceInit};
