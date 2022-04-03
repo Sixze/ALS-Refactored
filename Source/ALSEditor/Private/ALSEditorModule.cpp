@@ -1,4 +1,4 @@
-#include "ALSEditor.h"
+#include "ALSEditorModule.h"
 
 #include "Modules/ModuleManager.h"
 

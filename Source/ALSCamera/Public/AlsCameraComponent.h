@@ -61,6 +61,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+public:
 	float GetPostProcessWeight() const;
 
 	void SetPostProcessWeight(bool NewPostProcessWeight);

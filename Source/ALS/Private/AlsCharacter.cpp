@@ -220,74 +220,6 @@ void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTi
 	// Left empty intentionally.
 }
 
-void AAlsCharacter::Jump()
-{
-	if (Stance == EAlsStance::Standing && !LocomotionAction.IsValid() &&
-	    LocomotionMode == AlsLocomotionModeTags::Grounded)
-	{
-		Super::Jump();
-	}
-}
-
-void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, const uint8 PreviousCustomMode)
-{
-	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
-	// custom set of movement modes but still use the functionality of the default character movement component.
-
-	switch (GetCharacterMovement()->MovementMode)
-	{
-		case MOVE_Walking:
-		case MOVE_NavWalking:
-			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
-			break;
-
-		case MOVE_Falling:
-			SetLocomotionMode(AlsLocomotionModeTags::InAir);
-			break;
-
-		default:
-			SetLocomotionMode(FGameplayTag::EmptyTag);
-			break;
-	}
-
-	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
-}
-
-void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
-{
-	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
-	{
-		SetStance(DesiredStance); // Keep desired stance when rolling.
-		return;
-	}
-
-	SetStance(EAlsStance::Crouching);
-}
-
-void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
-{
-	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	SetStance(EAlsStance::Standing);
-}
-
-void AAlsCharacter::OnJumped_Implementation()
-{
-	Super::OnJumped_Implementation();
-
-	if (IsLocallyControlled())
-	{
-		OnJumpedNetworked();
-	}
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		MulticastOnJumpedNetworked();
-	}
-}
-
 void AAlsCharacter::PhysicsRotation(const float DeltaTime)
 {
 	RefreshRollingPhysics(DeltaTime);
@@ -341,6 +273,26 @@ void AAlsCharacter::ApplyDesiredStance()
 	{
 		Crouch();
 	}
+}
+
+void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
+	{
+		SetStance(DesiredStance); // Keep desired stance when rolling.
+		return;
+	}
+
+	SetStance(EAlsStance::Crouching);
+}
+
+void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
+{
+	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	SetStance(EAlsStance::Standing);
 }
 
 void AAlsCharacter::SetStance(const EAlsStance NewStance)
@@ -621,6 +573,30 @@ void AAlsCharacter::SetViewMode(const EAlsViewMode NewMode)
 void AAlsCharacter::ServerSetViewMode_Implementation(const EAlsViewMode NewMode)
 {
 	SetViewMode(NewMode);
+}
+
+void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, const uint8 PreviousCustomMode)
+{
+	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
+	// custom set of movement modes but still use the functionality of the default character movement component.
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+		case MOVE_Walking:
+		case MOVE_NavWalking:
+			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
+			break;
+
+		case MOVE_Falling:
+			SetLocomotionMode(AlsLocomotionModeTags::InAir);
+			break;
+
+		default:
+			SetLocomotionMode(FGameplayTag::EmptyTag);
+			break;
+	}
+
+	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
 }
 
 void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewModeTag)
@@ -1296,6 +1272,30 @@ void AAlsCharacter::MulticastLockRotation_Implementation(const float TargetYawAn
 void AAlsCharacter::MulticastUnLockRotation_Implementation()
 {
 	LocomotionState.bRotationLocked = false;
+}
+
+void AAlsCharacter::Jump()
+{
+	if (Stance == EAlsStance::Standing && !LocomotionAction.IsValid() &&
+	    LocomotionMode == AlsLocomotionModeTags::Grounded)
+	{
+		Super::Jump();
+	}
+}
+
+void AAlsCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	if (IsLocallyControlled())
+	{
+		OnJumpedNetworked();
+	}
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		MulticastOnJumpedNetworked();
+	}
 }
 
 void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()

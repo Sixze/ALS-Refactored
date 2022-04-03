@@ -18,13 +18,15 @@ struct ALS_API FAlsSpringFloatState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStateValid{false};
 
-	void Reset()
-	{
-		Velocity = 0.f;
-		PreviousTarget = 0.f;
-		bStateValid = false;
-	}
+	void Reset();
 };
+
+inline void FAlsSpringFloatState::Reset()
+{
+	Velocity = 0.f;
+	PreviousTarget = 0.f;
+	bStateValid = false;
+}
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsSpringVectorState
@@ -40,13 +42,15 @@ struct ALS_API FAlsSpringVectorState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStateValid{false};
 
-	void Reset()
-	{
-		Velocity = FVector::ZeroVector;
-		PreviousTarget = FVector::ZeroVector;
-		bStateValid = false;
-	}
+	void Reset();
 };
+
+inline void FAlsSpringVectorState::Reset()
+{
+	Velocity = FVector::ZeroVector;
+	PreviousTarget = FVector::ZeroVector;
+	bStateValid = false;
+}
 
 UCLASS()
 class ALS_API UAlsMath : public UBlueprintFunctionLibrary

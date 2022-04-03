@@ -14,6 +14,7 @@ struct ALS_API FAlsMovementGaitSettings
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float WalkSpeed{175.0f};
 
@@ -33,6 +34,7 @@ struct ALS_API FAlsMovementGaitSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve{nullptr};
 
+public:
 	float GetSpeedForGait(const EAlsGait Gait) const;
 };
 
@@ -60,12 +62,14 @@ struct ALS_API FAlsMovementStanceSettings
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementGaitSettings Standing;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementGaitSettings Crouching;
 
+public:
 	const FAlsMovementGaitSettings* GetMovementGaitSettingsForStance(const EAlsStance Stance) const;
 };
 

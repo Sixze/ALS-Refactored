@@ -123,16 +123,6 @@ public:
 
 	virtual void FaceRotation(FRotator NewRotation, float DeltaTime) override final;
 
-	virtual void Jump() override;
-
-	virtual void OnMovementModeChanged(EMovementMode PreviousMode, uint8 PreviousCustomMode = 0) override;
-
-	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-
-	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-
-	virtual void OnJumped_Implementation() override;
-
 private:
 	void PhysicsRotation(float DeltaTime);
 
@@ -151,6 +141,11 @@ private:
 	void ApplyDesiredStance();
 
 	// Stance
+
+public:
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 public:
 	EAlsStance GetStance() const;
@@ -253,6 +248,9 @@ private:
 	void ServerSetViewMode(EAlsViewMode NewMode);
 
 	// Locomotion Mode
+
+public:
+	virtual void OnMovementModeChanged(EMovementMode PreviousMode, uint8 PreviousCustomMode = 0) override;
 
 public:
 	const FGameplayTag& GetLocomotionMode() const;
@@ -401,6 +399,11 @@ private:
 	void MulticastUnLockRotation();
 
 	// Jumping
+
+public:
+	virtual void Jump() override;
+
+	virtual void OnJumped_Implementation() override;
 
 private:
 	UFUNCTION(NetMulticast, Reliable)

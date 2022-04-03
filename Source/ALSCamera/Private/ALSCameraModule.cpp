@@ -1,4 +1,4 @@
-#include "ALSCamera.h"
+#include "ALSCameraModule.h"
 
 #include "Modules/ModuleManager.h"
 
