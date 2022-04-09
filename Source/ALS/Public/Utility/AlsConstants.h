@@ -42,10 +42,10 @@ public:
 	static const FName& FootRightIkBone();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootLeftIkVirtualBone();
+	static const FName& FootLeftVirtualBone();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootRightIkVirtualBone();
+	static const FName& FootRightVirtualBone();
 
 	// Animation Slots
 
@@ -273,15 +273,15 @@ inline const FName& UAlsConstants::FootRightIkBone()
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftIkVirtualBone()
+inline const FName& UAlsConstants::FootLeftVirtualBone()
 {
-	static const FName Name{TEXT("VB ik_foot_l")};
+	static const FName Name{TEXT("VB foot_l")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightIkVirtualBone()
+inline const FName& UAlsConstants::FootRightVirtualBone()
 {
-	static const FName Name{TEXT("VB ik_foot_r")};
+	static const FName Name{TEXT("VB foot_r")};
 	return Name;
 }
 

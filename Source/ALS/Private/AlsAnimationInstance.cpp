@@ -669,11 +669,11 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.Right.IkAmount = GetCurveValueClamped01(UAlsConstants::FootRightIkCurve());
 
 	const auto& FootLeftBone{
-		Settings->General.bUseFootIkBones ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootLeftIkVirtualBone()
+		Settings->General.bUseFootIkBones ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootLeftVirtualBone()
 	};
 
 	const auto& FootRightBone{
-		Settings->General.bUseFootIkBones ? UAlsConstants::FootRightIkBone() : UAlsConstants::FootRightIkVirtualBone()
+		Settings->General.bUseFootIkBones ? UAlsConstants::FootRightIkBone() : UAlsConstants::FootRightVirtualBone()
 	};
 
 	const auto& CapsuleTransform{Character->GetCapsuleComponent()->GetComponentTransform()};
@@ -1128,7 +1128,7 @@ void UAlsAnimationInstance::RefreshTransitions()
 
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Settings->General.bUseFootIkBones
 		                                                         ? UAlsConstants::FootLeftIkBone()
-		                                                         : UAlsConstants::FootLeftIkVirtualBone()),
+		                                                         : UAlsConstants::FootLeftVirtualBone()),
 	                         FeetState.Left.LockLocation) > FootIkDistanceThresholdSquared)
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), BlendTime, BlendTime, PlayRate, StartTime, AllowanceDelay);
@@ -1137,7 +1137,7 @@ void UAlsAnimationInstance::RefreshTransitions()
 
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Settings->General.bUseFootIkBones
 		                                                         ? UAlsConstants::FootRightIkBone()
-		                                                         : UAlsConstants::FootRightIkVirtualBone()),
+		                                                         : UAlsConstants::FootRightVirtualBone()),
 	                         FeetState.Right.LockLocation) > FootIkDistanceThresholdSquared)
 	{
 		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), BlendTime, BlendTime, PlayRate, StartTime, AllowanceDelay);
