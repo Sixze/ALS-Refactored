@@ -62,11 +62,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
-	float LookUpMouseSensitivity{2.5f};
+	float LookUpMouseSensitivity{3.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
-	float LookRightMouseSensitivity{2.5f};
+	float LookRightMouseSensitivity{3.0f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "deg/s"))
