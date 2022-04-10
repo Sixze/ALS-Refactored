@@ -80,11 +80,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float ExponentialDecay(float DeltaTime, float Lambda);
 
-	template <class T>
-	static T Damp(const T& Current, const T& Target, float DeltaTime, float Smoothing);
+	template <class ValueType>
+	static ValueType Damp(const ValueType& Current, const ValueType& Target, float DeltaTime, float Smoothing);
 
-	template <class T>
-	static T ExponentialDecay(const T& Current, const T& Target, float DeltaTime, float Lambda);
+	template <class ValueType>
+	static ValueType ExponentialDecay(const ValueType& Current, const ValueType& Target, float DeltaTime, float Lambda);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float DampAngle(float Current, float Target, float DeltaTime, float Smoothing);
@@ -101,9 +101,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
 
-	template <class T, class U>
-	static T SpringDamp(const T& Current, const T& Target, U& SpringState, const float DeltaTime,
-	                    const float Frequency, const float DampingRatio, float TargetVelocityAmount = 1.0f);
+	template <class ValueType, class StateType>
+	static ValueType SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
+	                            const float Frequency, const float DampingRatio, float TargetVelocityAmount = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math")
 	static float SpringDampFloat(float Current, float Target, UPARAM(ref) FAlsSpringFloatState& SpringState,
@@ -223,16 +223,16 @@ inline float UAlsMath::ExponentialDecay(const float DeltaTime, const float Lambd
 	return 1.0f - FMath::InvExpApprox(Lambda * DeltaTime);
 }
 
-template <class T>
-T UAlsMath::Damp(const T& Current, const T& Target, const float DeltaTime, const float Smoothing)
+template <class ValueType>
+ValueType UAlsMath::Damp(const ValueType& Current, const ValueType& Target, const float DeltaTime, const float Smoothing)
 {
 	return Smoothing > 0.0f
 		       ? FMath::Lerp(Current, Target, Damp(DeltaTime, Smoothing))
 		       : Target;
 }
 
-template <class T>
-T UAlsMath::ExponentialDecay(const T& Current, const T& Target, const float DeltaTime, const float Lambda)
+template <class ValueType>
+ValueType UAlsMath::ExponentialDecay(const ValueType& Current, const ValueType& Target, const float DeltaTime, const float Lambda)
 {
 	return Lambda > 0.0f
 		       ? FMath::Lerp(Current, Target, ExponentialDecay(DeltaTime, Lambda))

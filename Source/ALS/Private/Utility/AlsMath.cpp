@@ -1,8 +1,8 @@
 #include "Utility/AlsMath.h"
 
-template <class T, class U>
-T UAlsMath::SpringDamp(const T& Current, const T& Target, U& SpringState, const float DeltaTime,
-                       const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
+template <class ValueType, class StateType>
+ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
+                               const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
 	if (DeltaTime <= SMALL_NUMBER)
 	{
@@ -18,7 +18,7 @@ T UAlsMath::SpringDamp(const T& Current, const T& Target, U& SpringState, const 
 		return Target;
 	}
 
-	T Result{Current};
+	ValueType Result{Current};
 	FMath::SpringDamper(Result, SpringState.Velocity, Target,
 	                    (Target - SpringState.PreviousTarget) * (Clamp01(TargetVelocityAmount) / DeltaTime),
 	                    DeltaTime, Frequency, DampingRatio);

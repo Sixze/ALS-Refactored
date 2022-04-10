@@ -1,6 +1,7 @@
 #include "Node/AlsAnimNode_CurvesBlend.h"
 
 #include "Animation/AnimInstanceProxy.h"
+#include "Utility/AlsEnumUtility.h"
 
 void FAlsAnimNode_CurvesBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -36,6 +37,9 @@ void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& C
 	{
 		CurvesPose.Update(Context);
 	}
+
+	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Amount"), BlendAmount);
+	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Mode"), *AlsEnumUtility::GetNameStringByValue(BlendMode));
 }
 
 void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
