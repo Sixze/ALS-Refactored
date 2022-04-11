@@ -127,6 +127,16 @@ void AAlsCharacter::BeginPlay()
 
 	Super::BeginPlay();
 
+	// Ignore root motion on simulated proxies, because in some situations it causes
+	// issues with network smoothing such as when the character uncrouches while rolling.
+
+	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
+
+	if (GetLocalRole() <= ROLE_SimulatedProxy)
+	{
+		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+	}
+
 	// Update states to use the initial desired values.
 
 	RefreshRotationMode();
@@ -181,6 +191,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
+	RefreshRolling(DeltaTime);
 
 	if (LocomotionState.bRotationLocked)
 	{

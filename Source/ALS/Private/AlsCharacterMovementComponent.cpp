@@ -173,15 +173,6 @@ void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMove
 	}
 }
 
-void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
-{
-	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
-
-	// This removes some very noticeable changes in the mesh location when the character automatically uncrouches at the end of the roll.
-
-	bCrouchMaintainsBaseLocation = true;
-}
-
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
@@ -247,13 +238,13 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	Super::PhysCustom(DeltaTime, Iterations);
 }
 
-void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation, const FQuat& OldRotation,
+void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& PreviousLocation, const FQuat& PreviousRotation,
                                                       const FVector& NewLocation, const FQuat& NewRotation)
 {
 	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 
 	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
-	    FVector::DistSquared2D(OldLocation, NewLocation) <= TeleportDistanceThresholdSquared)
+	    FVector::DistSquared2D(PreviousLocation, NewLocation) <= TeleportDistanceThresholdSquared)
 	{
 		// By default, the engine treats any movement of the simulated proxy as teleportation, and because of this, foot locking cannot
 		// work properly. Instead, treat movement as teleportation only if the character has moved more than some threshold distance.
@@ -261,7 +252,7 @@ void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& OldLocation
 		bJustTeleported = false;
 	}
 
-	Super::SmoothCorrection(OldLocation, OldRotation, NewLocation, NewRotation);
+	Super::SmoothCorrection(PreviousLocation, PreviousRotation, NewLocation, NewRotation);
 }
 
 FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const

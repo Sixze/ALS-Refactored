@@ -836,6 +836,18 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	}
 }
 
+void AAlsCharacter::RefreshRolling(const float DeltaTime)
+{
+	if (GetLocalRole() <= ROLE_SimulatedProxy ||
+	    GetMesh()->GetAnimInstance()->RootMotionMode <= ERootMotionMode::IgnoreRootMotion)
+	{
+		// Refresh rolling physics here because AAlsCharacter::PhysicsRotation()
+		// won't be called on simulated proxies or with ignored root motion.
+
+		RefreshRollingPhysics(DeltaTime);
+	}
+}
+
 void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 {
 	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
