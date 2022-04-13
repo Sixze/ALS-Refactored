@@ -256,7 +256,6 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 
 	if (Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
 	{
-		GroundedState.VelocityBlend.bReinitializationRequired = true;
 		GroundedState.SprintTime = 0.0f;
 		return;
 	}
@@ -362,8 +361,6 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 {
-	GroundedState.VelocityBlend.bReinitializationRequired |= bPendingUpdate;
-
 	// Calculate and interpolate the velocity blend. This value represents the velocity amount of the
 	// actor in each direction (normalized so that diagonals equal 0.5 for each direction) and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
@@ -381,7 +378,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 		 FMath::Abs(RelativeVelocityDirection.Z))
 	};
 
-	if (GroundedState.VelocityBlend.bReinitializationRequired)
+	if (bPendingUpdate)
 	{
 		GroundedState.VelocityBlend.ForwardAmount = UAlsMath::Clamp01(RelativeDirection.X);
 		GroundedState.VelocityBlend.BackwardAmount = FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f));
@@ -406,8 +403,6 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 		                                                           UAlsMath::Clamp01(RelativeDirection.Y), DeltaTime,
 		                                                           Settings->Grounded.VelocityBlendInterpolationSpeed);
 	}
-
-	GroundedState.VelocityBlend.bReinitializationRequired = false;
 }
 
 void UAlsAnimationInstance::ResetVelocityBlend(const float DeltaTime)

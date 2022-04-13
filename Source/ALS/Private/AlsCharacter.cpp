@@ -378,24 +378,17 @@ EAlsGait AAlsCharacter::CalculateMaxAllowedGait() const
 	// to be in and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
 	// if you wanted to force the character into a walking state while indoors, this could be done here.
 
-	if (Stance == EAlsStance::Standing && (RotationMode != EAlsRotationMode::Aiming || Settings->bSprintHasPriorityOverAiming))
+	if (DesiredGait != EAlsGait::Sprinting)
 	{
-		if (DesiredGait == EAlsGait::Sprinting)
-		{
-			return CanSprint() ? EAlsGait::Sprinting : EAlsGait::Running;
-		}
-
 		return DesiredGait;
 	}
 
-	// Crouching stance & aiming rotation mode has same behaviour.
-
-	if (DesiredGait == EAlsGait::Sprinting)
+	if (CanSprint())
 	{
-		return EAlsGait::Running;
+		return EAlsGait::Sprinting;
 	}
 
-	return DesiredGait;
+	return EAlsGait::Running;
 }
 
 EAlsGait AAlsCharacter::CalculateActualGait(const EAlsGait MaxAllowedGait) const
@@ -423,7 +416,9 @@ bool AAlsCharacter::CanSprint() const
 	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
 	// if there is input and it is faced forward relative to the camera + or - 50 degrees.
 
-	if (!LocomotionState.bHasInput || RotationMode == EAlsRotationMode::Aiming && !Settings->bSprintHasPriorityOverAiming)
+	if (!LocomotionState.bHasInput ||
+	    Stance != EAlsStance::Standing ||
+	    RotationMode == EAlsRotationMode::Aiming && !Settings->bSprintHasPriorityOverAiming)
 	{
 		return false;
 	}
@@ -512,58 +507,91 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(EAlsRotationMode Previo
 
 void AAlsCharacter::RefreshRotationMode()
 {
+	const auto bSprinting{Gait == EAlsGait::Sprinting};
+	const auto bAiming{bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming};
+
 	if (ViewMode == EAlsViewMode::FirstPerson)
 	{
-		const auto bSprinting{Gait == EAlsGait::Sprinting};
-
-		if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
-		    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
+		if (LocomotionMode == AlsLocomotionModeTags::InAir)
 		{
-			SetRotationMode(Settings->bAllowAimingWhenInAir || LocomotionMode != AlsLocomotionModeTags::InAir
-				                ? EAlsRotationMode::Aiming
-				                : EAlsRotationMode::LookingDirection);
+			if (bAiming && Settings->bAllowAimingWhenInAir)
+			{
+				SetRotationMode(EAlsRotationMode::Aiming);
+			}
+			else
+			{
+				SetRotationMode(EAlsRotationMode::LookingDirection);
+			}
+
 			return;
 		}
 
-		// ReSharper disable once CppRedundantParentheses
-		if ((bSprinting && DesiredRotationMode == EAlsRotationMode::Aiming) ||
-		    DesiredRotationMode == EAlsRotationMode::VelocityDirection)
+		// Grounded or other locomotion modes.
+
+		if (bAiming && (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
+		{
+			SetRotationMode(EAlsRotationMode::Aiming);
+		}
+		else
 		{
 			SetRotationMode(EAlsRotationMode::LookingDirection);
-			return;
 		}
 
-		SetRotationMode(DesiredRotationMode);
 		return;
 	}
 
-	const auto bSprinting{Gait == EAlsGait::Sprinting};
+	// Third person or other view modes.
 
-	if ((bDesiredAiming || DesiredRotationMode == EAlsRotationMode::Aiming) &&
-	    (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
+	if (LocomotionMode == AlsLocomotionModeTags::InAir)
 	{
-		SetRotationMode(Settings->bAllowAimingWhenInAir || LocomotionMode != AlsLocomotionModeTags::InAir
-			                ? EAlsRotationMode::Aiming
-			                : EAlsRotationMode::LookingDirection);
+		if (bAiming && Settings->bAllowAimingWhenInAir)
+		{
+			SetRotationMode(EAlsRotationMode::Aiming);
+		}
+		else if (bAiming)
+		{
+			SetRotationMode(EAlsRotationMode::LookingDirection);
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
+		}
+
 		return;
 	}
+
+	// Grounded or other locomotion modes.
 
 	if (bSprinting)
 	{
-		if (Settings->bRotateToVelocityWhenSprinting)
+		if (bAiming && !Settings->bSprintHasPriorityOverAiming)
+		{
+			SetRotationMode(EAlsRotationMode::Aiming);
+		}
+		else if (Settings->bRotateToVelocityWhenSprinting)
 		{
 			SetRotationMode(EAlsRotationMode::VelocityDirection);
-			return;
 		}
-
-		if (DesiredRotationMode == EAlsRotationMode::Aiming)
+		else if (bAiming)
 		{
 			SetRotationMode(EAlsRotationMode::LookingDirection);
-			return;
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
 		}
 	}
-
-	SetRotationMode(DesiredRotationMode);
+	else // Not sprinting.
+	{
+		if (bAiming)
+		{
+			SetRotationMode(EAlsRotationMode::Aiming);
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
+		}
+	}
 }
 
 void AAlsCharacter::SetViewMode(const EAlsViewMode NewMode)
