@@ -15,7 +15,7 @@ void AAlsAIController::OnPossess(APawn* NewPawn)
 FVector AAlsAIController::GetFocalPointOnActor(const AActor* Actor) const
 {
 	const auto* FocusedPawn{Cast<APawn>(Actor)};
-	if (!IsValid(FocusedPawn))
+	if (IsValid(FocusedPawn))
 	{
 		return FocusedPawn->GetPawnViewLocation();
 	}
