@@ -124,6 +124,8 @@ public:
 	virtual void FaceRotation(FRotator NewRotation, float DeltaTime) override final;
 
 private:
+	void RefreshVisibilityBasedAnimTickOption() const;
+
 	void PhysicsRotation(float DeltaTime);
 
 	// Desired Stance

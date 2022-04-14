@@ -28,9 +28,11 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
 	GetMesh()->SetAnimInstanceClass(UAlsAnimationInstance::StaticClass());
 
-	GetMesh()->bUpdateJointsFromAnimation = true; // Required for the flail animation to work properly when ragdolling.
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 
 	GetMesh()->bEnableUpdateRateOptimizations = false;
+
+	GetMesh()->bUpdateJointsFromAnimation = true; // Required for the flail animation to work properly when ragdolling.
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
 
@@ -84,13 +86,7 @@ void AAlsCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	// Make sure that the pose is always ticked on the server when the character is controlled
-	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
-
-	GetMesh()->VisibilityBasedAnimTickOption =
-		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
-			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
-			: EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	RefreshVisibilityBasedAnimTickOption();
 
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
 
@@ -166,14 +162,7 @@ void AAlsCharacter::PostNetReceiveLocationAndRotation()
 
 void AAlsCharacter::Tick(const float DeltaTime)
 {
-	// Restore visibility based animation tick option.
-	// Make sure that the pose is always ticked on the server when the character is controlled
-	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
-
-	GetMesh()->VisibilityBasedAnimTickOption =
-		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
-			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
-			: EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	RefreshVisibilityBasedAnimTickOption();
 
 	RefreshLocomotionLocationAndRotation();
 
@@ -229,6 +218,24 @@ void AAlsCharacter::Restart()
 void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
 {
 	// Left empty intentionally.
+}
+
+void AAlsCharacter::RefreshVisibilityBasedAnimTickOption() const
+{
+	const auto DefaultTickOption{GetClass()->GetDefaultObject<ThisClass>()->GetMesh()->VisibilityBasedAnimTickOption};
+
+	// Make sure that the pose is always ticked on the server when the character is controlled
+	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
+
+	const auto TargetTickOption{
+		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
+			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
+			: EVisibilityBasedAnimTickOption::AlwaysTickPose
+	};
+
+	// Keep the default tick option, at least if the target tick option is not required by the plugin to work properly.
+
+	GetMesh()->VisibilityBasedAnimTickOption = TargetTickOption <= DefaultTickOption ? TargetTickOption : DefaultTickOption;
 }
 
 void AAlsCharacter::PhysicsRotation(const float DeltaTime)
