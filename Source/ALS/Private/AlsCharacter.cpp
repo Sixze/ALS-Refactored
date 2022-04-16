@@ -82,10 +82,41 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
+void AAlsCharacter::PreRegisterAllComponents()
+{
+	Super::PreRegisterAllComponents();
+
+	// Set the default rotation values in this function to ensure that the animation instance
+	// and the camera component can read the most up-to-date values during their initialization.
+
+	SetViewRotation(Super::GetViewRotation().GetNormalized());
+
+	ViewState.InterpolationInitialRotation = ViewRotation;
+	ViewState.InterpolationTargetRotation = ViewRotation;
+	ViewState.Rotation = ViewRotation;
+	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewRotation.Yaw);
+
+	const auto& ActorTransform{GetActorTransform()};
+
+	LocomotionState.Location = ActorTransform.GetLocation();
+	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
+	LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+
+	RefreshTargetYawAngleUsingLocomotionRotation();
+
+	LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
+	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
+}
+
+void AAlsCharacter::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
+
+	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+}
+
 void AAlsCharacter::PostInitializeComponents()
 {
-	Super::PostInitializeComponents();
-
 	RefreshVisibilityBasedAnimTickOption();
 
 	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
@@ -98,18 +129,7 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
-	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
-
-	// Set default rotation values.
-
-	ViewState.Rotation = ViewRotation;
-	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewRotation.Yaw);
-
-	RefreshLocomotionLocationAndRotation();
-	RefreshTargetYawAngleUsingLocomotionRotation();
-
-	LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
-	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
+	Super::PostInitializeComponents();
 }
 
 void AAlsCharacter::BeginPlay()

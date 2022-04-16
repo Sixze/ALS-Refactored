@@ -45,7 +45,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient,
 		Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float CameraFov;
+	float CameraFov{90.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bRightShoulder{true};
