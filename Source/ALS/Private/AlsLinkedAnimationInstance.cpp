@@ -6,7 +6,7 @@
 
 UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
 {
-	RootMotionMode = ERootMotionMode::NoRootMotionExtraction;
+	RootMotionMode = ERootMotionMode::IgnoreRootMotion;
 	bUseMainInstanceMontageEvaluationData = true;
 }
 
@@ -16,6 +16,21 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 
 	Parent = Cast<UAlsAnimationInstance>(GetSkelMeshComponent()->GetAnimInstance());
 	Character = Cast<AAlsCharacter>(GetOwningActor());
+
+	if (!GetWorld()->IsGameWorld())
+	{
+		// Use default objects for editor preview.
+
+		if (Parent.IsNull())
+		{
+			Parent = GetMutableDefault<UAlsAnimationInstance>();
+		}
+
+		if (Character.IsNull())
+		{
+			Character = GetMutableDefault<AAlsCharacter>();
+		}
+	}
 }
 
 void UAlsLinkedAnimationInstance::NativeBeginPlay()

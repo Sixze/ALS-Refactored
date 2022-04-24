@@ -12,6 +12,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMath.h"
+#include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 #include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
@@ -108,13 +109,6 @@ void AAlsCharacter::PreRegisterAllComponents()
 	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 }
 
-void AAlsCharacter::PostRegisterAllComponents()
-{
-	Super::PostRegisterAllComponents();
-
-	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
-}
-
 void AAlsCharacter::PostInitializeComponents()
 {
 	RefreshVisibilityBasedAnimTickOption();
@@ -129,6 +123,18 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
+	// Ignore root motion on simulated proxies, because in some situations it causes
+	// issues with network smoothing such as when the character uncrouches while rolling.
+
+	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
+
+	if (GetLocalRole() <= ROLE_SimulatedProxy && IsValid(GetMesh()->GetAnimInstance()))
+	{
+		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+	}
+
+	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+
 	Super::PostInitializeComponents();
 }
 
@@ -142,16 +148,6 @@ void AAlsCharacter::BeginPlay()
 	       TEXT("These settings are not allowed and must be turned off!"))
 
 	Super::BeginPlay();
-
-	// Ignore root motion on simulated proxies, because in some situations it causes
-	// issues with network smoothing such as when the character uncrouches while rolling.
-
-	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
-
-	if (GetLocalRole() <= ROLE_SimulatedProxy)
-	{
-		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
-	}
 
 	// Update states to use the initial desired values.
 
@@ -182,6 +178,8 @@ void AAlsCharacter::PostNetReceiveLocationAndRotation()
 
 void AAlsCharacter::Tick(const float DeltaTime)
 {
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick()"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
+
 	RefreshVisibilityBasedAnimTickOption();
 
 	RefreshLocomotionLocationAndRotation();

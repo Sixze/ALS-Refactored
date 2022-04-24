@@ -36,24 +36,24 @@ class ALS_API UAlsMantlingSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> Montage;
 
 	// Mantling time to blend in amount curve.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCurveFloat> BlendInCurve;
 
 	// Mantling time to interpolation, horizontal and vertical correction amounts curve.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCurveVector> InterpolationAndCorrectionAmountsCurve;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector StartRelativeLocation{-65.0f, 0.0f, -100.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
 	FVector2D ReferenceHeight{50.0f, 100.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))
 	FVector2D StartTime{0.5f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0))

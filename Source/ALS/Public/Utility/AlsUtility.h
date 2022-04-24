@@ -7,6 +7,8 @@
 
 class ACharacter;
 
+DECLARE_STATS_GROUP(TEXT("Als"), STATGROUP_Als, STATCAT_Advanced)
+
 UCLASS()
 class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 {

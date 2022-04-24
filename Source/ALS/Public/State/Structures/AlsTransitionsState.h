@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/EngineTypes.h"
 #include "AlsTransitionsState.generated.h"
 
 USTRUCT(BlueprintType)
@@ -11,8 +10,9 @@ struct ALS_API FAlsTransitionsState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAllowTransitions{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAllowDynamicTransition{true};
 
-	FTimerHandle DynamicTransitionAllowanceTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float DynamicTransitionBlockTimeRemaining{0.0f};
 };

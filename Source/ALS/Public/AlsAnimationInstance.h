@@ -59,7 +59,16 @@ private:
 	FAlsRotationModeCache RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FGameplayTag LocomotionMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FGameplayTag LocomotionAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsViewModeCache ViewMode{EAlsViewMode::ThirdPerson};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag GroundedEntryMode;
@@ -101,6 +110,8 @@ private:
 	FAlsRagdollingAnimationState RagdollingState;
 
 public:
+	UAlsAnimationInstance();
+
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;
@@ -108,6 +119,10 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	// Core
+
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UAlsAnimationInstanceSettings* GetSettingsUnsafe() const;
 
 public:
 	void SetPendingUpdate(bool bNewPendingUpdate);
@@ -151,6 +166,8 @@ public:
 private:
 	void RefreshGrounded(float DeltaTime);
 
+	void RefreshPivot(float DeltaTime);
+
 	void RefreshMovementDirection();
 
 	void RefreshVelocityBlend(float DeltaTime);
@@ -174,6 +191,8 @@ public:
 
 private:
 	void RefreshInAir(float DeltaTime);
+
+	void RefreshJump(float DeltaTime);
 
 	float CalculateGroundPredictionAmount() const;
 
@@ -224,10 +243,12 @@ public:
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);
 
 private:
-	void RefreshTransitions();
+	void RefreshTransitions(float DeltaTime);
 
-	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
-	                           float PlayRate = 1.0f, float StartTime = 0.0f, float AllowanceDelay = 0.0f);
+	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f,
+	                           float BlendOutTime = 0.2f, float PlayRate = 1.0f, float StartTime = 0.0f);
+
+	void RefreshDynamicTransition(float DeltaTime);
 
 	// Rotate In Place
 
@@ -264,6 +285,11 @@ private:
 public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
 };
+
+inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe() const
+{
+	return Settings;
+}
 
 inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
 {

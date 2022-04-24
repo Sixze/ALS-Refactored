@@ -106,19 +106,19 @@ class ALS_API UAlsFootstepEffectsSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TEnumAsByte<ETraceTypeQuery> SurfaceTraceChannel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float SurfaceTraceDistance{50.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Foot Left Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Left Y Axis")
 	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Foot Right Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Y Axis")
 	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (TitleProperty = "SurfaceType"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (TitleProperty = "SurfaceType"))
 	TArray<FAlsFootstepEffectSettings> Effects;
 };
 

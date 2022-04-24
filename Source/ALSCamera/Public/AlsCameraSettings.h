@@ -85,14 +85,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsThirdPersonCameraSettings ThirdPerson;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
 	bool bUseLagSubstepping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", DisplayName = "Use Lag Substepping",
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Use Lag Substepping",
 		Meta = (AllowPrivateAccess, EditCondition = "bUseLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FPostProcessSettings PostProcess;
 
 #if WITH_EDITORONLY_DATA

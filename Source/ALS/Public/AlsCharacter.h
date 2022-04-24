@@ -112,8 +112,6 @@ public:
 protected:
 	virtual void PreRegisterAllComponents() override;
 
-	virtual void PostRegisterAllComponents() override;
-
 	virtual void PostInitializeComponents() override;
 
 	virtual void BeginPlay() override;

@@ -7,25 +7,40 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	AlsCharacter = Cast<AAlsCharacter>(GetOwningActor());
-	AlsCamera = Cast<UAlsCameraComponent>(GetSkelMeshComponent());
+	Character = Cast<AAlsCharacter>(GetOwningActor());
+	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent());
+
+	if (!GetWorld()->IsGameWorld())
+	{
+		// Use default objects for editor preview.
+
+		if (Character.IsNull())
+		{
+			Character = GetMutableDefault<AAlsCharacter>();
+		}
+
+		if (Camera.IsNull())
+		{
+			Camera = GetMutableDefault<UAlsCameraComponent>();
+		}
+	}
 }
 
 void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (AlsCharacter.IsNull() || AlsCamera.IsNull())
+	if (Character.IsNull() || Camera.IsNull())
 	{
 		return;
 	}
 
-	Stance = AlsCharacter->GetStance();
-	Gait = AlsCharacter->GetGait();
-	RotationMode = AlsCharacter->GetRotationMode();
-	ViewMode = AlsCharacter->GetViewMode();
-	LocomotionMode = AlsCharacter->GetLocomotionMode();
-	LocomotionAction = AlsCharacter->GetLocomotionAction();
+	Stance = Character->GetStance();
+	Gait = Character->GetGait();
+	RotationMode = Character->GetRotationMode();
+	ViewMode = Character->GetViewMode();
+	LocomotionMode = Character->GetLocomotionMode();
+	LocomotionAction = Character->GetLocomotionAction();
 
-	bRightShoulder = AlsCamera->IsRightShoulder();
+	bRightShoulder = Camera->IsRightShoulder();
 }

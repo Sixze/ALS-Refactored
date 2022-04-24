@@ -18,10 +18,10 @@ class ALSCAMERA_API UAlsCameraAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	TObjectPtr<AAlsCharacter> AlsCharacter;
+	TObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	TObjectPtr<UAlsCameraComponent> AlsCamera;
+	TObjectPtr<UAlsCameraComponent> Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsStanceCache Stance;

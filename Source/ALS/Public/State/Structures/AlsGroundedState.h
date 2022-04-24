@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Engine/EngineTypes.h"
 #include "State/Enumerations/AlsMovementDirection.h"
 #include "AlsGroundedState.generated.h"
 
@@ -65,7 +64,8 @@ struct ALS_API FAlsGroundedState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPivotActive{false};
 
-	FTimerHandle PivotResetTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float PivotTimeRemaining{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementDirectionCache MovementDirection;

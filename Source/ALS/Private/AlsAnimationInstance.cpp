@@ -9,15 +9,28 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsLog.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 #include "Utility/GameplayTags/AlsLocomotionModeTags.h"
+
+UAlsAnimationInstance::UAlsAnimationInstance()
+{
+	RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
+}
 
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
+
+	if (!GetWorld()->IsGameWorld() && Character.IsNull())
+	{
+		// Use default objects for editor preview.
+
+		Character = GetMutableDefault<AAlsCharacter>();
+	}
 }
 
 void UAlsAnimationInstance::NativeBeginPlay()
@@ -36,6 +49,9 @@ void UAlsAnimationInstance::NativeBeginPlay()
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeUpdateAnimation()"),
+	                            STAT_UAlsAnimationInstance_NativeUpdateAnimation, STATGROUP_Als)
+
 	Super::NativeUpdateAnimation(DeltaTime);
 
 	if (Settings.IsNull() || Character.IsNull())
@@ -46,7 +62,10 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Stance = Character->GetStance();
 	Gait = Character->GetGait();
 	RotationMode = Character->GetRotationMode();
+	LocomotionMode = Character->GetLocomotionMode();
+	LocomotionAction = Character->GetLocomotionAction();
 	ViewMode = Character->GetViewMode();
+	OverlayMode = Character->GetOverlayMode();
 
 	RefreshLayering();
 	RefreshPose();
@@ -59,7 +78,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	RefreshFeet(DeltaTime);
 
-	RefreshTransitions();
+	RefreshTransitions(DeltaTime);
 	RefreshRotateInPlace(DeltaTime);
 	RefreshTurnInPlace(DeltaTime);
 
@@ -86,17 +105,17 @@ void UAlsAnimationInstance::RefreshLayering()
 
 	LayeringState.ArmLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftCurve());
 	LayeringState.ArmLeftAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftAdditiveCurve());
+	LayeringState.ArmLeftSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftSlotCurve());
 	LayeringState.ArmLeftLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftLocalSpaceCurve());
 	LayeringState.ArmLeftMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmLeftLocalSpaceBlendAmount);
-	LayeringState.ArmLeftSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmLeftSlotCurve());
 
 	// The mesh space blend will always be 1 unless the local space blend is 1.
 
 	LayeringState.ArmRightBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightCurve());
 	LayeringState.ArmRightAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightAdditiveCurve());
+	LayeringState.ArmRightSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightSlotCurve());
 	LayeringState.ArmRightLocalSpaceBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightLocalSpaceCurve());
 	LayeringState.ArmRightMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmRightLocalSpaceBlendAmount);
-	LayeringState.ArmRightSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerArmRightSlotCurve());
 
 	LayeringState.HandLeftBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHandLeftCurve());
 	LayeringState.HandRightBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHandRightCurve());
@@ -135,7 +154,7 @@ void UAlsAnimationInstance::RefreshPose()
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
-	if (!Character->GetLocomotionAction().IsValid())
+	if (!LocomotionAction.IsValid())
 	{
 		ViewState.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(Character->GetViewState().Rotation.Yaw) -
 		                                               UE_REAL_TO_FLOAT(Character->GetLocomotionState().Rotation.Yaw));
@@ -200,7 +219,9 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 {
 	const auto& CharacterLocomotionState{Character->GetLocomotionState()};
 
-	if (CharacterLocomotionState.bHasInput && RotationMode.IsVelocityDirection())
+	LocomotionState.bHasInput = CharacterLocomotionState.bHasInput;
+
+	if (LocomotionState.bHasInput && RotationMode.IsVelocityDirection())
 	{
 		// Get the delta between character rotation and current input yaw angle and map it to a range from
 		// 0 to 1. This value is used in the aiming to make the character look toward the current input.
@@ -226,24 +247,24 @@ void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
 			                                                              Settings->General.InputYawAmountInterpolationSpeed);
 	}
 
+	LocomotionState.Speed = CharacterLocomotionState.Speed;
+	LocomotionState.Velocity = CharacterLocomotionState.Velocity;
+	LocomotionState.bMoving = CharacterLocomotionState.bMoving;
+
 	// ReSharper disable once CppRedundantParentheses
-	LocomotionState.bMovingSmooth = (CharacterLocomotionState.bHasInput && CharacterLocomotionState.bHasSpeed) ||
-	                                CharacterLocomotionState.Speed > Settings->General.MovingSmoothSpeedThreshold;
+	LocomotionState.bMovingSmooth = (LocomotionState.bHasInput && CharacterLocomotionState.bHasSpeed) ||
+	                                LocomotionState.Speed > Settings->General.MovingSmoothSpeedThreshold;
 }
 
 void UAlsAnimationInstance::ActivatePivot()
 {
-	GroundedState.bPivotActive = Character->GetLocomotionState().Speed < Settings->Grounded.PivotActivationSpeedThreshold;
+	GroundedState.bPivotActive = LocomotionState.Speed < Settings->Grounded.PivotActivationSpeedThreshold;
 
 	if (GroundedState.bPivotActive)
 	{
-		static constexpr auto ResetDelay{0.1f};
+		static constexpr auto Duration{0.1f};
 
-		GetWorld()->GetTimerManager().SetTimer(GroundedState.PivotResetTimer,
-		                                       FTimerDelegate::CreateWeakLambda(this, [&bPivotActive = GroundedState.bPivotActive]
-		                                       {
-			                                       bPivotActive = false;
-		                                       }), ResetDelay, false);
+		GroundedState.PivotTimeRemaining = Duration;
 	}
 }
 
@@ -254,13 +275,15 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	GroundedState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurve());
 	GroundedState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurve()), -1.0f, 1.0f);
 
-	if (Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
+	RefreshPivot(DeltaTime);
+
+	if (LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		GroundedState.SprintTime = 0.0f;
 		return;
 	}
 
-	if (!Character->GetLocomotionState().bMoving)
+	if (!LocomotionState.bMoving)
 	{
 		ResetVelocityBlend(DeltaTime);
 
@@ -282,7 +305,7 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	const auto Acceleration{Character->GetLocomotionState().Acceleration};
 	FVector3f RelativeAccelerationAmount;
 
-	if ((Acceleration | Character->GetLocomotionState().Velocity) >= 0.0f)
+	if ((Acceleration | LocomotionState.Velocity) >= 0.0f)
 	{
 		RelativeAccelerationAmount = UAlsMath::ClampMagnitude01(
 			FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Acceleration)} /
@@ -340,6 +363,18 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	}
 }
 
+void UAlsAnimationInstance::RefreshPivot(const float DeltaTime)
+{
+	if (GroundedState.bPivotActive)
+	{
+		GroundedState.PivotTimeRemaining = bPendingUpdate
+			                                   ? 0.0f
+			                                   : FMath::Max(0.0f, GroundedState.PivotTimeRemaining - DeltaTime);
+
+		GroundedState.bPivotActive = GroundedState.PivotTimeRemaining > 0.0f;
+	}
+}
+
 void UAlsAnimationInstance::RefreshMovementDirection()
 {
 	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
@@ -366,9 +401,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
-		FVector3f{
-			Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity)
-		}.GetSafeNormal()
+		FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(LocomotionState.Velocity)}.GetSafeNormal()
 	};
 
 	const auto RelativeDirection{
@@ -454,7 +487,7 @@ float UAlsAnimationInstance::CalculateStrideBlendAmount() const
 	// blend independently while still matching the animation speed to the movement speed, preventing the character from needing
 	// to play a half walk + half run blend. The curves are used to map the stride amount to the speed for maximum control.
 
-	const auto Speed{UE_REAL_TO_FLOAT(Character->GetLocomotionState().Speed / GetSkelMeshComponent()->GetComponentScale().Z)};
+	const auto Speed{UE_REAL_TO_FLOAT(LocomotionState.Speed / GetSkelMeshComponent()->GetComponentScale().Z)};
 
 	const auto StandingStrideBlend{
 		FMath::Lerp(Settings->Grounded.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
@@ -484,14 +517,14 @@ float UAlsAnimationInstance::CalculateStandingPlayRate() const
 	// stride blend and the mesh scale so that the play rate increases as the stride or scale gets smaller.
 
 	const auto WalkRunSpeedAmount{
-		FMath::Lerp(Character->GetLocomotionState().Speed / Settings->Grounded.AnimatedWalkSpeed,
-		            Character->GetLocomotionState().Speed / Settings->Grounded.AnimatedRunSpeed,
+		FMath::Lerp(LocomotionState.Speed / Settings->Grounded.AnimatedWalkSpeed,
+		            LocomotionState.Speed / Settings->Grounded.AnimatedRunSpeed,
 		            PoseState.GaitRunningAmount)
 	};
 
 	const auto WalkRunSprintSpeedAmount{
 		FMath::Lerp(WalkRunSpeedAmount,
-		            Character->GetLocomotionState().Speed / Settings->Grounded.AnimatedSprintSpeed,
+		            LocomotionState.Speed / Settings->Grounded.AnimatedSprintSpeed,
 		            PoseState.GaitSprintingAmount)
 	};
 
@@ -507,7 +540,7 @@ float UAlsAnimationInstance::CalculateCrouchingPlayRate() const
 	// to be separate from the standing play rate to improve the blend from crouching to standing while in motion.
 
 	return FMath::Clamp(
-		UE_REAL_TO_FLOAT(Character->GetLocomotionState().Speed /
+		UE_REAL_TO_FLOAT(LocomotionState.Speed /
 			(Settings->Grounded.AnimatedCrouchSpeed * GroundedState.StrideBlendAmount * GetSkelMeshComponent()->GetComponentScale().Z)),
 		0.0f, 2.0f);
 }
@@ -519,21 +552,18 @@ void UAlsAnimationInstance::Jump()
 	static constexpr auto MaxPlayRate{1.5f};
 
 	InAirState.bJumped = true;
-	InAirState.JumpPlayRate = UAlsMath::LerpClamped(MinPlayRate, MaxPlayRate,
-	                                                Character->GetLocomotionState().Speed / ReferenceSpeed);
+	InAirState.JumpPlayRate = UAlsMath::LerpClamped(MinPlayRate, MaxPlayRate, LocomotionState.Speed / ReferenceSpeed);
 
-	static constexpr auto ResetDelay{0.1f};
+	static constexpr auto Duration{0.1f};
 
-	GetWorld()->GetTimerManager().SetTimer(InAirState.JumpResetTimer,
-	                                       FTimerDelegate::CreateWeakLambda(this, [&bJumped = InAirState.bJumped]
-	                                       {
-		                                       bJumped = false;
-	                                       }), ResetDelay, false);
+	InAirState.JumpTimeRemaining = Duration;
 }
 
 void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 {
-	if (Character->GetLocomotionMode() != AlsLocomotionModeTags::InAir)
+	RefreshJump(DeltaTime);
+
+	if (LocomotionMode != AlsLocomotionModeTags::InAir)
 	{
 		return;
 	}
@@ -560,6 +590,18 @@ void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 	}
 }
 
+void UAlsAnimationInstance::RefreshJump(const float DeltaTime)
+{
+	if (InAirState.bJumped)
+	{
+		InAirState.JumpTimeRemaining = bPendingUpdate
+			                               ? 0.0f
+			                               : FMath::Max(0.0f, InAirState.JumpTimeRemaining - DeltaTime);
+
+		InAirState.bJumped = InAirState.JumpTimeRemaining > 0.0f;
+	}
+}
+
 float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 {
 	// Calculate the ground prediction weight by tracing in the velocity direction to find a walkable surface the character
@@ -568,7 +610,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 
 	static constexpr auto VerticalVelocityThreshold{-200.0f};
 
-	if (Character->GetLocomotionState().Velocity.Z > VerticalVelocityThreshold)
+	if (LocomotionState.Velocity.Z > VerticalVelocityThreshold)
 	{
 		return 0.0f;
 	}
@@ -589,7 +631,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	static constexpr auto MinVerticalVelocity{-4000.0f};
 	static constexpr auto MaxVerticalVelocity{-200.0f};
 
-	auto VelocityDirection{Character->GetLocomotionState().Velocity};
+	auto VelocityDirection{LocomotionState.Velocity};
 	VelocityDirection.Z = FMath::Clamp(VelocityDirection.Z, MinVerticalVelocity, MaxVerticalVelocity);
 	VelocityDirection.Normalize();
 
@@ -599,7 +641,7 @@ float UAlsAnimationInstance::CalculateGroundPredictionAmount() const
 	const auto SweepVector{
 		VelocityDirection *
 		FMath::GetMappedRangeValueClamped(FVector2f{MaxVerticalVelocity, MinVerticalVelocity}, {MinSweepDistance, MaxSweepDistance},
-		                                  Character->GetLocomotionState().Velocity.Z) * GetSkelMeshComponent()->GetComponentScale().Z
+		                                  LocomotionState.Velocity.Z) * GetSkelMeshComponent()->GetComponentScale().Z
 	};
 
 	FCollisionObjectQueryParams ObjectQueryParameters;
@@ -639,8 +681,8 @@ FAlsLeanState UAlsAnimationInstance::CalculateInAirLeanAmount() const
 	static constexpr auto ReferenceSpeed{350.0f};
 
 	const auto RelativeVelocity{
-		FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(Character->GetLocomotionState().Velocity)} /
-		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(UE_REAL_TO_FLOAT(Character->GetLocomotionState().Velocity.Z))
+		FVector3f{Character->GetLocomotionState().RotationQuaternion.UnrotateVector(LocomotionState.Velocity)} /
+		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(UE_REAL_TO_FLOAT(LocomotionState.Velocity.Z))
 	};
 
 	return {RelativeVelocity.Y, RelativeVelocity.X};
@@ -707,8 +749,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	const auto MeshRelativeTransform{GetSkelMeshComponent()->GetComponentTransform().Inverse()};
 
-	if (Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir ||
-	    Character->GetLocomotionAction() == AlsLocomotionActionTags::Ragdolling)
+	if (LocomotionMode == AlsLocomotionModeTags::InAir ||
+	    LocomotionAction == AlsLocomotionActionTags::Ragdolling)
 	{
 		ResetFootOffset(FeetState.Left, DeltaTime, FinalFootLeftLocation, FinalFootLeftRotation);
 		ResetFootOffset(FeetState.Right, DeltaTime, FinalFootRightLocation, FinalFootRightRotation);
@@ -789,7 +831,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 {
 	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
 
-	if (NewFootLockAmount > FootState.LockAmount && Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir)
+	if (NewFootLockAmount > FootState.LockAmount && LocomotionMode == AlsLocomotionModeTags::InAir)
 	{
 		// Smoothly disable foot locking if the character is in the air.
 
@@ -1078,7 +1120,7 @@ void UAlsAnimationInstance::PlayTransition(UAnimSequenceBase* Animation, const f
 void UAlsAnimationInstance::PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, const float BlendInTime,
                                                                const float BlendOutTime, const float PlayRate, const float StartTime)
 {
-	if (!Character->GetLocomotionState().bMoving && Stance.IsStanding())
+	if (!LocomotionState.bMoving && Stance.IsStanding())
 	{
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}
@@ -1091,16 +1133,18 @@ void UAlsAnimationInstance::StopTransitionAndTurnInPlaceAnimations(const float B
 	StopSlotAnimation(BlendOutTime, UAlsConstants::TurnInPlaceCrouchingSlot());
 }
 
-void UAlsAnimationInstance::RefreshTransitions()
+void UAlsAnimationInstance::RefreshTransitions(const float DeltaTime)
 {
 	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
 
 	TransitionsState.bAllowTransitions = FAnimWeight::IsFullWeight(GetCurveValue(UAlsConstants::AllowTransitionsCurve()));
 
+	RefreshDynamicTransition(DeltaTime);
+
 	// Dynamic transitions.
 
 	if (!bAnimationCurvesRelevant || !TransitionsState.bAllowTransitions || !TransitionsState.bAllowDynamicTransition ||
-	    Character->GetLocomotionState().bMoving || Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
+	    LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -1119,14 +1163,13 @@ void UAlsAnimationInstance::RefreshTransitions()
 	static constexpr auto BlendTime{0.2f};
 	static constexpr auto PlayRate{1.5f};
 	static constexpr auto StartTime{0.8f};
-	static constexpr auto AllowanceDelay{0.1f};
 
 	if (FVector::DistSquared(SkeletalMesh->GetSocketLocation(Settings->General.bUseFootIkBones
 		                                                         ? UAlsConstants::FootLeftIkBone()
 		                                                         : UAlsConstants::FootLeftVirtualBone()),
 	                         FeetState.Left.LockLocation) > FootIkDistanceThresholdSquared)
 	{
-		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), BlendTime, BlendTime, PlayRate, StartTime, AllowanceDelay);
+		PlayDynamicTransition(SelectDynamicTransitionForRightFoot(), BlendTime, BlendTime, PlayRate, StartTime);
 		return;
 	}
 
@@ -1135,25 +1178,35 @@ void UAlsAnimationInstance::RefreshTransitions()
 		                                                         : UAlsConstants::FootRightVirtualBone()),
 	                         FeetState.Right.LockLocation) > FootIkDistanceThresholdSquared)
 	{
-		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), BlendTime, BlendTime, PlayRate, StartTime, AllowanceDelay);
+		PlayDynamicTransition(SelectDynamicTransitionForLeftFoot(), BlendTime, BlendTime, PlayRate, StartTime);
 	}
 }
 
-void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, const float BlendInTime, const float BlendOutTime,
-                                                  const float PlayRate, const float StartTime, const float AllowanceDelay)
+void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, const float BlendInTime,
+                                                  const float BlendOutTime, const float PlayRate, const float StartTime)
 {
 	if (TransitionsState.bAllowDynamicTransition)
 	{
 		TransitionsState.bAllowDynamicTransition = false;
 
-		GetWorld()->GetTimerManager().SetTimer(TransitionsState.DynamicTransitionAllowanceTimer,
-		                                       FTimerDelegate::CreateWeakLambda(
-			                                       this, [&bAllowDynamicTransition = TransitionsState.bAllowDynamicTransition]
-			                                       {
-				                                       bAllowDynamicTransition = true;
-			                                       }), AllowanceDelay, false);
+		static constexpr auto BlockDuration{0.1f};
+
+		TransitionsState.DynamicTransitionBlockTimeRemaining = BlockDuration;
 
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
+	}
+}
+
+void UAlsAnimationInstance::RefreshDynamicTransition(const float DeltaTime)
+{
+	if (!TransitionsState.bAllowDynamicTransition)
+	{
+		TransitionsState.DynamicTransitionBlockTimeRemaining =
+			bPendingUpdate
+				? 0.0f
+				: FMath::Max(0.0f, TransitionsState.DynamicTransitionBlockTimeRemaining - DeltaTime);
+
+		TransitionsState.bAllowDynamicTransition = TransitionsState.DynamicTransitionBlockTimeRemaining <= 0.0f;
 	}
 }
 
@@ -1168,8 +1221,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (Character->GetLocomotionState().bMoving || !IsRotateInPlaceAllowed() ||
-	    Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
+	if (LocomotionState.bMoving || !IsRotateInPlaceAllowed() ||
+	    LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -1240,8 +1293,8 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	// Turn in place is allowed only if transitions are allowed, the character
 	// standing still and looking at the camera and not in first-person mode.
 
-	if (Character->GetLocomotionState().bMoving || !IsTurnInPlaceAllowed() ||
-	    Character->GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
+	if (LocomotionState.bMoving || !IsTurnInPlaceAllowed() ||
+	    LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
 		TurnInPlaceState.bDisableFootLock = false;
@@ -1359,7 +1412,7 @@ void UAlsAnimationInstance::StartTurnInPlace(const float TargetYawAngle, const f
 
 void UAlsAnimationInstance::RefreshRagdolling()
 {
-	if (Character->GetLocomotionAction() != AlsLocomotionActionTags::Ragdolling)
+	if (LocomotionAction != AlsLocomotionActionTags::Ragdolling)
 	{
 		return;
 	}
