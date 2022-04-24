@@ -264,7 +264,9 @@ void UAlsAnimationInstance::ActivatePivot()
 	{
 		static constexpr auto Duration{0.1f};
 
-		GroundedState.PivotTimeRemaining = Duration;
+		// The timer should be at least ~2 frames long to give the animation blueprint some time to react to the dependent variable change.
+
+		GroundedState.PivotTimeRemaining = FMath::Max(Duration, 2.0f * GetDeltaSeconds());
 	}
 }
 
@@ -279,16 +281,13 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 
 	if (LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
+		GroundedState.VelocityBlend.bReinitializationRequired = true;
 		GroundedState.SprintTime = 0.0f;
 		return;
 	}
 
 	if (!LocomotionState.bMoving)
 	{
-		ResetVelocityBlend(DeltaTime);
-
-		GroundedState.SprintTime = 0.0f;
-
 		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
 		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
 		return;
@@ -396,6 +395,8 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 
 void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 {
+	GroundedState.VelocityBlend.bReinitializationRequired |= bPendingUpdate;
+
 	// Calculate and interpolate the velocity blend. This value represents the velocity amount of the
 	// actor in each direction (normalized so that diagonals equal 0.5 for each direction) and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
@@ -411,7 +412,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 		 FMath::Abs(RelativeVelocityDirection.Z))
 	};
 
-	if (bPendingUpdate)
+	if (GroundedState.VelocityBlend.bReinitializationRequired)
 	{
 		GroundedState.VelocityBlend.ForwardAmount = UAlsMath::Clamp01(RelativeDirection.X);
 		GroundedState.VelocityBlend.BackwardAmount = FMath::Abs(FMath::Clamp(RelativeDirection.X, -1.0f, 0.0f));
@@ -436,31 +437,8 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 		                                                           UAlsMath::Clamp01(RelativeDirection.Y), DeltaTime,
 		                                                           Settings->Grounded.VelocityBlendInterpolationSpeed);
 	}
-}
 
-void UAlsAnimationInstance::ResetVelocityBlend(const float DeltaTime)
-{
-	if (bPendingUpdate)
-	{
-		GroundedState.VelocityBlend.ForwardAmount = 0.0f;
-		GroundedState.VelocityBlend.BackwardAmount = 0.0f;
-		GroundedState.VelocityBlend.LeftAmount = 0.0f;
-		GroundedState.VelocityBlend.RightAmount = 0.0f;
-	}
-	else
-	{
-		GroundedState.VelocityBlend.ForwardAmount = FMath::FInterpTo(GroundedState.VelocityBlend.ForwardAmount, 0.0f, DeltaTime,
-		                                                             Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		GroundedState.VelocityBlend.BackwardAmount = FMath::FInterpTo(GroundedState.VelocityBlend.BackwardAmount, 0.0f, DeltaTime,
-		                                                              Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		GroundedState.VelocityBlend.LeftAmount = FMath::FInterpTo(GroundedState.VelocityBlend.LeftAmount, 0.0f, DeltaTime,
-		                                                          Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		GroundedState.VelocityBlend.RightAmount = FMath::FInterpTo(GroundedState.VelocityBlend.RightAmount, 0.0f, DeltaTime,
-		                                                           Settings->Grounded.VelocityBlendInterpolationSpeed);
-	}
+	GroundedState.VelocityBlend.bReinitializationRequired = false;
 }
 
 void UAlsAnimationInstance::RefreshRotationYawOffsets()
@@ -556,7 +534,9 @@ void UAlsAnimationInstance::Jump()
 
 	static constexpr auto Duration{0.1f};
 
-	InAirState.JumpTimeRemaining = Duration;
+	// The timer should be at least ~2 frames long to give the animation blueprint some time to react to the dependent variable change.
+
+	InAirState.JumpTimeRemaining = FMath::Max(Duration, 2.0f * GetDeltaSeconds());
 }
 
 void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
@@ -1191,7 +1171,9 @@ void UAlsAnimationInstance::PlayDynamicTransition(UAnimSequenceBase* Animation, 
 
 		static constexpr auto BlockDuration{0.1f};
 
-		TransitionsState.DynamicTransitionBlockTimeRemaining = BlockDuration;
+		// The timer should be at least ~2 frames long to give the animation blueprint some time to react to the dependent variable change.
+
+		TransitionsState.DynamicTransitionBlockTimeRemaining = FMath::Max(BlockDuration, 2.0f * GetDeltaSeconds());
 
 		PlayTransition(Animation, BlendInTime, BlendOutTime, PlayRate, StartTime);
 	}

@@ -172,8 +172,6 @@ private:
 
 	void RefreshVelocityBlend(float DeltaTime);
 
-	void ResetVelocityBlend(float DeltaTime);
-
 	void RefreshRotationYawOffsets();
 
 	float CalculateStrideBlendAmount() const;
