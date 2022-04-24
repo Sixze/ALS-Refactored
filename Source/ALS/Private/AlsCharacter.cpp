@@ -123,16 +123,6 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
-	// Ignore root motion on simulated proxies, because in some situations it causes
-	// issues with network smoothing such as when the character uncrouches while rolling.
-
-	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
-
-	if (GetLocalRole() <= ROLE_SimulatedProxy && IsValid(GetMesh()->GetAnimInstance()))
-	{
-		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
-	}
-
 	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	Super::PostInitializeComponents();
@@ -148,6 +138,16 @@ void AAlsCharacter::BeginPlay()
 	       TEXT("These settings are not allowed and must be turned off!"))
 
 	Super::BeginPlay();
+
+	// Ignore root motion on simulated proxies, because in some situations it causes
+	// issues with network smoothing such as when the character uncrouches while rolling.
+
+	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
+
+	if (GetLocalRole() <= ROLE_SimulatedProxy && IsValid(GetMesh()->GetAnimInstance()))
+	{
+		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+	}
 
 	// Update states to use the initial desired values.
 
