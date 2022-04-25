@@ -355,7 +355,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (!MantlingSettings->Montage.IsNull())
+	if (ensure(!MantlingSettings->Montage.IsNull()))
 	{
 		// Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
 

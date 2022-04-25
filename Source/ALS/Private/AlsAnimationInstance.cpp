@@ -811,15 +811,21 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 {
 	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
 
-	if (NewFootLockAmount > FootState.LockAmount && LocomotionMode == AlsLocomotionModeTags::InAir)
+	if (FAnimWeight::IsRelevant(FootState.LockAmount) &&
+	    (LocomotionState.bMovingSmooth || LocomotionMode == AlsLocomotionModeTags::InAir))
 	{
-		// Smoothly disable foot locking if the character is in the air.
+		// Smoothly disable foot locking if the character is moving or in the air,
+		// instead of relying on the curve value from the animation blueprint.
 
-		static constexpr auto DecreaseSpeed{0.6f};
+		static constexpr auto MovingDecreaseSpeed{5.0f};
+		static constexpr auto InAirDecreaseSpeed{0.6f};
 
 		NewFootLockAmount = FeetState.bReinitializationRequired
 			                    ? 0.0f
-			                    : FMath::Max(0.0f, FootState.LockAmount - DeltaTime * DecreaseSpeed);
+			                    : FMath::Max(0.0f, FMath::Min(NewFootLockAmount,
+			                                                  FootState.LockAmount - DeltaTime * (LocomotionState.bMovingSmooth
+				                                                  ? MovingDecreaseSpeed
+				                                                  : InAirDecreaseSpeed)));
 	}
 
 	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(FootState.IkAmount * NewFootLockAmount))

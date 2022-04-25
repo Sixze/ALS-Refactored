@@ -44,6 +44,6 @@ struct ALS_API FAlsGroundedSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float VelocityBlendInterpolationSpeed{12.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float PivotActivationSpeedThreshold{200.0f};
 };
