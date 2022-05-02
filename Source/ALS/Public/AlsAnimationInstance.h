@@ -38,16 +38,32 @@ private:
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may not be correct (such as foot location used in foot locking).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bPendingUpdateGameThread{true};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bPendingUpdate{true};
 
 	// The animation curves will be relevant if the character is rendered or VisibilityBasedAnimTickOption
 	// is set to AlwaysTickPoseAndRefreshBones, otherwise the curves will have their old values even though
 	// the animation blueprint continues to update.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bAnimationCurvesRelevantGameThread;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bAnimationCurvesRelevant;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bJustTeleported;
+	bool bTeleportedGameThread;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bTeleported;
+
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	bool bDisplayDebugTraces{false};
+
+	TArray<TFunction<void()>> DisplayDebugTracesQueue;
+#endif
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FAlsStanceCache Stance;
@@ -118,6 +134,8 @@ public:
 
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
+	virtual void NativeThreadSafeUpdateAnimation(float DeltaTime) override;
+
 	// Core
 
 protected:
@@ -129,8 +147,6 @@ public:
 
 	void SetAnimationCurvesRelevant(bool bNewRelevant);
 
-	const FAlsFeetState& GetFeetState() const;
-
 private:
 	void RefreshLayering();
 
@@ -139,6 +155,8 @@ private:
 	// View
 
 private:
+	void RefreshViewGameThread();
+
 	void RefreshView(float DeltaTime);
 
 protected:
@@ -147,6 +165,8 @@ protected:
 	// Locomotion
 
 private:
+	void RefreshLocomotionGameThread();
+
 	void RefreshLocomotion(float DeltaTime);
 
 	// Grounded
@@ -154,7 +174,8 @@ private:
 public:
 	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
 	void ResetGroundedEntryMode();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
@@ -164,9 +185,9 @@ public:
 	void ActivatePivot();
 
 private:
-	void RefreshGrounded(float DeltaTime);
+	void RefreshGroundedGameThread();
 
-	void RefreshPivot(float DeltaTime);
+	void RefreshGrounded(float DeltaTime);
 
 	void RefreshMovementDirection();
 
@@ -174,79 +195,86 @@ private:
 
 	void RefreshRotationYawOffsets();
 
-	float CalculateStrideBlendAmount() const;
+	void RefreshSprint(const FVector3f& RelativeAccelerationAmount, float DeltaTime);
 
-	float CalculateWalkRunBlendAmount() const;
+	void RefreshStrideBlendAmount();
 
-	float CalculateStandingPlayRate() const;
+	void RefreshWalkRunBlendAmount();
 
-	float CalculateCrouchingPlayRate() const;
+	void RefreshStandingPlayRate();
+
+	void RefreshCrouchingPlayRate();
+
+	void RefreshGroundedLeanAmount(const FVector3f& RelativeAccelerationAmount, float DeltaTime);
+
+	void ResetGroundedLeanAmount(float DeltaTime);
 
 	// In Air
 
 public:
 	void Jump();
 
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	void ResetJumped();
+
 private:
+	void RefreshInAirGameThread();
+
 	void RefreshInAir(float DeltaTime);
 
-	void RefreshJump(float DeltaTime);
+	void RefreshGroundPredictionAmount();
 
-	float CalculateGroundPredictionAmount() const;
-
-	FAlsLeanState CalculateInAirLeanAmount() const;
+	void RefreshInAirLeanAmount(float DeltaTime);
 
 	// Feet
 
 private:
+	void RefreshFeetGameThread();
+
 	void RefreshFeet(float DeltaTime);
 
-	void ProcessFootLockTeleport(FAlsFootState& FootState, const FTransform& CapsuleTransform) const;
+	void RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
+	                 const FTransform& ComponentTransformInverse, float DeltaTime, FVector& TargetLocationOffset) const;
 
-	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FName& FootBoneName, const FVector& BaseLocation,
-	                               const FQuat& BaseRotation, const FTransform& CapsuleRelativeTransform) const;
+	void ProcessFootLockTeleport(FAlsFootState& FootState) const;
 
-	void RefreshFootLock(FAlsFootState& FootState, const FName& FootBoneName,
-	                     const FName& FootLockCurveName, const FTransform& CapsuleRelativeTransform,
+	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const;
+
+	void RefreshFootLock(FAlsFootState& FootState, const FName& FootLockCurveName, const FTransform& ComponentTransformInverse,
 	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,
 	                       FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	void ResetFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
-
-	static void RefreshFinalFootState(FAlsFootState& FootState, const FTransform& MeshRelativeTransform,
-	                                  const FVector& FinalLocation, const FQuat& FinalRotation);
-
-	void RefreshPelvisOffset(float DeltaTime, float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ);
+	void RefreshPelvisOffset(float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ, float DeltaTime);
 
 	// Transitions
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	UAnimSequenceBase* SelectDynamicTransitionForLeftFoot() const;
+	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
+	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	UAnimSequenceBase* SelectDynamicTransitionForRightFoot() const;
+	void PlayTransitionLeftAnimation(float BlendInTime = 0.2f, float BlendOutTime = 0.2f, float PlayRate = 1.0f,
+	                                 float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
-	                    float PlayRate = 1.0f, float StartTime = 0.0f);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionFromStandingIdleOnly(UAnimSequenceBase* Animation, float BlendInTime = 0.2f,
-	                                        float BlendOutTime = 0.2f, float PlayRate = 1.0f, float StartTime = 0.0f);
+	void PlayTransitionRightAnimation(float BlendInTime = 0.2f, float BlendOutTime = 0.2f, float PlayRate = 1.0f,
+	                                  float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);
 
 private:
-	void RefreshTransitions(float DeltaTime);
+	void RefreshTransitionsGameThread();
 
-	void PlayDynamicTransition(UAnimSequenceBase* Animation, float BlendInTime = 0.2f,
-	                           float BlendOutTime = 0.2f, float PlayRate = 1.0f, float StartTime = 0.0f);
+	void RefreshTransitions();
 
-	void RefreshDynamicTransition(float DeltaTime);
+	void RefreshDynamicTransition();
+
+	void PlayPQueuedDynamicTransitionAnimation();
 
 	// Rotate In Place
 
@@ -262,21 +290,23 @@ protected:
 	virtual bool IsTurnInPlaceAllowed();
 
 private:
+	void RefreshTurnInPlaceGameThread();
+
 	void RefreshTurnInPlace(float DeltaTime);
 
-	void StartTurnInPlace(float TargetYawAngle, float PlayRateScale = 1.0f, float StartTime = 0.0f, bool bAllowRestartWhenPlaying = false);
+	void PlayQueuedTurnInPlaceAnimation();
 
 	// Ragdolling
 
 private:
-	void RefreshRagdolling();
+	void RefreshRagdollingGameThread();
 
 public:
 	void StopRagdolling();
 
-private:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void FinalizeRagdolling();
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	void FinalizeRagdolling() const;
 
 	// Utility
 
@@ -291,17 +321,12 @@ inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe()
 
 inline void UAlsAnimationInstance::SetPendingUpdate(const bool bNewPendingUpdate)
 {
-	bPendingUpdate = bNewPendingUpdate;
+	bPendingUpdateGameThread = bNewPendingUpdate;
 }
 
 inline void UAlsAnimationInstance::SetAnimationCurvesRelevant(const bool bNewRelevant)
 {
-	bAnimationCurvesRelevant = bNewRelevant;
-}
-
-inline const FAlsFeetState& UAlsAnimationInstance::GetFeetState() const
-{
-	return FeetState;
+	bAnimationCurvesRelevantGameThread = bNewRelevant;
 }
 
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewModeTag)
@@ -317,4 +342,19 @@ inline void UAlsAnimationInstance::ResetGroundedEntryMode()
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)
 {
 	GroundedState.HipsDirection = NewDirection;
+}
+
+inline void UAlsAnimationInstance::ActivatePivot()
+{
+	GroundedState.bPivotActivationRequested = true;
+}
+
+inline void UAlsAnimationInstance::Jump()
+{
+	InAirState.bJumpRequested = true;
+}
+
+inline void UAlsAnimationInstance::ResetJumped()
+{
+	InAirState.bJumped = false;
 }

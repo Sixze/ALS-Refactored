@@ -102,8 +102,8 @@ public:
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
 
 	template <class ValueType, class StateType>
-	static ValueType SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
-	                            const float Frequency, const float DampingRatio, float TargetVelocityAmount = 1.0f);
+	static ValueType SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState,
+	                            float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math")
 	static float SpringDampFloat(float Current, float Target, UPARAM(ref) FAlsSpringFloatState& SpringState,

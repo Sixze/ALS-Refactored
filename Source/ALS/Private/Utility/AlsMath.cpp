@@ -11,7 +11,7 @@ ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target
 
 	if (!SpringState.bStateValid)
 	{
-		SpringState.Velocity = {};
+		SpringState.Velocity = ValueType{0.0f};
 		SpringState.PreviousTarget = Target;
 		SpringState.bStateValid = true;
 

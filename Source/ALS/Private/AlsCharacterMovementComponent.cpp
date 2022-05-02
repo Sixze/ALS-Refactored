@@ -173,6 +173,16 @@ void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMove
 	}
 }
 
+void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
+
+	// This removes some very noticeable changes in the mesh location when the
+	// character automatically uncrouches at the end of the roll in the air.
+
+	bCrouchMaintainsBaseLocation = true;
+}
+
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.

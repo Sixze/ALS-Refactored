@@ -8,10 +8,10 @@ struct ALS_API FAlsInAirState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bJumped{false};
+	bool bJumpRequested{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float JumpTimeRemaining{0.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bJumped{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float JumpPlayRate{1.0f};

@@ -3,8 +3,6 @@
 #include "Utility/AlsMath.h"
 #include "AlsFeetState.generated.h"
 
-class UPhysicalMaterial;
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsFootState
 {
@@ -17,37 +15,28 @@ struct ALS_API FAlsFootState
 	float LockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector BoneLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FQuat BoneRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LockLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FQuat LockRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector LockCapsuleRelativeLocation{ForceInit};
+	FVector LockComponentRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat LockCapsuleRelativeRotation{ForceInit};
+	FQuat LockComponentRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector LockBaseRelativeLocation{ForceInit};
+	FVector LockMovementBaseRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat LockBaseRelativeRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector OffsetHitLocation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector OffsetHitNormal{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TWeakObjectPtr<UPrimitiveComponent> OffsetHitComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TWeakObjectPtr<UPhysicalMaterial> OffsetHitPhysicalMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bOffsetHitValid{false};
+	FQuat LockMovementBaseRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsSpringVectorState OffsetSpringState;
@@ -59,10 +48,10 @@ struct ALS_API FAlsFootState
 	FQuat OffsetRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector FinalMeshRelativeLocation{ForceInit};
+	FVector IkLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat FinalMeshRelativeRotation{ForceInit};
+	FQuat IkRotation{ForceInit};
 };
 
 USTRUCT(BlueprintType)
@@ -72,12 +61,6 @@ struct ALS_API FAlsFeetState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bReinitializationRequired{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UPrimitiveComponent> BasePrimitive{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName BaseBoneName;
 
 	// Choose whether a foot is planted or about to plant when stopping using the foot planted animation
 	// curve. A value less than 0.5 means the foot is planted and a value more than 0.5 means the
@@ -97,11 +80,11 @@ struct ALS_API FAlsFeetState
 
 	// Pelvis
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
-	float PelvisOffsetAmount{0.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsSpringFloatState PelvisSpringState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Target Pelvis Offset Z", Meta = (ForceUnits = "cm"))
+	float TargetPelvisOffsetZ{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z", Meta = (ForceUnits = "cm"))
 	float PelvisOffsetZ{0.0f};

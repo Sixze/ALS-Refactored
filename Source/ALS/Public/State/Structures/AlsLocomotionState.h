@@ -29,10 +29,10 @@ struct ALS_API FAlsLocomotionState
 	float VelocityYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bMoving{false};
+	FVector Acceleration{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Acceleration{ForceInit};
+	bool bMoving{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bRotationLocked{false};

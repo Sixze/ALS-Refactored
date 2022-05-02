@@ -2,17 +2,19 @@
 
 #include "AlsTransitionsState.generated.h"
 
+class UAnimSequenceBase;
+
 USTRUCT(BlueprintType)
 struct ALS_API FAlsTransitionsState
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowTransitions{false};
+	bool bTransitionsAllowed{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowDynamicTransition{true};
+	int32 DynamicTransitionsFrameDelay{0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float DynamicTransitionBlockTimeRemaining{0.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UAnimSequenceBase> QueuedDynamicTransitionAnimation{nullptr};
 };

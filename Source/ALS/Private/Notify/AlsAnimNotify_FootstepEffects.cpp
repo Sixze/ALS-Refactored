@@ -1,10 +1,10 @@
 #include "Notify/AlsAnimNotify_FootstepEffects.h"
 
-#include "AlsAnimationInstance.h"
 #include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Animation/AnimInstance.h"
 #include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/DecalComponent.h"
@@ -41,73 +41,41 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	const auto CapsuleScale{IsValid(Character) ? Character->GetCapsuleComponent()->GetComponentScale().Z : 1.0f};
 
 	const auto* World{Mesh->GetWorld()};
-	const auto* AnimationInstance{Cast<UAlsAnimationInstance>(Mesh->GetAnimInstance())};
+	const auto* AnimationInstance{Mesh->GetAnimInstance()};
 
 	const auto FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftIkBone() : UAlsConstants::FootRightIkBone()};
 	const auto FootTransform{Mesh->GetSocketTransform(FootBoneName)};
-
-	FVector HitLocation;
-	FVector HitNormal;
-	TWeakObjectPtr<UPrimitiveComponent> HitComponent;
-	TWeakObjectPtr<UPhysicalMaterial> HitPhysicalMaterial;
-
-	const auto* FeetState{
-		!IsValid(AnimationInstance)
-			? nullptr
-			: FootBone == EAlsFootBone::Left
-			? &AnimationInstance->GetFeetState().Left
-			: &AnimationInstance->GetFeetState().Right
-	};
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebug(Mesh->GetOwner(), UAlsConstants::TracesDisplayName())};
 #endif
 
-	if (FeetState != nullptr && FeetState->bOffsetHitValid)
-	{
-		// Reuse hit information from foot offset logic.
+	FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, Mesh->GetOwner()};
+	QueryParameters.bReturnPhysicalMaterial = true;
 
-		HitLocation = FeetState->OffsetHitLocation;
-		HitNormal = FeetState->OffsetHitNormal;
-		HitComponent = FeetState->OffsetHitComponent;
-		HitPhysicalMaterial = FeetState->OffsetHitPhysicalMaterial;
+	FHitResult Hit{};
+	if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
+	                                    FootTransform.GetLocation() - FVector{
+		                                    0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance * CapsuleScale
+	                                    },
+	                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
+	                                    QueryParameters))
+	{
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
+			                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
+		}
+#endif
 	}
 	else
 	{
-		FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, Mesh->GetOwner()};
-		QueryParameters.bReturnPhysicalMaterial = true;
-
-		FHitResult Hit;
-		if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
-		                                    FootTransform.GetLocation() - FVector{
-			                                    0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance * CapsuleScale
-		                                    },
-		                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-		                                    QueryParameters))
-		{
-#if ENABLE_DRAW_DEBUG
-			if (bDisplayDebug)
-			{
-				UAlsUtility::DrawDebugLineTraceSingle(World, Hit.TraceStart, Hit.TraceEnd, Hit.bBlockingHit,
-				                                      Hit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
-			}
-#endif
-
-			HitLocation = Hit.ImpactPoint;
-			HitNormal = Hit.ImpactNormal;
-			HitComponent = Hit.Component;
-			HitPhysicalMaterial = Hit.PhysMaterial;
-		}
-		else
-		{
-			HitLocation = FootTransform.GetLocation();
-			HitNormal = FVector::UpVector;
-			HitComponent = nullptr;
-			HitPhysicalMaterial = nullptr;
-		}
+		Hit.ImpactPoint = FootTransform.GetLocation();
+		Hit.ImpactNormal = FVector::UpVector;
 	}
 
-	const auto SurfaceType{HitPhysicalMaterial.IsValid() ? HitPhysicalMaterial->SurfaceType.GetValue() : SurfaceType_Default};
+	const auto SurfaceType{Hit.PhysMaterial.IsValid() ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType_Default};
 	const FAlsFootstepEffectSettings* EffectSettings{nullptr};
 
 	for (const auto& Effect : FootstepEffectsSettings->Effects)
@@ -129,10 +97,10 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		return;
 	}
 
-	const auto FootstepLocation{HitLocation};
+	const auto FootstepLocation{Hit.ImpactPoint};
 
 	const auto FootstepRotation{
-		FRotationMatrix::MakeFromZY(HitNormal,
+		FRotationMatrix::MakeFromZY(Hit.ImpactNormal,
 		                            FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
 			                                                                 ? FootstepEffectsSettings->FootLeftYAxis
 			                                                                 : FootstepEffectsSettings->FootRightYAxis))
@@ -200,10 +168,10 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 		UDecalComponent* Decal;
 
-		if (EffectSettings->DecalSpawnType == EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent && HitComponent.IsValid())
+		if (EffectSettings->DecalSpawnType == EAlsFootstepDecalSpawnType::SpawnAttachedToTraceHitComponent && Hit.Component.IsValid())
 		{
 			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize * CapsuleScale,
-			                                             HitComponent.Get(), NAME_None, DecalLocation,
+			                                             Hit.Component.Get(), NAME_None, DecalLocation,
 			                                             DecalRotation, EAttachLocation::KeepWorldPosition);
 		}
 		else

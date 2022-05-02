@@ -65,10 +65,10 @@ struct ALS_API FAlsGroundedState
 	float HipsDirectionLockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bPivotActive{false};
+	bool bPivotActivationRequested{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float PivotTimeRemaining{0.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bPivotActive{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsMovementDirectionCache MovementDirection;

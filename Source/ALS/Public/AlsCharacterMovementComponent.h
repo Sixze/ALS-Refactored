@@ -112,6 +112,8 @@ public:
 
 	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
 
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
+
 public:
 	virtual float GetMaxAcceleration() const override;
 
