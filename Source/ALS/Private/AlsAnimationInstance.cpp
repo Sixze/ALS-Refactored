@@ -1164,7 +1164,7 @@ void UAlsAnimationInstance::RefreshTransitionsGameThread()
 {
 	check(IsInGameThread())
 
-	PlayPQueuedDynamicTransitionAnimation();
+	PlayQueuedDynamicTransitionAnimation();
 }
 
 void UAlsAnimationInstance::RefreshTransitions()
@@ -1255,12 +1255,12 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 		if (IsInGameThread())
 		{
-			PlayPQueuedDynamicTransitionAnimation();
+			PlayQueuedDynamicTransitionAnimation();
 		}
 	}
 }
 
-void UAlsAnimationInstance::PlayPQueuedDynamicTransitionAnimation()
+void UAlsAnimationInstance::PlayQueuedDynamicTransitionAnimation()
 {
 	check(IsInGameThread())
 
