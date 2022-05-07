@@ -75,7 +75,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	LocomotionMode = Character->GetLocomotionMode();
 	LocomotionAction = Character->GetLocomotionAction();
 	ViewMode = Character->GetViewMode();
-	OverlayMode = Character->GetOverlayMode();
 
 	RefreshViewGameThread();
 
