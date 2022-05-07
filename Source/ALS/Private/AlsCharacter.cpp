@@ -131,8 +131,9 @@ void AAlsCharacter::PostInitializeComponents()
 void AAlsCharacter::BeginPlay()
 {
 	check(!Settings.IsNull())
-	check(!MovementSettings.IsNull())
-	check(!AlsAnimationInstance.IsNull())
+
+	ensure(!MovementSettings.IsNull());
+	ensure(!AlsAnimationInstance.IsNull());
 
 	checkf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 	       TEXT("These settings are not allowed and must be turned off!"))
@@ -212,10 +213,15 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
+	if (AlsAnimationInstance.IsNull())
+	{
+		return;
+	}
+
 	if (!GetMesh()->bRecentlyRendered &&
 	    GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
 	{
-		AlsAnimationInstance->SetPendingUpdate(true);
+		AlsAnimationInstance->MarkPendingUpdate();
 	}
 
 	AlsAnimationInstance->SetAnimationCurvesRelevant(
