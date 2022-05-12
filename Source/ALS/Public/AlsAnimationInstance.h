@@ -173,13 +173,13 @@ public:
 	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ActivatePivot();
 
 private:
@@ -213,7 +213,7 @@ public:
 	void Jump();
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetJumped();
 
 private:

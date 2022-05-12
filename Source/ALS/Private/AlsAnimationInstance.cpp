@@ -1210,9 +1210,8 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 	}
 
 	auto RotationYawAngle{
-		FRotator3f::NormalizeAxis(
-			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) -
-			UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw))
+		FRotator3f::NormalizeAxis((LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) -
+		                          UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw))
 	};
 
 	if (RotationYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
