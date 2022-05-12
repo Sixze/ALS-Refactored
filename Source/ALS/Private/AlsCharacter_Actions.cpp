@@ -830,7 +830,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	{
 		RollingState.TargetYawAngle = TargetYawAngle;
 
-		RefreshActorRotationInstant(StartYawAngle);
+		RefreshRotationInstant(StartYawAngle);
 
 		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
 	}

@@ -9,6 +9,18 @@ struct ALS_API FAlsTransitionsSettings
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float QuickStopBlendInTime{0.1f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float QuickStopBlendOutTime{0.2f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
+	FVector2D QuickStopPlayRate{1.75f, 3.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float QuickStopStartTime{0.3f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimSequenceBase> StandingTransitionLeftAnimation{nullptr};
 

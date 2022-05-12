@@ -7,6 +7,7 @@
 #include "AlsRotateInPlaceSettings.h"
 #include "AlsTransitionsSettings.h"
 #include "AlsTurnInPlaceSettings.h"
+#include "AlsViewSettings.h"
 #include "Engine/DataAsset.h"
 #include "AlsAnimationInstanceSettings.generated.h"
 
@@ -18,6 +19,9 @@ class ALS_API UAlsAnimationInstanceSettings : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FAlsGeneralAnimationSettings General;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FAlsViewSettings View;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FAlsGroundedSettings Grounded;

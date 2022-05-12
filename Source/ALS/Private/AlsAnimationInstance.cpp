@@ -73,8 +73,16 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Gait = Character->GetGait();
 	RotationMode = Character->GetRotationMode();
 	LocomotionMode = Character->GetLocomotionMode();
-	LocomotionAction = Character->GetLocomotionAction();
+
+	if (LocomotionAction != Character->GetLocomotionAction())
+	{
+		LocomotionAction = Character->GetLocomotionAction();
+
+		ResetGroundedEntryMode();
+	}
+
 	ViewMode = Character->GetViewMode();
+	OverlayMode = Character->GetOverlayMode();
 
 	RefreshViewGameThread();
 
@@ -104,7 +112,6 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 
 	RefreshView(DeltaTime);
 
-	RefreshLocomotion(DeltaTime);
 	RefreshGrounded(DeltaTime);
 	RefreshInAir(DeltaTime);
 
@@ -218,45 +225,20 @@ void UAlsAnimationInstance::RefreshViewGameThread()
 	ViewState.YawSpeed = View.YawSpeed;
 }
 
+bool UAlsAnimationInstance::IsSpineRotationAllowed()
+{
+	return RotationMode.IsAiming();
+}
+
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
 	if (!LocomotionAction.IsValid())
 	{
 		ViewState.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw));
 		ViewState.PitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Pitch - LocomotionState.Rotation.Pitch));
+
+		ViewState.PitchAmount = 0.5f - ViewState.PitchAngle / 180.0f;
 	}
-
-	if (!RotationMode.IsVelocityDirection())
-	{
-		ViewState.PitchAmount = FMath::GetMappedRangeValueClamped(FVector2f{-90.0f, 90.0f}, {1.0f, 0.0f}, ViewState.PitchAngle);
-	}
-
-	// Interpolate the view rotation value to achieve smooth view rotation changes. Interpolating
-	// the rotation before calculating the angle ensures the value is not affected by changes in
-	// actor rotation, allowing slow view rotation changes with fast actor rotation changes.
-
-	ViewState.SmoothRotation = bPendingUpdate
-		                           ? ViewState.Rotation
-		                           : UAlsMath::ExponentialDecay(ViewState.SmoothRotation, ViewState.Rotation, DeltaTime,
-		                                                        Settings->General.ViewSmoothRotationInterpolationSpeed);
-
-	ViewState.SmoothYawAngle = FRotator3f::NormalizeAxis(
-		UE_REAL_TO_FLOAT(ViewState.SmoothRotation.Yaw - LocomotionState.Rotation.Yaw));
-
-	ViewState.SmoothPitchAngle = FRotator3f::NormalizeAxis(
-		UE_REAL_TO_FLOAT(ViewState.SmoothRotation.Pitch - LocomotionState.Rotation.Pitch));
-
-	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
-	// improve the blending of the view when rotating completely around the character. This allows
-	// you to keep the view responsive but still smoothly blend from left to right or right to left.
-
-	ViewState.SmoothYawAmount = (ViewState.SmoothYawAngle / 180.0f + 1.0f) * 0.5f;
-
-	ViewState.SmoothYawLeftAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, 180.0f}, {0.5f, 0.0f},
-	                                                                  FMath::Abs(ViewState.SmoothYawAngle));
-
-	ViewState.SmoothYawRightAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, 180.0f}, {0.5f, 1.0f},
-	                                                                   FMath::Abs(ViewState.SmoothYawAngle));
 
 	const auto AimingAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
 	const auto AimingManualAmount{GetCurveValueClamped01(UAlsConstants::AimManualCurve())};
@@ -271,11 +253,112 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	}
 
 	ViewState.SpineYawAngle = FRotator3f::NormalizeAxis(ViewState.TargetSpineYawAngle * AimingAllowedAmount * AimingManualAmount);
+
+	if (!FAnimWeight::IsRelevant(ViewState.LookAmount))
+	{
+		ViewState.LookTowardsInput.bReinitializationRequired = true;
+		ViewState.LookTowardsCamera.bReinitializationRequired = true;
+		return;
+	}
+
+	if (RotationMode.IsVelocityDirection())
+	{
+		ViewState.LookTowardsCamera.bReinitializationRequired = true;
+
+		RefreshLookTowardsInput(DeltaTime);
+	}
+	else
+	{
+		ViewState.LookTowardsInput.bReinitializationRequired = true;
+
+		RefreshLookTowardsCamera(DeltaTime);
+	}
 }
 
-bool UAlsAnimationInstance::IsSpineRotationAllowed()
+void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 {
-	return RotationMode.IsAiming();
+	ViewState.LookTowardsInput.bReinitializationRequired |= bPendingUpdate;
+
+	// Get the delta between character rotation and current input yaw angle and map it to a
+	// range from 0 to 1. This value is used to make the character look towards the current input.
+
+	auto TargetYawAngle{
+		FRotator3f::NormalizeAxis((LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) -
+		                          UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw))
+	};
+
+	float YawAngle;
+
+	if (ViewState.LookTowardsInput.bReinitializationRequired || Settings->View.LookTowardsInputYawAngleInterpolationSpeed <= 0.0f)
+	{
+		YawAngle = TargetYawAngle;
+	}
+	else
+	{
+		if (TargetYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		{
+			TargetYawAngle -= 360.0f;
+		}
+
+		YawAngle = FRotator3f::NormalizeAxis(ViewState.LookTowardsInput.YawAngle - UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw));
+
+		auto DeltaYawAngle{FMath::Clamp(TargetYawAngle - YawAngle, -90.0f, 90.0f)};
+
+		// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
+		// direction, so that the rotation of the head remain synchronized with the rotation of the body.
+
+		if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER &&
+		    FMath::Abs(TargetYawAngle) > 90.0f &&
+		    FMath::Abs(TargetYawAngle) < 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		{
+			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
+		}
+
+		YawAngle = FRotator3f::NormalizeAxis(
+			YawAngle + DeltaYawAngle * UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsInputYawAngleInterpolationSpeed));
+	}
+
+	ViewState.LookTowardsInput.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw) +
+	                                                                FMath::Clamp(YawAngle, -90.0f, 90.0f));
+
+	// Convert [-90, 90] range to [0, 1].
+
+	ViewState.LookTowardsInput.YawAmount = YawAngle / 180.0f + 0.5f;
+
+	ViewState.LookTowardsInput.bReinitializationRequired = false;
+}
+
+void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
+{
+	auto& LookTowardsCamera{ViewState.LookTowardsCamera};
+
+	LookTowardsCamera.bReinitializationRequired |= bPendingUpdate;
+
+	// Interpolate the view rotation value to achieve smooth view rotation changes. Interpolating
+	// the rotation before calculating the angle ensures the value is not affected by changes in
+	// character rotation, allowing slow view rotation changes with fast character rotation changes.
+
+	LookTowardsCamera.Rotation = LookTowardsCamera.bReinitializationRequired
+		                             ? ViewState.Rotation
+		                             : UAlsMath::ExponentialDecay(LookTowardsCamera.Rotation,
+		                                                          ViewState.Rotation, DeltaTime,
+		                                                          Settings->View.LookTowardsCameraRotationInterpolationSpeed);
+
+	LookTowardsCamera.YawAngle = FRotator3f::NormalizeAxis(
+		UE_REAL_TO_FLOAT(LookTowardsCamera.Rotation.Yaw - LocomotionState.Rotation.Yaw));
+
+	LookTowardsCamera.PitchAngle = FRotator3f::NormalizeAxis(
+		UE_REAL_TO_FLOAT(LookTowardsCamera.Rotation.Pitch - LocomotionState.Rotation.Pitch));
+
+	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
+	// improve the blending of the view when rotating completely around the character. This allows
+	// you to keep the view responsive but still smoothly blend from left to right or right to left.
+
+	LookTowardsCamera.YawForwardAmount = LookTowardsCamera.YawAngle / 360.0f + 0.5f;
+	LookTowardsCamera.YawLeftAmount = 0.5f - FMath::Abs(LookTowardsCamera.YawForwardAmount - 0.5f);
+	LookTowardsCamera.YawRightAmount = 0.5f + FMath::Abs(LookTowardsCamera.YawForwardAmount - 0.5f);
+
+	LookTowardsCamera.bReinitializationRequired = false;
 }
 
 void UAlsAnimationInstance::RefreshLocomotionGameThread()
@@ -287,7 +370,6 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	LocomotionState.bHasInput = Locomotion.bHasInput;
 	LocomotionState.InputYawAngle = Locomotion.InputYawAngle;
 
-	LocomotionState.bHasSpeed = Locomotion.bHasSpeed;
 	LocomotionState.Speed = Locomotion.Speed;
 	LocomotionState.Velocity = Locomotion.Velocity;
 	LocomotionState.VelocityYawAngle = Locomotion.VelocityYawAngle;
@@ -295,9 +377,17 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	LocomotionState.MaxAcceleration = Character->GetCharacterMovement()->GetMaxAcceleration();
 	LocomotionState.MaxBrakingDeceleration = Character->GetCharacterMovement()->GetMaxBrakingDeceleration();
 	LocomotionState.bMoving = Locomotion.bMoving;
+
+	// ReSharper disable once CppRedundantParentheses
+	LocomotionState.bMovingSmooth = (Locomotion.bHasInput && Locomotion.bHasSpeed) ||
+	                                Locomotion.Speed > Settings->General.MovingSmoothSpeedThreshold;
+
+	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
 	LocomotionState.Location = Locomotion.Location;
 	LocomotionState.Rotation = Locomotion.Rotation;
 	LocomotionState.RotationQuaternion = Locomotion.RotationQuaternion;
+	LocomotionState.YawSpeed = Locomotion.YawSpeed;
+
 	LocomotionState.Scale = UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetComponentScale().Z);
 
 	const auto* Capsule{Character->GetCapsuleComponent()};
@@ -325,42 +415,13 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	                                              LocomotionState.BasedMovement.Location, LocomotionState.BasedMovement.Rotation);
 }
 
-void UAlsAnimationInstance::RefreshLocomotion(const float DeltaTime)
-{
-	if (LocomotionState.bHasInput && RotationMode.IsVelocityDirection())
-	{
-		// Get the delta between character rotation and current input yaw angle and map it to a range from
-		// 0 to 1. This value is used in the aiming to make the character look toward the current input.
-
-		const auto InputYawAngle{FRotator3f::NormalizeAxis(LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw))};
-
-		// Convert [-180, 180] range to [0, 1].
-
-		const auto InputYawAmount{(InputYawAngle / 180.0f + 1.0f) * 0.5f};
-
-		LocomotionState.InputYawAmount = bPendingUpdate
-			                                 ? InputYawAmount
-			                                 : UAlsMath::ExponentialDecay(LocomotionState.InputYawAmount, InputYawAmount, DeltaTime,
-			                                                              Settings->General.InputYawAmountInterpolationSpeed);
-	}
-	else
-	{
-		LocomotionState.InputYawAmount = bPendingUpdate
-			                                 ? 0.5f
-			                                 : UAlsMath::ExponentialDecay(LocomotionState.InputYawAmount, 0.5f, DeltaTime,
-			                                                              Settings->General.InputYawAmountInterpolationSpeed);
-	}
-
-	// ReSharper disable once CppRedundantParentheses
-	LocomotionState.bMovingSmooth = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||
-	                                LocomotionState.Speed > Settings->General.MovingSmoothSpeedThreshold;
-}
-
 void UAlsAnimationInstance::RefreshGroundedGameThread()
 {
 	check(IsInGameThread())
 
-	GroundedState.bPivotActive = GroundedState.bPivotActivationRequested && !bPendingUpdate;
+	GroundedState.bPivotActive = GroundedState.bPivotActivationRequested && !bPendingUpdate &&
+	                             LocomotionState.Speed < Settings->Grounded.PivotActivationSpeedThreshold;
+
 	GroundedState.bPivotActivationRequested = false;
 }
 
@@ -385,7 +446,7 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	}
 
 	// Calculate the relative acceleration amount. This value represents the current amount of acceleration / deceleration
-	// relative to the actor rotation. It is normalized to a range of -1 to 1 so that -1 equals the
+	// relative to the character rotation. It is normalized to a range of -1 to 1 so that -1 equals the
 	// max braking deceleration and 1 equals the max acceleration of the character movement component.
 
 	FVector3f RelativeAccelerationAmount;
@@ -441,7 +502,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 	GroundedState.VelocityBlend.bReinitializationRequired |= bPendingUpdate;
 
 	// Calculate and interpolate the velocity blend. This value represents the velocity amount of the
-	// actor in each direction (normalized so that diagonals equal 0.5 for each direction) and is
+	// character in each direction (normalized so that diagonals equal 0.5 for each direction) and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
@@ -863,8 +924,8 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 	{
 		const auto BaseRotationInverse{LocomotionState.BasedMovement.Rotation.Inverse()};
 
-		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse
-			.RotateVector(FootState.LockLocation - LocomotionState.BasedMovement.Location);
+		FootState.LockMovementBaseRelativeLocation =
+			BaseRotationInverse.RotateVector(FootState.LockLocation - LocomotionState.BasedMovement.Location);
 
 		FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
 	}
@@ -887,13 +948,15 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		// instead of relying on the curve value from the animation blueprint.
 
 		static constexpr auto MovingDecreaseSpeed{5.0f};
-		static constexpr auto InAirDecreaseSpeed{0.6f};
+		static constexpr auto NotGroundedDecreaseSpeed{0.6f};
 
 		NewFootLockAmount = FeetState.bReinitializationRequired
 			                    ? 0.0f
 			                    : FMath::Max(0.0f, FMath::Min(NewFootLockAmount,
 			                                                  FootState.LockAmount - DeltaTime *
-			                                                  (LocomotionState.bMovingSmooth ? MovingDecreaseSpeed : InAirDecreaseSpeed)));
+			                                                  (LocomotionState.bMovingSmooth
+				                                                   ? MovingDecreaseSpeed
+				                                                   : NotGroundedDecreaseSpeed)));
 	}
 
 	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(FootState.IkAmount * NewFootLockAmount))
@@ -915,31 +978,35 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		return;
 	}
 
-	const auto bNewAmountIsEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
-	const auto bNewAmountIsLessThanPrevious{NewFootLockAmount <= FootState.LockAmount};
+	const auto bNewAmountEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
+	const auto bNewAmountGreaterThanPrevious{NewFootLockAmount > FootState.LockAmount};
 
 	// Update the foot lock amount only if the new amount is less than the current amount or equal to 1. This
 	// allows the foot to blend out from a locked location or lock to a new location, but never blend in.
 
-	if (bNewAmountIsEqualOne || bNewAmountIsLessThanPrevious)
+	if (bNewAmountEqualOne)
 	{
-		FootState.LockAmount = NewFootLockAmount;
-
-		// If the new foot lock amount is 1 and the previous amount is less than 1, then save the new foot lock location and rotation.
-
-		if (bNewAmountIsEqualOne && !bNewAmountIsLessThanPrevious)
+		if (bNewAmountGreaterThanPrevious)
 		{
-			FootState.LockLocation = FootState.BoneLocation;
-			FootState.LockRotation = FootState.BoneRotation;
+			// If the new foot lock amount is 1 and the previous amount is less than 1, then save the new foot lock location and rotation.
+
+			if (FootState.LockAmount <= 0.9f)
+			{
+				// Keep the same lock location and rotation when the previous lock
+				// amount is close to 1 to get rid of the foot "teleportation" issue.
+
+				FootState.LockLocation = FinalLocation;
+				FootState.LockRotation = FinalRotation;
+			}
 
 			if (LocomotionState.BasedMovement.bHasRelativeLocation)
 			{
 				const auto BaseRotationInverse{LocomotionState.BasedMovement.Rotation.Inverse()};
 
 				FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.
-					RotateVector(FootState.BoneLocation - LocomotionState.BasedMovement.Location);
+					RotateVector(FinalLocation - LocomotionState.BasedMovement.Location);
 
-				FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.BoneRotation;
+				FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FinalRotation;
 			}
 			else
 			{
@@ -947,6 +1014,12 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 				FootState.LockMovementBaseRelativeRotation = FQuat::Identity;
 			}
 		}
+
+		FootState.LockAmount = 1.0f;
+	}
+	else if (!bNewAmountGreaterThanPrevious)
+	{
+		FootState.LockAmount = NewFootLockAmount;
 	}
 
 	if (LocomotionState.BasedMovement.bHasRelativeLocation)
@@ -1125,6 +1198,43 @@ void UAlsAnimationInstance::RefreshPelvisOffset(const float TargetFootLeftLocati
 	}
 
 	FeetState.PelvisOffsetZ = FeetState.TargetPelvisOffsetZ * OffsetAmount;
+}
+
+void UAlsAnimationInstance::PlayQuickStopAnimation()
+{
+	if (!RotationMode.IsVelocityDirection())
+	{
+		PlayTransitionLeftAnimation(Settings->Transitions.QuickStopBlendInTime, Settings->Transitions.QuickStopBlendOutTime,
+		                            Settings->Transitions.QuickStopPlayRate.X, Settings->Transitions.QuickStopStartTime);
+		return;
+	}
+
+	auto RotationYawAngle{
+		FRotator3f::NormalizeAxis(
+			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) -
+			UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw))
+	};
+
+	if (RotationYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+	{
+		RotationYawAngle -= 360.0f;
+	}
+
+	// Scale quick stop animation play rate based on how far the character
+	// is going to rotate. At 180 degrees, the play rate will be maximum.
+
+	if (RotationYawAngle <= 0.0f)
+	{
+		PlayTransitionLeftAnimation(Settings->Transitions.QuickStopBlendInTime, Settings->Transitions.QuickStopBlendOutTime,
+		                            FMath::Lerp(Settings->Transitions.QuickStopPlayRate.X, Settings->Transitions.QuickStopPlayRate.Y,
+		                                        FMath::Abs(RotationYawAngle) / 180.0f), Settings->Transitions.QuickStopStartTime);
+	}
+	else
+	{
+		PlayTransitionRightAnimation(Settings->Transitions.QuickStopBlendInTime, Settings->Transitions.QuickStopBlendOutTime,
+		                             FMath::Lerp(Settings->Transitions.QuickStopPlayRate.X, Settings->Transitions.QuickStopPlayRate.Y,
+		                                         FMath::Abs(RotationYawAngle) / 180.0f), Settings->Transitions.QuickStopStartTime);
+	}
 }
 
 void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation, const float BlendInTime, const float BlendOutTime,

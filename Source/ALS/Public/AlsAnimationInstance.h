@@ -78,6 +78,9 @@ private:
 	FAlsViewModeCache ViewMode{EAlsViewMode::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FGameplayTag OverlayMode;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
@@ -147,20 +150,22 @@ private:
 
 	// View
 
+protected:
+	virtual bool IsSpineRotationAllowed();
+
 private:
 	void RefreshViewGameThread();
 
 	void RefreshView(float DeltaTime);
 
-protected:
-	virtual bool IsSpineRotationAllowed();
+	void RefreshLookTowardsInput(float DeltaTime);
+
+	void RefreshLookTowardsCamera(float DeltaTime);
 
 	// Locomotion
 
 private:
 	void RefreshLocomotionGameThread();
-
-	void RefreshLocomotion(float DeltaTime);
 
 	// Grounded
 
@@ -245,6 +250,9 @@ private:
 	// Transitions
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	void PlayQuickStopAnimation();
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
 	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);

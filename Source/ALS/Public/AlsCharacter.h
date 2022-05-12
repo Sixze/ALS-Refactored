@@ -334,27 +334,25 @@ public:
 private:
 	void SetInputDirection(FVector NewInputDirection);
 
-	FTransform CalculateNetworkSmoothedTransform() const;
-
-	void RefreshLocomotionLocationAndRotation();
+	void RefreshLocomotionLocationAndRotation(float DeltaTime);
 
 	void RefreshLocomotion(float DeltaTime);
 
 	// Rotation
 
 private:
-	void RefreshGroundedActorRotation(float DeltaTime);
+	void RefreshGroundedRotation(float DeltaTime);
 
 protected:
-	virtual bool TryRefreshCustomGroundedMovingActorRotation(float DeltaTime);
+	virtual bool TryRefreshCustomGroundedMovingRotation(float DeltaTime);
 
-	virtual bool TryRefreshCustomGroundedNotMovingActorRotation(float DeltaTime);
+	virtual bool TryRefreshCustomGroundedNotMovingRotation(float DeltaTime);
 
-	void RefreshGroundedMovingAimingActorRotation(float DeltaTime);
+	void RefreshGroundedMovingAimingRotation(float DeltaTime);
 
-	void RefreshGroundedNotMovingAimingActorRotation(float DeltaTime);
+	void RefreshGroundedNotMovingAimingRotation(float DeltaTime);
 
-	float CalculateActorRotationInterpolationSpeed() const;
+	float CalculateRotationInterpolationSpeed() const;
 
 public:
 	void ApplyRotationYawSpeedFromAnimationInstance(float DeltaTime);
@@ -364,27 +362,27 @@ private:
 
 	void ApplyRotationYawSpeed(float DeltaTime);
 
-	void RefreshInAirActorRotation(float DeltaTime);
+	void RefreshInAirRotation(float DeltaTime);
 
 protected:
-	virtual bool TryRefreshCustomInAirActorRotation(float DeltaTime);
+	virtual bool TryRefreshCustomInAirRotation(float DeltaTime);
 
-	void RefreshInAirAimingActorRotation(float DeltaTime);
+	void RefreshInAirAimingRotation(float DeltaTime);
 
 protected:
-	void RefreshTargetYawAngle(float TargetYawAngle);
+	void RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
 
-	void RefreshViewRelativeTargetYawAngle();
+	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
+	                                float RotationInterpolationSpeed,
+	                                float TargetYawAngleRotationSpeed);
+
+	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
 	void RefreshTargetYawAngleUsingLocomotionRotation();
 
-	void RefreshActorRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
+	void RefreshTargetYawAngle(float TargetYawAngle);
 
-	void RefreshActorRotation(float TargetYawAngle, float DeltaTime, float ActorRotationInterpolationSpeed);
-
-	void RefreshActorRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
-	                                     float ActorRotationInterpolationSpeed,
-	                                     float TargetYawAngleRotationSpeed);
+	void RefreshViewRelativeTargetYawAngle();
 
 	// Rotation Lock
 
@@ -625,24 +623,4 @@ inline const FAlsViewState& AAlsCharacter::GetViewState() const
 inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 {
 	return LocomotionState;
-}
-
-inline void AAlsCharacter::RefreshTargetYawAngleUsingLocomotionRotation()
-{
-	RefreshTargetYawAngle(UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw));
-}
-
-inline void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
-{
-	LocomotionState.TargetYawAngle = TargetYawAngle;
-
-	RefreshViewRelativeTargetYawAngle();
-
-	LocomotionState.SmoothTargetYawAngle = TargetYawAngle;
-}
-
-inline void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
-{
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(
-		UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - LocomotionState.TargetYawAngle);
 }
