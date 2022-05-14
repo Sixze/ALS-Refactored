@@ -810,23 +810,23 @@ void UAlsAnimationInstance::RefreshFeetGameThread()
 
 	const auto* Mesh{GetSkelMeshComponent()};
 
-	const auto FootLeftTransform{
+	const auto FootLeftTargetTransform{
 		Mesh->GetSocketTransform(Settings->General.bUseFootIkBones
 			                         ? UAlsConstants::FootLeftIkBone()
 			                         : UAlsConstants::FootLeftVirtualBone())
 	};
 
-	FeetState.Left.BoneLocation = FootLeftTransform.GetLocation();
-	FeetState.Left.BoneRotation = FootLeftTransform.GetRotation();
+	FeetState.Left.TargetLocation = FootLeftTargetTransform.GetLocation();
+	FeetState.Left.TargetRotation = FootLeftTargetTransform.GetRotation();
 
-	const auto FootRightTransform{
+	const auto FootRightTargetTransform{
 		Mesh->GetSocketTransform(Settings->General.bUseFootIkBones
 			                         ? UAlsConstants::FootRightIkBone()
 			                         : UAlsConstants::FootRightVirtualBone())
 	};
 
-	FeetState.Right.BoneLocation = FootRightTransform.GetLocation();
-	FeetState.Right.BoneRotation = FootRightTransform.GetRotation();
+	FeetState.Right.TargetLocation = FootRightTargetTransform.GetLocation();
+	FeetState.Right.TargetRotation = FootRightTargetTransform.GetRotation();
 }
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
@@ -868,8 +868,8 @@ void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& F
 
 	ProcessFootLockBaseChange(FootState, ComponentTransformInverse);
 
-	auto FinalLocation{FootState.BoneLocation};
-	auto FinalRotation{FootState.BoneRotation};
+	auto FinalLocation{FootState.TargetLocation};
+	auto FinalRotation{FootState.TargetRotation};
 
 	RefreshFootLock(FootState, FootLockCurveName, ComponentTransformInverse, DeltaTime, FinalLocation, FinalRotation);
 
@@ -913,8 +913,8 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 
 	if (FeetState.bReinitializationRequired)
 	{
-		FootState.LockLocation = FootState.BoneLocation;
-		FootState.LockRotation = FootState.BoneRotation;
+		FootState.LockLocation = FootState.TargetLocation;
+		FootState.LockRotation = FootState.TargetRotation;
 	}
 
 	FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
@@ -1323,8 +1323,8 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 		FMath::Square(Settings->Transitions.DynamicTransitionFootLockDistanceThreshold * LocomotionState.Scale)
 	};
 
-	const auto FootLockLeftDistanceSquared{FVector::DistSquared(FeetState.Left.BoneLocation, FeetState.Left.LockLocation)};
-	const auto FootLockRightDistanceSquared{FVector::DistSquared(FeetState.Right.BoneLocation, FeetState.Right.LockLocation)};
+	const auto FootLockLeftDistanceSquared{FVector::DistSquared(FeetState.Left.TargetLocation, FeetState.Left.LockLocation)};
+	const auto FootLockRightDistanceSquared{FVector::DistSquared(FeetState.Right.TargetLocation, FeetState.Right.LockLocation)};
 
 	const auto bTransitionLeftAllowed{
 		FAnimWeight::IsRelevant(FeetState.Left.LockAmount) && FootLockLeftDistanceSquared > FootLockDistanceThresholdSquared

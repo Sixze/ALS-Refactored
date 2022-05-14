@@ -15,7 +15,7 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	float Fov{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName CameraSocket{TEXT("FirstPersonCamera")};
+	FName CameraSocketName{TEXT("FirstPersonCamera")};
 };
 
 USTRUCT(BlueprintType)
@@ -36,10 +36,10 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	float Fov{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName FirstPivotSocket{UAlsConstants::RootBone()};
+	FName FirstPivotSocketName{UAlsConstants::RootBone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName SecondPivotSocket{UAlsConstants::HeadBone()};
+	FName SecondPivotSocketName{UAlsConstants::HeadBone()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float TraceRadius{15.0f};
@@ -48,10 +48,10 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	TEnumAsByte<ETraceTypeQuery> TraceChannel{UEngineTypes::ConvertToTraceType(ECC_Visibility)};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LeftTraceShoulderSocket{TEXT("ThirdPersonTraceShoulderLeft")};
+	FName TraceShoulderLeftSocketName{TEXT("ThirdPersonTraceShoulderLeft")};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RightTraceShoulderSocket{TEXT("ThirdPersonTraceShoulderRight")};
+	FName TraceShoulderRightSocketName{TEXT("ThirdPersonTraceShoulderRight")};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector TraceOverrideOffset{0.0f, 0.0f, 40.0f};

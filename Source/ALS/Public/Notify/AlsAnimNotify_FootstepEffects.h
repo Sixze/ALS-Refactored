@@ -115,8 +115,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Left Y Axis")
 	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Left Z Axis")
+	FVector FootLeftZAxis{1.0f, 0.0f, 0.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Y Axis")
 	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Z Axis")
+	FVector FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (TitleProperty = "SurfaceType"))
 	TArray<FAlsFootstepEffectSettings> Effects;

@@ -60,23 +60,23 @@ void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick 
 
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 {
-	return AlsCharacter->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocket);
+	return AlsCharacter->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
 }
 
 FTransform UAlsCameraComponent::GetThirdPersonPivotTransform() const
 {
 	return {
 		GetComponentRotation(),
-		(AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocket) +
-		 AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocket)) * 0.5f
+		(AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
+		 AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f
 	};
 }
 
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
 {
 	return AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder
-		                                                  ? Settings->ThirdPerson.RightTraceShoulderSocket
-		                                                  : Settings->ThirdPerson.LeftTraceShoulderSocket);
+		                                                  ? Settings->ThirdPerson.TraceShoulderRightSocketName
+		                                                  : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
 
 void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const

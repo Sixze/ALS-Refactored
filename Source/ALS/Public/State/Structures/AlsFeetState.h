@@ -15,10 +15,10 @@ struct ALS_API FAlsFootState
 	float LockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector BoneLocation{ForceInit};
+	FVector TargetLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat BoneRotation{ForceInit};
+	FQuat TargetRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LockLocation{ForceInit};
