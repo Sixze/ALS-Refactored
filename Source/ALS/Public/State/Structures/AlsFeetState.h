@@ -39,6 +39,12 @@ struct ALS_API FAlsFootState
 	FQuat LockMovementBaseRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector OffsetTargetLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FQuat OffsetTargetRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsSpringVectorState OffsetSpringState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -81,11 +87,5 @@ struct ALS_API FAlsFeetState
 	// Pelvis
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsSpringFloatState PelvisSpringState;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Target Pelvis Offset Z", Meta = (ForceUnits = "cm"))
-	float TargetPelvisOffsetZ{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Pelvis Offset Z", Meta = (ForceUnits = "cm"))
-	float PelvisOffsetZ{0.0f};
+	FVector2D MinMaxPelvisOffsetZ{ForceInit};
 };

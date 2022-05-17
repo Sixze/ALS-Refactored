@@ -233,7 +233,7 @@ private:
 	void RefreshFeet(float DeltaTime);
 
 	void RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
-	                 const FTransform& ComponentTransformInverse, float DeltaTime, FVector& TargetLocationOffset) const;
+	                 const FTransform& ComponentTransformInverse, float DeltaTime) const;
 
 	void ProcessFootLockTeleport(FAlsFootState& FootState) const;
 
@@ -242,10 +242,7 @@ private:
 	void RefreshFootLock(FAlsFootState& FootState, const FName& FootLockCurveName, const FTransform& ComponentTransformInverse,
 	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& TargetLocationOffset,
-	                       FVector& FinalLocation, FQuat& FinalRotation) const;
-
-	void RefreshPelvisOffset(float TargetFootLeftLocationOffsetZ, float TargetFootRightLocationOffsetZ, float DeltaTime);
+	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	// Transitions
 

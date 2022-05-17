@@ -56,6 +56,9 @@ struct ALS_API FAlsLocomotionAnimationState
 	float MaxBrakingDeceleration{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkableFloorZ{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bMoving{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

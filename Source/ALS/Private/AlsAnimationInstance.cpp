@@ -374,8 +374,13 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	LocomotionState.Velocity = Locomotion.Velocity;
 	LocomotionState.VelocityYawAngle = Locomotion.VelocityYawAngle;
 	LocomotionState.Acceleration = Locomotion.Acceleration;
-	LocomotionState.MaxAcceleration = Character->GetCharacterMovement()->GetMaxAcceleration();
-	LocomotionState.MaxBrakingDeceleration = Character->GetCharacterMovement()->GetMaxBrakingDeceleration();
+
+	const auto* Movement{Character->GetCharacterMovement()};
+
+	LocomotionState.MaxAcceleration = Movement->GetMaxAcceleration();
+	LocomotionState.MaxBrakingDeceleration = Movement->GetMaxBrakingDeceleration();
+	LocomotionState.WalkableFloorZ = Movement->GetWalkableFloorZ();
+
 	LocomotionState.bMoving = Locomotion.bMoving;
 
 	// ReSharper disable once CppRedundantParentheses
@@ -745,9 +750,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	                                    FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
 	                                    {ANSI_TO_TCHAR(__FUNCTION__), false, Character});
 
-	static constexpr auto MaxSlopeCos{0.71f}; // cos 0.71 = 45 degrees.
-
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= MaxSlopeCos};
+	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (bDisplayDebugTraces)
@@ -843,24 +846,24 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
 	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurve());
 
+	FeetState.MinMaxPelvisOffsetZ = FVector2D::ZeroVector;
+
 	const auto ComponentTransformInverse{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().Inverse()};
 
-	FVector TargetFootLeftLocationOffset;
-	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurve(), UAlsConstants::FootLeftLockCurve(),
-	            ComponentTransformInverse, DeltaTime, TargetFootLeftLocationOffset);
+	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurve(),
+	            UAlsConstants::FootLeftLockCurve(), ComponentTransformInverse, DeltaTime);
 
-	FVector TargetFootRightLocationOffset;
-	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurve(), UAlsConstants::FootRightLockCurve(),
-	            ComponentTransformInverse, DeltaTime, TargetFootRightLocationOffset);
+	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurve(),
+	            UAlsConstants::FootRightLockCurve(), ComponentTransformInverse, DeltaTime);
 
-	RefreshPelvisOffset(UE_REAL_TO_FLOAT(TargetFootLeftLocationOffset.Z), UE_REAL_TO_FLOAT(TargetFootRightLocationOffset.Z), DeltaTime);
+	FeetState.MinMaxPelvisOffsetZ.X = FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
+	FeetState.MinMaxPelvisOffsetZ.Y = FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
 
 	FeetState.bReinitializationRequired = false;
 }
 
-void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName,
-                                        const FName& FootLockCurveName, const FTransform& ComponentTransformInverse,
-                                        const float DeltaTime, FVector& TargetLocationOffset) const
+void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
+                                        const FTransform& ComponentTransformInverse, const float DeltaTime) const
 {
 	FootState.IkAmount = GetCurveValueClamped01(FootIkCurveName);
 
@@ -873,7 +876,7 @@ void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& F
 
 	RefreshFootLock(FootState, FootLockCurveName, ComponentTransformInverse, DeltaTime, FinalLocation, FinalRotation);
 
-	RefreshFootOffset(FootState, DeltaTime, TargetLocationOffset, FinalLocation, FinalRotation);
+	RefreshFootOffset(FootState, DeltaTime, FinalLocation, FinalRotation);
 
 	FootState.IkLocation = ComponentTransformInverse.TransformPosition(FinalLocation);
 	FootState.IkRotation = ComponentTransformInverse.TransformRotation(FinalRotation);
@@ -1037,20 +1040,22 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	FinalRotation = FQuat::Slerp(FinalRotation, FootState.LockRotation, FootState.LockAmount);
 }
 
-void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const float DeltaTime, FVector& TargetLocationOffset,
+void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const float DeltaTime,
                                               FVector& FinalLocation, FQuat& FinalRotation) const
 {
 	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
 	{
+		FootState.OffsetTargetLocation = FVector::ZeroVector;
+		FootState.OffsetTargetRotation = FQuat::Identity;
 		FootState.OffsetSpringState.Reset();
-		TargetLocationOffset = FVector::ZeroVector;
 		return;
 	}
 
 	if (LocomotionMode == AlsLocomotionModeTags::InAir)
 	{
+		FootState.OffsetTargetLocation = FVector::ZeroVector;
+		FootState.OffsetTargetRotation = FQuat::Identity;
 		FootState.OffsetSpringState.Reset();
-		TargetLocationOffset = FVector::ZeroVector;
 
 		if (FeetState.bReinitializationRequired)
 		{
@@ -1083,9 +1088,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	                                     UEngineTypes::ConvertToCollisionChannel(Settings->Feet.IkTraceChannel),
 	                                     {ANSI_TO_TCHAR(__FUNCTION__), true, Character});
 
-	static constexpr auto MaxSlopeCos{0.71f}; // cos 0.71 = 45 degrees.
-
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= MaxSlopeCos};
+	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (bDisplayDebugTraces)
@@ -1107,8 +1110,6 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	}
 #endif
 
-	FQuat TargetRotationOffset;
-
 	if (bGroundValid)
 	{
 		const auto FootHeight{Settings->Feet.FootHeight * LocomotionState.Scale};
@@ -1116,21 +1117,16 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		// Find the difference in location from the impact location and the expected (flat) floor location. These values
 		// are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
 
-		TargetLocationOffset = Hit.ImpactPoint - FootLocation + Hit.ImpactNormal * FootHeight;
-		TargetLocationOffset.Z -= FootHeight;
+		FootState.OffsetTargetLocation = Hit.ImpactPoint - FootLocation + Hit.ImpactNormal * FootHeight;
+		FootState.OffsetTargetLocation.Z -= FootHeight;
 
 		// Calculate the rotation offset.
 
-		TargetRotationOffset = FRotator{
+		FootState.OffsetTargetRotation = FRotator{
 			-UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.X}),
 			0.0f,
 			UAlsMath::DirectionToAngle({Hit.ImpactNormal.Z, Hit.ImpactNormal.Y})
 		}.Quaternion();
-	}
-	else
-	{
-		TargetLocationOffset = FVector::ZeroVector;
-		TargetRotationOffset = FQuat::Identity;
 	}
 
 	// Interpolate current offsets to the new target values.
@@ -1139,8 +1135,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	{
 		FootState.OffsetSpringState.Reset();
 
-		FootState.OffsetLocation = TargetLocationOffset;
-		FootState.OffsetRotation = TargetRotationOffset;
+		FootState.OffsetLocation = FootState.OffsetTargetLocation;
+		FootState.OffsetRotation = FootState.OffsetTargetRotation;
 	}
 	else
 	{
@@ -1148,56 +1144,18 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		static constexpr auto LocationInterpolationDampingRatio{4.0f};
 		static constexpr auto LocationInterpolationTargetVelocityAmount{1.0f};
 
-		FootState.OffsetLocation = UAlsMath::SpringDamp(FootState.OffsetLocation, TargetLocationOffset,
+		FootState.OffsetLocation = UAlsMath::SpringDamp(FootState.OffsetLocation, FootState.OffsetTargetLocation,
 		                                                FootState.OffsetSpringState, DeltaTime, LocationInterpolationFrequency,
 		                                                LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
 
 		static constexpr auto RotationInterpolationSpeed{30.0f};
 
-		FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, TargetRotationOffset, DeltaTime, RotationInterpolationSpeed);
+		FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FootState.OffsetTargetRotation,
+		                                            DeltaTime, RotationInterpolationSpeed);
 	}
 
 	FinalLocation += FootState.OffsetLocation;
 	FinalRotation = FootState.OffsetRotation * FinalRotation;
-}
-
-void UAlsAnimationInstance::RefreshPelvisOffset(const float TargetFootLeftLocationOffsetZ, const float TargetFootRightLocationOffsetZ,
-                                                const float DeltaTime)
-{
-	// Calculate the pelvis offset amount by finding the average foot ik weight.
-
-	const auto OffsetAmount{(FeetState.Left.IkAmount + FeetState.Right.IkAmount) * 0.5f};
-
-	if (!FAnimWeight::IsRelevant(OffsetAmount))
-	{
-		FeetState.PelvisSpringState.Reset();
-		FeetState.PelvisOffsetZ = 0.0f;
-		return;
-	}
-
-	// Set the new offset to be the lowest foot offset.
-
-	const auto NewTargetOffset{FMath::Min(TargetFootLeftLocationOffsetZ, TargetFootRightLocationOffsetZ) / LocomotionState.Scale};
-
-	// Interpolate current offset to the new target value.
-
-	if (FeetState.bReinitializationRequired)
-	{
-		FeetState.PelvisSpringState.Reset();
-		FeetState.TargetPelvisOffsetZ = NewTargetOffset;
-	}
-	else
-	{
-		static constexpr auto InterpolationFrequency{0.2f};
-		static constexpr auto InterpolationDampingRatio{2.0f};
-		static constexpr auto InterpolationTargetVelocityAmount{0.5f};
-
-		FeetState.TargetPelvisOffsetZ = UAlsMath::SpringDamp(FeetState.TargetPelvisOffsetZ, NewTargetOffset,
-		                                                     FeetState.PelvisSpringState, DeltaTime, InterpolationFrequency,
-		                                                     InterpolationDampingRatio, InterpolationTargetVelocityAmount);
-	}
-
-	FeetState.PelvisOffsetZ = FeetState.TargetPelvisOffsetZ * OffsetAmount;
 }
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()
