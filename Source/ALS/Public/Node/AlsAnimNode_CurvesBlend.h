@@ -26,17 +26,19 @@ struct ALS_API FAlsAnimNode_CurvesBlend : public FAnimNode_Base
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	UPROPERTY(EditAnywhere, Category = "Settings")
 	FPoseLink SourcePose;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	UPROPERTY(EditAnywhere, Category = "Settings")
 	FPoseLink CurvesPose;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (PinShownByDefault))
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty, PinShownByDefault))
 	float BlendAmount{1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty))
 	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::BlendByAmount};
+#endif
 
 public:
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
@@ -48,4 +50,9 @@ public:
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 
 	virtual void GatherDebugData(FNodeDebugData& DebugData) override;
+
+public:
+	float GetBlendAmount() const;
+
+	EAlsCurvesBlendMode GetBlendMode() const;
 };

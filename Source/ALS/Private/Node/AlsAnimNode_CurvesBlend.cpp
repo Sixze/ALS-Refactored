@@ -33,12 +33,14 @@ void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& C
 
 	SourcePose.Update(Context);
 
-	if (FAnimWeight::IsRelevant(BlendAmount))
+	const auto CurrentBlendAmount{GetBlendAmount()};
+
+	if (FAnimWeight::IsRelevant(CurrentBlendAmount))
 	{
 		CurvesPose.Update(Context);
 	}
 
-	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Amount"), BlendAmount);
+	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Amount"), CurrentBlendAmount);
 	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Mode"), *AlsEnumUtility::GetNameStringByValue(BlendMode));
 }
 
@@ -48,7 +50,9 @@ void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 
 	SourcePose.Evaluate(Output);
 
-	if (!FAnimWeight::IsRelevant(BlendAmount))
+	const auto CurrentBlendAmount{GetBlendAmount()};
+
+	if (!FAnimWeight::IsRelevant(CurrentBlendAmount))
 	{
 		return;
 	}
@@ -56,10 +60,10 @@ void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 	auto CurvesPoseContext{Output};
 	CurvesPose.Evaluate(CurvesPoseContext);
 
-	switch (BlendMode)
+	switch (GetBlendMode())
 	{
 		case EAlsCurvesBlendMode::BlendByAmount:
-			Output.Curve.Accumulate(CurvesPoseContext.Curve, BlendAmount);
+			Output.Curve.Accumulate(CurvesPoseContext.Curve, CurrentBlendAmount);
 			break;
 
 		case EAlsCurvesBlendMode::Combine:
@@ -90,4 +94,14 @@ void FAlsAnimNode_CurvesBlend::GatherDebugData(FNodeDebugData& DebugData)
 
 	SourcePose.GatherDebugData(DebugData.BranchFlow(1.0f));
 	CurvesPose.GatherDebugData(DebugData.BranchFlow(BlendAmount));
+}
+
+float FAlsAnimNode_CurvesBlend::GetBlendAmount() const
+{
+	return GET_ANIM_NODE_DATA(float, BlendAmount);
+}
+
+EAlsCurvesBlendMode FAlsAnimNode_CurvesBlend::GetBlendMode() const
+{
+	return GET_ANIM_NODE_DATA(EAlsCurvesBlendMode, BlendMode);
 }
