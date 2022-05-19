@@ -12,7 +12,6 @@
 #include "Utility/AlsLog.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
-#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {
@@ -61,7 +60,12 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	Character->ApplyRotationYawSpeedFromAnimationInstance(DeltaTime);
+#if WITH_EDITOR
+	if (GetWorld()->IsGameWorld())
+#endif
+	{
+		Character->ApplyRotationYawSpeedFromAnimationInstance(DeltaTime);
+	}
 
 	bAnimationCurvesRelevant = bAnimationCurvesRelevantGameThread;
 
@@ -695,6 +699,10 @@ void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 		return;
 	}
 
+	// A separate variable for vertical speed is used to determine at what speed the character landed on the ground.
+
+	InAirState.VerticalVelocity = UE_REAL_TO_FLOAT(LocomotionState.Velocity.Z);
+
 	RefreshGroundPredictionAmount();
 
 	RefreshInAirLeanAmount(DeltaTime);
@@ -708,7 +716,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 
 	static constexpr auto VerticalVelocityThreshold{-200.0f};
 
-	if (LocomotionState.Velocity.Z > VerticalVelocityThreshold)
+	if (InAirState.VerticalVelocity > VerticalVelocityThreshold)
 	{
 		InAirState.GroundPredictionAmount = 0.0f;
 		return;
@@ -736,7 +744,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	const auto SweepVector{
 		VelocityDirection * FMath::GetMappedRangeValueClamped(FVector2f{MaxVerticalVelocity, MinVerticalVelocity},
 		                                                      {MinSweepDistance, MaxSweepDistance},
-		                                                      LocomotionState.Velocity.Z) * LocomotionState.Scale
+		                                                      InAirState.VerticalVelocity) * LocomotionState.Scale
 	};
 
 	FCollisionObjectQueryParams ObjectQueryParameters;
@@ -788,8 +796,8 @@ void UAlsAnimationInstance::RefreshInAirLeanAmount(const float DeltaTime)
 	static constexpr auto ReferenceSpeed{350.0f};
 
 	const auto RelativeVelocity{
-		FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)} / ReferenceSpeed *
-		Settings->InAir.LeanAmountCurve->GetFloatValue(UE_REAL_TO_FLOAT(LocomotionState.Velocity.Z))
+		FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)} / 
+		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 
 	if (bPendingUpdate)

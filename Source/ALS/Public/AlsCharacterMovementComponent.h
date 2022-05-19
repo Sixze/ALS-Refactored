@@ -124,6 +124,8 @@ public:
 protected:
 	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
 
+	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
+
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 
 public:

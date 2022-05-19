@@ -14,7 +14,6 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
-#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
@@ -313,6 +312,35 @@ void AAlsCharacter::ApplyDesiredStance()
 	{
 		Crouch();
 	}
+}
+
+void AAlsCharacter::Crouch(const bool bClientSimulation)
+{
+	Super::Crouch(bClientSimulation);
+
+	// Chance stance instantly without waiting for ACharacter::OnStartCrouch.
+
+	if (!GetCharacterMovement()->bWantsToCrouch)
+	{
+		return;
+	}
+
+	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
+	{
+		SetStance(DesiredStance); // Keep desired stance when rolling.
+		return;
+	}
+
+	SetStance(EAlsStance::Crouching);
+}
+
+void AAlsCharacter::UnCrouch(const bool bClientSimulation)
+{
+	Super::UnCrouch(bClientSimulation);
+
+	// Chance stance instantly without waiting for ACharacter::OnEndCrouch.
+
+	SetStance(EAlsStance::Standing);
 }
 
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)

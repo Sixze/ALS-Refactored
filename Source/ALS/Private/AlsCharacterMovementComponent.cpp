@@ -110,8 +110,9 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	// NetworkMaxSmoothUpdateDistance = 92.0f;
 	// NetworkNoSmoothUpdateDistance = 140.0f;
 
-	MaxWalkSpeed = 175.0f;
-	MaxWalkSpeedCrouched = 150.0;
+	GroundFriction = 4.0f;
+	MaxWalkSpeed = 375.0f;
+	MaxWalkSpeedCrouched = 200.0f;
 	MaxAcceleration = 1500.0f;
 
 	BrakingFrictionFactor = 0.0f;
@@ -221,6 +222,18 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 	}
 
 	Super::PhysWalking(DeltaTime, Iterations);
+}
+
+void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
+{
+	if (!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
+	{
+		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
+
+		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
+	}
+
+	Super::PhysNavWalking(DeltaTime, Iterations);
 }
 
 void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Iterations)

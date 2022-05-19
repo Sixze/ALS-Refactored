@@ -18,6 +18,7 @@
 #include "State/Structures/AlsTransitionsState.h"
 #include "State/Structures/AlsTurnInPlaceState.h"
 #include "State/Structures/AlsViewAnimationState.h"
+#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 #include "AlsAnimationInstance.generated.h"
 
 class UAlsAnimationInstanceSettings;
@@ -69,7 +70,7 @@ private:
 	FAlsRotationModeCache RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag LocomotionMode;
+	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionAction;

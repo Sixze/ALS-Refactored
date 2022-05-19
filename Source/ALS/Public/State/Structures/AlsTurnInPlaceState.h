@@ -19,7 +19,7 @@ struct ALS_API FAlsTurnInPlaceState
 	FName QueuedSlotName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float QueuedTurnYawAngle;
+	float QueuedTurnYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.0f};

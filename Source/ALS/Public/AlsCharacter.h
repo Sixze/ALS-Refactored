@@ -11,6 +11,7 @@
 #include "State/Structures/AlsRagdollingState.h"
 #include "State/Structures/AlsRollingState.h"
 #include "State/Structures/AlsViewState.h"
+#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 #include "AlsCharacter.generated.h"
 
 class UAlsCharacterMovementComponent;
@@ -67,7 +68,7 @@ private:
 	EAlsRotationMode RotationMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag LocomotionMode;
+	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionAction;
@@ -147,6 +148,10 @@ private:
 	// Stance
 
 public:
+	virtual void Crouch(bool bClientSimulation = false) override;
+
+	virtual void UnCrouch(bool bClientSimulation = false) override;
+
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
