@@ -138,6 +138,7 @@ protected:
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character Movement")
 	void SetMovementSettings(UAlsMovementSettings* NewMovementSettings);
 
 	const FAlsMovementGaitSettings& GetGaitSettings() const;
