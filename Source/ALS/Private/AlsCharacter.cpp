@@ -91,8 +91,8 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	SetViewRotation(Super::GetViewRotation().GetNormalized());
 
-	ViewState.InterpolationInitialRotation = ViewRotation;
-	ViewState.InterpolationTargetRotation = ViewRotation;
+	ViewState.NetworkSmoothing.InitialRotation = ViewRotation;
+	ViewState.NetworkSmoothing.Rotation = ViewRotation;
 	ViewState.Rotation = ViewRotation;
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewRotation.Yaw);
 
@@ -123,32 +123,34 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
-	AlsAnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	Super::PostInitializeComponents();
 }
 
 void AAlsCharacter::BeginPlay()
 {
-	check(!Settings.IsNull())
-
+	ensure(!Settings.IsNull());
 	ensure(!MovementSettings.IsNull());
-	ensure(!AlsAnimationInstance.IsNull());
+	ensure(!AnimationInstance.IsNull());
 
-	checkf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
-	       TEXT("These settings are not allowed and must be turned off!"))
+	ensureMsgf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
+	           TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
 
 	// Ignore root motion on simulated proxies, because in some situations it causes
 	// issues with network smoothing such as when the character uncrouches while rolling.
 
-	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
+	// TODO Check the need for this temporary fix in future engine versions.
 
 	if (GetLocalRole() <= ROLE_SimulatedProxy && IsValid(GetMesh()->GetAnimInstance()))
 	{
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 	}
+
+	ViewState.NetworkSmoothing.bEnabled |= !Settings.IsNull() &&
+		Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
 
 	// Update states to use the initial desired values.
 
@@ -180,6 +182,12 @@ void AAlsCharacter::PostNetReceiveLocationAndRotation()
 void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick()"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
+
+	if (Settings.IsNull() || AnimationInstance.IsNull())
+	{
+		Super::Tick(DeltaTime);
+		return;
+	}
 
 	RefreshVisibilityBasedAnimTickOption();
 
@@ -213,20 +221,25 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	if (AlsAnimationInstance.IsNull())
-	{
-		return;
-	}
-
 	if (!GetMesh()->bRecentlyRendered &&
 	    GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
 	{
-		AlsAnimationInstance->MarkPendingUpdate();
+		AnimationInstance->MarkPendingUpdate();
 	}
 
-	AlsAnimationInstance->SetAnimationCurvesRelevant(
+	AnimationInstance->SetAnimationCurvesRelevant(
 		GetMesh()->bRecentlyRendered ||
 		GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
+}
+
+void AAlsCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
+
+	ViewState.NetworkSmoothing.bEnabled |= !Settings.IsNull() && Settings->View.bEnableListenServerNetworkSmoothing &&
+		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
 }
 
 void AAlsCharacter::Restart()
@@ -489,7 +502,7 @@ bool AAlsCharacter::CanSprint() const
 	static constexpr auto ViewRelativeAngleThreshold{50.0f};
 
 	if (FMath::Abs(FRotator3f::NormalizeAxis(
-		    LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(ViewRotation.Yaw))) < ViewRelativeAngleThreshold)
+		    LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(ViewState.NetworkSmoothing.Rotation.Yaw))) < ViewRelativeAngleThreshold)
 	{
 		return true;
 	}
@@ -814,7 +827,7 @@ void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& Prev
 
 FRotator AAlsCharacter::GetViewRotation() const
 {
-	return ViewRotation;
+	return ViewState.NetworkSmoothing.Rotation;
 }
 
 void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
@@ -835,51 +848,69 @@ void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
 	}
 }
 
-void AAlsCharacter::OnReplicate_ViewRotation(const FRotator& PreviousViewRotation)
+void AAlsCharacter::OnReplicate_ViewRotation()
 {
-	ViewRotation.Normalize();
-
-	CorrectViewInterpolation(PreviousViewRotation);
+	CorrectViewNetworkSmoothing(ViewRotation);
 }
 
-void AAlsCharacter::CorrectViewInterpolation(const FRotator& PreviousViewRotation)
+void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
 {
 	// Based on UCharacterMovementComponent::SmoothCorrection().
 
-	if (!Settings->bEnableViewInterpolation || GetLocalRole() >= ROLE_AutonomousProxy ||
-	    GetReplicatedServerLastTransformUpdateTimeStamp() <= 0.0f)
+	ViewRotation = NewViewRotation;
+	ViewRotation.Normalize();
+
+	auto& NetworkSmoothing{ViewState.NetworkSmoothing};
+
+	if (!NetworkSmoothing.bEnabled)
+	{
+		NetworkSmoothing.InitialRotation = ViewRotation;
+		NetworkSmoothing.Rotation = ViewRotation;
+		return;
+	}
+
+	const auto bListenServer{IsNetMode(NM_ListenServer)};
+
+	const auto NewNetworkSmoothingServerTime{
+		bListenServer
+			? GetCharacterMovement()->GetServerLastTransformUpdateTimeStamp()
+			: GetReplicatedServerLastTransformUpdateTimeStamp()
+	};
+
+	if (NewNetworkSmoothingServerTime <= 0.0f)
 	{
 		return;
 	}
 
-	const auto NewViewRotation{ViewRotation};
-
-	ViewState.InterpolationInitialRotation = PreviousViewRotation;
-	ViewState.InterpolationTargetRotation = NewViewRotation;
-	ViewRotation = PreviousViewRotation;
+	NetworkSmoothing.InitialRotation = NetworkSmoothing.Rotation;
 
 	// Using server time lets us know how much time actually elapsed, regardless of packet lag variance.
 
-	const auto ServerDeltaTime{GetReplicatedServerLastTransformUpdateTimeStamp() - ViewState.InterpolationServerTimeStamp};
+	const auto ServerDeltaTime{NewNetworkSmoothingServerTime - NetworkSmoothing.ServerTime};
+
+	NetworkSmoothing.ServerTime = NewNetworkSmoothingServerTime;
 
 	// Don't let the client fall too far behind or run ahead of new server time.
 
 	const auto MaxServerDeltaTime{GetDefault<AGameNetworkManager>()->MaxClientSmoothingDeltaTime};
-	const auto MinServerDeltaTime{FMath::Min(GetCharacterMovement()->NetworkSimulatedSmoothLocationTime, MaxServerDeltaTime)};
+
+	const auto MinServerDeltaTime{
+		FMath::Min(MaxServerDeltaTime, bListenServer
+			                               ? GetCharacterMovement()->ListenServerNetworkSimulatedSmoothLocationTime
+			                               : GetCharacterMovement()->NetworkSimulatedSmoothLocationTime)
+	};
 
 	// Calculate how far behind we can be after receiving a new server time.
 
 	const auto MinClientDeltaTime{FMath::Clamp(ServerDeltaTime * 1.25f, MinServerDeltaTime, MaxServerDeltaTime)};
 
-	ViewState.InterpolationServerTimeStamp = GetReplicatedServerLastTransformUpdateTimeStamp();
-
-	ViewState.InterpolationClientTimeStamp = FMath::Clamp(ViewState.InterpolationClientTimeStamp,
-	                                                      ViewState.InterpolationServerTimeStamp - MinClientDeltaTime,
-	                                                      ViewState.InterpolationServerTimeStamp);
+	NetworkSmoothing.ClientTime = FMath::Clamp(NetworkSmoothing.ClientTime,
+	                                           NetworkSmoothing.ServerTime - MinClientDeltaTime,
+	                                           NetworkSmoothing.ServerTime);
 
 	// Compute actual delta between new server time and client simulation.
 
-	ViewState.InterpolationDuration = ViewState.InterpolationServerTimeStamp - ViewState.InterpolationClientTimeStamp;
+	NetworkSmoothing.Duration = NetworkSmoothing.ServerTime - NetworkSmoothing.ClientTime;
 }
 
 void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
@@ -897,14 +928,15 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 		SetViewRotation(Super::GetViewRotation().GetNormalized());
 	}
 
-	RefreshViewInterpolation(DeltaTime);
+	RefreshViewNetworkSmoothing(DeltaTime);
 
 	// Interpolate view rotation to current raw view rotation for smooth character
 	// rotation movement. Decrease interpolation speed for slower but smoother movement.
 
 	static constexpr auto InterpolationSpeed{30.0f};
 
-	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewRotation, DeltaTime, InterpolationSpeed);
+	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewState.NetworkSmoothing.Rotation,
+	                                                DeltaTime, InterpolationSpeed);
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided
 	// by delta seconds. This represents the speed the camera is rotating left to right.
@@ -912,36 +944,36 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	ViewState.YawSpeed = FMath::Abs(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - ViewState.PreviousYawAngle) / DeltaTime;
 }
 
-void AAlsCharacter::RefreshViewInterpolation(const float DeltaTime)
+void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 {
 	// Based on UCharacterMovementComponent::SmoothClientPosition_Interpolate()
 	// and UCharacterMovementComponent::SmoothClientPosition_UpdateVisuals().
 
-	if (!Settings->bEnableViewInterpolation || GetLocalRole() >= ROLE_AutonomousProxy)
+	auto& NetworkSmoothing{ViewState.NetworkSmoothing};
+
+	if (!NetworkSmoothing.bEnabled ||
+	    NetworkSmoothing.ClientTime >= NetworkSmoothing.ServerTime ||
+	    NetworkSmoothing.Duration <= SMALL_NUMBER)
 	{
+		NetworkSmoothing.InitialRotation = ViewRotation;
+		NetworkSmoothing.Rotation = ViewRotation;
 		return;
 	}
 
-	ViewState.InterpolationClientTimeStamp += DeltaTime;
+	NetworkSmoothing.ClientTime += DeltaTime;
 
 	const auto InterpolationAmount{
-		ViewState.InterpolationClientTimeStamp >= ViewState.InterpolationServerTimeStamp ||
-		ViewState.InterpolationDuration <= SMALL_NUMBER
-			? 1.0f
-			: FMath::Max(0.0f,
-			             1.0f - (ViewState.InterpolationServerTimeStamp - ViewState.InterpolationClientTimeStamp) /
-			             ViewState.InterpolationDuration)
+		UAlsMath::Clamp01(1.0f - (NetworkSmoothing.ServerTime - NetworkSmoothing.ClientTime) / NetworkSmoothing.Duration)
 	};
 
 	if (!FAnimWeight::IsFullWeight(InterpolationAmount))
 	{
-		ViewRotation = UAlsMath::LerpRotator(ViewState.InterpolationInitialRotation,
-		                                     ViewState.InterpolationTargetRotation, InterpolationAmount);
+		NetworkSmoothing.Rotation = UAlsMath::LerpRotator(NetworkSmoothing.InitialRotation, ViewRotation, InterpolationAmount);
 	}
 	else
 	{
-		ViewRotation = ViewState.InterpolationTargetRotation;
-		ViewState.InterpolationClientTimeStamp = ViewState.InterpolationServerTimeStamp;
+		NetworkSmoothing.ClientTime = NetworkSmoothing.ServerTime;
+		NetworkSmoothing.Rotation = ViewRotation;
 	}
 }
 
@@ -1436,5 +1468,5 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	AlsAnimationInstance->Jump();
+	AnimationInstance->Jump();
 }

@@ -56,7 +56,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
 		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
-	TObjectPtr<UAlsAnimationInstance> AlsAnimationInstance;
+	TObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	EAlsStance Stance;
@@ -121,6 +121,8 @@ public:
 	virtual void PostNetReceiveLocationAndRotation() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void Restart() override;
 
@@ -317,9 +319,10 @@ private:
 	void ServerSetViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION()
-	void OnReplicate_ViewRotation(const FRotator& PreviousViewRotation);
+	void OnReplicate_ViewRotation();
 
-	void CorrectViewInterpolation(const FRotator& PreviousViewRotation);
+public:
+	void CorrectViewNetworkSmoothing(const FRotator& NewViewRotation);
 
 public:
 	const FAlsViewState& GetViewState() const;
@@ -327,7 +330,7 @@ public:
 private:
 	void RefreshView(float DeltaTime);
 
-	void RefreshViewInterpolation(float DeltaTime);
+	void RefreshViewNetworkSmoothing(float DeltaTime);
 
 	// Locomotion
 

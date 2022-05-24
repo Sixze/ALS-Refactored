@@ -28,7 +28,7 @@ void FAlsAnimNode_SuppressAdditiveWarnings::Evaluate_AnyThread(FPoseContext& Out
 	// Construct a new FPoseContext with bExpectsAdditivePose set to false to suppress "Trying to play a
 	// non-additive animation into a pose that is expected to be additive" warnings when evaluating a pose.
 
-	// TODO Check the need for this temporary fix in future versions of Unreal Engine.
+	// TODO Check the need for this temporary fix in future engine versions.
 
 	FPoseContext NewOutput{Output.AnimInstanceProxy, false};
 	NewOutput.SetNodeIds(Output);

@@ -98,6 +98,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bMovementModeLocked;
 
+	// Valid only on locally controlled characters.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FRotator PreviousControlRotation;
+
 public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;
 
@@ -119,6 +123,10 @@ public:
 
 	virtual float GetMaxBrakingDeceleration() const override;
 
+protected:
+	virtual void ControlledCharacterMove(const FVector& InputVector, float DeltaTime) override;
+
+public:
 	virtual void PhysicsRotation(float DeltaTime) override;
 
 protected:
@@ -127,6 +135,8 @@ protected:
 	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
 
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
+
+	virtual void PerformMovement(float DeltaTime) override;
 
 public:
 	virtual void SmoothCorrection(const FVector& PreviousLocation, const FQuat& PreviousRotation,

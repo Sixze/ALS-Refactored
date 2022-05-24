@@ -10,6 +10,7 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent());
 
+#if WITH_EDITOR
 	if (!GetWorld()->IsGameWorld())
 	{
 		// Use default objects for editor preview.
@@ -24,6 +25,7 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 			Camera = GetMutableDefault<UAlsCameraComponent>();
 		}
 	}
+#endif
 }
 
 void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)

@@ -8,9 +8,9 @@
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
-	AlsCamera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("AlsCamera"));
-	AlsCamera->SetupAttachment(GetMesh());
-	AlsCamera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
+	Camera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(GetMesh());
+	Camera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()
@@ -44,9 +44,9 @@ void AAlsCharacterExample::NotifyControllerChanged()
 
 void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
 {
-	if (AlsCamera->IsActive())
+	if (Camera->IsActive())
 	{
-		AlsCamera->GetViewInfo(ViewInfo);
+		Camera->GetViewInfo(ViewInfo);
 		return;
 	}
 
@@ -200,14 +200,14 @@ void AAlsCharacterExample::InputViewMode()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacterExample::InputSwitchShoulder()
 {
-	AlsCamera->SetRightShoulder(!AlsCamera->IsRightShoulder());
+	Camera->SetRightShoulder(!Camera->IsRightShoulder());
 }
 
 void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalLocation)
 {
-	if (AlsCamera->IsActive())
+	if (Camera->IsActive())
 	{
-		AlsCamera->DisplayDebug(Canvas, DebugDisplay, VerticalLocation);
+		Camera->DisplayDebug(Canvas, DebugDisplay, VerticalLocation);
 	}
 
 	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalLocation);

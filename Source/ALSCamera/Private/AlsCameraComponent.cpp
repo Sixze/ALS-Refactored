@@ -1,9 +1,9 @@
 #include "AlsCameraComponent.h"
 
-#include "AlsCameraAnimationInstance.h"
 #include "AlsCameraSettings.h"
 #include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsUtility.h"
@@ -15,13 +15,11 @@ UAlsCameraComponent::UAlsCameraComponent()
 
 	bTickInEditor = false;
 	bHiddenInGame = true;
-
-	AnimClass = UAlsCameraAnimationInstance::StaticClass();
 }
 
 void UAlsCameraComponent::OnRegister()
 {
-	AlsCharacter = Cast<AAlsCharacter>(GetOwner());
+	Character = Cast<AAlsCharacter>(GetOwner());
 
 	Super::OnRegister();
 }
@@ -36,17 +34,14 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 	Super::Activate(bReset);
 
-	if (IsValid(GetAnimInstance()) && !Settings.IsNull() && !AlsCharacter.IsNull())
-	{
-		TickCamera(0.0f, false);
-	}
+	TickCamera(0.0f, false);
 }
 
 void UAlsCameraComponent::BeginPlay()
 {
-	check(IsValid(GetAnimInstance()))
-	check(!Settings.IsNull())
-	check(!AlsCharacter.IsNull())
+	ensure(IsValid(GetAnimInstance()));
+	ensure(!Settings.IsNull());
+	ensure(!Character.IsNull());
 
 	Super::BeginPlay();
 }
@@ -60,23 +55,23 @@ void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick 
 
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 {
-	return AlsCharacter->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
+	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
 }
 
 FTransform UAlsCameraComponent::GetThirdPersonPivotTransform() const
 {
 	return {
 		GetComponentRotation(),
-		(AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
-		 AlsCharacter->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f
+		(Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
+		 Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f
 	};
 }
 
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
 {
-	return AlsCharacter->GetMesh()->GetSocketLocation(bRightShoulder
-		                                                  ? Settings->ThirdPerson.TraceShoulderRightSocketName
-		                                                  : Settings->ThirdPerson.TraceShoulderLeftSocketName);
+	return Character->GetMesh()->GetSocketLocation(bRightShoulder
+		                                               ? Settings->ThirdPerson.TraceShoulderRightSocketName
+		                                               : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
 
 void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
@@ -95,16 +90,23 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 
 void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag)
 {
+	if (!IsValid(GetAnimInstance()) || Settings.IsNull() || Character.IsNull())
+	{
+		return;
+	}
+
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{UAlsUtility::ShouldDisplayDebug(GetOwner(), UAlsCameraConstants::CameraShapesDisplayName())};
 #else
 	const auto bDisplayDebugCameraShapes{false};
 #endif
 
-	// Calculate camera rotation. Use raw rotation locally and smooth rotation on remote clients.
+	// Calculate camera rotation.
 
 	const auto CameraTargetRotation{
-		AlsCharacter->IsLocallyControlled() ? AlsCharacter->GetViewRotation() : AlsCharacter->GetViewState().Rotation
+		Character->GetViewState().NetworkSmoothing.bEnabled || Character->IsLocallyControlled()
+			? Character->GetViewState().NetworkSmoothing.Rotation
+			: Character->GetViewState().Rotation
 	};
 
 	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
@@ -296,7 +298,7 @@ FVector UAlsCameraComponent::CalculatePivotOffset(const FQuat& PivotTargetRotati
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
-		} * AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z);
+		} * Character->GetCapsuleComponent()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraOffset() const
@@ -306,7 +308,7 @@ FVector UAlsCameraComponent::CalculateCameraOffset() const
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurve())
-		} * AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z);
+		} * Character->GetCapsuleComponent()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
@@ -318,7 +320,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto bDisplayDebugCameraTraces{false};
 #endif
 
-	const auto CapsuleScale{AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z};
+	const auto CapsuleScale{Character->GetCapsuleComponent()->GetComponentScale().Z};
 
 	static const FName MainTraceTag{FString::Format(TEXT("{0} (Main Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
@@ -396,7 +398,7 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 {
 	// Based on ComponentEncroachesBlockingGeometry_WithAdjustment().
 
-	const auto CapsuleScale{AlsCharacter->GetCapsuleComponent()->GetComponentScale().Z};
+	const auto CapsuleScale{Character->GetCapsuleComponent()->GetComponentScale().Z};
 
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
 	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * CapsuleScale)};

@@ -41,7 +41,7 @@ void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& C
 	}
 
 	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Amount"), CurrentBlendAmount);
-	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Mode"), *AlsEnumUtility::GetNameStringByValue(BlendMode));
+	TRACE_ANIM_NODE_VALUE(Context, TEXT("Blend Mode"), *AlsEnumUtility::GetNameStringByValue(GetBlendMode()));
 }
 
 void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
@@ -93,7 +93,7 @@ void FAlsAnimNode_CurvesBlend::GatherDebugData(FNodeDebugData& DebugData)
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(GatherDebugData)
 
 	SourcePose.GatherDebugData(DebugData.BranchFlow(1.0f));
-	CurvesPose.GatherDebugData(DebugData.BranchFlow(BlendAmount));
+	CurvesPose.GatherDebugData(DebugData.BranchFlow(GetBlendAmount()));
 }
 
 float FAlsAnimNode_CurvesBlend::GetBlendAmount() const

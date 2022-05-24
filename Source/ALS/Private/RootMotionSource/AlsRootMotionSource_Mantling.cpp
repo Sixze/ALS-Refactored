@@ -153,7 +153,7 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 
 	Archive << MantlingHeight;
 
-	return true;
+	return bSuccess;
 }
 
 UScriptStruct* FAlsRootMotionSource_Mantling::GetScriptStruct() const

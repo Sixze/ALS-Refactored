@@ -17,6 +17,7 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 	Parent = Cast<UAlsAnimationInstance>(GetSkelMeshComponent()->GetAnimInstance());
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
+#if WITH_EDITOR
 	if (!GetWorld()->IsGameWorld())
 	{
 		// Use default objects for editor preview.
@@ -31,12 +32,13 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 			Character = GetMutableDefault<AAlsCharacter>();
 		}
 	}
+#endif
 }
 
 void UAlsLinkedAnimationInstance::NativeBeginPlay()
 {
-	checkf(!Parent.IsNull(), TEXT("%s (%s) should only be used as a linked animation instance within the %s animation blueprint!"),
-	       ALS_GET_TYPE_STRING(UAlsLinkedAnimationInstance), *GetClass()->GetName(), ALS_GET_TYPE_STRING(UAlsAnimationInstance));
+	ensureMsgf(!Parent.IsNull(), TEXT("%s (%s) should only be used as a linked animation instance within the %s animation blueprint!"),
+	           ALS_GET_TYPE_STRING(UAlsLinkedAnimationInstance), *GetClass()->GetName(), ALS_GET_TYPE_STRING(UAlsAnimationInstance));
 
 	Super::NativeBeginPlay();
 }

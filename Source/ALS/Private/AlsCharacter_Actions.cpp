@@ -292,8 +292,9 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	}
 
 	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
-	if (!IsValid(MantlingSettings) || MantlingSettings->BlendInCurve.IsNull() ||
-	    MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull())
+	if (!ensure(IsValid(MantlingSettings)) ||
+	    !ensure(!MantlingSettings->BlendInCurve.IsNull()) ||
+	    !ensure(!MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull()))
 	{
 		return;
 	}
@@ -688,7 +689,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 		return;
 	}
 
-	AlsAnimationInstance->StopRagdolling();
+	AnimationInstance->StopRagdolling();
 
 	RagdollingState.bPendingFinalization = true;
 
@@ -782,7 +783,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 	}
 
 	auto* Montage{SelectRollMontage()};
-	if (!IsValid(Montage) || !IsRollingAllowedToStart(Montage))
+	if (!ensure(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
 	{
 		return;
 	}

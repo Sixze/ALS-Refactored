@@ -24,12 +24,14 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
+#if WITH_EDITOR
 	if (!GetWorld()->IsGameWorld() && Character.IsNull())
 	{
 		// Use default objects for editor preview.
 
 		Character = GetMutableDefault<AAlsCharacter>();
 	}
+#endif
 }
 
 void UAlsAnimationInstance::NativeBeginPlay()
@@ -796,7 +798,7 @@ void UAlsAnimationInstance::RefreshInAirLeanAmount(const float DeltaTime)
 	static constexpr auto ReferenceSpeed{350.0f};
 
 	const auto RelativeVelocity{
-		FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)} / 
+		FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)} /
 		ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 

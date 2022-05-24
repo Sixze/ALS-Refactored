@@ -161,7 +161,7 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 
 void UAlsCharacterMovementComponent::BeginPlay()
 {
-	checkf(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."))
+	ensureMsgf(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."));
 
 	Super::BeginPlay();
 }
@@ -188,7 +188,7 @@ float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
+	return IsMovingOnGround() && ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
 		       : Super::GetMaxAcceleration();
 }
@@ -197,9 +197,20 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 {
 	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && !GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()
+	return IsMovingOnGround() && ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
 		       : Super::GetMaxBrakingDeceleration();
+}
+
+void UAlsCharacterMovementComponent::ControlledCharacterMove(const FVector& InputVector, const float DeltaTime)
+{
+	Super::ControlledCharacterMove(InputVector, DeltaTime);
+
+	const auto* Controller{CharacterOwner->GetController()};
+	if (IsValid(Controller))
+	{
+		PreviousControlRotation = Controller->GetControlRotation();
+	}
 }
 
 void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
@@ -214,7 +225,7 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 
 void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const int32 Iterations)
 {
-	if (!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
+	if (ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
@@ -226,7 +237,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, const in
 
 void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
 {
-	if (!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
+	if (ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
@@ -259,6 +270,34 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
 	Super::PhysCustom(DeltaTime, Iterations);
+}
+
+void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
+{
+	Super::PerformMovement(DeltaTime);
+
+	if (!HasValidData())
+	{
+		return;
+	}
+
+	// Update the ServerLastTransformUpdateTimeStamp when the control rotation
+	// changes. This is required for the view network smoothing to work properly.
+
+	const auto* Controller{CharacterOwner->GetController()};
+
+	if (IsValid(Controller) && CharacterOwner->GetLocalRole() >= ROLE_Authority &&
+	    PreviousControlRotation != Controller->GetControlRotation())
+	{
+		if (CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
+		{
+			ServerLastTransformUpdateTimeStamp = GetPredictionData_Server_Character()->ServerAccumulatedClientTimeStamp;
+		}
+		else
+		{
+			ServerLastTransformUpdateTimeStamp = GetWorld()->GetTimeSeconds();
+		}
+	}
 }
 
 void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& PreviousLocation, const FQuat& PreviousRotation,
@@ -304,10 +343,34 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 	}
 
 	Super::MoveAutonomous(ClientTimeStamp, DeltaTime, CompressedFlags, NewAcceleration);
+
+	if (!HasValidData())
+	{
+		return;
+	}
+
+	// Process view network smoothing on the listen server.
+
+	const auto* Controller{CharacterOwner->GetController()};
+
+	if (IsValid(Controller) && IsNetMode(NM_ListenServer) && CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
+	{
+		const auto NewControlRotation{Controller->GetControlRotation()};
+
+		auto* Character{Cast<AAlsCharacter>(CharacterOwner)};
+		if (IsValid(Character))
+		{
+			Character->CorrectViewNetworkSmoothing(NewControlRotation);
+		}
+
+		PreviousControlRotation = NewControlRotation;
+	}
 }
 
 void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* NewMovementSettings)
 {
+	ensure(IsValid(NewMovementSettings));
+
 	MovementSettings = NewMovementSettings;
 
 	RefreshGaitSettings();
@@ -315,10 +378,11 @@ void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* N
 
 void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
-	GaitSettings = MovementSettings.IsNull()
-		               ? FAlsMovementGaitSettings{}
-		               : *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)
-		                                  ->GetMovementGaitSettingsForStance(Stance);
+	if (ensure(!MovementSettings.IsNull()))
+	{
+		GaitSettings = *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)
+		                                ->GetMovementGaitSettingsForStance(Stance);
+	}
 
 	RefreshMaxWalkSpeed();
 }

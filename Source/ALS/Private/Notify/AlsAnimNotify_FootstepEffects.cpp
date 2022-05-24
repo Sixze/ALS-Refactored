@@ -26,7 +26,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 {
 	Super::Notify(Mesh, Animation, EventReference);
 
-	if (!IsValid(Mesh) || FootstepEffectsSettings.IsNull())
+	if (!IsValid(Mesh) || !ensure(!FootstepEffectsSettings.IsNull()))
 	{
 		return;
 	}

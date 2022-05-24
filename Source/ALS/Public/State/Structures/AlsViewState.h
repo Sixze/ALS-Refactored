@@ -3,27 +3,39 @@
 #include "AlsViewState.generated.h"
 
 USTRUCT(BlueprintType)
+struct ALS_API FAlsViewNetworkSmoothingState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bEnabled{false};
+
+	// Used to track the time of the last server move.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float ServerTime{0.0f};
+
+	// Used to track the client time as we try to match the server.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float ClientTime{0.0f};
+
+	// Used for remembering how much time has passed between server corrections.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float Duration{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator InitialRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator Rotation{ForceInit};
+};
+
+USTRUCT(BlueprintType)
 struct ALS_API FAlsViewState
 {
 	GENERATED_BODY()
 
-	// Used to track the time of the last server move.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float InterpolationServerTimeStamp{0.0f};
-
-	// Used to track the client time as we try to match the server.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float InterpolationClientTimeStamp{0.0f};
-
-	// Used for remembering how much time has passed between server corrections.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float InterpolationDuration{0.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator InterpolationInitialRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator InterpolationTargetRotation{ForceInit};
+	FAlsViewNetworkSmoothingState NetworkSmoothing;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRotator Rotation{ForceInit};
