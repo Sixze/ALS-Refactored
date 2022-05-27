@@ -848,6 +848,11 @@ void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
 	}
 }
 
+void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
+{
+	SetViewRotation(NewViewRotation);
+}
+
 void AAlsCharacter::OnReplicate_ViewRotation()
 {
 	CorrectViewNetworkSmoothing(ViewRotation);
@@ -911,11 +916,6 @@ void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
 	// Compute actual delta between new server time and client simulation.
 
 	NetworkSmoothing.Duration = NetworkSmoothing.ServerTime - NetworkSmoothing.ClientTime;
-}
-
-void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
-{
-	SetViewRotation(NewViewRotation);
 }
 
 void AAlsCharacter::RefreshView(const float DeltaTime)

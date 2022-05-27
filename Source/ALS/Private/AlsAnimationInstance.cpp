@@ -207,18 +207,26 @@ void UAlsAnimationInstance::RefreshPose()
 		return;
 	}
 
-	PoseState.GaitAmount = FMath::Clamp(GetCurveValue(UAlsConstants::PoseGaitCurve()), 0.0f, 3.0f);
-	PoseState.GaitWalkingAmount = UAlsMath::Clamp01(PoseState.GaitAmount);
-	PoseState.GaitRunningAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 1.0f);
-	PoseState.GaitSprintingAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 2.0f);
-
-	PoseState.MovingAmount = GetCurveValueClamped01(UAlsConstants::PoseMovingCurve());
+	PoseState.GroundedAmount = GetCurveValueClamped01(UAlsConstants::PoseGroundedCurve());
+	PoseState.InAirAmount = GetCurveValueClamped01(UAlsConstants::PoseInAirCurve());
 
 	PoseState.StandingAmount = GetCurveValueClamped01(UAlsConstants::PoseStandingCurve());
 	PoseState.CrouchingAmount = GetCurveValueClamped01(UAlsConstants::PoseCrouchingCurve());
 
-	PoseState.GroundedAmount = GetCurveValueClamped01(UAlsConstants::PoseGroundedCurve());
-	PoseState.InAirAmount = GetCurveValueClamped01(UAlsConstants::PoseInAirCurve());
+	PoseState.MovingAmount = GetCurveValueClamped01(UAlsConstants::PoseMovingCurve());
+	PoseState.GaitAmount = FMath::Clamp(GetCurveValue(UAlsConstants::PoseGaitCurve()), 0.0f, 3.0f);
+
+	// Use the grounded pose curve value to "unweight" the gait pose curve. This is used to
+	// instantly get the full gait value from the very beginning of transitions to grounded states.
+
+	if (PoseState.GroundedAmount > 0.0f)
+	{
+		PoseState.GaitAmount /= PoseState.GroundedAmount;
+	}
+
+	PoseState.GaitWalkingAmount = UAlsMath::Clamp01(PoseState.GaitAmount);
+	PoseState.GaitRunningAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 1.0f);
+	PoseState.GaitSprintingAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 2.0f);
 }
 
 void UAlsAnimationInstance::RefreshViewGameThread()
