@@ -38,16 +38,8 @@ void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	if (!ensure(!Settings.IsNull()) || !ensure(!Character.IsNull()))
-	{
-		return;
-	}
-
-	Character->GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
-		this, [&bTeleported = bTeleported](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
-		{
-			bTeleported |= TeleportType != ETeleportType::None;
-		});
+	ensure(!Settings.IsNull());
+	ensure(!Character.IsNull());
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
@@ -62,14 +54,18 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-#if WITH_EDITOR
-	if (GetWorld()->IsGameWorld())
-#endif
+	if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
 	{
-		Character->ApplyRotationYawSpeedFromAnimationInstance(DeltaTime);
-	}
+		// Manually synchronize mesh rotation with character rotation.
 
-	bAnimationCurvesRelevant = bAnimationCurvesRelevantGameThread;
+		GetSkelMeshComponent()->SetWorldRotation(Character->GetActorQuat() * Character->GetBaseRotationOffset());
+
+		const auto& Proxy{GetProxyOnAnyThread<FAnimInstanceProxy>()};
+
+		const_cast<FTransform&>(Proxy.GetComponentTransform()) = GetSkelMeshComponent()->GetComponentTransform();
+		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = GetSkelMeshComponent()->GetRelativeTransform();
+		const_cast<FTransform&>(Proxy.GetActorTransform()) = Character->GetActorTransform();
+	}
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebug(Character, UAlsConstants::TracesDisplayName());
@@ -156,16 +152,11 @@ void UAlsAnimationInstance::NativePostEvaluateAnimation()
 #endif
 
 	bPendingUpdate = false;
-	bTeleported = false;
+	LocomotionState.bTeleported = false;
 }
 
 void UAlsAnimationInstance::RefreshLayering()
 {
-	if (!bAnimationCurvesRelevant)
-	{
-		return;
-	}
-
 	LayeringState.HeadBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadCurve());
 	LayeringState.HeadAdditiveBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadAdditiveCurve());
 	LayeringState.HeadSlotBlendAmount = GetCurveValueClamped01(UAlsConstants::LayerHeadSlotCurve());
@@ -202,11 +193,6 @@ void UAlsAnimationInstance::RefreshLayering()
 
 void UAlsAnimationInstance::RefreshPose()
 {
-	if (!bAnimationCurvesRelevant)
-	{
-		return;
-	}
-
 	PoseState.GroundedAmount = GetCurveValueClamped01(UAlsConstants::PoseGroundedCurve());
 	PoseState.InAirAmount = GetCurveValueClamped01(UAlsConstants::PoseInAirCurve());
 
@@ -214,7 +200,7 @@ void UAlsAnimationInstance::RefreshPose()
 	PoseState.CrouchingAmount = GetCurveValueClamped01(UAlsConstants::PoseCrouchingCurve());
 
 	PoseState.MovingAmount = GetCurveValueClamped01(UAlsConstants::PoseMovingCurve());
-	PoseState.GaitAmount = FMath::Clamp(GetCurveValue(UAlsConstants::PoseGaitCurve()), 0.0f, 3.0f);
+	PoseState.GaitAmount = GetCurveValue(UAlsConstants::PoseGaitCurve());
 
 	// Use the grounded pose curve value to "unweight" the gait pose curve. This is used to
 	// instantly get the full gait value from the very beginning of transitions to grounded states.
@@ -224,6 +210,7 @@ void UAlsAnimationInstance::RefreshPose()
 		PoseState.GaitAmount /= PoseState.GroundedAmount;
 	}
 
+	PoseState.GaitAmount = FMath::Clamp(PoseState.GaitAmount, 0.0f, 3.0f);
 	PoseState.GaitWalkingAmount = UAlsMath::Clamp01(PoseState.GaitAmount);
 	PoseState.GaitRunningAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 1.0f);
 	PoseState.GaitSprintingAmount = UAlsMath::Clamp01(PoseState.GaitAmount - 2.0f);
@@ -402,6 +389,10 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	                                Locomotion.Speed > Settings->General.MovingSmoothSpeedThreshold;
 
 	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
+
+	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(15.0f)};
+
+	LocomotionState.bTeleported |= FVector::DistSquared(LocomotionState.Location, Locomotion.Location) > TeleportDistanceThresholdSquared;
 	LocomotionState.Location = Locomotion.Location;
 	LocomotionState.Rotation = Locomotion.Rotation;
 	LocomotionState.RotationQuaternion = Locomotion.RotationQuaternion;
@@ -852,15 +843,6 @@ void UAlsAnimationInstance::RefreshFeetGameThread()
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 {
-	FeetState.bReinitializationRequired |= bPendingUpdate || !bAnimationCurvesRelevant;
-
-	// If animation curves are not relevant, then skip feet update entirely.
-
-	if (!bAnimationCurvesRelevant)
-	{
-		return;
-	}
-
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurve()), -1.0f, 1.0f);
 	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurve());
 
@@ -876,8 +858,6 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	FeetState.MinMaxPelvisOffsetZ.X = FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
 	FeetState.MinMaxPelvisOffsetZ.Y = FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
-
-	FeetState.bReinitializationRequired = false;
 }
 
 void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
@@ -902,7 +882,7 @@ void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& F
 
 void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) const
 {
-	if (!bTeleported || FeetState.bReinitializationRequired ||
+	if (bPendingUpdate || !LocomotionState.bTeleported ||
 	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;
@@ -926,13 +906,13 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) co
 
 void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const
 {
-	if (!LocomotionState.BasedMovement.bBaseChanged && !FeetState.bReinitializationRequired ||
+	if (!bPendingUpdate && !LocomotionState.BasedMovement.bBaseChanged ||
 	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;
 	}
 
-	if (FeetState.bReinitializationRequired)
+	if (bPendingUpdate)
 	{
 		FootState.LockLocation = FootState.TargetLocation;
 		FootState.LockRotation = FootState.TargetRotation;
@@ -971,7 +951,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		static constexpr auto MovingDecreaseSpeed{5.0f};
 		static constexpr auto NotGroundedDecreaseSpeed{0.6f};
 
-		NewFootLockAmount = FeetState.bReinitializationRequired
+		NewFootLockAmount = bPendingUpdate
 			                    ? 0.0f
 			                    : FMath::Max(0.0f, FMath::Min(NewFootLockAmount,
 			                                                  FootState.LockAmount - DeltaTime *
@@ -1075,7 +1055,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		FootState.OffsetTargetRotation = FQuat::Identity;
 		FootState.OffsetSpringState.Reset();
 
-		if (FeetState.bReinitializationRequired)
+		if (bPendingUpdate)
 		{
 			FootState.OffsetLocation = FVector::ZeroVector;
 			FootState.OffsetRotation = FQuat::Identity;
@@ -1149,7 +1129,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	// Interpolate current offsets to the new target values.
 
-	if (FeetState.bReinitializationRequired)
+	if (bPendingUpdate)
 	{
 		FootState.OffsetSpringState.Reset();
 
@@ -1285,8 +1265,7 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 		return;
 	}
 
-	if (!bAnimationCurvesRelevant || !TransitionsState.bTransitionsAllowed ||
-	    LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (!TransitionsState.bTransitionsAllowed || LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}

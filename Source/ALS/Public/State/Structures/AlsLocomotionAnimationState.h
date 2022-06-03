@@ -68,6 +68,9 @@ struct ALS_API FAlsLocomotionAnimationState
 	float TargetYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bTeleported;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Location{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

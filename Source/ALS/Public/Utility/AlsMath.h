@@ -149,7 +149,8 @@ public:
 		DisplayName = "Angle Between (Skip Normalization)", Meta = (AutoCreateRefTerm = "From, To"))
 	static double AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", DisplayName = "Slerp (Skip Normalization)")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector",
+		DisplayName = "Slerp (Skip Normalization)", Meta = (AutoCreateRefTerm = "From, To"))
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input")
@@ -173,7 +174,6 @@ inline float UAlsMath::LerpClamped(const float A, const float B, const float Alp
 inline float UAlsMath::LerpAngle(const float A, const float B, const float Alpha)
 {
 	auto Delta{FRotator3f::NormalizeAxis(B - A)};
-
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
@@ -289,7 +289,6 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 	}
 
 	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
-
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
@@ -309,6 +308,7 @@ inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
 	}
 
 	const auto Scale{FMath::InvSqrt(MagnitudeSquared)};
+
 	return {Vector.X * Scale, Vector.Y * Scale, Vector.Z * Scale};
 }
 
@@ -321,6 +321,7 @@ inline FVector3f UAlsMath::ClampMagnitude01(const FVector3f& Vector)
 	}
 
 	const auto Scale{FMath::InvSqrt(MagnitudeSquared)};
+
 	return {Vector.X * Scale, Vector.Y * Scale, Vector.Z * Scale};
 }
 
@@ -333,6 +334,7 @@ inline FVector2D UAlsMath::ClampMagnitude012D(const FVector2D& Vector)
 	}
 
 	const auto Scale{FMath::InvSqrt(MagnitudeSquared)};
+
 	return {Vector.X * Scale, Vector.Y * Scale};
 }
 

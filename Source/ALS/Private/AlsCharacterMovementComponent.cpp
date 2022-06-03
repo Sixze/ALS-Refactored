@@ -1,6 +1,7 @@
 #include "AlsCharacterMovementComponent.h"
 
 #include "AlsCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
 #include "GameFramework/Controller.h"
 
@@ -110,27 +111,24 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	// NetworkMaxSmoothUpdateDistance = 92.0f;
 	// NetworkNoSmoothUpdateDistance = 140.0f;
 
+	MaxAcceleration = 1500.0f;
+	BrakingFrictionFactor = 0.0f;
+	SetCrouchedHalfHeight(56.0f);
+
+	bRunPhysicsWithNoController = true;
+
 	GroundFriction = 4.0f;
 	MaxWalkSpeed = 375.0f;
 	MaxWalkSpeedCrouched = 200.0f;
-	MaxAcceleration = 1500.0f;
-
-	BrakingFrictionFactor = 0.0f;
-	SetCrouchedHalfHeight(56.0f);
-	bRunPhysicsWithNoController = true;
-
 	MinAnalogWalkSpeed = 25.0f;
 	bCanWalkOffLedgesWhenCrouching = true;
+	bIgnoreBaseRotation = true;
+
 	PerchRadiusThreshold = 20.0f;
 	PerchAdditionalHeight = 0.0f;
 	LedgeCheckThreshold = 0.0f;
 
 	AirControl = 0.15f;
-	BrakingDecelerationFlying = 1000.0f;
-
-	NavAgentProps.bCanCrouch = true;
-	NavAgentProps.bCanFly = true;
-	bUseAccelerationForPaths = true;
 
 	// https://unrealengine.hatenablog.com/entry/2019/01/16/231404
 
@@ -139,9 +137,15 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 
 	bNetworkAlwaysReplicateTransformUpdateTimestamp = true; // Required for view interpolation.
 
-	bIgnoreBaseRotation = true;
+	RotationRate = FRotator::ZeroRotator;
+	bUseControllerDesiredRotation = false;
+	bOrientRotationToMovement = false;
 
 	bAllowPhysicsRotationDuringAnimRootMotion = true; // Used to allow character rotation while rolling.
+
+	NavAgentProps.bCanCrouch = true;
+	NavAgentProps.bCanFly = true;
+	bUseAccelerationForPaths = true;
 }
 
 #if WITH_EDITOR
@@ -149,7 +153,10 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 {
 	auto bCanEditChange{Super::CanEditChange(Property)};
 
-	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation))
+	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation) ||
+	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) ||
+	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) ||
+	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement))
 	{
 		bCanEditChange = false;
 	}
@@ -162,6 +169,9 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 void UAlsCharacterMovementComponent::BeginPlay()
 {
 	ensureMsgf(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."));
+
+	ensureMsgf(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
+	           TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
 }
@@ -215,10 +225,10 @@ void UAlsCharacterMovementComponent::ControlledCharacterMove(const FVector& Inpu
 
 void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 {
+	Super::PhysicsRotation(DeltaTime);
+
 	if (HasValidData() && (bRunPhysicsWithNoController || !CharacterOwner->Controller.IsNull()))
 	{
-		Super::PhysicsRotation(DeltaTime);
-
 		OnPhysicsRotation.Broadcast(DeltaTime);
 	}
 }
@@ -276,15 +286,10 @@ void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
 {
 	Super::PerformMovement(DeltaTime);
 
-	if (!HasValidData())
-	{
-		return;
-	}
-
 	// Update the ServerLastTransformUpdateTimeStamp when the control rotation
 	// changes. This is required for the view network smoothing to work properly.
 
-	const auto* Controller{CharacterOwner->GetController()};
+	const auto* Controller{HasValidData() ? CharacterOwner->GetController() : nullptr};
 
 	if (IsValid(Controller) && CharacterOwner->GetLocalRole() >= ROLE_Authority &&
 	    PreviousControlRotation != Controller->GetControlRotation())
@@ -300,23 +305,6 @@ void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
 	}
 }
 
-void UAlsCharacterMovementComponent::SmoothCorrection(const FVector& PreviousLocation, const FQuat& PreviousRotation,
-                                                      const FVector& NewLocation, const FQuat& NewRotation)
-{
-	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
-
-	if (bJustTeleported && GetOwnerRole() <= ROLE_SimulatedProxy &&
-	    FVector::DistSquared2D(PreviousLocation, NewLocation) <= TeleportDistanceThresholdSquared)
-	{
-		// By default, the engine treats any movement of the simulated proxy as teleportation, and because of this, foot locking cannot
-		// work properly. Instead, treat movement as teleportation only if the character has moved more than some threshold distance.
-
-		bJustTeleported = false;
-	}
-
-	Super::SmoothCorrection(PreviousLocation, PreviousRotation, NewLocation, NewRotation);
-}
-
 FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData_Client() const
 {
 	if (ClientPredictionData == nullptr)
@@ -327,6 +315,26 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 	}
 
 	return ClientPredictionData;
+}
+
+void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
+{
+	auto* Mesh{HasValidData() ? CharacterOwner->GetMesh() : nullptr};
+
+	if (NetworkSmoothingMode == ENetworkSmoothingMode::Disabled || !IsValid(Mesh) ||
+	    !Mesh->IsUsingAbsoluteRotation() || Mesh->IsSimulatingPhysics())
+	{
+		Super::SmoothClientPosition(DeltaTime);
+		return;
+	}
+
+	// Ignore mesh rotation smoothing when using absolute mesh rotation because in this case ALS controls the mesh rotation itself.
+
+	const auto InitialRotation{Mesh->GetComponentQuat()};
+
+	Super::SmoothClientPosition(DeltaTime);
+
+	Mesh->SetWorldRotation(InitialRotation);
 }
 
 void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp, const float DeltaTime,
@@ -344,14 +352,9 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 
 	Super::MoveAutonomous(ClientTimeStamp, DeltaTime, CompressedFlags, NewAcceleration);
 
-	if (!HasValidData())
-	{
-		return;
-	}
-
 	// Process view network smoothing on the listen server.
 
-	const auto* Controller{CharacterOwner->GetController()};
+	const auto* Controller{HasValidData() ? CharacterOwner->GetController() : nullptr};
 
 	if (IsValid(Controller) && IsNetMode(NM_ListenServer) && CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
 	{

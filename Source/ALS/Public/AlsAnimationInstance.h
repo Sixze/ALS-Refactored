@@ -41,21 +41,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bPendingUpdate{true};
 
-	// The animation curves will be relevant if the character is rendered or VisibilityBasedAnimTickOption
-	// is set to AlwaysTickPoseAndRefreshBones, otherwise the curves will have their old values even though
-	// the animation blueprint continues to update.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bAnimationCurvesRelevantGameThread;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bAnimationCurvesRelevant;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bTeleported;
-
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	bool bDisplayDebugTraces{false};
+	bool bDisplayDebugTraces;
 
 	TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
@@ -141,8 +129,6 @@ protected:
 
 public:
 	void MarkPendingUpdate();
-
-	void SetAnimationCurvesRelevant(bool bNewRelevant);
 
 private:
 	void RefreshLayering();
@@ -317,11 +303,6 @@ inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe()
 inline void UAlsAnimationInstance::MarkPendingUpdate()
 {
 	bPendingUpdate |= true;
-}
-
-inline void UAlsAnimationInstance::SetAnimationCurvesRelevant(const bool bNewRelevant)
-{
-	bAnimationCurvesRelevantGameThread = bNewRelevant;
 }
 
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewModeTag)

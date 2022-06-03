@@ -362,12 +362,7 @@ protected:
 
 	float CalculateRotationInterpolationSpeed() const;
 
-public:
-	void ApplyRotationYawSpeedFromAnimationInstance(float DeltaTime);
-
 private:
-	void ApplyRotationYawSpeedFromCharacter(float DeltaTime);
-
 	void ApplyRotationYawSpeed(float DeltaTime);
 
 	void RefreshInAirRotation(float DeltaTime);
@@ -377,7 +372,6 @@ protected:
 
 	void RefreshInAirAimingRotation(float DeltaTime);
 
-protected:
 	void RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
 
 	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,

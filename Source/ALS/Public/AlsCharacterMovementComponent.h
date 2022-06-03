@@ -139,12 +139,11 @@ protected:
 	virtual void PerformMovement(float DeltaTime) override;
 
 public:
-	virtual void SmoothCorrection(const FVector& PreviousLocation, const FQuat& PreviousRotation,
-	                              const FVector& NewLocation, const FQuat& NewRotation) override;
-
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 protected:
+	virtual void SmoothClientPosition(float DeltaTime) override;
+
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
 
 public:

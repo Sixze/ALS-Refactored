@@ -24,9 +24,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetCapsuleComponent()->InitCapsuleSize(30.0f, 90.0f);
 
-	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -90.0f});
+	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -92.0f});
 	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
-	GetMesh()->SetAnimInstanceClass(UAlsAnimationInstance::StaticClass());
 
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 
@@ -126,6 +125,11 @@ void AAlsCharacter::PostInitializeComponents()
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	Super::PostInitializeComponents();
+
+	// Use absolute mesh rotation to be able to synchronize character rotation with
+	// rotation animations by updating the mesh rotation only from the animation instance.
+
+	GetMesh()->SetUsingAbsoluteRotation(true);
 }
 
 void AAlsCharacter::BeginPlay()
@@ -226,10 +230,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	{
 		AnimationInstance->MarkPendingUpdate();
 	}
-
-	AnimationInstance->SetAnimationCurvesRelevant(
-		GetMesh()->bRecentlyRendered ||
-		GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones);
 }
 
 void AAlsCharacter::PossessedBy(AController* NewController)
@@ -1001,6 +1001,12 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation(const float DeltaTime)
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
 	}
+	else if (GetMesh()->IsUsingAbsoluteRotation())
+	{
+		LocomotionState.Location = GetMesh()->GetComponentLocation() - GetBaseTranslationOffset();
+		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
+		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+	}
 	else
 	{
 		const auto SmoothTransform{
@@ -1080,7 +1086,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 	{
 		// Not moving.
 
-		ApplyRotationYawSpeedFromCharacter(DeltaTime);
+		ApplyRotationYawSpeed(DeltaTime);
 
 		if (TryRefreshCustomGroundedNotMovingRotation(DeltaTime))
 		{
@@ -1221,35 +1227,6 @@ float AAlsCharacter::CalculateRotationInterpolationSpeed() const
 	return AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve
 	                           ->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
 	       UAlsMath::LerpClamped(1.0f, InterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
-}
-
-void AAlsCharacter::ApplyRotationYawSpeedFromAnimationInstance(const float DeltaTime)
-{
-	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
-	    LocomotionMode != AlsLocomotionModeTags::Grounded ||
-	    HasAnyRootMotion() || LocomotionState.bMoving)
-	{
-		return;
-	}
-
-	// ReSharper disable once CppRedundantParentheses
-	if (GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
-	    (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled()))
-	{
-		ApplyRotationYawSpeed(DeltaTime);
-	}
-}
-
-void AAlsCharacter::ApplyRotationYawSpeedFromCharacter(const float DeltaTime)
-{
-	// ReSharper disable once CppRedundantParentheses
-	if (GetMesh()->AnimUpdateRateParams->UpdateRate > 1 ||
-	    (GetLocalRole() >= ROLE_Authority && !IsLocallyControlled()))
-	{
-		return;
-	}
-
-	ApplyRotationYawSpeed(DeltaTime);
 }
 
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
