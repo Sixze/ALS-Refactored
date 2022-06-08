@@ -1,11 +1,9 @@
 #include "AlsAnimationInstance.h"
 
 #include "AlsCharacter.h"
-#include "TimerManager.h"
 #include "Animation/AnimInstanceProxy.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
-#include "Engine/CollisionProfile.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
@@ -38,8 +36,21 @@ void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	ensure(!Settings.IsNull());
-	ensure(!Character.IsNull());
+	if (!ensure(!Settings.IsNull()) || !ensure(!Character.IsNull()))
+	{
+		return;
+	}
+
+	if (Character->GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		// Teleportation of simulated proxies is done in a different way.
+
+		Character->GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
+			this, [&bTeleported = bTeleported](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
+			{
+				bTeleported |= TeleportType != ETeleportType::None;
+			});
+	}
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
@@ -60,12 +71,16 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		GetSkelMeshComponent()->SetWorldRotation(Character->GetActorQuat() * Character->GetBaseRotationOffset());
 
+		// Re-cache transforms because the skeletal mesh transform has changed before.
+
 		const auto& Proxy{GetProxyOnAnyThread<FAnimInstanceProxy>()};
 
 		const_cast<FTransform&>(Proxy.GetComponentTransform()) = GetSkelMeshComponent()->GetComponentTransform();
 		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = GetSkelMeshComponent()->GetRelativeTransform();
 		const_cast<FTransform&>(Proxy.GetActorTransform()) = Character->GetActorTransform();
 	}
+
+	bTeleported |= Character->IsSimulatedProxyTeleported();
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebug(Character, UAlsConstants::TracesDisplayName());
@@ -152,7 +167,7 @@ void UAlsAnimationInstance::NativePostEvaluateAnimation()
 #endif
 
 	bPendingUpdate = false;
-	LocomotionState.bTeleported = false;
+	bTeleported = false;
 }
 
 void UAlsAnimationInstance::RefreshLayering()
@@ -389,10 +404,6 @@ void UAlsAnimationInstance::RefreshLocomotionGameThread()
 	                                Locomotion.Speed > Settings->General.MovingSmoothSpeedThreshold;
 
 	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
-
-	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(15.0f)};
-
-	LocomotionState.bTeleported |= FVector::DistSquared(LocomotionState.Location, Locomotion.Location) > TeleportDistanceThresholdSquared;
 	LocomotionState.Location = Locomotion.Location;
 	LocomotionState.Rotation = Locomotion.Rotation;
 	LocomotionState.RotationQuaternion = Locomotion.RotationQuaternion;
@@ -882,8 +893,7 @@ void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& F
 
 void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) const
 {
-	if (bPendingUpdate || !LocomotionState.bTeleported ||
-	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
+	if (bPendingUpdate || !bTeleported || !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;
 	}

@@ -11,5 +11,5 @@ struct ALS_API FAlsViewAnimationSettings
 	float LookTowardsCameraRotationInterpolationSpeed{10.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
-	float LookTowardsInputYawAngleInterpolationSpeed{10.0f};
+	float LookTowardsInputYawAngleInterpolationSpeed{8.0f};
 };

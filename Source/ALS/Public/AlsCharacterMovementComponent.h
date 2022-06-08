@@ -102,6 +102,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FRotator PreviousControlRotation;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	FVector PendingPenetrationAdjustment;
+
 public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;
 
@@ -114,7 +117,7 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
+	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode = 0) override;
 
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 
@@ -145,6 +148,14 @@ protected:
 	virtual void SmoothClientPosition(float DeltaTime) override;
 
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
+
+	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,
+	                              float SweepRadius, const FHitResult* DownwardSweepResult) const override;
+
+private:
+	void SavePenetrationAdjustment(const FHitResult& Hit);
+
+	void ApplyPendingPenetrationAdjustment();
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character Movement")

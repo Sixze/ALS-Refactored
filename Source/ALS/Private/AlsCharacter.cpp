@@ -15,12 +15,18 @@
 #include "Utility/AlsUtility.h"
 #include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
+namespace AlsCharacterConstants
+{
+	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
+}
+
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationYaw = false;
+	bClientCheckEncroachmentOnNetUpdate = true; // Required for bSimGravityDisabled to be updated.
 
 	GetCapsuleComponent()->InitCapsuleSize(30.0f, 90.0f);
 
@@ -173,14 +179,45 @@ void AAlsCharacter::BeginPlay()
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
+	bSimulatedProxyTeleported = false;
+
 	if (GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
 
 		GetReplicatedMovement_Mutable().Rotation = GetActorRotation();
+
+		if (!ReplicatedBasedMovement.HasRelativeLocation())
+		{
+			const auto PreviousLocation{GetActorLocation()};
+			const auto NewLocation{FRepMovement::RebaseOntoLocalOrigin(GetReplicatedMovement().Location, this)};
+
+			bSimulatedProxyTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) >
+				AlsCharacterConstants::TeleportDistanceThresholdSquared;
+		}
 	}
 
 	Super::PostNetReceiveLocationAndRotation();
+
+	bSimulatedProxyTeleported |= bSimGravityDisabled;
+}
+
+void AAlsCharacter::OnRep_ReplicatedBasedMovement()
+{
+	bSimulatedProxyTeleported = false;
+
+	if (GetLocalRole() <= ROLE_SimulatedProxy && ReplicatedBasedMovement.HasRelativeLocation())
+	{
+		const auto PreviousLocation{GetActorLocation()};
+		const auto NewLocation{GetCharacterMovement()->OldBaseLocation + ReplicatedBasedMovement.Location};
+
+		bSimulatedProxyTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) >
+			AlsCharacterConstants::TeleportDistanceThresholdSquared;
+	}
+
+	Super::OnRep_ReplicatedBasedMovement();
+
+	bSimulatedProxyTeleported |= bSimGravityDisabled;
 }
 
 void AAlsCharacter::Tick(const float DeltaTime)

@@ -14,7 +14,7 @@ class ALS_API UAlsCharacterSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float MovingSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

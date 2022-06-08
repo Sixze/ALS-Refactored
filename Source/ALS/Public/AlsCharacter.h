@@ -54,6 +54,9 @@ private:
 		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
 	FGameplayTag OverlayMode;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	bool bSimulatedProxyTeleported;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
 		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
 	TObjectPtr<UAlsAnimationInstance> AnimationInstance;
@@ -120,6 +123,8 @@ protected:
 public:
 	virtual void PostNetReceiveLocationAndRotation() override;
 
+	virtual void OnRep_ReplicatedBasedMovement() override;
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PossessedBy(AController* NewController) override;
@@ -127,6 +132,9 @@ public:
 	virtual void Restart() override;
 
 	virtual void FaceRotation(FRotator NewRotation, float DeltaTime) override final;
+
+public:
+	bool IsSimulatedProxyTeleported() const;
 
 private:
 	void RefreshVisibilityBasedAnimTickOption() const;
@@ -556,6 +564,11 @@ private:
 
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
+
+inline bool AAlsCharacter::IsSimulatedProxyTeleported() const
+{
+	return bSimulatedProxyTeleported;
+}
 
 inline EAlsStance AAlsCharacter::GetDesiredStance() const
 {
