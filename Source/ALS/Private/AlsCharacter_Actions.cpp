@@ -513,6 +513,21 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 
+	// Limit the ragdoll's speed to a few frames, because for some unclear reason,
+	// it can get a much higher initial speed than the character's last speed.
+
+	// TODO Find a better solution or wait for a fix in future engine versions.
+
+	static constexpr auto MinSpeedLimit{200.0f};
+
+	RagdollingState.SpeedLimitFrameTimeRemaining = 8;
+	RagdollingState.SpeedLimit = FMath::Max(LocomotionState.Velocity.Size(), MinSpeedLimit);
+
+	GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBone(), true, false, [SpeedLimit = RagdollingState.SpeedLimit](FBodyInstance* Body)
+	{
+		Body->SetLinearVelocity(Body->GetUnrealWorldVelocity().GetClampedToMaxSize(SpeedLimit), false);
+	});
+
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
 
@@ -553,9 +568,19 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		return;
 	}
 
+	if (RagdollingState.SpeedLimitFrameTimeRemaining > 0)
+	{
+		GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBone(), true, false, [SpeedLimit = RagdollingState.SpeedLimit](FBodyInstance* Body)
+		{
+			Body->SetLinearVelocity(Body->GetUnrealWorldVelocity().GetClampedToMaxSize(SpeedLimit), false);
+		});
+
+		RagdollingState.SpeedLimitFrameTimeRemaining -= 1;
+	}
+
 	if (IsNetMode(NM_DedicatedServer))
 	{
-		// Change animation tick option when the host is a dedicated server to avoid z-location bug.
+		// Change animation tick option when the host is a dedicated server to avoid z-location issue.
 		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}
 
