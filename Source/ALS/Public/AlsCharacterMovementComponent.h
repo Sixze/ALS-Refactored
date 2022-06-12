@@ -2,6 +2,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMovementSettings.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsCharacterMovementComponent.generated.h"
 
 using FAlsPhysicsRotationDelegate = TMulticastDelegate<void(float DeltaTime)>;
@@ -12,11 +13,11 @@ private:
 	using Super = FCharacterNetworkMoveData;
 
 public:
-	EAlsStance Stance{EAlsStance::Standing};
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
-	EAlsRotationMode RotationMode{EAlsRotationMode::LookingDirection};
+	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
-	EAlsGait MaxAllowedGait{EAlsGait::Walking};
+	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
 public:
 	virtual void ClientFillNetworkMoveData(const FSavedMove_Character& Move, ENetworkMoveType MoveType) override;
@@ -39,11 +40,11 @@ private:
 	using Super = FSavedMove_Character;
 
 public:
-	EAlsStance Stance{EAlsStance::Standing};
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
-	EAlsRotationMode RotationMode{EAlsRotationMode::LookingDirection};
+	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
-	EAlsGait MaxAllowedGait{EAlsGait::Walking};
+	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
 public:
 	virtual void Clear() override;
@@ -87,13 +88,13 @@ private:
 	FAlsMovementGaitSettings GaitSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	EAlsStance Stance;
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	EAlsRotationMode RotationMode;
+	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	EAlsGait MaxAllowedGait;
+	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	bool bMovementModeLocked;
@@ -167,11 +168,11 @@ private:
 	void RefreshGaitSettings();
 
 public:
-	void SetStance(EAlsStance NewStance);
+	void SetStance(const FGameplayTag& NewStanceTag);
 
-	void SetRotationMode(EAlsRotationMode NewMode);
+	void SetRotationMode(const FGameplayTag& NewModeTag);
 
-	void SetMaxAllowedGait(EAlsGait NewGait);
+	void SetMaxAllowedGait(const FGameplayTag& NewGaitTag);
 
 private:
 	void RefreshMaxWalkSpeed();

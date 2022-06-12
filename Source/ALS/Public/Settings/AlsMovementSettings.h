@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include "Engine/DataAsset.h"
-#include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsRotationMode.h"
-#include "State/Enumerations/AlsStance.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsMovementSettings.generated.h"
 
 class UCurveFloat;
@@ -35,26 +33,27 @@ public:
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve{nullptr};
 
 public:
-	float GetSpeedForGait(const EAlsGait Gait) const;
+	float GetSpeedForGait(const FGameplayTag& GaitTag) const;
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedForGait(const EAlsGait Gait) const
+inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& GaitTag) const
 {
-	switch (Gait)
+	if (GaitTag == AlsGaitTags::Walking)
 	{
-		case EAlsGait::Running:
-			return RunSpeed;
-
-		case EAlsGait::Sprinting:
-			return SprintSpeed;
-
-		case EAlsGait::Walking:
-			return WalkSpeed;
-
-		default:
-			checkNoEntry();
-			return 0.0f;
+		return WalkSpeed;
 	}
+
+	if (GaitTag == AlsGaitTags::Running)
+	{
+		return RunSpeed;
+	}
+
+	if (GaitTag == AlsGaitTags::Sprinting)
+	{
+		return SprintSpeed;
+	}
+
+	return 0.0f;
 }
 
 USTRUCT(BlueprintType)
@@ -62,32 +61,13 @@ struct ALS_API FAlsMovementStanceSettings
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsMovementGaitSettings Standing;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FAlsMovementGaitSettings Crouching;
-
-public:
-	const FAlsMovementGaitSettings* GetMovementGaitSettingsForStance(const EAlsStance Stance) const;
-};
-
-inline const FAlsMovementGaitSettings* FAlsMovementStanceSettings::GetMovementGaitSettingsForStance(const EAlsStance Stance) const
-{
-	switch (Stance)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ForceInlineRow))
+	TMap<FGameplayTag, FAlsMovementGaitSettings> Stances
 	{
-		case EAlsStance::Standing:
-			return &Standing;
-
-		case EAlsStance::Crouching:
-			return &Crouching;
-
-		default:
-			checkNoEntry();
-			return nullptr;
-	}
-}
+		{AlsStanceTags::Standing, {}},
+		{AlsStanceTags::Crouching, {}}
+	};
+};
 
 UCLASS(Blueprintable, BlueprintType)
 class ALS_API UAlsMovementSettings : public UDataAsset
@@ -95,35 +75,11 @@ class ALS_API UAlsMovementSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FAlsMovementStanceSettings LookingDirection;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FAlsMovementStanceSettings VelocityDirection;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FAlsMovementStanceSettings Aiming;
-
-public:
-	const FAlsMovementStanceSettings* GetMovementStanceSettingsForRotationMode(const EAlsRotationMode RotationMode) const;
-};
-
-inline const FAlsMovementStanceSettings* UAlsMovementSettings::GetMovementStanceSettingsForRotationMode(
-	const EAlsRotationMode RotationMode) const
-{
-	switch (RotationMode)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ForceInlineRow))
+	TMap<FGameplayTag, FAlsMovementStanceSettings> RotationModes
 	{
-		case EAlsRotationMode::LookingDirection:
-			return &LookingDirection;
-
-		case EAlsRotationMode::VelocityDirection:
-			return &VelocityDirection;
-
-		case EAlsRotationMode::Aiming:
-			return &Aiming;
-
-		default:
-			checkNoEntry();
-			return nullptr;
-	}
-}
+		{AlsRotationModeTags::VelocityDirection, {}},
+		{AlsRotationModeTags::LookingDirection, {}},
+		{AlsRotationModeTags::Aiming, {}}
+	};
+};

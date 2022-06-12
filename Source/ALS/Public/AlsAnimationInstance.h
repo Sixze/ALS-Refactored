@@ -2,23 +2,19 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
-#include "State/Enumerations/AlsGait.h"
-#include "State/Enumerations/AlsRotationMode.h"
-#include "State/Enumerations/AlsStance.h"
-#include "State/Enumerations/AlsViewMode.h"
-#include "State/Structures/AlsFeetState.h"
-#include "State/Structures/AlsGroundedState.h"
-#include "State/Structures/AlsInAirState.h"
-#include "State/Structures/AlsLayeringState.h"
-#include "State/Structures/AlsLeanState.h"
-#include "State/Structures/AlsLocomotionAnimationState.h"
-#include "State/Structures/AlsPoseState.h"
-#include "State/Structures/AlsRagdollingAnimationState.h"
-#include "State/Structures/AlsRotateInPlaceState.h"
-#include "State/Structures/AlsTransitionsState.h"
-#include "State/Structures/AlsTurnInPlaceState.h"
-#include "State/Structures/AlsViewAnimationState.h"
-#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
+#include "State/AlsFeetState.h"
+#include "State/AlsGroundedState.h"
+#include "State/AlsInAirState.h"
+#include "State/AlsLayeringState.h"
+#include "State/AlsLeanState.h"
+#include "State/AlsLocomotionAnimationState.h"
+#include "State/AlsPoseState.h"
+#include "State/AlsRagdollingAnimationState.h"
+#include "State/AlsRotateInPlaceState.h"
+#include "State/AlsTransitionsState.h"
+#include "State/AlsTurnInPlaceState.h"
+#include "State/AlsViewAnimationState.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
 class UAlsAnimationInstanceSettings;
@@ -52,13 +48,13 @@ private:
 #endif
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsStanceCache Stance;
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsGaitCache Gait;
+	FGameplayTag Gait{AlsGaitTags::Walking};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsRotationModeCache RotationMode;
+	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
@@ -67,7 +63,7 @@ private:
 	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FAlsViewModeCache ViewMode{EAlsViewMode::ThirdPerson};
+	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag OverlayMode;

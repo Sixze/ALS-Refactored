@@ -9,7 +9,6 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsUtility.h"
-#include "Utility/GameplayTags/AlsLocomotionActionTags.h"
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {
@@ -243,7 +242,7 @@ void UAlsAnimationInstance::RefreshViewGameThread()
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
-	return RotationMode.IsAiming();
+	return RotationMode == AlsRotationModeTags::Aiming;
 }
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
@@ -277,17 +276,17 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode.IsVelocityDirection())
-	{
-		ViewState.LookTowardsCamera.bReinitializationRequired = true;
-
-		RefreshLookTowardsInput(DeltaTime);
-	}
-	else
+	if (RotationMode == AlsRotationModeTags::LookingDirection || RotationMode == AlsRotationModeTags::Aiming)
 	{
 		ViewState.LookTowardsInput.bReinitializationRequired = true;
 
 		RefreshLookTowardsCamera(DeltaTime);
+	}
+	else
+	{
+		ViewState.LookTowardsCamera.bReinitializationRequired = true;
+
+		RefreshLookTowardsInput(DeltaTime);
 	}
 }
 
@@ -505,7 +504,7 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
 	// the looking direction / aiming modes and is used in the cycle blending to blend to the appropriate directional states.
 
-	if (Gait.IsSprinting() || RotationMode.IsVelocityDirection())
+	if (RotationMode == AlsRotationModeTags::VelocityDirection || Gait == AlsGaitTags::Sprinting)
 	{
 		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
 		return;
@@ -580,7 +579,7 @@ void UAlsAnimationInstance::RefreshRotationYawOffsets()
 
 void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationAmount, const float DeltaTime)
 {
-	if (!Gait.IsSprinting())
+	if (Gait != AlsGaitTags::Sprinting)
 	{
 		GroundedState.SprintTime = 0.0f;
 		GroundedState.SprintAccelerationAmount = 0.0f;
@@ -628,7 +627,7 @@ void UAlsAnimationInstance::RefreshWalkRunBlendAmount()
 {
 	// Calculate the walk run blend. This value is used within the blend spaces to blend between walking and running.
 
-	GroundedState.WalkRunBlendAmount = Gait.IsWalking() ? 0.0f : 1.0f;
+	GroundedState.WalkRunBlendAmount = Gait == AlsGaitTags::Walking ? 0.0f : 1.0f;
 }
 
 void UAlsAnimationInstance::RefreshStandingPlayRate()
@@ -1168,7 +1167,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()
 {
-	if (!RotationMode.IsVelocityDirection())
+	if (RotationMode != AlsRotationModeTags::VelocityDirection)
 	{
 		PlayTransitionLeftAnimation(Settings->Transitions.QuickStopBlendInTime, Settings->Transitions.QuickStopBlendOutTime,
 		                            Settings->Transitions.QuickStopPlayRate.X, Settings->Transitions.QuickStopStartTime);
@@ -1213,7 +1212,7 @@ void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation
 	}
 
 	// ReSharper disable once CppRedundantParentheses
-	if ((bFromStandingIdleOnly && (Character->GetLocomotionState().bMoving || Character->GetStance() != EAlsStance::Standing)))
+	if ((bFromStandingIdleOnly && (Character->GetLocomotionState().bMoving || Character->GetStance() != AlsStanceTags::Standing)))
 	{
 		return;
 	}
@@ -1229,7 +1228,7 @@ void UAlsAnimationInstance::PlayTransitionLeftAnimation(const float BlendInTime,
 		return;
 	}
 
-	PlayTransitionAnimation(Stance.IsCrouching()
+	PlayTransitionAnimation(Stance == AlsStanceTags::Crouching
 		                        ? Settings->Transitions.CrouchingTransitionLeftAnimation
 		                        : Settings->Transitions.StandingTransitionLeftAnimation,
 	                        BlendInTime, BlendOutTime, PlayRate, StartTime, bFromStandingIdleOnly);
@@ -1243,7 +1242,7 @@ void UAlsAnimationInstance::PlayTransitionRightAnimation(const float BlendInTime
 		return;
 	}
 
-	PlayTransitionAnimation(Stance.IsCrouching()
+	PlayTransitionAnimation(Stance == AlsStanceTags::Crouching
 		                        ? Settings->Transitions.CrouchingTransitionRightAnimation
 		                        : Settings->Transitions.StandingTransitionRightAnimation,
 	                        BlendInTime, BlendOutTime, PlayRate, StartTime, bFromStandingIdleOnly);
@@ -1310,25 +1309,25 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 	if (!bTransitionLeftAllowed)
 	{
-		DynamicTransitionAnimation = Stance.IsCrouching()
+		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
 			                             ? Settings->Transitions.CrouchingDynamicTransitionRightAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionRightAnimation;
 	}
 	else if (!bTransitionRightAllowed)
 	{
-		DynamicTransitionAnimation = Stance.IsCrouching()
+		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
 			                             ? Settings->Transitions.CrouchingDynamicTransitionLeftAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionLeftAnimation;
 	}
 	else if (FootLockLeftDistanceSquared >= FootLockRightDistanceSquared)
 	{
-		DynamicTransitionAnimation = Stance.IsCrouching()
+		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
 			                             ? Settings->Transitions.CrouchingDynamicTransitionLeftAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionLeftAnimation;
 	}
 	else
 	{
-		DynamicTransitionAnimation = Stance.IsCrouching()
+		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
 			                             ? Settings->Transitions.CrouchingDynamicTransitionRightAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionRightAnimation;
 	}
@@ -1363,7 +1362,7 @@ void UAlsAnimationInstance::PlayQueuedDynamicTransitionAnimation()
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
 {
-	return RotationMode.IsAiming() || ViewMode.IsFirstPerson();
+	return RotationMode == AlsRotationModeTags::Aiming || ViewMode == AlsViewModeTags::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
@@ -1435,7 +1434,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
 {
-	return RotationMode.IsLookingDirection() && !ViewMode.IsFirstPerson();
+	return RotationMode == AlsRotationModeTags::LookingDirection && ViewMode != AlsViewModeTags::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
@@ -1490,7 +1489,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	UAlsTurnInPlaceSettings* TurnInPlaceSettings{nullptr};
 	FName TurnInPlaceSlotName;
 
-	if (Stance.IsStanding())
+	if (Stance == AlsStanceTags::Standing)
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceStandingSlot();
 
@@ -1509,7 +1508,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 				                      : Settings->TurnInPlace.StandingTurn180Right;
 		}
 	}
-	else if (Stance.IsCrouching())
+	else if (Stance == AlsStanceTags::Crouching)
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceCrouchingSlot();
 

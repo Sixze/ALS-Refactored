@@ -2,8 +2,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "State/Enumerations/AlsRotationMode.h"
-#include "State/Enumerations/AlsStance.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsAnimNotifyState_EarlyBlendOut.generated.h"
 
 UCLASS(DisplayName = "Als Early Blend Out Animation Notify State", Meta = (ShowWorldContextPin))
@@ -22,19 +21,19 @@ private:
 	bool bCheckLocomotionMode{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckLocomotionMode"))
-	FGameplayTag LocomotionModeEquals;
+	FGameplayTag LocomotionModeEquals{AlsLocomotionModeTags::InAir};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, InlineEditConditionToggle))
 	bool bCheckStance{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckStance"))
-	EAlsStance StanceEquals{EAlsStance::Crouching};
+	FGameplayTag StanceEquals{AlsStanceTags::Crouching};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, InlineEditConditionToggle))
 	bool bCheckRotationMode{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckRotationMode"))
-	EAlsRotationMode RotationModeEquals{EAlsRotationMode::Aiming};
+	FGameplayTag RotationModeEquals{AlsRotationModeTags::Aiming};
 
 public:
 	UAlsAnimNotifyState_EarlyBlendOut();

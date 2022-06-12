@@ -2,12 +2,19 @@
 
 #include "Engine/DataAsset.h"
 #include "Engine/EngineTypes.h"
-#include "State/Enumerations/AlsMantlingType.h"
 #include "AlsMantlingSettings.generated.h"
 
 class UAnimMontage;
 class UCurveFloat;
 class UCurveVector;
+
+UENUM(BlueprintType)
+enum class EAlsMantlingType : uint8
+{
+	High,
+	Low,
+	InAir
+};
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMantlingParameters

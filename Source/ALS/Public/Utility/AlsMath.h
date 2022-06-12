@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "State/Enumerations/AlsMovementDirection.h"
+#include "State/AlsMovementDirection.h"
 #include "AlsMath.generated.h"
 
 USTRUCT(BlueprintType)

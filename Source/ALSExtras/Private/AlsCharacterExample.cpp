@@ -104,36 +104,30 @@ void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::InputSprint(const FInputActionValue& ActionValue)
 {
-	SetDesiredGait(ActionValue.Get<bool>() ? EAlsGait::Sprinting : EAlsGait::Running);
+	SetDesiredGait(ActionValue.Get<bool>() ? AlsGaitTags::Sprinting : AlsGaitTags::Running);
 }
 
 void AAlsCharacterExample::InputWalk()
 {
-	// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
-	// ReSharper disable once CppIncompleteSwitchStatement
-	switch (GetDesiredGait())
+	if (GetDesiredGait() == AlsGaitTags::Walking)
 	{
-		case EAlsGait::Walking:
-			SetDesiredGait(EAlsGait::Running);
-			break;
-
-		case EAlsGait::Running:
-			SetDesiredGait(EAlsGait::Walking);
-			break;
+		SetDesiredStance(AlsGaitTags::Running);
+	}
+	else if (GetDesiredGait() == AlsGaitTags::Running)
+	{
+		SetDesiredStance(AlsGaitTags::Walking);
 	}
 }
 
 void AAlsCharacterExample::InputCrouch()
 {
-	switch (GetDesiredStance())
+	if (GetDesiredStance() == AlsStanceTags::Standing)
 	{
-		case EAlsStance::Standing:
-			SetDesiredStance(EAlsStance::Crouching);
-			break;
-
-		case EAlsStance::Crouching:
-			SetDesiredStance(EAlsStance::Standing);
-			break;
+		SetDesiredStance(AlsStanceTags::Crouching);
+	}
+	else if (GetDesiredStance() == AlsStanceTags::Crouching)
+	{
+		SetDesiredStance(AlsStanceTags::Standing);
 	}
 }
 
@@ -151,9 +145,9 @@ void AAlsCharacterExample::InputJump(const FInputActionValue& ActionValue)
 			return;
 		}
 
-		if (GetStance() == EAlsStance::Crouching)
+		if (GetStance() == AlsStanceTags::Crouching)
 		{
-			SetDesiredStance(EAlsStance::Standing);
+			SetDesiredStance(AlsStanceTags::Standing);
 			return;
 		}
 
@@ -187,14 +181,14 @@ void AAlsCharacterExample::InputRoll()
 
 void AAlsCharacterExample::InputRotationMode()
 {
-	SetDesiredRotationMode(GetDesiredRotationMode() == EAlsRotationMode::LookingDirection
-		                       ? EAlsRotationMode::VelocityDirection
-		                       : EAlsRotationMode::LookingDirection);
+	SetDesiredRotationMode(GetDesiredRotationMode() == AlsRotationModeTags::VelocityDirection
+		                       ? AlsRotationModeTags::LookingDirection
+		                       : AlsRotationModeTags::VelocityDirection);
 }
 
 void AAlsCharacterExample::InputViewMode()
 {
-	SetViewMode(GetViewMode() == EAlsViewMode::ThirdPerson ? EAlsViewMode::FirstPerson : EAlsViewMode::ThirdPerson);
+	SetViewMode(GetViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

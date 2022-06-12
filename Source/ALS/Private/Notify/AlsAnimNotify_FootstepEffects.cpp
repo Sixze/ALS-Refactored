@@ -14,7 +14,6 @@
 #include "Utility/AlsEnumUtility.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
-#include "Utility/GameplayTags/AlsLocomotionModeTags.h"
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {

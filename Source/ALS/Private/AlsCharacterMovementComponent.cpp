@@ -22,9 +22,9 @@ bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Moveme
 {
 	Super::Serialize(Movement, Archive, Map, MoveType);
 
-	SerializeOptionalValue(Archive.IsSaving(), Archive, Stance, EAlsStance::Standing);
-	SerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, EAlsRotationMode::LookingDirection);
-	SerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, EAlsGait::Walking);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance, AlsStanceTags::Standing.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, AlsRotationModeTags::LookingDirection.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, AlsGaitTags::Walking.GetTag(), Map);
 
 	return !Archive.IsError();
 }
@@ -40,9 +40,9 @@ void FAlsSavedMove::Clear()
 {
 	Super::Clear();
 
-	Stance = EAlsStance::Standing;
-	RotationMode = EAlsRotationMode::LookingDirection;
-	MaxAllowedGait = EAlsGait::Walking;
+	Stance = AlsStanceTags::Standing;
+	RotationMode = AlsRotationModeTags::LookingDirection;
+	MaxAllowedGait = AlsGaitTags::Walking;
 }
 
 void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, const FVector& NewAcceleration,
@@ -791,38 +791,37 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
 	if (ensure(!MovementSettings.IsNull()))
 	{
-		GaitSettings = *MovementSettings->GetMovementStanceSettingsForRotationMode(RotationMode)
-		                                ->GetMovementGaitSettingsForStance(Stance);
+		GaitSettings = *MovementSettings->RotationModes.Find(RotationMode)->Stances.Find(Stance);
 	}
 
 	RefreshMaxWalkSpeed();
 }
 
-void UAlsCharacterMovementComponent::SetStance(const EAlsStance NewStance)
+void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStanceTag)
 {
-	if (Stance != NewStance)
+	if (Stance != NewStanceTag)
 	{
-		Stance = NewStance;
+		Stance = NewStanceTag;
 
 		RefreshGaitSettings();
 	}
 }
 
-void UAlsCharacterMovementComponent::SetRotationMode(const EAlsRotationMode NewMode)
+void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewModeTag)
 {
-	if (RotationMode != NewMode)
+	if (RotationMode != NewModeTag)
 	{
-		RotationMode = NewMode;
+		RotationMode = NewModeTag;
 
 		RefreshGaitSettings();
 	}
 }
 
-void UAlsCharacterMovementComponent::SetMaxAllowedGait(const EAlsGait NewGait)
+void UAlsCharacterMovementComponent::SetMaxAllowedGait(const FGameplayTag& NewGaitTag)
 {
-	if (MaxAllowedGait != NewGait)
+	if (MaxAllowedGait != NewGaitTag)
 	{
-		MaxAllowedGait = NewGait;
+		MaxAllowedGait = NewGaitTag;
 
 		RefreshMaxWalkSpeed();
 	}
