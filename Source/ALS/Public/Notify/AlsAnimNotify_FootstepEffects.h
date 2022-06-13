@@ -51,9 +51,6 @@ struct ALS_API FAlsFootstepEffectSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EPhysicalSurface> SurfaceType{SurfaceType1};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	TSoftObjectPtr<USoundBase> Sound;
 
@@ -124,8 +121,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Z Axis")
 	FVector FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (TitleProperty = "SurfaceType"))
-	TArray<FAlsFootstepEffectSettings> Effects;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ForceInlineRow))
+	TMap<TEnumAsByte<EPhysicalSurface>, FAlsFootstepEffectSettings> Effects;
 };
 
 UCLASS(DisplayName = "Als Footstep Effects Animation Notify",

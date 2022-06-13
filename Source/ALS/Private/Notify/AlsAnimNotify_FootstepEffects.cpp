@@ -80,25 +80,20 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	}
 
 	const auto SurfaceType{Hit.PhysMaterial.IsValid() ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType_Default};
-	const FAlsFootstepEffectSettings* EffectSettings{nullptr};
+	const auto* EffectSettings{FootstepEffectsSettings->Effects.Find(SurfaceType)};
 
-	for (const auto& Effect : FootstepEffectsSettings->Effects)
+	if (EffectSettings == nullptr)
 	{
-		if (Effect.SurfaceType == SurfaceType)
+		for (const auto& Pair : FootstepEffectsSettings->Effects)
 		{
-			EffectSettings = &Effect;
+			EffectSettings = &Pair.Value;
 			break;
 		}
 
 		if (EffectSettings == nullptr)
 		{
-			EffectSettings = &Effect;
+			return;
 		}
-	}
-
-	if (EffectSettings == nullptr)
-	{
-		return;
 	}
 
 	const auto FootstepLocation{Hit.ImpactPoint};
