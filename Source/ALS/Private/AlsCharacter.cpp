@@ -233,11 +233,12 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshLocomotionLocationAndRotation(DeltaTime);
 
-	RefreshRotationMode();
-
 	RefreshView(DeltaTime);
 
+	RefreshRotationMode();
+
 	RefreshLocomotion(DeltaTime);
+
 	RefreshGait();
 
 	RefreshGroundedRotation(DeltaTime);
@@ -285,11 +286,6 @@ void AAlsCharacter::Restart()
 	ApplyDesiredStance();
 }
 
-void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
-{
-	// Left empty intentionally.
-}
-
 void AAlsCharacter::RefreshVisibilityBasedAnimTickOption() const
 {
 	const auto DefaultTickOption{GetClass()->GetDefaultObject<ThisClass>()->GetMesh()->VisibilityBasedAnimTickOption};
@@ -308,9 +304,267 @@ void AAlsCharacter::RefreshVisibilityBasedAnimTickOption() const
 	GetMesh()->VisibilityBasedAnimTickOption = TargetTickOption <= DefaultTickOption ? TargetTickOption : DefaultTickOption;
 }
 
-void AAlsCharacter::PhysicsRotation(const float DeltaTime)
+void AAlsCharacter::SetViewMode(const FGameplayTag& NewModeTag)
 {
-	RefreshRollingPhysics(DeltaTime);
+	if (ViewMode != NewModeTag)
+	{
+		ViewMode = NewModeTag;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetViewMode(NewModeTag);
+		}
+	}
+}
+
+void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag& NewModeTag)
+{
+	SetViewMode(NewModeTag);
+}
+
+void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, const uint8 PreviousCustomMode)
+{
+	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
+	// custom set of movement modes but still use the functionality of the default character movement component.
+
+	switch (GetCharacterMovement()->MovementMode)
+	{
+		case MOVE_Walking:
+		case MOVE_NavWalking:
+			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
+			break;
+
+		case MOVE_Falling:
+			SetLocomotionMode(AlsLocomotionModeTags::InAir);
+			break;
+
+		default:
+			SetLocomotionMode(FGameplayTag::EmptyTag);
+			break;
+	}
+
+	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
+}
+
+void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewModeTag)
+{
+	if (LocomotionMode != NewModeTag)
+	{
+		const auto PreviousMode{LocomotionMode};
+
+		LocomotionMode = NewModeTag;
+
+		NotifyLocomotionModeChanged(PreviousMode);
+	}
+}
+
+void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousModeTag)
+{
+	ApplyDesiredStance();
+
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded &&
+	    PreviousModeTag == AlsLocomotionModeTags::InAir)
+	{
+		if (Settings->Ragdolling.bStartRagdollingOnLand &&
+		    LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
+		{
+			StartRagdolling();
+		}
+		else if (Settings->Rolling.bStartRollingOnLand &&
+		         LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
+		{
+			static constexpr auto PlayRate{1.3f};
+
+			StartRolling(PlayRate, LocomotionState.bHasSpeed
+				                       ? LocomotionState.VelocityYawAngle
+				                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
+		}
+		else
+		{
+			static constexpr auto HasInputBrakingFrictionFactor{0.5f};
+			static constexpr auto NoInputBrakingFrictionFactor{3.0f};
+
+			GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput
+				                                                ? HasInputBrakingFrictionFactor
+				                                                : NoInputBrakingFrictionFactor;
+
+			static constexpr auto ResetDelay{0.5f};
+
+			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer, FTimerDelegate::CreateWeakLambda(
+				                                this, [&BrakingFrictionFactor = GetCharacterMovement()->BrakingFrictionFactor]
+				                                {
+					                                BrakingFrictionFactor = 0.0f;
+				                                }), ResetDelay, false);
+		}
+	}
+	else if (LocomotionMode == AlsLocomotionModeTags::InAir &&
+	         LocomotionAction == AlsLocomotionActionTags::Rolling &&
+	         Settings->Rolling.bInterruptRollingWhenInAir)
+	{
+		// If the character is currently rolling, then enable ragdolling.
+
+		StartRagdolling();
+	}
+
+	OnLocomotionModeChanged(PreviousModeTag);
+}
+
+void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
+
+void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
+{
+	if (bDesiredAiming != bNewDesiredAiming)
+	{
+		bDesiredAiming = bNewDesiredAiming;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
+
+		OnDesiredAimingChanged(!bNewDesiredAiming);
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetDesiredAiming(bNewDesiredAiming);
+		}
+	}
+}
+
+void AAlsCharacter::OnReplicate_DesiredAiming(const bool bPreviousDesiredAiming)
+{
+	OnDesiredAimingChanged(bPreviousDesiredAiming);
+}
+
+void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
+
+void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
+{
+	SetDesiredAiming(bNewAiming);
+}
+
+void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewModeTag)
+{
+	if (DesiredRotationMode != NewModeTag)
+	{
+		DesiredRotationMode = NewModeTag;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetDesiredRotationMode(NewModeTag);
+		}
+	}
+}
+
+void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag& NewModeTag)
+{
+	SetDesiredRotationMode(NewModeTag);
+}
+
+void AAlsCharacter::SetRotationMode(const FGameplayTag& NewModeTag)
+{
+	AlsCharacterMovement->SetRotationMode(NewModeTag);
+
+	if (RotationMode != NewModeTag)
+	{
+		const auto PreviousMode{RotationMode};
+
+		RotationMode = NewModeTag;
+
+		OnRotationModeChanged(PreviousMode);
+	}
+}
+
+void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
+
+void AAlsCharacter::RefreshRotationMode()
+{
+	const auto bSprinting{Gait == AlsGaitTags::Sprinting};
+	const auto bAiming{bDesiredAiming || DesiredRotationMode == AlsRotationModeTags::Aiming};
+
+	if (ViewMode == AlsViewModeTags::FirstPerson)
+	{
+		if (LocomotionMode == AlsLocomotionModeTags::InAir)
+		{
+			if (bAiming && Settings->bAllowAimingWhenInAir)
+			{
+				SetRotationMode(AlsRotationModeTags::Aiming);
+			}
+			else
+			{
+				SetRotationMode(AlsRotationModeTags::LookingDirection);
+			}
+
+			return;
+		}
+
+		// Grounded or other locomotion modes.
+
+		if (bAiming && (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
+		{
+			SetRotationMode(AlsRotationModeTags::Aiming);
+		}
+		else
+		{
+			SetRotationMode(AlsRotationModeTags::LookingDirection);
+		}
+
+		return;
+	}
+
+	// Third person or other view modes.
+
+	if (LocomotionMode == AlsLocomotionModeTags::InAir)
+	{
+		if (bAiming && Settings->bAllowAimingWhenInAir)
+		{
+			SetRotationMode(AlsRotationModeTags::Aiming);
+		}
+		else if (bAiming)
+		{
+			SetRotationMode(AlsRotationModeTags::LookingDirection);
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
+		}
+
+		return;
+	}
+
+	// Grounded or other locomotion modes.
+
+	if (bSprinting)
+	{
+		if (bAiming && !Settings->bSprintHasPriorityOverAiming)
+		{
+			SetRotationMode(AlsRotationModeTags::Aiming);
+		}
+		else if (Settings->bRotateToVelocityWhenSprinting)
+		{
+			SetRotationMode(AlsRotationModeTags::VelocityDirection);
+		}
+		else if (bAiming)
+		{
+			SetRotationMode(AlsRotationModeTags::LookingDirection);
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
+		}
+	}
+	else // Not sprinting.
+	{
+		if (bAiming)
+		{
+			SetRotationMode(AlsRotationModeTags::Aiming);
+		}
+		else
+		{
+			SetRotationMode(DesiredRotationMode);
+		}
+	}
 }
 
 void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewStanceTag)
@@ -543,290 +797,6 @@ bool AAlsCharacter::CanSprint() const
 	return false;
 }
 
-void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
-{
-	if (bDesiredAiming != bNewDesiredAiming)
-	{
-		bDesiredAiming = bNewDesiredAiming;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
-
-		OnDesiredAimingChanged(!bNewDesiredAiming);
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			ServerSetDesiredAiming(bNewDesiredAiming);
-		}
-	}
-}
-
-void AAlsCharacter::OnReplicate_DesiredAiming(const bool bPreviousDesiredAiming)
-{
-	OnDesiredAimingChanged(bPreviousDesiredAiming);
-}
-
-void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
-
-void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
-{
-	SetDesiredAiming(bNewAiming);
-}
-
-void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewModeTag)
-{
-	if (DesiredRotationMode != NewModeTag)
-	{
-		DesiredRotationMode = NewModeTag;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			ServerSetDesiredRotationMode(NewModeTag);
-		}
-	}
-}
-
-void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag& NewModeTag)
-{
-	SetDesiredRotationMode(NewModeTag);
-}
-
-void AAlsCharacter::SetRotationMode(const FGameplayTag& NewModeTag)
-{
-	AlsCharacterMovement->SetRotationMode(NewModeTag);
-
-	if (RotationMode != NewModeTag)
-	{
-		const auto PreviousMode{RotationMode};
-
-		RotationMode = NewModeTag;
-
-		OnRotationModeChanged(PreviousMode);
-	}
-}
-
-void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
-
-void AAlsCharacter::RefreshRotationMode()
-{
-	const auto bSprinting{Gait == AlsGaitTags::Sprinting};
-	const auto bAiming{bDesiredAiming || DesiredRotationMode == AlsRotationModeTags::Aiming};
-
-	if (ViewMode == AlsViewModeTags::FirstPerson)
-	{
-		if (LocomotionMode == AlsLocomotionModeTags::InAir)
-		{
-			if (bAiming && Settings->bAllowAimingWhenInAir)
-			{
-				SetRotationMode(AlsRotationModeTags::Aiming);
-			}
-			else
-			{
-				SetRotationMode(AlsRotationModeTags::LookingDirection);
-			}
-
-			return;
-		}
-
-		// Grounded or other locomotion modes.
-
-		if (bAiming && (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
-		{
-			SetRotationMode(AlsRotationModeTags::Aiming);
-		}
-		else
-		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
-		}
-
-		return;
-	}
-
-	// Third person or other view modes.
-
-	if (LocomotionMode == AlsLocomotionModeTags::InAir)
-	{
-		if (bAiming && Settings->bAllowAimingWhenInAir)
-		{
-			SetRotationMode(AlsRotationModeTags::Aiming);
-		}
-		else if (bAiming)
-		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
-		}
-		else
-		{
-			SetRotationMode(DesiredRotationMode);
-		}
-
-		return;
-	}
-
-	// Grounded or other locomotion modes.
-
-	if (bSprinting)
-	{
-		if (bAiming && !Settings->bSprintHasPriorityOverAiming)
-		{
-			SetRotationMode(AlsRotationModeTags::Aiming);
-		}
-		else if (Settings->bRotateToVelocityWhenSprinting)
-		{
-			SetRotationMode(AlsRotationModeTags::VelocityDirection);
-		}
-		else if (bAiming)
-		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
-		}
-		else
-		{
-			SetRotationMode(DesiredRotationMode);
-		}
-	}
-	else // Not sprinting.
-	{
-		if (bAiming)
-		{
-			SetRotationMode(AlsRotationModeTags::Aiming);
-		}
-		else
-		{
-			SetRotationMode(DesiredRotationMode);
-		}
-	}
-}
-
-void AAlsCharacter::SetViewMode(const FGameplayTag& NewModeTag)
-{
-	if (ViewMode != NewModeTag)
-	{
-		ViewMode = NewModeTag;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			ServerSetViewMode(NewModeTag);
-		}
-	}
-}
-
-void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag& NewModeTag)
-{
-	SetViewMode(NewModeTag);
-}
-
-void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMode, const uint8 PreviousCustomMode)
-{
-	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
-	// custom set of movement modes but still use the functionality of the default character movement component.
-
-	switch (GetCharacterMovement()->MovementMode)
-	{
-		case MOVE_Walking:
-		case MOVE_NavWalking:
-			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
-			break;
-
-		case MOVE_Falling:
-			SetLocomotionMode(AlsLocomotionModeTags::InAir);
-			break;
-
-		default:
-			SetLocomotionMode(FGameplayTag::EmptyTag);
-			break;
-	}
-
-	Super::OnMovementModeChanged(PreviousMode, PreviousCustomMode);
-}
-
-void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewModeTag)
-{
-	if (LocomotionMode != NewModeTag)
-	{
-		const auto PreviousMode{LocomotionMode};
-
-		LocomotionMode = NewModeTag;
-
-		NotifyLocomotionModeChanged(PreviousMode);
-	}
-}
-
-void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousModeTag)
-{
-	ApplyDesiredStance();
-
-	if (LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	    PreviousModeTag == AlsLocomotionModeTags::InAir)
-	{
-		if (Settings->Ragdolling.bStartRagdollingOnLand &&
-		    LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
-		{
-			StartRagdolling();
-		}
-		else if (Settings->Rolling.bStartRollingOnLand &&
-		         LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
-		{
-			static constexpr auto PlayRate{1.3f};
-
-			StartRolling(PlayRate, LocomotionState.bHasSpeed
-				                       ? LocomotionState.VelocityYawAngle
-				                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
-		}
-		else
-		{
-			static constexpr auto HasInputBrakingFrictionFactor{0.5f};
-			static constexpr auto NoInputBrakingFrictionFactor{3.0f};
-
-			GetCharacterMovement()->BrakingFrictionFactor = LocomotionState.bHasInput
-				                                                ? HasInputBrakingFrictionFactor
-				                                                : NoInputBrakingFrictionFactor;
-
-			static constexpr auto ResetDelay{0.5f};
-
-			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer, FTimerDelegate::CreateWeakLambda(
-				                                this, [&BrakingFrictionFactor = GetCharacterMovement()->BrakingFrictionFactor]
-				                                {
-					                                BrakingFrictionFactor = 0.0f;
-				                                }), ResetDelay, false);
-		}
-	}
-	else if (LocomotionMode == AlsLocomotionModeTags::InAir &&
-	         LocomotionAction == AlsLocomotionActionTags::Rolling &&
-	         Settings->Rolling.bInterruptRollingWhenInAir)
-	{
-		// If the character is currently rolling, then enable ragdolling.
-
-		StartRagdolling();
-	}
-
-	OnLocomotionModeChanged(PreviousModeTag);
-}
-
-void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
-
-void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewActionTag)
-{
-	if (LocomotionAction != NewActionTag)
-	{
-		const auto PreviousAction{LocomotionAction};
-
-		LocomotionAction = NewActionTag;
-
-		NotifyLocomotionActionChanged(PreviousAction);
-	}
-}
-
-void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag)
-{
-	ApplyDesiredStance();
-
-	OnLocomotionActionChanged(PreviousActionTag);
-}
-
-void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag& PreviousActionTag) {}
-
 void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewModeTag)
 {
 	if (OverlayMode != NewModeTag)
@@ -857,6 +827,27 @@ void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
 }
 
 void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousModeTag) {}
+
+void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewActionTag)
+{
+	if (LocomotionAction != NewActionTag)
+	{
+		const auto PreviousAction{LocomotionAction};
+
+		LocomotionAction = NewActionTag;
+
+		NotifyLocomotionActionChanged(PreviousAction);
+	}
+}
+
+void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag)
+{
+	ApplyDesiredStance();
+
+	OnLocomotionActionChanged(PreviousActionTag);
+}
+
+void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag& PreviousActionTag) {}
 
 FRotator AAlsCharacter::GetViewRotation() const
 {
@@ -1099,6 +1090,53 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	// ReSharper disable once CppRedundantParentheses
 	LocomotionState.bMoving = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||
 	                          LocomotionState.Speed > Settings->MovingSpeedThreshold;
+}
+
+void AAlsCharacter::Jump()
+{
+	if (Stance == AlsStanceTags::Standing && !LocomotionAction.IsValid() &&
+	    LocomotionMode == AlsLocomotionModeTags::Grounded)
+	{
+		Super::Jump();
+	}
+}
+
+void AAlsCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	if (IsLocallyControlled())
+	{
+		OnJumpedNetworked();
+	}
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		MulticastOnJumpedNetworked();
+	}
+}
+
+void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
+{
+	if (!IsLocallyControlled())
+	{
+		OnJumpedNetworked();
+	}
+}
+
+void AAlsCharacter::OnJumpedNetworked()
+{
+	AnimationInstance->Jump();
+}
+
+void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
+{
+	// Left empty intentionally.
+}
+
+void AAlsCharacter::PhysicsRotation(const float DeltaTime)
+{
+	RefreshRollingPhysics(DeltaTime);
 }
 
 void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
@@ -1433,41 +1471,4 @@ void AAlsCharacter::MulticastLockRotation_Implementation(const float TargetYawAn
 void AAlsCharacter::MulticastUnLockRotation_Implementation()
 {
 	LocomotionState.bRotationLocked = false;
-}
-
-void AAlsCharacter::Jump()
-{
-	if (Stance == AlsStanceTags::Standing && !LocomotionAction.IsValid() &&
-	    LocomotionMode == AlsLocomotionModeTags::Grounded)
-	{
-		Super::Jump();
-	}
-}
-
-void AAlsCharacter::OnJumped_Implementation()
-{
-	Super::OnJumped_Implementation();
-
-	if (IsLocallyControlled())
-	{
-		OnJumpedNetworked();
-	}
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		MulticastOnJumpedNetworked();
-	}
-}
-
-void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
-{
-	if (!IsLocallyControlled())
-	{
-		OnJumpedNetworked();
-	}
-}
-
-void AAlsCharacter::OnJumpedNetworked()
-{
-	AnimationInstance->Jump();
 }

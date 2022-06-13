@@ -85,10 +85,12 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebug(Character, UAlsConstants::TracesDisplayName());
 #endif
 
+	ViewMode = Character->GetViewMode();
+	LocomotionMode = Character->GetLocomotionMode();
+	RotationMode = Character->GetRotationMode();
 	Stance = Character->GetStance();
 	Gait = Character->GetGait();
-	RotationMode = Character->GetRotationMode();
-	LocomotionMode = Character->GetLocomotionMode();
+	OverlayMode = Character->GetOverlayMode();
 
 	if (LocomotionAction != Character->GetLocomotionAction())
 	{
@@ -96,9 +98,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		ResetGroundedEntryMode();
 	}
-
-	ViewMode = Character->GetViewMode();
-	OverlayMode = Character->GetOverlayMode();
 
 	RefreshViewGameThread();
 

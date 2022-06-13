@@ -24,16 +24,16 @@ private:
 	FGameplayTag LocomotionModeEquals{AlsLocomotionModeTags::InAir};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, InlineEditConditionToggle))
-	bool bCheckStance{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckStance"))
-	FGameplayTag StanceEquals{AlsStanceTags::Crouching};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, InlineEditConditionToggle))
 	bool bCheckRotationMode{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckRotationMode"))
 	FGameplayTag RotationModeEquals{AlsRotationModeTags::Aiming};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, InlineEditConditionToggle))
+	bool bCheckStance{true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, EditCondition = "bCheckStance"))
+	FGameplayTag StanceEquals{AlsStanceTags::Crouching};
 
 public:
 	UAlsAnimNotifyState_EarlyBlendOut();

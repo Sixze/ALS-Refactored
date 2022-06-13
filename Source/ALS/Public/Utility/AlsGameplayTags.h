@@ -8,17 +8,17 @@ namespace AlsViewModeTags
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ThirdPerson)
 }
 
+namespace AlsLocomotionModeTags
+{
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Grounded)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InAir)
+}
+
 namespace AlsRotationModeTags
 {
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(LookingDirection)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(VelocityDirection)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aiming)
-}
-
-namespace AlsLocomotionModeTags
-{
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Grounded)
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InAir)
 }
 
 namespace AlsStanceTags

@@ -12,8 +12,8 @@ void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Ch
 
 	const auto& SavedMove{static_cast<const FAlsSavedMove&>(Move)};
 
-	Stance = SavedMove.Stance;
 	RotationMode = SavedMove.RotationMode;
+	Stance = SavedMove.Stance;
 	MaxAllowedGait = SavedMove.MaxAllowedGait;
 }
 
@@ -22,8 +22,8 @@ bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Moveme
 {
 	Super::Serialize(Movement, Archive, Map, MoveType);
 
-	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance, AlsStanceTags::Standing.GetTag(), Map);
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, AlsRotationModeTags::LookingDirection.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance, AlsStanceTags::Standing.GetTag(), Map);
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, AlsGaitTags::Walking.GetTag(), Map);
 
 	return !Archive.IsError();
@@ -40,8 +40,8 @@ void FAlsSavedMove::Clear()
 {
 	Super::Clear();
 
-	Stance = AlsStanceTags::Standing;
 	RotationMode = AlsRotationModeTags::LookingDirection;
+	Stance = AlsStanceTags::Standing;
 	MaxAllowedGait = AlsGaitTags::Walking;
 }
 
@@ -53,8 +53,8 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 	const auto* Movement{Cast<UAlsCharacterMovementComponent>(Character->GetCharacterMovement())};
 	if (IsValid(Movement))
 	{
-		Stance = Movement->Stance;
 		RotationMode = Movement->RotationMode;
+		Stance = Movement->Stance;
 		MaxAllowedGait = Movement->MaxAllowedGait;
 	}
 }
@@ -63,8 +63,8 @@ bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* 
 {
 	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
 
-	return Stance == NewMove->Stance &&
-	       RotationMode == NewMove->RotationMode &&
+	return RotationMode == NewMove->RotationMode &&
+	       Stance == NewMove->Stance &&
 	       MaxAllowedGait == NewMove->MaxAllowedGait &&
 	       Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
 }
@@ -90,8 +90,8 @@ void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
 	auto* Movement{Cast<UAlsCharacterMovementComponent>(Character->GetCharacterMovement())};
 	if (IsValid(Movement))
 	{
-		Movement->Stance = Stance;
 		Movement->RotationMode = RotationMode;
+		Movement->Stance = Stance;
 		Movement->MaxAllowedGait = MaxAllowedGait;
 
 		Movement->RefreshGaitSettings();
@@ -270,7 +270,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	}
 
 	// devCode(ensureMsgf(!Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN before Iteration (%s)\n%s"), *GetPathNameSafe(this), *Velocity.ToString()));
-	
+
 	bJustTeleported = false;
 	bool bCheckedFall = false;
 	bool bTriedLedgeMove = false;
@@ -303,7 +303,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			CalcVelocity(timeTick, GroundFriction, false, GetMaxBrakingDeceleration());
 			// devCode(ensureMsgf(!Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *Velocity.ToString()));
 		}
-		
+
 		ApplyRootMotionToVelocity(timeTick);
 		// devCode(ensureMsgf(!Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after Root Motion application (%s)\n%s"), *GetPathNameSafe(this), *Velocity.ToString()));
 
@@ -408,7 +408,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					if (IsMovingOnGround())
 					{
 						ApplyPendingPenetrationAdjustment();
-						
+
 						// If still walking, then fall. If not, assume the user set a different mode they want to keep.
 						StartFalling(Iterations, remainingTime, timeTick, Delta, OldLocation);
 					}
@@ -468,7 +468,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		{
 			remainingTime = 0.f;
 			break;
-		}	
+		}
 	}
 
 	if (IsMovingOnGround())
@@ -577,8 +577,8 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 	const auto* MoveData{static_cast<FAlsCharacterNetworkMoveData*>(GetCurrentNetworkMoveData())};
 	if (MoveData != nullptr)
 	{
-		Stance = MoveData->Stance;
 		RotationMode = MoveData->RotationMode;
+		Stance = MoveData->Stance;
 		MaxAllowedGait = MoveData->MaxAllowedGait;
 
 		RefreshGaitSettings();
@@ -635,10 +635,10 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 				const bool bIsWalkable = IsWalkable(*DownwardSweepResult);
 				const float FloorDist = (CapsuleLocation.Z - DownwardSweepResult->Location.Z);
 				OutFloorResult.SetFromSweep(*DownwardSweepResult, FloorDist, bIsWalkable);
-				
+
 				if (bIsWalkable)
 				{
-					// Use the supplied downward sweep as the floor hit result.			
+					// Use the supplied downward sweep as the floor hit result.
 					return;
 				}
 			}
@@ -701,7 +701,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 
 			OutFloorResult.SetFromSweep(Hit, SweepResult, false);
 			if (Hit.IsValidBlockingHit() && IsWalkable(Hit))
-			{		
+			{
 				if (SweepResult <= SweepDistance)
 				{
 					// Hit within test distance.
@@ -724,7 +724,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 	if (LineDistance > 0.f)
 	{
 		const float ShrinkHeight = PawnHalfHeight;
-		const FVector LineTraceStart = CapsuleLocation;	
+		const FVector LineTraceStart = CapsuleLocation;
 		const float TraceDist = LineDistance + ShrinkHeight;
 		const FVector Down = FVector(0.f, 0.f, -TraceDist);
 		QueryParams.TraceTag = SCENE_QUERY_STAT_NAME_ONLY(FloorLineTrace);
@@ -750,7 +750,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 			}
 		}
 	}
-	
+
 	// No hits were acceptable.
 	OutFloorResult.bWalkableFloor = false;
 
@@ -797,21 +797,21 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 	RefreshMaxWalkSpeed();
 }
 
-void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStanceTag)
-{
-	if (Stance != NewStanceTag)
-	{
-		Stance = NewStanceTag;
-
-		RefreshGaitSettings();
-	}
-}
-
 void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewModeTag)
 {
 	if (RotationMode != NewModeTag)
 	{
 		RotationMode = NewModeTag;
+
+		RefreshGaitSettings();
+	}
+}
+
+void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStanceTag)
+{
+	if (Stance != NewStanceTag)
+	{
+		Stance = NewStanceTag;
 
 		RefreshGaitSettings();
 	}

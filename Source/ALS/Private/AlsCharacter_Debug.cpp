@@ -203,6 +203,67 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{120.0f * Scale};
 
+	static const auto ViewModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewMode), false))
+	};
+
+	Text.Text = ViewModeText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(ViewMode).ToString(), false));
+	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
+	static const auto LocomotionModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionMode), false))
+	};
+
+	Text.Text = LocomotionModeText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionMode).ToString(), false));
+	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
+	static const auto DesiredAimingText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, bDesiredAiming), true))
+	};
+
+	Text.Text = DesiredAimingText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::BoolToString(bDesiredAiming), false));
+	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
+	static const auto DesiredRotationModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredRotationMode), false))
+	};
+
+	Text.Text = DesiredRotationModeText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	Text.Text = FText::AsCultureInvariant(
+		FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(DesiredRotationMode).ToString(), false));
+	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
+	static const auto RotationModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RotationMode), false))
+	};
+
+	Text.Text = RotationModeText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(RotationMode).ToString(), false));
+	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
 	static const auto DesiredStanceText{
 		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredStance), false))
 	};
@@ -251,55 +312,6 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 
 	VerticalLocation += RowOffset;
 
-	static const auto DesiredAimingText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, bDesiredAiming), true))
-	};
-
-	Text.Text = DesiredAimingText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::BoolToString(bDesiredAiming), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
-	static const auto DesiredRotationModeText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredRotationMode), false))
-	};
-
-	Text.Text = DesiredRotationModeText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(
-		FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(DesiredRotationMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
-	static const auto RotationModeText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RotationMode), false))
-	};
-
-	Text.Text = RotationModeText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(RotationMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
-	static const auto ViewModeText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewMode), false))
-	};
-
-	Text.Text = ViewModeText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(ViewMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
 	static const auto OverlayModeText{
 		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, OverlayMode), false))
 	};
@@ -308,18 +320,6 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(OverlayMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
-	static const auto LocomotionModeText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, LocomotionMode), false))
-	};
-
-	Text.Text = LocomotionModeText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionMode).ToString(), false));
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	VerticalLocation += RowOffset;

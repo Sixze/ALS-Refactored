@@ -6,17 +6,17 @@ namespace AlsViewModeTags
 	UE_DEFINE_GAMEPLAY_TAG(ThirdPerson, TEXT("Als.ViewMode.ThirdPerson"))
 }
 
+namespace AlsLocomotionModeTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Grounded, TEXT("Als.LocomotionMode.Grounded"))
+	UE_DEFINE_GAMEPLAY_TAG(InAir, TEXT("Als.LocomotionMode.InAir"))
+}
+
 namespace AlsRotationModeTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(VelocityDirection, TEXT("Als.RotationMode.VelocityDirection"))
 	UE_DEFINE_GAMEPLAY_TAG(LookingDirection, TEXT("Als.RotationMode.LookingDirection"))
 	UE_DEFINE_GAMEPLAY_TAG(Aiming, TEXT("Als.RotationMode.Aiming"))
-}
-
-namespace AlsLocomotionModeTags
-{
-	UE_DEFINE_GAMEPLAY_TAG(Grounded, TEXT("Als.LocomotionMode.Grounded"))
-	UE_DEFINE_GAMEPLAY_TAG(InAir, TEXT("Als.LocomotionMode.InAir"))
 }
 
 namespace AlsStanceTags

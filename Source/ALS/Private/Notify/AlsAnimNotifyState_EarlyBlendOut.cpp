@@ -26,8 +26,8 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Mesh,
 	if (IsValid(Character) &&
 	    ((bCheckInput && Character->GetLocomotionState().bHasInput) ||
 	     (bCheckLocomotionMode && Character->GetLocomotionMode() == LocomotionModeEquals) ||
-	     (bCheckStance && Character->GetStance() == StanceEquals) ||
-	     (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals)))
+	     (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals) ||
+	     (bCheckStance && Character->GetStance() == StanceEquals)))
 	// ReSharper restore CppRedundantParentheses
 	{
 		AnimationInstance->Montage_Stop(BlendOutTime, Montage);

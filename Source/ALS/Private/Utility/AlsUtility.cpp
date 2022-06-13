@@ -31,7 +31,7 @@ FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
 {
 	const auto TagNode{UGameplayTagsManager::Get().FindTagNode(Tag)};
 
-	return ensure(TagNode.IsValid()) ? TagNode->GetSimpleTagName() : NAME_None;
+	return TagNode.IsValid() ? TagNode->GetSimpleTagName() : NAME_None;
 }
 
 float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)

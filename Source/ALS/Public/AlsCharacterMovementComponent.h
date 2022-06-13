@@ -13,9 +13,9 @@ private:
 	using Super = FCharacterNetworkMoveData;
 
 public:
-	FGameplayTag Stance{AlsStanceTags::Standing};
-
 	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
+
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
@@ -40,9 +40,9 @@ private:
 	using Super = FSavedMove_Character;
 
 public:
-	FGameplayTag Stance{AlsStanceTags::Standing};
-
 	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
+
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
@@ -88,10 +88,10 @@ private:
 	FAlsMovementGaitSettings GaitSettings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag Stance{AlsStanceTags::Standing};
+	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
+	FGameplayTag Stance{AlsStanceTags::Standing};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
@@ -168,9 +168,9 @@ private:
 	void RefreshGaitSettings();
 
 public:
-	void SetStance(const FGameplayTag& NewStanceTag);
-
 	void SetRotationMode(const FGameplayTag& NewModeTag);
+
+	void SetStance(const FGameplayTag& NewStanceTag);
 
 	void SetMaxAllowedGait(const FGameplayTag& NewGaitTag);
 
