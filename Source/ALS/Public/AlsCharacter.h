@@ -420,6 +420,33 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastUnLockRotation();
 
+	// Rolling
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	void TryStartRolling(float PlayRate = 1.0f);
+
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UAnimMontage* SelectRollMontage();
+
+private:
+	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
+
+	void StartRolling(float PlayRate, float TargetYawAngle);
+
+	UFUNCTION(Server, Reliable)
+	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
+
+	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
+
+	void RefreshRolling(float DeltaTime);
+
+	void RefreshRollingPhysics(float DeltaTime);
+
 	// Mantling
 
 public:
@@ -514,33 +541,6 @@ private:
 	void RefreshRagdolling(float DeltaTime);
 
 	void RefreshRagdollingActorTransform(float DeltaTime);
-
-	// Rolling
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void TryStartRolling(float PlayRate = 1.0f);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
-	UAnimMontage* SelectRollMontage();
-
-private:
-	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
-
-	void StartRolling(float PlayRate, float TargetYawAngle);
-
-	UFUNCTION(Server, Reliable)
-	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
-
-	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float StartYawAngle, float TargetYawAngle);
-
-	void RefreshRolling(float DeltaTime);
-
-	void RefreshRollingPhysics(float DeltaTime);
 
 	// Debug
 

@@ -16,6 +16,123 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
+void AAlsCharacter::TryStartRolling(const float PlayRate)
+{
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+	{
+		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
+			                       ? LocomotionState.InputYawAngle
+			                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
+	}
+}
+
+bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
+{
+	return !LocomotionAction.IsValid() ||
+	       // ReSharper disable once CppRedundantParentheses
+	       (LocomotionAction == AlsLocomotionActionTags::Rolling &&
+	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
+}
+
+void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
+{
+	if (GetLocalRole() <= ROLE_SimulatedProxy)
+	{
+		return;
+	}
+
+	auto* Montage{SelectRollMontage()};
+	if (!ensure(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
+	{
+		return;
+	}
+
+	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+	}
+	else
+	{
+		GetCharacterMovement()->FlushServerMoves();
+
+		StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+		ServerStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+	}
+}
+
+UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
+{
+	return Settings->Rolling.Montage;
+}
+
+void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
+                                                      const float StartYawAngle, const float TargetYawAngle)
+{
+	if (IsRollingAllowedToStart(Montage))
+	{
+		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+		ForceNetUpdate();
+	}
+}
+
+void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
+                                                         const float StartYawAngle, const float TargetYawAngle)
+{
+	StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+}
+
+void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
+                                               const float StartYawAngle, const float TargetYawAngle)
+{
+	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
+	{
+		RollingState.TargetYawAngle = TargetYawAngle;
+
+		RefreshRotationInstant(StartYawAngle);
+
+		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
+	}
+}
+
+void AAlsCharacter::RefreshRolling(const float DeltaTime)
+{
+	if (GetLocalRole() <= ROLE_SimulatedProxy ||
+	    GetMesh()->GetAnimInstance()->RootMotionMode <= ERootMotionMode::IgnoreRootMotion)
+	{
+		// Refresh rolling physics here because AAlsCharacter::PhysicsRotation()
+		// won't be called on simulated proxies or with ignored root motion.
+
+		RefreshRollingPhysics(DeltaTime);
+	}
+}
+
+void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
+{
+	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
+	{
+		return;
+	}
+
+	auto TargetRotation{GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};
+
+	if (Settings->Rolling.RotationInterpolationSpeed <= 0.0f)
+	{
+		TargetRotation.Yaw = RollingState.TargetYawAngle;
+
+		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
+	}
+	else
+	{
+		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
+		                                                     RollingState.TargetYawAngle, DeltaTime,
+		                                                     Settings->Rolling.RotationInterpolationSpeed);
+
+		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
+	}
+}
+
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
 	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
@@ -779,120 +896,3 @@ UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdo
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}
-
-void AAlsCharacter::TryStartRolling(const float PlayRate)
-{
-	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
-	{
-		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
-			                       ? LocomotionState.InputYawAngle
-			                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
-	}
-}
-
-bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
-{
-	return !LocomotionAction.IsValid() ||
-	       // ReSharper disable once CppRedundantParentheses
-	       (LocomotionAction == AlsLocomotionActionTags::Rolling &&
-	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
-}
-
-void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
-{
-	if (GetLocalRole() <= ROLE_SimulatedProxy)
-	{
-		return;
-	}
-
-	auto* Montage{SelectRollMontage()};
-	if (!ensure(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
-	{
-		return;
-	}
-
-	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-	}
-	else
-	{
-		GetCharacterMovement()->FlushServerMoves();
-
-		StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-		ServerStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-	}
-}
-
-UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
-{
-	return Settings->Rolling.Montage;
-}
-
-void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
-                                                      const float StartYawAngle, const float TargetYawAngle)
-{
-	if (IsRollingAllowedToStart(Montage))
-	{
-		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-		ForceNetUpdate();
-	}
-}
-
-void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
-                                                         const float StartYawAngle, const float TargetYawAngle)
-{
-	StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-}
-
-void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
-                                               const float StartYawAngle, const float TargetYawAngle)
-{
-	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
-	{
-		RollingState.TargetYawAngle = TargetYawAngle;
-
-		RefreshRotationInstant(StartYawAngle);
-
-		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
-	}
-}
-
-void AAlsCharacter::RefreshRolling(const float DeltaTime)
-{
-	if (GetLocalRole() <= ROLE_SimulatedProxy ||
-	    GetMesh()->GetAnimInstance()->RootMotionMode <= ERootMotionMode::IgnoreRootMotion)
-	{
-		// Refresh rolling physics here because AAlsCharacter::PhysicsRotation()
-		// won't be called on simulated proxies or with ignored root motion.
-
-		RefreshRollingPhysics(DeltaTime);
-	}
-}
-
-void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
-{
-	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
-	{
-		return;
-	}
-
-	auto TargetRotation{GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};
-
-	if (Settings->Rolling.RotationInterpolationSpeed <= 0.0f)
-	{
-		TargetRotation.Yaw = RollingState.TargetYawAngle;
-
-		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
-	}
-	else
-	{
-		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
-		                                                     RollingState.TargetYawAngle, DeltaTime,
-		                                                     Settings->Rolling.RotationInterpolationSpeed);
-
-		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
-	}
-}
