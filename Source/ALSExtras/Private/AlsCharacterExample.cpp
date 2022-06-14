@@ -111,11 +111,11 @@ void AAlsCharacterExample::InputWalk()
 {
 	if (GetDesiredGait() == AlsGaitTags::Walking)
 	{
-		SetDesiredStance(AlsGaitTags::Running);
+		SetDesiredGait(AlsGaitTags::Running);
 	}
 	else if (GetDesiredGait() == AlsGaitTags::Running)
 	{
-		SetDesiredStance(AlsGaitTags::Walking);
+		SetDesiredGait(AlsGaitTags::Walking);
 	}
 }
 
