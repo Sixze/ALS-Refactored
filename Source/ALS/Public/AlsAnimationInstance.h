@@ -143,8 +143,19 @@ private:
 
 	void RefreshView(float DeltaTime);
 
+	void RefreshSpineRotation(float DeltaTime);
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
+	void ReinitializeLookTowardsInput();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void RefreshLookTowardsInput(float DeltaTime);
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
+	void ReinitializeLookTowardsCamera();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void RefreshLookTowardsCamera(float DeltaTime);
 
 	// Locomotion
@@ -157,14 +168,13 @@ private:
 public:
 	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
 
-protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ActivatePivot();
 
 private:
@@ -197,8 +207,7 @@ private:
 public:
 	void Jump();
 
-protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ResetJumped();
 
 private:
@@ -283,8 +292,8 @@ private:
 public:
 	void StopRagdolling();
 
-protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected))
+public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
 	void FinalizeRagdolling() const;
 
 	// Utility

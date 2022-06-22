@@ -1260,14 +1260,17 @@ void AAlsCharacter::RefreshGroundedNotMovingAimingRotation(const float DeltaTime
 
 	// Prevent the character from rotating past a certain angle.
 
-	const auto ViewRelativeYawAngle{
-		FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw))
-	};
+	auto ViewRelativeYawAngle{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw))};
 
 	static constexpr auto ViewRelativeYawAngleThreshold{70.0f};
 
 	if (FMath::Abs(ViewRelativeYawAngle) > ViewRelativeYawAngleThreshold)
 	{
+		if (ViewRelativeYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		{
+			ViewRelativeYawAngle -= 360.0f;
+		}
+
 		RefreshRotation(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) +
 		                                          (ViewRelativeYawAngle >= 0.0f
 			                                           ? -ViewRelativeYawAngleThreshold

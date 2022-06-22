@@ -11,7 +11,7 @@ struct ALS_API FAlsLookTowardsInputState
 	bool bReinitializationRequired{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float YawAngle{0.0f};
+	float WorldYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float YawAmount{0.5f};
@@ -25,8 +25,8 @@ struct ALS_API FAlsLookTowardsCameraState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bReinitializationRequired{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator Rotation{ForceInit};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	float WorldYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float YawAngle{0.0f};
@@ -42,6 +42,18 @@ struct ALS_API FAlsLookTowardsCameraState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0.5, ClampMax = 1))
 	float YawRightAmount{0.5f};
+};
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsSpineRotationState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float SpineAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	float YawAngle{0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -67,11 +79,8 @@ struct ALS_API FAlsViewAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float LookAmount{1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float TargetSpineYawAngle{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float SpineYawAngle{0.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FAlsSpineRotationState SpineRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAlsLookTowardsInputState LookTowardsInput;
