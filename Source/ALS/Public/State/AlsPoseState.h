@@ -33,4 +33,16 @@ struct ALS_API FAlsPoseState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float GaitSprintingAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 3))
+	float UnweightedGaitAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float UnweightedGaitWalkingAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float UnweightedGaitRunningAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float UnweightedGaitSprintingAmount{0.0f};
 };
