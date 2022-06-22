@@ -40,8 +40,8 @@ private:
 		UAlsConstants::HandLeftIkCurve(),
 		UAlsConstants::HandRightIkCurve(),
 
-		UAlsConstants::AimManualCurve(),
-		UAlsConstants::AimBlockCurve(),
+		UAlsConstants::ViewBlockCurve(),
+		UAlsConstants::AllowAimingCurve(),
 
 		UAlsConstants::HipsDirectionLockCurve(),
 	};

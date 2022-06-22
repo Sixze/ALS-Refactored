@@ -254,14 +254,14 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 		ViewState.PitchAmount = 0.5f - ViewState.PitchAngle / 180.0f;
 	}
 
-	const auto AimingAllowedAmount{1.0f - GetCurveValueClamped01(UAlsConstants::AimBlockCurve())};
-	const auto AimingManualAmount{GetCurveValueClamped01(UAlsConstants::AimManualCurve())};
+	const auto ViewAmount{1.0f - GetCurveValueClamped01(UAlsConstants::ViewBlockCurve())};
+	const auto AimingAmount{GetCurveValueClamped01(UAlsConstants::AllowAimingCurve())};
 
-	ViewState.LookAmount = AimingAllowedAmount * (1.0f - AimingManualAmount);
+	ViewState.LookAmount = ViewAmount * (1.0f - AimingAmount);
 
 	RefreshSpineRotation(DeltaTime);
 
-	ViewState.SpineRotation.YawAngle *= AimingAllowedAmount * AimingManualAmount;
+	ViewState.SpineRotation.YawAngle *= ViewAmount * AimingAmount;
 }
 
 void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)

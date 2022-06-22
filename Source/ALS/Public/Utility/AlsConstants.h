@@ -127,10 +127,10 @@ public:
 	static const FName& HandRightIkCurve();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& AimManualCurve();
+	static const FName& ViewBlockCurve();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& AimBlockCurve();
+	static const FName& AllowAimingCurve();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
 	static const FName& HipsDirectionLockCurve();
@@ -435,15 +435,15 @@ inline const FName& UAlsConstants::HandRightIkCurve()
 	return Name;
 }
 
-inline const FName& UAlsConstants::AimManualCurve()
+inline const FName& UAlsConstants::ViewBlockCurve()
 {
-	static const FName Name{TEXT("AimManual")};
+	static const FName Name{TEXT("ViewBlock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::AimBlockCurve()
+inline const FName& UAlsConstants::AllowAimingCurve()
 {
-	static const FName Name{TEXT("AimBlock")};
+	static const FName Name{TEXT("AllowAiming")};
 	return Name;
 }
 
