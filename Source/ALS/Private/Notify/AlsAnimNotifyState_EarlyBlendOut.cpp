@@ -5,6 +5,10 @@
 
 UAlsAnimNotifyState_EarlyBlendOut::UAlsAnimNotifyState_EarlyBlendOut()
 {
+#if WITH_EDITORONLY_DATA
+	bShouldFireInEditor = false;
+#endif
+
 	bIsNativeBranchingPoint = true;
 }
 

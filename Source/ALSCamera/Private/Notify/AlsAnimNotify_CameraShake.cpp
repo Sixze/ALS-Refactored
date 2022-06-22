@@ -4,6 +4,13 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/PlayerController.h"
 
+UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
+{
+#if WITH_EDITORONLY_DATA
+	bShouldFireInEditor = false;
+#endif
+}
+
 FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 {
 	return FString::Format(TEXT("Als Camera Shake: {0}"), {IsValid(CameraShakeClass) ? CameraShakeClass->GetName() : TEXT("None")});

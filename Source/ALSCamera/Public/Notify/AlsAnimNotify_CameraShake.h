@@ -19,6 +19,8 @@ private:
 	float CameraShakeScale{1.0f};
 
 public:
+	UAlsAnimNotify_CameraShake();
+
 	virtual FString GetNotifyName_Implementation() const override;
 
 	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

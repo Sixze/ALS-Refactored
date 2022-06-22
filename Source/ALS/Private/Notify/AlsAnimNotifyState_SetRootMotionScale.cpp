@@ -6,6 +6,10 @@
 
 UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 {
+#if WITH_EDITORONLY_DATA
+	bShouldFireInEditor = false;
+#endif
+
 	bIsNativeBranchingPoint = true;
 }
 
