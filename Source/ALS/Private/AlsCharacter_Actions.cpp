@@ -473,7 +473,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	if (ensure(!MantlingSettings->Montage.IsNull()))
 	{
-		// Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
+		// TODO Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
 
 		const auto MontageStartTime{
 			Parameters.MantlingType == EAlsMantlingType::InAir && IsLocallyControlled()
@@ -710,13 +710,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		                                          RagdollingState.RootBoneVelocity.Size()) / ReferenceSpeed) * Stiffness,
 	                                          0.0f, 0.0f, false);
 
-	// Disable Gravity if falling faster than -4000 to prevent continual
-	// acceleration. This also prevents the ragdoll from going through the floor.
-
-	static constexpr auto VerticalVelocityThreshold{-4000.0f};
-
-	GetMesh()->SetEnableGravity(RagdollingState.RootBoneVelocity.Z > VerticalVelocityThreshold);
-
 	RefreshRagdollingActorTransform(DeltaTime);
 }
 
@@ -854,8 +847,7 @@ void AAlsCharacter::FinalizeRagdolling()
 
 	RagdollingState.bPendingFinalization = false;
 
-	// Disable physics simulation of a mesh and enable capsule collision with a one
-	// frame delay to give the animation blueprint time to assume the final ragdoll pose.
+	// Disable physics simulation of a mesh and enable capsule collision.
 
 	GetMesh()->SetAllBodiesSimulatePhysics(false);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
