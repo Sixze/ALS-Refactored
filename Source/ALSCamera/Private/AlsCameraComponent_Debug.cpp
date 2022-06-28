@@ -26,7 +26,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 
 	const auto InitialVerticalLocation{VerticalLocation};
 
-	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.CameraCurves (Shift + 6)"))};
+	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(TEXT("Als.CameraCurves (Shift + 6)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsCameraConstants::CameraCurvesDisplayName()))
 	{
@@ -46,7 +46,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("ALS.CameraShapes (Shift + 7)"))};
+	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("Als.CameraShapes (Shift + 7)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsCameraConstants::CameraShapesDisplayName()))
 	{
@@ -61,7 +61,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("ALS.CameraTraces (Shift + 8)"))};
+	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("Als.CameraTraces (Shift + 8)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsCameraConstants::CameraTracesDisplayName()))
 	{

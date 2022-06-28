@@ -39,7 +39,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	const auto InitialVerticalLocation{VerticalLocation};
 
-	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Curves (Shift + 1)"))};
+	static const auto CurvesHeaderText{FText::AsCultureInvariant(TEXT("Als.Curves (Shift + 1)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsConstants::CurvesDisplayName()))
 	{
@@ -59,7 +59,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto StateHeaderText{FText::AsCultureInvariant(TEXT("ALS.State (Shift + 2)"))};
+	static const auto StateHeaderText{FText::AsCultureInvariant(TEXT("Als.State (Shift + 2)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsConstants::StateDisplayName()))
 	{
@@ -74,7 +74,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Shapes (Shift + 3)"))};
+	static const auto ShapesHeaderText{FText::AsCultureInvariant(TEXT("Als.Shapes (Shift + 3)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsConstants::ShapesDisplayName()))
 	{
@@ -89,7 +89,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("ALS.Traces (Shift + 4)"))};
+	static const auto TracesHeaderText{FText::AsCultureInvariant(TEXT("Als.Traces (Shift + 4)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsConstants::TracesDisplayName()))
 	{
@@ -104,7 +104,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto MantlingHeaderText{FText::AsCultureInvariant(TEXT("ALS.Mantling (Shift + 5)"))};
+	static const auto MantlingHeaderText{FText::AsCultureInvariant(TEXT("Als.Mantling (Shift + 5)"))};
 
 	if (DebugDisplay.IsDisplayOn(UAlsConstants::MantlingDisplayName()))
 	{

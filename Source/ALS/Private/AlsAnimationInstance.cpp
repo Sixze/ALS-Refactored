@@ -723,8 +723,16 @@ void UAlsAnimationInstance::RefreshGroundedLeanAmount(const FVector3f& RelativeA
 
 void UAlsAnimationInstance::ResetGroundedLeanAmount(const float DeltaTime)
 {
-	LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
-	LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
+	if (bPendingUpdate)
+	{
+		LeanState.RightAmount = 0.0f;
+		LeanState.ForwardAmount = 0.0f;
+	}
+	else
+	{
+		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
+		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, 0.0f, DeltaTime, Settings->General.LeanInterpolationSpeed);
+	}
 }
 
 void UAlsAnimationInstance::RefreshInAirGameThread()
@@ -907,8 +915,11 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurve(),
 	            UAlsConstants::FootRightLockCurve(), ComponentTransformInverse, DeltaTime);
 
-	FeetState.MinMaxPelvisOffsetZ.X = FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
-	FeetState.MinMaxPelvisOffsetZ.Y = FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z);
+	FeetState.MinMaxPelvisOffsetZ.X = FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) /
+	                                  LocomotionState.Scale;
+
+	FeetState.MinMaxPelvisOffsetZ.Y = FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) /
+	                                  LocomotionState.Scale;
 }
 
 void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
