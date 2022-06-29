@@ -53,6 +53,9 @@ struct ALS_API FAlsSpineRotationState
 	float SpineAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	float TargetYawAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float YawAngle{0.0f};
 };
 
