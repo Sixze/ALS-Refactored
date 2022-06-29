@@ -277,6 +277,10 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
 		SpineRotation.SpineAmount = bPendingUpdate
 			                            ? 1.0f
 			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 1.0f, DeltaTime, InterpolationSpeed);
+
+		SpineRotation.YawAngle = (ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			                          ? ViewState.YawAngle - 360.0f
+			                          : ViewState.YawAngle) * SpineRotation.SpineAmount;
 	}
 	else
 	{
@@ -286,10 +290,6 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
 			                            ? 0.0f
 			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 0.0f, DeltaTime, InterpolationSpeed);
 	}
-
-	SpineRotation.YawAngle = (ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
-		                          ? ViewState.YawAngle - 360.0f
-		                          : ViewState.YawAngle) * SpineRotation.SpineAmount;
 }
 
 void UAlsAnimationInstance::ReinitializeLookTowardsInput()
