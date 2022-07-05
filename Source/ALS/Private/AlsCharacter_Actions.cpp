@@ -13,6 +13,7 @@
 #include "RootMotionSource/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
@@ -42,7 +43,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 	}
 
 	auto* Montage{SelectRollMontage()};
-	if (!ensure(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
+	if (!ALS_ENSURE(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
 	{
 		return;
 	}
@@ -407,9 +408,9 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	}
 
 	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
-	if (!ensure(IsValid(MantlingSettings)) ||
-	    !ensure(!MantlingSettings->BlendInCurve.IsNull()) ||
-	    !ensure(!MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull()))
+	if (!ALS_ENSURE(IsValid(MantlingSettings)) ||
+	    !ALS_ENSURE(!MantlingSettings->BlendInCurve.IsNull()) ||
+	    !ALS_ENSURE(!MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull()))
 	{
 		return;
 	}
@@ -471,7 +472,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (ensure(!MantlingSettings->Montage.IsNull()))
+	if (ALS_ENSURE(!MantlingSettings->Montage.IsNull()))
 	{
 		// TODO Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
 
@@ -840,7 +841,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 void AAlsCharacter::FinalizeRagdolling()
 {
-	if (!ensure(RagdollingState.bPendingFinalization))
+	if (!ALS_ENSURE(RagdollingState.bPendingFinalization))
 	{
 		return;
 	}

@@ -37,8 +37,10 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 
 void UAlsLinkedAnimationInstance::NativeBeginPlay()
 {
-	ensureMsgf(!Parent.IsNull(), TEXT("%s (%s) should only be used as a linked animation instance within the %s animation blueprint!"),
-	           ALS_GET_TYPE_STRING(UAlsLinkedAnimationInstance), *GetClass()->GetName(), ALS_GET_TYPE_STRING(UAlsAnimationInstance));
+	ALS_ENSURE_MESSAGE(!Parent.IsNull(),
+	                   TEXT("%s (%s) should only be used as a linked animation instance within the %s animation blueprint!"),
+	                   ALS_GET_TYPE_STRING(UAlsLinkedAnimationInstance), *GetClass()->GetName(),
+	                   ALS_GET_TYPE_STRING(UAlsAnimationInstance));
 
 	Super::NativeBeginPlay();
 }

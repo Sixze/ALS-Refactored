@@ -8,6 +8,7 @@
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsUtility.h"
 
 UAlsAnimationInstance::UAlsAnimationInstance()
@@ -35,7 +36,7 @@ void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	if (!ensure(!Settings.IsNull()) || !ensure(!Character.IsNull()))
+	if (!ALS_ENSURE(!Settings.IsNull()) || !ALS_ENSURE(!Character.IsNull()))
 	{
 		return;
 	}
@@ -1584,7 +1585,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		}
 	}
 
-	if (IsValid(TurnInPlaceSettings) && ensure(!TurnInPlaceSettings->Animation.IsNull()))
+	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(!TurnInPlaceSettings->Animation.IsNull()))
 	{
 		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thead.
 

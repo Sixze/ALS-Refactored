@@ -7,6 +7,7 @@
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsMath.h"
 
 FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)
@@ -19,7 +20,7 @@ float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FNa
 	const auto* Mesh{IsValid(Character) ? Character->GetMesh() : nullptr};
 	const auto* AnimationInstance{IsValid(Mesh) ? Mesh->GetAnimInstance() : nullptr};
 
-	return ensure(IsValid(AnimationInstance)) ? AnimationInstance->GetCurveValue(CurveName) : 0.0f;
+	return ALS_ENSURE(IsValid(AnimationInstance)) ? AnimationInstance->GetCurveValue(CurveName) : 0.0f;
 }
 
 FGameplayTagContainer UAlsUtility::GetChildTags(const FGameplayTag& Tag)
@@ -58,7 +59,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -90,7 +91,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -122,7 +123,7 @@ void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const 
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -147,7 +148,7 @@ void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FV
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -168,7 +169,7 @@ void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVecto
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -193,7 +194,7 @@ void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const 
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -219,7 +220,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsule(const UObject* WorldContext, const
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}
@@ -253,7 +254,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{WorldContext->GetWorld()};
-	if (!IsValid(World))
+	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
 	}

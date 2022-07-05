@@ -11,6 +11,7 @@
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
@@ -139,12 +140,12 @@ void AAlsCharacter::PostInitializeComponents()
 
 void AAlsCharacter::BeginPlay()
 {
-	ensure(!Settings.IsNull());
-	ensure(!MovementSettings.IsNull());
-	ensure(!AnimationInstance.IsNull());
+	ALS_ENSURE(!Settings.IsNull());
+	ALS_ENSURE(!MovementSettings.IsNull());
+	ALS_ENSURE(!AnimationInstance.IsNull());
 
-	ensureMsgf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
-	           TEXT("These settings are not allowed and must be turned off!"));
+	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
+	                   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
 

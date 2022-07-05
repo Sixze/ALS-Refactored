@@ -12,6 +12,7 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsEnumUtility.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
@@ -25,7 +26,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 {
 	Super::Notify(Mesh, Animation, EventReference);
 
-	if (!IsValid(Mesh) || !ensure(!FootstepEffectsSettings.IsNull()))
+	if (!IsValid(Mesh) || !ALS_ENSURE(!FootstepEffectsSettings.IsNull()))
 	{
 		return;
 	}

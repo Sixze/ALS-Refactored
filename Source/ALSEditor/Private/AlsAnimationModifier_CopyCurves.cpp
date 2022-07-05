@@ -1,11 +1,12 @@
 ﻿#include "AlsAnimationModifier_CopyCurves.h"
 
 #include "Animation/AnimSequence.h"
+#include "Utility/AlsMacro.h"
 
 void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
 	auto* SourceSequenceObject{SourceSequence.LoadSynchronous()};
-	if (!ensure(IsValid(SourceSequenceObject)))
+	if (!ALS_ENSURE(IsValid(SourceSequenceObject)))
 	{
 		return;
 	}

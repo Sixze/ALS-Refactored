@@ -50,4 +50,4 @@ Reading the changelogs is a good way to keep up to date with all the latest feat
 
 ## License & Contribution
 
-Advanced Locomotion System Refactored is licensed under the MIT License, see [LICENSE.md](LICENSE.md) for more information. Other developers are encouraged to fork the repository, open issues & pull requests to help the development.
+ALS Refactored is licensed under the MIT License, see [LICENSE.md](LICENSE.md) for more information. Other developers are encouraged to fork the repository, open issues & pull requests to help the development.

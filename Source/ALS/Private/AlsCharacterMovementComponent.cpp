@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
 #include "GameFramework/Controller.h"
+#include "Utility/AlsMacro.h"
 
 void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, const ENetworkMoveType MoveType)
 {
@@ -164,15 +165,14 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 
 	return bCanEditChange;
 }
-
 #endif
 
 void UAlsCharacterMovementComponent::BeginPlay()
 {
-	ensureMsgf(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."));
+	ALS_ENSURE_MESSAGE(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."));
 
-	ensureMsgf(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
-	           TEXT("These settings are not allowed and must be turned off!"));
+	ALS_ENSURE_MESSAGE(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
+	                   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
 }
@@ -199,7 +199,7 @@ float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
+	return IsMovingOnGround() && ALS_ENSURE(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
 		       : Super::GetMaxAcceleration();
 }
@@ -208,7 +208,7 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 {
 	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
-	return IsMovingOnGround() && ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
+	return IsMovingOnGround() && ALS_ENSURE(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull())
 		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
 		       : Super::GetMaxBrakingDeceleration();
 }
@@ -236,7 +236,7 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 
 void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 Iterations)
 {
-	if (ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
+	if (ALS_ENSURE(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
@@ -481,7 +481,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 
 void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
 {
-	if (ensure(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
+	if (ALS_ENSURE(!GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve.IsNull()))
 	{
 		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
 
@@ -780,7 +780,7 @@ void UAlsCharacterMovementComponent::ApplyPendingPenetrationAdjustment()
 
 void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* NewMovementSettings)
 {
-	ensure(IsValid(NewMovementSettings));
+	ALS_ENSURE(IsValid(NewMovementSettings));
 
 	MovementSettings = NewMovementSettings;
 
@@ -789,7 +789,7 @@ void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* N
 
 void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
-	if (ensure(!MovementSettings.IsNull()))
+	if (ALS_ENSURE(!MovementSettings.IsNull()))
 	{
 		GaitSettings = *MovementSettings->RotationModes.Find(RotationMode)->Stances.Find(Stance);
 	}

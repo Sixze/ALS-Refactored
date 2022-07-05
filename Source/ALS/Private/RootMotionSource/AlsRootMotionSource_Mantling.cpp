@@ -36,7 +36,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
-	if (!ensure(Duration > SMALL_NUMBER) || DeltaTime <= SMALL_NUMBER)
+	if (!ALS_ENSURE(Duration > SMALL_NUMBER) || DeltaTime <= SMALL_NUMBER)
 	{
 		RootMotionParams.Clear();
 		return;

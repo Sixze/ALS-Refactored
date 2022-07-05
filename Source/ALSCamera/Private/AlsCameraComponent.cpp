@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Utility/AlsCameraConstants.h"
+#include "Utility/AlsMacro.h"
 #include "Utility/AlsUtility.h"
 
 UAlsCameraComponent::UAlsCameraComponent()
@@ -39,9 +40,9 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 void UAlsCameraComponent::BeginPlay()
 {
-	ensure(IsValid(GetAnimInstance()));
-	ensure(!Settings.IsNull());
-	ensure(!Character.IsNull());
+	ALS_ENSURE(IsValid(GetAnimInstance()));
+	ALS_ENSURE(!Settings.IsNull());
+	ALS_ENSURE(!Character.IsNull());
 
 	Super::BeginPlay();
 }
