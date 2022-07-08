@@ -21,7 +21,7 @@ public:
 	static constexpr auto DrawCircleSidesCount{16};
 
 public:
-	static constexpr const TCHAR* BoolToString(const bool bValue);
+	static constexpr const TCHAR* BoolToString(bool bValue);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
 	static FString NameToDisplayString(const FName& Name, bool bIsBool = false);

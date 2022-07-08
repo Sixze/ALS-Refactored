@@ -409,8 +409,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) ||
-	    !ALS_ENSURE(!MantlingSettings->BlendInCurve.IsNull()) ||
-	    !ALS_ENSURE(!MantlingSettings->InterpolationAndCorrectionAmountsCurve.IsNull()))
+	    !ALS_ENSURE(IsValid(MantlingSettings->BlendInCurve)) ||
+	    !ALS_ENSURE(IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve)))
 	{
 		return;
 	}
@@ -472,7 +472,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (ALS_ENSURE(!MantlingSettings->Montage.IsNull()))
+	if (ALS_ENSURE(IsValid(MantlingSettings->Montage)))
 	{
 		// TODO Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
 

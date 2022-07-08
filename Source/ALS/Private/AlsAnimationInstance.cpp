@@ -23,7 +23,7 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
 #if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld() && Character.IsNull())
+	if (!GetWorld()->IsGameWorld() && !IsValid(Character))
 	{
 		// Use default objects for editor preview.
 
@@ -36,7 +36,7 @@ void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	if (!ALS_ENSURE(!Settings.IsNull()) || !ALS_ENSURE(!Character.IsNull()))
+	if (!ALS_ENSURE(IsValid(Settings)) || !ALS_ENSURE(IsValid(Character)))
 	{
 		return;
 	}
@@ -60,7 +60,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (Settings.IsNull() || Character.IsNull())
+	if (!IsValid(Settings) || !IsValid(Character))
 	{
 		return;
 	}
@@ -118,7 +118,7 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 
 	Super::NativeThreadSafeUpdateAnimation(DeltaTime);
 
-	if (Settings.IsNull() || Character.IsNull())
+	if (!IsValid(Settings) || !IsValid(Character))
 	{
 		return;
 	}
@@ -145,7 +145,7 @@ void UAlsAnimationInstance::NativePostEvaluateAnimation()
 
 	Super::NativePostEvaluateAnimation();
 
-	if (Settings.IsNull() || Character.IsNull())
+	if (!IsValid(Settings) || !IsValid(Character))
 	{
 		return;
 	}
@@ -1263,13 +1263,12 @@ void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation
 {
 	check(IsInGameThread())
 
-	if (Character.IsNull())
+	if (!IsValid(Character))
 	{
 		return;
 	}
 
-	// ReSharper disable once CppRedundantParentheses
-	if ((bFromStandingIdleOnly && (Character->GetLocomotionState().bMoving || Character->GetStance() != AlsStanceTags::Standing)))
+	if (bFromStandingIdleOnly && (Character->GetLocomotionState().bMoving || Character->GetStance() != AlsStanceTags::Standing))
 	{
 		return;
 	}
@@ -1280,7 +1279,7 @@ void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation
 void UAlsAnimationInstance::PlayTransitionLeftAnimation(const float BlendInTime, const float BlendOutTime, const float PlayRate,
                                                         const float StartTime, const bool bFromStandingIdleOnly)
 {
-	if (Settings.IsNull())
+	if (!IsValid(Settings))
 	{
 		return;
 	}
@@ -1294,7 +1293,7 @@ void UAlsAnimationInstance::PlayTransitionLeftAnimation(const float BlendInTime,
 void UAlsAnimationInstance::PlayTransitionRightAnimation(const float BlendInTime, const float BlendOutTime, const float PlayRate,
                                                          const float StartTime, const bool bFromStandingIdleOnly)
 {
-	if (Settings.IsNull())
+	if (!IsValid(Settings))
 	{
 		return;
 	}
@@ -1389,7 +1388,7 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 			                             : Settings->Transitions.StandingDynamicTransitionRightAnimation;
 	}
 
-	if (!DynamicTransitionAnimation.IsNull())
+	if (IsValid(DynamicTransitionAnimation))
 	{
 		// Block next dynamic transitions for about 2 frames to give the animation blueprint some time to properly react to the animation.
 
@@ -1585,7 +1584,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		}
 	}
 
-	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(!TurnInPlaceSettings->Animation.IsNull()))
+	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
 	{
 		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thead.
 
@@ -1604,7 +1603,7 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 {
 	check(IsInGameThread())
 
-	if (TurnInPlaceState.QueuedSettings.IsNull())
+	if (!IsValid(TurnInPlaceState.QueuedSettings))
 	{
 		return;
 	}

@@ -15,12 +15,12 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	{
 		// Use default objects for editor preview.
 
-		if (Character.IsNull())
+		if (!IsValid(Character))
 		{
 			Character = GetMutableDefault<AAlsCharacter>();
 		}
 
-		if (Camera.IsNull())
+		if (!IsValid(Camera))
 		{
 			Camera = GetMutableDefault<UAlsCameraComponent>();
 		}
@@ -32,7 +32,7 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (Character.IsNull() || Camera.IsNull())
+	if (!IsValid(Character) || !IsValid(Camera))
 	{
 		return;
 	}

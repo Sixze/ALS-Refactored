@@ -140,9 +140,9 @@ void AAlsCharacter::PostInitializeComponents()
 
 void AAlsCharacter::BeginPlay()
 {
-	ALS_ENSURE(!Settings.IsNull());
-	ALS_ENSURE(!MovementSettings.IsNull());
-	ALS_ENSURE(!AnimationInstance.IsNull());
+	ALS_ENSURE(IsValid(Settings));
+	ALS_ENSURE(IsValid(MovementSettings));
+	ALS_ENSURE(IsValid(AnimationInstance));
 
 	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 	                   TEXT("These settings are not allowed and must be turned off!"));
@@ -159,7 +159,7 @@ void AAlsCharacter::BeginPlay()
 		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 	}
 
-	ViewState.NetworkSmoothing.bEnabled |= !Settings.IsNull() &&
+	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) &&
 		Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
 
 	// Update states to use the initial desired values.
@@ -224,7 +224,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick()"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
 
-	if (Settings.IsNull() || AnimationInstance.IsNull())
+	if (!IsValid(Settings) || !IsValid(AnimationInstance))
 	{
 		Super::Tick(DeltaTime);
 		return;
@@ -276,7 +276,7 @@ void AAlsCharacter::PossessedBy(AController* NewController)
 
 	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
 
-	ViewState.NetworkSmoothing.bEnabled |= !Settings.IsNull() && Settings->View.bEnableListenServerNetworkSmoothing &&
+	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
 		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
 }
 

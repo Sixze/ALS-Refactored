@@ -41,8 +41,8 @@ void UAlsCameraComponent::Activate(const bool bReset)
 void UAlsCameraComponent::BeginPlay()
 {
 	ALS_ENSURE(IsValid(GetAnimInstance()));
-	ALS_ENSURE(!Settings.IsNull());
-	ALS_ENSURE(!Character.IsNull());
+	ALS_ENSURE(IsValid(Settings));
+	ALS_ENSURE(IsValid(Character));
 
 	Super::BeginPlay();
 }
@@ -81,9 +81,9 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 	ViewInfo.Rotation = CameraRotation;
 	ViewInfo.FOV = CameraFov;
 
-	ViewInfo.PostProcessBlendWeight = Settings.IsNull() ? 0.0f : PostProcessWeight;
+	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
 
-	if (ViewInfo.PostProcessBlendWeight)
+	if (ViewInfo.PostProcessBlendWeight > SMALL_NUMBER)
 	{
 		ViewInfo.PostProcessSettings = Settings->PostProcess;
 	}
@@ -91,7 +91,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 
 void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag)
 {
-	if (!IsValid(GetAnimInstance()) || Settings.IsNull() || Character.IsNull())
+	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !IsValid(Character))
 	{
 		return;
 	}
