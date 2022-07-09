@@ -40,14 +40,6 @@
 	],
 	"Plugins": [
 		{
-			"Name": "GameplayCameras",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayTagsEditor",
-			"Enabled": true
-		},
-		{
 			"Name": "ControlRig",
 			"Enabled": true
 		},
@@ -56,11 +48,23 @@
 			"Enabled": true
 		},
 		{
+			"Name": "GameplayCameras",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayTagsEditor",
+			"Enabled": true
+		},
+		{
 			"Name": "Metasound",
 			"Enabled": true
 		},
 		{
 			"Name": "Niagara",
+			"Enabled": true
+		},
+		{
+			"Name": "PropertyAccessNode",
 			"Enabled": true
 		}
 	]
