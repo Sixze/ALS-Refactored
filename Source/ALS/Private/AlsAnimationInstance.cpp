@@ -271,17 +271,21 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
 {
 	auto& SpineRotation{ViewState.SpineRotation};
 
-	if (IsSpineRotationAllowed())
+	if (SpineRotation.bSpineRotationAllowed != IsSpineRotationAllowed())
 	{
-		static constexpr auto InterpolationSpeed{30.0f};
+		SpineRotation.bSpineRotationAllowed = !SpineRotation.bSpineRotationAllowed;
+		SpineRotation.StartYawAngle = SpineRotation.CurrentYawAngle;
+	}
+
+	if (SpineRotation.bSpineRotationAllowed)
+	{
+		static constexpr auto InterpolationSpeed{20.0f};
 
 		SpineRotation.SpineAmount = bPendingUpdate
 			                            ? 1.0f
 			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 1.0f, DeltaTime, InterpolationSpeed);
 
-		SpineRotation.TargetYawAngle = (ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
-			                                ? ViewState.YawAngle - 360.0f
-			                                : ViewState.YawAngle) * SpineRotation.SpineAmount;
+		SpineRotation.TargetYawAngle = ViewState.YawAngle;
 	}
 	else
 	{
@@ -292,7 +296,10 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
 			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 0.0f, DeltaTime, InterpolationSpeed);
 	}
 
-	SpineRotation.YawAngle = SpineRotation.TargetYawAngle;
+	SpineRotation.CurrentYawAngle = UAlsMath::LerpAngle(SpineRotation.StartYawAngle, SpineRotation.TargetYawAngle,
+	                                                    SpineRotation.SpineAmount);
+
+	SpineRotation.YawAngle = SpineRotation.CurrentYawAngle;
 }
 
 void UAlsAnimationInstance::ReinitializeLookTowardsInput()
