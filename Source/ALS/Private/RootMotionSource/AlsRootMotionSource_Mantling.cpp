@@ -57,6 +57,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	FRotator RotationOffset;
 
 	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(MantlingTime)};
+
 	if (!FAnimWeight::IsRelevant(BlendInAmount))
 	{
 		LocationOffset = ActorFeetLocationOffset;

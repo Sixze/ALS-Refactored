@@ -174,6 +174,7 @@ inline float UAlsMath::LerpClamped(const float A, const float B, const float Alp
 inline float UAlsMath::LerpAngle(const float A, const float B, const float Alpha)
 {
 	auto Delta{FRotator3f::NormalizeAxis(B - A)};
+
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
@@ -289,6 +290,7 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 	}
 
 	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
+
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
@@ -302,6 +304,7 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
+
 	if (MagnitudeSquared <= 1.0f)
 	{
 		return Vector;
@@ -315,6 +318,7 @@ inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
 inline FVector3f UAlsMath::ClampMagnitude01(const FVector3f& Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
+
 	if (MagnitudeSquared <= 1.0f)
 	{
 		return Vector;
@@ -328,6 +332,7 @@ inline FVector3f UAlsMath::ClampMagnitude01(const FVector3f& Vector)
 inline FVector2D UAlsMath::ClampMagnitude012D(const FVector2D& Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
+
 	if (MagnitudeSquared <= 1.0f)
 	{
 		return Vector;

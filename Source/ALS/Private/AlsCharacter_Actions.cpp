@@ -43,6 +43,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 	}
 
 	auto* Montage{SelectRollMontage()};
+
 	if (!ALS_ENSURE(IsValid(Montage)) || !IsRollingAllowedToStart(Montage))
 	{
 		return;
@@ -408,6 +409,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	}
 
 	const auto MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
+
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) ||
 	    !ALS_ENSURE(IsValid(MantlingSettings->BlendInCurve)) ||
 	    !ALS_ENSURE(IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve)))

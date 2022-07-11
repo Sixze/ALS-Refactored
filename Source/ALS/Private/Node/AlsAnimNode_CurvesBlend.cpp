@@ -34,7 +34,6 @@ void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& C
 	SourcePose.Update(Context);
 
 	const auto CurrentBlendAmount{GetBlendAmount()};
-
 	if (FAnimWeight::IsRelevant(CurrentBlendAmount))
 	{
 		CurvesPose.Update(Context);
@@ -51,7 +50,6 @@ void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 	SourcePose.Evaluate(Output);
 
 	const auto CurrentBlendAmount{GetBlendAmount()};
-
 	if (!FAnimWeight::IsRelevant(CurrentBlendAmount))
 	{
 		return;

@@ -34,6 +34,7 @@ void UAlsAnimNotifyState_SetLocomotionAction::NotifyEnd(USkeletalMeshComponent* 
 	Super::NotifyEnd(Mesh, Animation, EventReference);
 
 	auto* Character{Cast<AAlsCharacter>(Mesh->GetOwner())};
+
 	if (IsValid(Character) && Character->GetLocomotionAction() == LocomotionAction)
 	{
 		Character->SetLocomotionAction(FGameplayTag::EmptyTag);

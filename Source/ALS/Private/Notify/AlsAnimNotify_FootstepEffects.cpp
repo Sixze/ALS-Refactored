@@ -59,7 +59,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	FCollisionQueryParams QueryParameters{ANSI_TO_TCHAR(__FUNCTION__), true, Mesh->GetOwner()};
 	QueryParameters.bReturnPhysicalMaterial = true;
 
-	FHitResult Hit{};
+	FHitResult Hit;
 	if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
 	                                    FootTransform.GetLocation() - FootZAxis *
 	                                    (FootstepEffectsSettings->SurfaceTraceDistance * CapsuleScale),

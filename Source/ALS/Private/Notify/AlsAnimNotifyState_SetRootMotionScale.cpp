@@ -24,6 +24,7 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent*
 	Super::NotifyBegin(Mesh, Animation, TotalDuration, EventReference);
 
 	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
+
 	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		Character->SetAnimRootMotionTranslationScale(TranslationScale);
@@ -36,6 +37,7 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* M
 	Super::NotifyEnd(Mesh, Animation, EventReference);
 
 	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
+
 	if (IsValid(Character) && Character->GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		if (FMath::IsNearlyEqual(Character->GetAnimRootMotionTranslationScale(), TranslationScale))
