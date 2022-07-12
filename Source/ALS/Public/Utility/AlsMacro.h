@@ -11,12 +11,12 @@
 
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 
-#define ALS_ENSURE_IMPLEMENTATION(Expression, bEnsureOnce, Format, Capture, ...) \
+#define ALS_ENSURE_IMPLEMENTATION(Expression, bEnsureAlways, Format, Capture, ...) \
 	(LIKELY(Expression) || ([Capture]() FORCENOINLINE UE_DEBUG_SECTION \
 	{ \
 		static auto bExecuted{false}; \
 		\
-		if ((!bEnsureOnce || !bExecuted) && FPlatformMisc::IsEnsureAllowed()) \
+		if ((bEnsureAlways || !bExecuted) && FPlatformMisc::IsEnsureAllowed()) \
 		{ \
 			bExecuted = true; \
 			\
@@ -38,8 +38,8 @@
 
 #define ALS_ENSURE(Expression) ALS_ENSURE_IMPLEMENTATION(Expression, false, TEXT(""), )
 #define ALS_ENSURE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression, false, Format, &, __VA_ARGS__)
-#define ALS_ENSURE_ONCE(Expression) ALS_ENSURE_IMPLEMENTATION(Expression true, TEXT(""), )
-#define ALS_ENSURE_ONCE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression true, Format, &, __VA_ARGS__)
+#define ALS_ENSURE_ALWAYS(Expression) ALS_ENSURE_IMPLEMENTATION(Expression true, TEXT(""), )
+#define ALS_ENSURE_ALWAYS_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression true, Format, &, __VA_ARGS__)
 
 #else
 
