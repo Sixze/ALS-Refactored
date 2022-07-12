@@ -147,7 +147,7 @@ bool AAlsCharacter::TryStartMantlingInAir()
 	       TryStartMantling(Settings->Mantling.InAirTrace);
 }
 
-bool AAlsCharacter::IsMantlingAllowedToStart() const
+bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 {
 	return !LocomotionAction.IsValid();
 }
