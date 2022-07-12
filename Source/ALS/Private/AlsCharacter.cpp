@@ -1130,6 +1130,11 @@ void AAlsCharacter::OnJumpedNetworked()
 	AnimationInstance->Jump();
 }
 
+ bool AAlsCharacter::CanMantle_Implementation() const
+{
+	return true;
+}
+
 void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
 {
 	// Left empty intentionally.

@@ -449,6 +449,13 @@ private:
 
 	// Mantling
 
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	bool CanMantle() const;
+
+private:
+	bool CanMantle_Implementation() const;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	bool TryStartMantlingGrounded();

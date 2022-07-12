@@ -149,6 +149,9 @@ bool AAlsCharacter::TryStartMantlingInAir()
 
 bool AAlsCharacter::IsMantlingAllowedToStart() const
 {
+	if (!CanMantle()) {
+		return false;
+	}
 	return !LocomotionAction.IsValid();
 }
 
