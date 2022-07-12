@@ -449,14 +449,16 @@ private:
 
 	// Mantling
 
+protected:
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	bool IsMantlingAllowedToStart() const;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	bool TryStartMantlingGrounded();
 
 private:
 	bool TryStartMantlingInAir();
-
-	bool IsMantlingAllowedToStart() const;
 
 	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
