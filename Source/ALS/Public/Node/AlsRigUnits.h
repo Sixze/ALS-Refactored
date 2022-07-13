@@ -40,24 +40,31 @@ public:
 	UPROPERTY(Meta = (Input))
 	bool bInitial{false};
 
+	// UPROPERTY(Transient, Meta = (Output))
 	UPROPERTY(Meta = (Output))
 	bool bSuccess{false};
 
+	// UPROPERTY(Transient, Meta = (Output))
 	UPROPERTY(Meta = (Output))
 	FVector StartLocation{ForceInit};
 
+	// UPROPERTY(Transient, Meta = (Output))
 	UPROPERTY(Meta = (Output))
 	FVector EndLocation{ForceInit};
 
+	// UPROPERTY(Transient, Meta = (Output))
 	UPROPERTY(Meta = (Output))
 	FVector Direction{FVector::ForwardVector};
 
+	// UPROPERTY(Transient)
 	UPROPERTY()
 	FCachedRigElement CachedItemA;
 
+	// UPROPERTY(Transient)
 	UPROPERTY()
 	FCachedRigElement CachedItemB;
 
+	// UPROPERTY(Transient)
 	UPROPERTY()
 	FCachedRigElement CachedItemC;
 
@@ -78,6 +85,7 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = 0))
 	float Lambda{1.0f};
 
+	// UPROPERTY(Transient, Meta = (Output))
 	UPROPERTY(Meta = (Output))
 	FVector Current{ForceInit};
 
