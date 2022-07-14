@@ -33,10 +33,10 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 void UAlsAnimationModifier_CopyCurves::CopyCurve(UAnimSequence* SourceSequence, UAnimSequence* TargetSequence, const FName& CurveName)
 {
 	static TArray<float> CurveTimes;
-	check(CurveTimes.Num() <= 0)
+	check(CurveTimes.IsEmpty())
 
 	static TArray<float> CurveValues;
-	check(CurveValues.Num() <= 0)
+	check(CurveValues.IsEmpty())
 
 	if (UAnimationBlueprintLibrary::DoesCurveExist(TargetSequence, CurveName, ERawCurveTrackTypes::RCT_Float))
 	{

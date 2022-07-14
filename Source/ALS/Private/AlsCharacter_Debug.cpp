@@ -161,7 +161,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	const auto ColumnOffset{145.0f * Scale};
 
 	static TArray<FName> CurveNames;
-	check(CurveNames.Num() <= 0)
+	check(CurveNames.IsEmpty())
 
 	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
 

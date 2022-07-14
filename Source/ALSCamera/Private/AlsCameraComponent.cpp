@@ -405,7 +405,7 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * CapsuleScale)};
 
 	static TArray<FOverlapResult> Overlaps;
-	check(Overlaps.Num() <= 0)
+	check(Overlaps.IsEmpty())
 
 	static const FName OverlapMultiTraceTag{FString::Format(TEXT("{0} (Overlap Multi)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 

@@ -243,7 +243,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
 	}
 
-	// TODO Copied with modifications from UAlsCharacterMovementComponent::PhysWalking().
+	// TODO Copied with modifications from UCharacterMovementComponent::PhysWalking().
 	// TODO After the release of a new engine version, this code should be updated to match the source code.
 
 	// ReSharper disable All

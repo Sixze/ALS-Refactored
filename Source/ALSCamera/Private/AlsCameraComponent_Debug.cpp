@@ -116,7 +116,7 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	const auto ColumnOffset{145.0f * Scale};
 
 	static TArray<FName> CurveNames;
-	check(CurveNames.Num() <= 0)
+	check(CurveNames.IsEmpty())
 
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
