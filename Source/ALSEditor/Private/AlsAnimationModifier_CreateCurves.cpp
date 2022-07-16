@@ -4,6 +4,8 @@
 
 void UAlsAnimationModifier_CreateCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
+	Super::OnApply_Implementation(Sequence);
+
 	for (const auto& Curve : Curves)
 	{
 		if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, Curve.Name, ERawCurveTrackTypes::RCT_Float))

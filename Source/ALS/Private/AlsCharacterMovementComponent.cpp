@@ -76,7 +76,7 @@ void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, AChara
 	const auto* Movement{Character->GetCharacterMovement()};
 	const auto InitialRotation{Movement->UpdatedComponent->GetComponentRotation()};
 
-	FSavedMove_Character::CombineWith(PreviousMove, Character, PlayerController, PreviousStartLocation);
+	Super::CombineWith(PreviousMove, Character, PlayerController, PreviousStartLocation);
 
 	// Restore initial rotation after movement combining. Without this, any rotation applied in
 	// the character class will be discarded and the character will not be able to rotate properly.

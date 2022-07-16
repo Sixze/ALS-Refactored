@@ -5,7 +5,7 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimNotifyState_EarlyBlendOut.generated.h"
 
-UCLASS(DisplayName = "Als Early Blend Out Animation Notify State", Meta = (ShowWorldContextPin))
+UCLASS(DisplayName = "Als Early Blend Out Animation Notify State")
 class ALS_API UAlsAnimNotifyState_EarlyBlendOut : public UAnimNotifyState
 {
 	GENERATED_BODY()

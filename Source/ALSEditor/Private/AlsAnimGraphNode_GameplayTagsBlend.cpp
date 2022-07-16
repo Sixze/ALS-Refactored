@@ -44,6 +44,8 @@ FString UAlsAnimGraphNode_GameplayTagsBlend::GetNodeCategory() const
 
 void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, const FName SourcePropertyName, const int32 ArrayIndex) const
 {
+	Super::CustomizePinData(Pin, SourcePropertyName, ArrayIndex);
+
 	bool bBlendPosePin;
 	bool bBlendTimePin;
 	GetBlendPinProperties(Pin, bBlendPosePin, bBlendTimePin);

@@ -47,6 +47,8 @@ void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread)
 
+	Super::Evaluate_AnyThread(Output);
+
 	SourcePose.Evaluate(Output);
 
 	const auto CurrentBlendAmount{GetBlendAmount()};

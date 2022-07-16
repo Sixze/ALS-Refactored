@@ -4,6 +4,8 @@
 
 void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
+	Super::OnApply_Implementation(Sequence);
+
 	CreateCurves(Sequence, CurveNames, CurveValue);
 
 	if (bAddSlotCurves)

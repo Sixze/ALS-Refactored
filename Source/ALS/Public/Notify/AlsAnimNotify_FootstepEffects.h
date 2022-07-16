@@ -126,7 +126,7 @@ public:
 };
 
 UCLASS(DisplayName = "Als Footstep Effects Animation Notify",
-	AutoExpandCategories = ("Settings|Sound", "Settings|Decal", "Settings|Particle System"), Meta = (ShowWorldContextPin))
+	AutoExpandCategories = ("Settings|Sound", "Settings|Decal", "Settings|Particle System"))
 class ALS_API UAlsAnimNotify_FootstepEffects : public UAnimNotify
 {
 	GENERATED_BODY()

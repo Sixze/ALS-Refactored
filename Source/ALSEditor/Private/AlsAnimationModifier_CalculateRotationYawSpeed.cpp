@@ -5,6 +5,8 @@
 
 void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAnimSequence* Sequence)
 {
+	Super::OnApply_Implementation(Sequence);
+
 	if (UAnimationBlueprintLibrary::DoesCurveExist(Sequence, UAlsConstants::RotationYawSpeedCurve(), ERawCurveTrackTypes::RCT_Float))
 	{
 		UAnimationBlueprintLibrary::RemoveCurve(Sequence, UAlsConstants::RotationYawSpeedCurve());

@@ -3,7 +3,7 @@
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "AlsAnimNotifyState_SetRootMotionScale.generated.h"
 
-UCLASS(DisplayName = "Als Set Root Motion Scale Animation Notify State", Meta = (ShowWorldContextPin))
+UCLASS(DisplayName = "Als Set Root Motion Scale Animation Notify State")
 class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 {
 	GENERATED_BODY()

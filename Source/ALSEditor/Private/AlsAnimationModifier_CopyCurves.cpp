@@ -5,6 +5,8 @@
 
 void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
+	Super::OnApply_Implementation(Sequence);
+
 	auto* SourceSequenceObject{SourceSequence.LoadSynchronous()};
 	if (!ALS_ENSURE(IsValid(SourceSequenceObject)))
 	{
