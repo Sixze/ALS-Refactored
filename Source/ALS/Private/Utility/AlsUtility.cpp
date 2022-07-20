@@ -7,7 +7,7 @@
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
-#include "Utility/AlsMacro.h"
+#include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"
 
 FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)

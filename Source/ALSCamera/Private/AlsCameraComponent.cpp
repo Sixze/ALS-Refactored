@@ -6,7 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Utility/AlsCameraConstants.h"
-#include "Utility/AlsMacro.h"
+#include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
 UAlsCameraComponent::UAlsCameraComponent()

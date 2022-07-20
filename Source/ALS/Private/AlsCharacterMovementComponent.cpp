@@ -5,7 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
 #include "GameFramework/Controller.h"
-#include "Utility/AlsMacro.h"
+#include "Utility/AlsMacros.h"
 
 void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, const ENetworkMoveType MoveType)
 {

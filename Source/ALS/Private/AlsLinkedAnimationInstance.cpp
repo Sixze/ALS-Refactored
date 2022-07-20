@@ -2,7 +2,7 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacter.h"
-#include "Utility/AlsMacro.h"
+#include "Utility/AlsMacros.h"
 
 UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
 {
