@@ -6,14 +6,9 @@ public class ALS : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
-			"Core", "CoreUObject", "NetCore", "Engine", "PhysicsCore", "GameplayTags", "AnimGraphRuntime", "ControlRig", "Niagara"
-		});
-
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"RigVM"
+			"Core", "CoreUObject", "Engine", "NetCore", "PhysicsCore", "GameplayTags", "AnimGraphRuntime", "ControlRig", "RigVM", "Niagara"
 		});
 	}
 }
