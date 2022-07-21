@@ -429,7 +429,7 @@ void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
 	}
 }
 
-void AAlsCharacter::OnReplicate_DesiredAiming(const bool bPreviousDesiredAiming)
+void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming)
 {
 	OnDesiredAimingChanged(bPreviousDesiredAiming);
 }
@@ -820,7 +820,7 @@ void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewM
 	SetOverlayMode(NewModeTag);
 }
 
-void AAlsCharacter::OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag)
+void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousModeTag)
 {
 	OnOverlayModeChanged(PreviousModeTag);
 }
@@ -876,7 +876,7 @@ void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewView
 	SetViewRotation(NewViewRotation);
 }
 
-void AAlsCharacter::OnReplicate_ViewRotation()
+void AAlsCharacter::OnReplicated_ViewRotation()
 {
 	CorrectViewNetworkSmoothing(ViewRotation);
 }

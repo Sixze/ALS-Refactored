@@ -31,7 +31,7 @@ private:
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicate_DesiredAiming", Meta = (AllowPrivateAccess))
+		ReplicatedUsing = "OnReplicated_DesiredAiming", Meta = (AllowPrivateAccess))
 	bool bDesiredAiming;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
@@ -47,8 +47,8 @@ private:
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicate_OverlayMode", Meta = (AllowPrivateAccess))
-	FGameplayTag OverlayMode;
+		ReplicatedUsing = "OnReplicated_OverlayMode", Meta = (AllowPrivateAccess))
+	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	bool bSimulatedProxyTeleported;
@@ -74,7 +74,7 @@ private:
 
 	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicate_ViewRotation", Meta = (AllowPrivateAccess))
+		ReplicatedUsing = "OnReplicated_ViewRotation", Meta = (AllowPrivateAccess))
 	FRotator ViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
@@ -175,7 +175,7 @@ private:
 	void ServerSetDesiredAiming(bool bNewDesiredAiming);
 
 	UFUNCTION()
-	void OnReplicate_DesiredAiming(bool bPreviousDesiredAiming);
+	void OnReplicated_DesiredAiming(bool bPreviousDesiredAiming);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -288,7 +288,7 @@ private:
 	void ServerSetOverlayMode(const FGameplayTag& NewModeTag);
 
 	UFUNCTION()
-	void OnReplicate_OverlayMode(const FGameplayTag& PreviousModeTag);
+	void OnReplicated_OverlayMode(const FGameplayTag& PreviousModeTag);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
@@ -319,7 +319,7 @@ private:
 	void ServerSetViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION()
-	void OnReplicate_ViewRotation();
+	void OnReplicated_ViewRotation();
 
 public:
 	void CorrectViewNetworkSmoothing(const FRotator& NewViewRotation);
