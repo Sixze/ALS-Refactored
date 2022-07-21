@@ -54,16 +54,14 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 #if WITH_EDITOR
 bool AAlsCharacter::CanEditChange(const FProperty* Property) const
 {
-	auto bCanEditChange{Super::CanEditChange(Property)};
-
 	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationPitch) ||
 	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationYaw) ||
 	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationRoll))
 	{
-		bCanEditChange = false;
+		return false;
 	}
 
-	return bCanEditChange;
+	return Super::CanEditChange(Property);
 }
 #endif
 
