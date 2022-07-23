@@ -20,11 +20,10 @@ struct ALS_API FAlsRollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0))
 	float RotationInterpolationSpeed{10.0f};
 
-	// If character landed with a specified speed, then start rolling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bStartRollingOnLand{true};
 
-	// If character landed with a speed greater than specified value, then start rolling.
+	// If a character landed with a speed greater than the specified value, then start rolling.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand", ForceUnits = "cm/s"))
 	float RollingOnLandSpeedThreshold{700.0f};
 

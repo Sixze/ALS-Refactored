@@ -14,11 +14,11 @@ struct ALS_API FAlsViewNetworkSmoothingState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ServerTime{0.0f};
 
-	// Used to track the client time as we try to match the server.
+	// Used to track client time as we try to match the server.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ClientTime{0.0f};
 
-	// Used for remembering how much time has passed between server corrections.
+	// Used for remembering how much time passed between server corrections.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float Duration{0.0f};
 

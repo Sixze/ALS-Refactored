@@ -21,7 +21,7 @@ struct ALS_API FAlsRigUnit_SimulationBase : public FRigUnit
 	GENERATED_BODY()
 };
 
-// Calculates the intersection location and direction of the perpendicular to line AC through point B.
+// Calculates the intersection location and direction of the perpendicular to AC through B.
 USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS|Als"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 {

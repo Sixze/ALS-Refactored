@@ -112,7 +112,7 @@ void AAlsCharacter::PostInitializeComponents()
 {
 	RefreshVisibilityBasedAnimTickOption();
 
-	// Make sure the mesh and animation blueprint update after the character to ensure it gets the most recent values.
+	// Make sure the mesh and animation blueprint update after the character to guarantee it gets the most recent values.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
 
@@ -144,7 +144,7 @@ void AAlsCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Ignore root motion on simulated proxies, because in some situations it causes
-	// issues with network smoothing such as when the character uncrouches while rolling.
+	// issues with network smoothing, such as when the character uncrouches while rolling.
 
 	// TODO Check the need for this temporary fix in future engine versions.
 
@@ -494,7 +494,7 @@ void AAlsCharacter::RefreshRotationMode()
 			return;
 		}
 
-		// Grounded or other locomotion modes.
+		// Grounded and other locomotion modes.
 
 		if (bAiming && (!bSprinting || !Settings->bSprintHasPriorityOverAiming))
 		{
@@ -508,7 +508,7 @@ void AAlsCharacter::RefreshRotationMode()
 		return;
 	}
 
-	// Third person or other view modes.
+	// Third person and other view modes.
 
 	if (LocomotionMode == AlsLocomotionModeTags::InAir)
 	{
@@ -528,7 +528,7 @@ void AAlsCharacter::RefreshRotationMode()
 		return;
 	}
 
-	// Grounded or other locomotion modes.
+	// Grounded and other locomotion modes.
 
 	if (bSprinting)
 	{
@@ -614,7 +614,7 @@ void AAlsCharacter::Crouch(const bool bClientSimulation)
 {
 	Super::Crouch(bClientSimulation);
 
-	// Chance stance instantly without waiting for ACharacter::OnStartCrouch.
+	// Chance stance instantly without waiting for ACharacter::OnStartCrouch().
 
 	if (!GetCharacterMovement()->bWantsToCrouch)
 	{
@@ -634,7 +634,7 @@ void AAlsCharacter::UnCrouch(const bool bClientSimulation)
 {
 	Super::UnCrouch(bClientSimulation);
 
-	// Chance stance instantly without waiting for ACharacter::OnEndCrouch.
+	// Chance stance instantly without waiting for ACharacter::OnEndCrouch().
 
 	SetStance(AlsStanceTags::Standing);
 }
@@ -767,7 +767,7 @@ bool AAlsCharacter::CanSprint() const
 {
 	// Determine if the character is currently able to sprint based on the rotation mode and input
 	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
-	// if there is input and it is faced forward relative to the camera + or - 50 degrees.
+	// if there is input and it is facing forward relative to the camera + or - 50 degrees.
 
 	if (!LocomotionState.bHasInput || Stance != AlsStanceTags::Standing ||
 	    RotationMode == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming)
@@ -908,7 +908,7 @@ void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
 
 	NetworkSmoothing.InitialRotation = NetworkSmoothing.Rotation;
 
-	// Using server time lets us know how much time actually elapsed, regardless of packet lag variance.
+	// Using server time lets us know how much time elapsed, regardless of packet lag variance.
 
 	const auto ServerDeltaTime{NewNetworkSmoothingServerTime - NetworkSmoothing.ServerTime};
 
@@ -957,8 +957,8 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewState.NetworkSmoothing.Rotation,
 	                                                DeltaTime, InterpolationSpeed);
 
-	// Set the yaw speed by comparing the current and previous view yaw angle, divided
-	// by delta seconds. This represents the speed the camera is rotating left to right.
+	// Set the yaw speed by comparing the current and previous view yaw angle, divided by
+	// delta seconds. This represents the speed the camera is rotating from left to right.
 
 	ViewState.YawSpeed = FMath::Abs(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - ViewState.PreviousYawAngle) / DeltaTime;
 }
@@ -1054,7 +1054,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
 	}
 
-	// If the character has input, update the input yaw angle.
+	// If the character has the input, update the input yaw angle.
 
 	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
 
@@ -1065,10 +1065,10 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.Velocity = GetVelocity();
 
-	// Determine if the character is moving by getting it's speed. The speed equals the length
+	// Determine if the character is moving by getting its speed. The speed equals the length
 	// of the horizontal velocity, so it does not take vertical movement into account. If the
-	// character is moving, update the last velocity rotation. This value is saved because it
-	// might be useful to know the last orientation of movement even after the character has stopped.
+	// character is moving, update the last velocity rotation. This value is saved because it might
+	// be useful to know the last orientation of a movement even after the character has stopped.
 
 	LocomotionState.Speed = UE_REAL_TO_FLOAT(LocomotionState.Velocity.Size2D());
 	LocomotionState.bHasSpeed = LocomotionState.Speed >= 1.0f;
@@ -1080,7 +1080,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
 
-	// Character is moving if has speed and current acceleration, or if the speed is greater than moving speed threshold.
+	// Character is moving if has speed and current acceleration, or if the speed is greater than the moving speed threshold.
 
 	// ReSharper disable once CppRedundantParentheses
 	LocomotionState.bMoving = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||

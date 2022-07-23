@@ -136,7 +136,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 	}
 #endif
 
-	// Calculate pivot lag location. Get the pivot target location and interpolate using axis independent lag for maximum control.
+	// Calculate pivot lag location. Get the pivot target location and interpolate using axis-independent lag for maximum control.
 
 	PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
 

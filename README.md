@@ -4,11 +4,11 @@
 
 Completely reworked and improved version of the [Community Version](https://github.com/dyanikoglu/ALS-Community) of [Advanced Locomotion System V4](https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1).
 
-The main purpose of this ALS version is is a complete and high-quality refactoring of every aspect of the plugin, so that it becomes easier to understand, more flexible, reliable (especially in network multiplayer), performant and simply more pleasant to work with.
+The main purpose of this ALS version is is a complete and high-quality refactoring of every aspect of the plugin, so that it becomes easier to understand, more flexible, reliable (especially in network multiplayer), performant, and simply more pleasant to work with.
 
 ## Features
 
-- Refactored plugin structure. Content is now separated into 3 categories: `ALS` - main content, `ALSCamera` - camera related content and `ALSExtras` - other optional content.
+- Refactored plugin structure. Content is now separated into 3 categories: `ALS` - main content, `ALSCamera` - camera-related content and `ALSExtras` - other optional content.
 - Use of multiple linked animation blueprints instead of a single monolithic animation blueprint.
 - Use of animation layer interfaces to dynamically switch overlay states at runtime instead of referencing them directly in animation blueprints.
 - Use of the **Control Rig** plugin for IK and other bone manipulation tasks instead of animation graph nodes.
@@ -18,7 +18,7 @@ The main purpose of this ALS version is is a complete and high-quality refactori
 - Reworked foot and pelvis offset logic for smoother character movement on stairs or sloped surfaces.
 - Added "Slot" layering animation curves that allow to control the blending of overlay poses with animation montages played inside "Layering" animation slots.
 - Added `Blend Curves` and `Blend Poses by Gameplay Tag` animation graph nodes. `Blend Curves` allows to blend animation curves without the need for the `VB curves` virtual bone and `Blend Poses by Gameplay Tag` is similar to `Blend Poses by Enum` but uses gameplay tags instead of enum.
-- Moved thread safe animation instance logic to the worker thread to improve game thread performance.
+- Moved thread-safe animation instance logic to the worker thread to improve game thread performance.
 - Replaced some C++ enums such as `EAlsOverlayMode` with gameplay tags so new entries can be added without the need to modify the code.
 - Reworked `UAlsCharacterMovementComponent` for better movement synchronization over the network.
 - Reworked mantling. Implemented as a root motion source for better movement synchronization over the network.

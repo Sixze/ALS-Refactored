@@ -209,7 +209,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const auto LedgeHeightDelta{UE_REAL_TO_FLOAT((TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * CapsuleScale)};
 
-	// Trace forward to find a object the character cannot walk on.
+	// Trace forward to find an object the character cannot walk on.
 
 	static const FName ForwardTraceTag{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
@@ -354,8 +354,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		                          ? EAlsMantlingType::High
 		                          : EAlsMantlingType::Low;
 
-	// If the target primitive can't move, then use world coordinates in order to
-	// save some performance by skipping some coordinate space transformations later.
+	// If the target primitive can't move, then use world coordinates to save
+	// some performance by skipping some coordinate space transformations later.
 
 	if (MovementBaseUtility::UseRelativeLocation(TargetPrimitive))
 	{
@@ -611,7 +611,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	GetMesh()->GetAnimInstance()->Montage_Stop(BlendOutTime);
 
-	// When networked, disable replicate movement reset ragdolling target location and pull force variables.
+	// When networked, disable replicate movement, reset ragdolling target location, and pull force variables.
 
 	SetReplicateMovement(false);
 	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
@@ -631,7 +631,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBone(), true, true);
 
-	// Limit the ragdoll's speed to a few frames, because for some unclear reason,
+	// Limit ragdoll speed to a few frames, because for some unclear reason,
 	// it can get a much higher initial speed than the character's last speed.
 
 	// TODO Find a better solution or wait for a fix in future engine versions.
@@ -699,12 +699,13 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	if (IsNetMode(NM_DedicatedServer))
 	{
 		// Change animation tick option when the host is a dedicated server to avoid z-location issue.
+
 		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	}
 
 	RagdollingState.RootBoneVelocity = GetMesh()->GetPhysicsLinearVelocity(UAlsConstants::RootBone());
 
-	// Use the velocity to scale the ragdoll's joint strength for physical animation.
+	// Use the velocity to scale ragdoll joint strength for physical animation.
 
 	static constexpr auto ReferenceSpeed{1000.0f};
 	static constexpr auto Stiffness{25000.0f};
@@ -858,7 +859,7 @@ void AAlsCharacter::FinalizeRagdolling()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	// If the ragdoll is on the ground, set the movement mode to walking and play a get up animation. If not, set
+	// If the ragdoll is on the ground, set the movement mode to walking and play a get-up montage. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 
 	AlsCharacterMovement->SetMovementModeLocked(false);

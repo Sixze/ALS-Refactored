@@ -413,9 +413,9 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
 
 	LookTowardsCamera.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsCamera.YawAngle);
 
-	// Separate the smooth view yaw angle into 3 separate values. These 3 values are used to
-	// improve the blending of the view when rotating completely around the character. This allows
-	// you to keep the view responsive but still smoothly blend from left to right or right to left.
+	// Separate the yaw angle into 3 separate values. These 3 values are used to improve the
+	// blending of the view when rotating completely around the character. This allows to
+	// keep the view responsive but still smoothly blend from left to right or right to left.
 
 	LookTowardsCamera.YawForwardAmount = LookTowardsCamera.YawAngle / 360.0f + 0.5f;
 	LookTowardsCamera.YawLeftAmount = 0.5f - FMath::Abs(LookTowardsCamera.YawForwardAmount - 0.5f);
@@ -569,8 +569,8 @@ void UAlsAnimationInstance::RefreshVelocityBlend(const float DeltaTime)
 {
 	GroundedState.VelocityBlend.bReinitializationRequired |= bPendingUpdate;
 
-	// Calculate and interpolate the velocity blend. This value represents the velocity amount of the
-	// character in each direction (normalized so that diagonals equal 0.5 for each direction) and is
+	// Calculate and interpolate the velocity blend amounts. This value represents the velocity amount of
+	// the character in each direction (normalized so that diagonals equal 0.5 for each direction) and is
 	// used in a blend multi node to produce better directional blending than a standard blend space.
 
 	const auto RelativeVelocityDirection{
@@ -634,9 +634,9 @@ void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationA
 		return;
 	}
 
-	// Use the relative acceleration as the sprint relative acceleration if less than 0.5 seconds has elapsed
-	// since the start of the sprint, otherwise set the sprint relative acceleration to zero.This is
-	// necessary in order to apply the acceleration animation only at the beginning of the sprint.
+	// Use the relative acceleration as the sprint relative acceleration if less than 0.5 seconds has
+	// elapsed since the start of the sprint, otherwise set the sprint relative acceleration to zero.
+	// This is necessary to apply the acceleration animation only at the beginning of the sprint.
 
 	static constexpr auto TimeThreshold{0.5f};
 
@@ -651,8 +651,8 @@ void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationA
 
 void UAlsAnimationInstance::RefreshStrideBlendAmount()
 {
-	// Calculate the stride blend. This value is used within the blend spaces to scale the stride (distance feet travel) so
-	// that the character can walk or run at different movement speeds. It also allows the walk or run gait animations to
+	// Calculate the stride blend amount. This value is used within the blend spaces to scale the stride (distance feet travel)
+	// so that the character can walk or run at different movement speeds. It also allows the walk or run gait animations to
 	// blend independently while still matching the animation speed to the movement speed, preventing the character from needing
 	// to play a half walk + half run blend. The curves are used to map the stride amount to the speed for maximum control.
 
@@ -664,7 +664,7 @@ void UAlsAnimationInstance::RefreshStrideBlendAmount()
 		            PoseState.UnweightedGaitRunningAmount)
 	};
 
-	// Crouching stride blend.
+	// Crouching stride blend amount.
 
 	GroundedState.StrideBlendAmount = FMath::Lerp(StandingStrideBlend,
 	                                              Settings->Grounded.StrideBlendAmountWalkCurve->GetFloatValue(Speed),
@@ -673,7 +673,7 @@ void UAlsAnimationInstance::RefreshStrideBlendAmount()
 
 void UAlsAnimationInstance::RefreshWalkRunBlendAmount()
 {
-	// Calculate the walk run blend. This value is used within the blend spaces to blend between walking and running.
+	// Calculate the walk run blend amount. This value is used within the blend spaces to blend between walking and running.
 
 	GroundedState.WalkRunBlendAmount = Gait == AlsGaitTags::Walking ? 0.0f : 1.0f;
 }
@@ -681,7 +681,7 @@ void UAlsAnimationInstance::RefreshWalkRunBlendAmount()
 void UAlsAnimationInstance::RefreshStandingPlayRate()
 {
 	// Calculate the standing play rate by dividing the character's speed by the animated speed for each gait.
-	// The interpolation are determined by the gait amount curve that exists on every locomotion cycle so that
+	// The interpolation is determined by the gait amount curve that exists on every locomotion cycle so that
 	// the play rate is always in sync with the currently blended animation. The value is also divided by the
 	// stride blend and the capsule scale so that the play rate increases as the stride or scale gets smaller.
 
@@ -1182,8 +1182,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	{
 		const auto FootHeight{Settings->Feet.FootHeight * LocomotionState.Scale};
 
-		// Find the difference in location from the impact location and the expected (flat) floor location. These values
-		// are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
+		// Find the difference in location between the impact location and the expected (flat) floor location. These
+		// values are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
 
 		FootState.OffsetTargetLocation = Hit.ImpactPoint - FootLocation + Hit.ImpactNormal * FootHeight;
 		FootState.OffsetTargetLocation.Z -= FootHeight;
@@ -1246,7 +1246,7 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 	}
 
 	// Scale quick stop animation play rate based on how far the character
-	// is going to rotate. At 180 degrees, the play rate will be maximum.
+	// is going to rotate. At 180 degrees, the play rate will be maximal.
 
 	if (RotationYawAngle <= 0.0f)
 	{
@@ -1319,7 +1319,7 @@ void UAlsAnimationInstance::StopTransitionAndTurnInPlaceAnimations(const float B
 
 void UAlsAnimationInstance::RefreshTransitions()
 {
-	// The allow transitions curve is modified within certain states, so that allow transition will be true while in those states.
+	// The allow transitions curve is modified within certain states, so that transitions allowed will be true while in those states.
 
 	TransitionsState.bTransitionsAllowed = FAnimWeight::IsFullWeight(GetCurveValue(UAlsConstants::AllowTransitionsCurve()));
 
@@ -1365,7 +1365,7 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 	TObjectPtr<UAnimSequenceBase> DynamicTransitionAnimation;
 
-	// If both transitions are allowed, choose the one with the greater lock distance.
+	// If both transitions are allowed, choose the one with a greater lock distance.
 
 	if (!bTransitionLeftAllowed)
 	{
@@ -1398,7 +1398,7 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 		TransitionsState.DynamicTransitionsFrameDelay = 2;
 
-		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thead.
+		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
 		TransitionsState.QueuedDynamicTransitionAnimation = DynamicTransitionAnimation;
 
@@ -1463,8 +1463,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		return;
 	}
 
-	// If the character should be rotating, set the play rate to scale with the view yaw speed.
-	// This makes the character rotate faster when moving the camera faster.
+	// If the character should rotate, set the play rate to scale with the view yaw
+	// speed. This makes the character rotate faster when moving the camera faster.
 
 	const auto PlayRate{
 		FMath::GetMappedRangeValueClamped(FVector2f{Settings->RotateInPlace.ReferenceViewYawSpeed},
@@ -1515,9 +1515,9 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		return;
 	}
 
-	// Check if the view yaw speed is below the threshold and if view yaw angle is outside of the
-	// threshold. If so, begin counting the activation delay time. If not, reset the activation delay time.
-	// This ensures the conditions remain true for a sustained period of time before turning in place.
+	// Check if the view yaw speed is below the threshold and if the view yaw angle is outside the
+	// threshold. If so, begin counting the activation delay time. If not, reset the activation delay
+	// time. This ensures the conditions remain true for a sustained time before turning in place.
 
 	if (ViewState.YawSpeed >= Settings->TurnInPlace.ViewYawSpeedThreshold ||
 	    FMath::Abs(ViewState.YawAngle) <= Settings->TurnInPlace.ViewYawAngleThreshold)
@@ -1590,7 +1590,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 
 	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
 	{
-		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thead.
+		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
 		TurnInPlaceState.QueuedSettings = TurnInPlaceSettings;
 		TurnInPlaceState.QueuedSlotName = TurnInPlaceSlotName;

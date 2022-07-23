@@ -830,8 +830,8 @@ void UAlsCharacterMovementComponent::RefreshMaxWalkSpeed()
 float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 {
 	// Map the character's current speed to the configured movement speeds ranging from 0 to 3,
-	// where 0 is stopped, 1 is walking, 2 is running and 3 is sprinting. This allows us to vary
-	// the movement speeds but still use the mapped range in calculations for consistent results.
+	// where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting. This allows us to vary
+	// movement speeds but still use the mapped range in calculations for consistent results.
 
 	const auto Speed{UE_REAL_TO_FLOAT(Velocity.Size2D())};
 
