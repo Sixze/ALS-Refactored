@@ -315,47 +315,48 @@ void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 
 	const auto CharacterYawAngle{UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw)};
 
+	if (RotationMode != AlsRotationModeTags::VelocityDirection)
+	{
+		LookTowardsInput.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsInput.YawAngle);
+		LookTowardsInput.bReinitializationRequired = false;
+		return;
+	}
+
 	const auto TargetYawAngle{
-		RotationMode == AlsRotationModeTags::VelocityDirection
-			? FRotator3f::NormalizeAxis((LocomotionState.bHasInput
-				                             ? LocomotionState.InputYawAngle
-				                             : LocomotionState.TargetYawAngle) - CharacterYawAngle)
-			: ViewState.YawAngle
+		FRotator3f::NormalizeAxis((LocomotionState.bHasInput
+			                           ? LocomotionState.InputYawAngle
+			                           : LocomotionState.TargetYawAngle) - CharacterYawAngle)
 	};
-
-	auto YawAngle{
-		LookTowardsInput.bReinitializationRequired
-			? TargetYawAngle
-			: FRotator3f::NormalizeAxis(LookTowardsInput.WorldYawAngle - CharacterYawAngle)
-	};
-
-	auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
-
-	if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
-	{
-		DeltaYawAngle -= 360.0f;
-	}
-	else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
-	{
-		// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
-		// direction, so that the rotation of the head remain synchronized with the rotation of the body.
-
-		DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
-	}
 
 	if (LookTowardsInput.bReinitializationRequired || Settings->View.LookTowardsInputYawAngleInterpolationSpeed <= 0.0f)
 	{
-		YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle);
+		LookTowardsInput.YawAngle = TargetYawAngle;
 	}
 	else
 	{
-		YawAngle = FRotator3f::NormalizeAxis(
-			YawAngle + DeltaYawAngle *
-			UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsInputYawAngleInterpolationSpeed));
+		const auto YawAngle{FRotator3f::NormalizeAxis(LookTowardsInput.WorldYawAngle - CharacterYawAngle)};
+		auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
+
+		if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		{
+			DeltaYawAngle -= 360.0f;
+		}
+		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		{
+			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
+			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
+
+			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
+		}
+
+		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsInputYawAngleInterpolationSpeed)};
+
+		LookTowardsInput.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
 	}
 
-	LookTowardsInput.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + YawAngle);
-	LookTowardsInput.YawAmount = YawAngle / 360.0f + 0.5f;
+	LookTowardsInput.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsInput.YawAngle);
+
+	LookTowardsInput.YawAmount = LookTowardsInput.YawAngle / 360.0f + 0.5f;
 
 	LookTowardsInput.bReinitializationRequired = false;
 }
@@ -373,41 +374,37 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
 
 	const auto CharacterYawAngle{UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw)};
 
-	const auto TargetYawAngle{
-		RotationMode == AlsRotationModeTags::VelocityDirection && LocomotionState.bMoving
-			? FRotator3f::NormalizeAxis((LocomotionState.bHasInput
-				                             ? LocomotionState.InputYawAngle
-				                             : LocomotionState.TargetYawAngle) - CharacterYawAngle)
-			: ViewState.YawAngle
-	};
-
-	const auto YawAngle{
-		LookTowardsCamera.bReinitializationRequired
-			? TargetYawAngle
-			: FRotator3f::NormalizeAxis(LookTowardsCamera.WorldYawAngle - CharacterYawAngle)
-	};
-
-	auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
-
-	if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+	if (RotationMode == AlsRotationModeTags::VelocityDirection && LocomotionState.bMoving)
 	{
-		DeltaYawAngle -= 360.0f;
+		LookTowardsCamera.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsCamera.YawAngle);
+		LookTowardsCamera.bReinitializationRequired = false;
+		return;
 	}
-	else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
-	{
-		// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
-		// direction, so that the rotation of the head remain synchronized with the rotation of the body.
 
-		DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
-	}
+	const auto TargetYawAngle{ViewState.YawAngle};
 
 	if (LookTowardsCamera.bReinitializationRequired || Settings->View.LookTowardsCameraRotationInterpolationSpeed <= 0.0f)
 	{
-		LookTowardsCamera.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle);
+		LookTowardsCamera.YawAngle = TargetYawAngle;
 		LookTowardsCamera.PitchAngle = ViewState.PitchAngle;
 	}
 	else
 	{
+		const auto YawAngle{FRotator3f::NormalizeAxis(LookTowardsCamera.WorldYawAngle - CharacterYawAngle)};
+		auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
+
+		if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		{
+			DeltaYawAngle -= 360.0f;
+		}
+		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		{
+			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
+			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
+
+			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
+		}
+
 		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsCameraRotationInterpolationSpeed)};
 
 		LookTowardsCamera.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);

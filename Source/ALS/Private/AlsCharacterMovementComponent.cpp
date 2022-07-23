@@ -153,15 +153,11 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 #if WITH_EDITOR
 bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) const
 {
-	if (Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation) ||
-	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) ||
-	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) ||
-	    Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement))
-	{
-		return false;
-	}
-
-	return Super::CanEditChange(Property);
+	return Super::CanEditChange(Property) &&
+	       !(Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation) ||
+	         Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) ||
+	         Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) ||
+	         Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement));
 }
 #endif
 
