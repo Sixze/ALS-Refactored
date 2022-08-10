@@ -215,11 +215,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewStanceTag"))
 	void SetDesiredStance(const FGameplayTag& NewStanceTag);
 
+	virtual	void ApplyDesiredStance();
+
 private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetDesiredStance(const FGameplayTag& NewStanceTag);
-
-	void ApplyDesiredStance();
 
 	// Stance
 
