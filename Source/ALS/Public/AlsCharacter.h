@@ -219,7 +219,7 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetDesiredStance(const FGameplayTag& NewStanceTag);
 
-	void ApplyDesiredStance();
+	virtual void ApplyDesiredStance();
 
 	// Stance
 
