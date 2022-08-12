@@ -610,44 +610,9 @@ void AAlsCharacter::ApplyDesiredStance()
 	}
 }
 
-void AAlsCharacter::Crouch(const bool bClientSimulation)
-{
-	Super::Crouch(bClientSimulation);
-
-	// Chance stance instantly without waiting for ACharacter::OnStartCrouch().
-
-	if (!GetCharacterMovement()->bWantsToCrouch)
-	{
-		return;
-	}
-
-	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
-	{
-		SetStance(DesiredStance); // Keep desired stance when rolling.
-		return;
-	}
-
-	SetStance(AlsStanceTags::Crouching);
-}
-
-void AAlsCharacter::UnCrouch(const bool bClientSimulation)
-{
-	Super::UnCrouch(bClientSimulation);
-
-	// Chance stance instantly without waiting for ACharacter::OnEndCrouch().
-
-	SetStance(AlsStanceTags::Standing);
-}
-
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
 {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	if (LocomotionAction == AlsLocomotionActionTags::Rolling)
-	{
-		SetStance(DesiredStance); // Keep desired stance when rolling.
-		return;
-	}
 
 	SetStance(AlsStanceTags::Crouching);
 }

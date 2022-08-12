@@ -219,15 +219,12 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSetDesiredStance(const FGameplayTag& NewStanceTag);
 
+protected:
 	virtual void ApplyDesiredStance();
 
 	// Stance
 
 public:
-	virtual void Crouch(bool bClientSimulation = false) override;
-
-	virtual void UnCrouch(bool bClientSimulation = false) override;
-
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
