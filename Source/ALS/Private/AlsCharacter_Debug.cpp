@@ -565,7 +565,7 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	VerticalLocation += RowOffset;
 
-	static const auto FreeSpaceOverlapText{FText::AsCultureInvariant(TEXT("Free Space Overlap (Only if Failed)"))};
+	static const auto FreeSpaceOverlapText{FText::AsCultureInvariant(TEXT("Failed Free Space Overlap"))};
 
 	Text.SetColor(FLinearColor::Red);
 

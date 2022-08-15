@@ -20,7 +20,7 @@
 		{ \
 			bExecuted = true; \
 			\
-			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") ALS_STRINGIFY(__LINE__)); \
+			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") ALS_STRINGIFY(__LINE__) TEXT(".")); \
 			UE_LOG(LogOutputDevice, Warning, Format, __VA_ARGS__); \
 			\
 			PrintScriptCallstack(); \
