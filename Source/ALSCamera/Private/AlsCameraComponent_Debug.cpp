@@ -6,6 +6,8 @@
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsUtility.h"
 
+#define LOCTEXT_NAMESPACE "AlsCameraComponentDebug"
+
 void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& VerticalLocation) const
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
@@ -251,7 +253,7 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
 
 	const auto RowOffset{12.0f * Scale};
 
-	static const auto BlockingGeometryAdjustmentText{FText::AsCultureInvariant(TEXT("Blocking Geometry Adjustment"))};
+	static const auto BlockingGeometryAdjustmentText{LOCTEXT("BlockingGeometryAdjustment", "Blocking Geometry Adjustment")};
 
 	Text.SetColor({0.0f, 0.75f, 1.0f});
 
@@ -260,7 +262,7 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
 
 	VerticalLocation += RowOffset;
 
-	static const auto CameraTraceNoHitText{FText::AsCultureInvariant(TEXT("Camera Trace (No Hit)"))};
+	static const auto CameraTraceNoHitText{LOCTEXT("CameraTraceNoHit", "Camera Trace (No Hit)")};
 
 	Text.SetColor(FLinearColor::Green);
 
@@ -269,7 +271,7 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
 
 	VerticalLocation += RowOffset;
 
-	static const auto CameraTraceBlockingHitText{FText::AsCultureInvariant(TEXT("Camera Trace (Blocking Hit)"))};
+	static const auto CameraTraceBlockingHitText{LOCTEXT("CameraTraceBlockingHit", "Camera Trace (Blocking Hit)")};
 
 	Text.SetColor(FLinearColor::Red);
 
@@ -278,3 +280,5 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
 
 	VerticalLocation += RowOffset;
 }
+
+#undef LOCTEXT_NAMESPACE

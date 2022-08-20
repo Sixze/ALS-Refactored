@@ -3,7 +3,7 @@
 #include "Animation/AnimNode_Inertialization.h"
 #include "Utility/AlsUtility.h"
 
-#define LOCTEXT_NAMESPACE "GameplayTagsBlendAnimationGraphNode"
+#define LOCTEXT_NAMESPACE "AlsGameplayTagsBlendAnimationGraphNode"
 
 UAlsAnimGraphNode_GameplayTagsBlend::UAlsAnimGraphNode_GameplayTagsBlend()
 {

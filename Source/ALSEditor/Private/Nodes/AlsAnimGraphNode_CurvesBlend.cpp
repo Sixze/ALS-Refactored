@@ -1,6 +1,6 @@
 #include "Nodes/AlsAnimGraphNode_CurvesBlend.h"
 
-#define LOCTEXT_NAMESPACE "CurvesBlendAnimationGraphNode"
+#define LOCTEXT_NAMESPACE "AlsCurvesBlendAnimationGraphNode"
 
 FText UAlsAnimGraphNode_CurvesBlend::GetNodeTitle(const ENodeTitleType::Type TitleType) const
 {

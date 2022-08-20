@@ -1,6 +1,6 @@
 #include "Nodes/AlsAnimGraphNode_SuppressAdditiveWarnings.h"
 
-#define LOCTEXT_NAMESPACE "SuppressAdditiveWarningsAnimationGraphNode"
+#define LOCTEXT_NAMESPACE "AlsSuppressAdditiveWarningsAnimationGraphNode"
 
 FText UAlsAnimGraphNode_SuppressAdditiveWarnings::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {

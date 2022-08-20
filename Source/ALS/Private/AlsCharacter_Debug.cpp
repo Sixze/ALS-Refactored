@@ -10,6 +10,8 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
+#define LOCTEXT_NAMESPACE "AlsCharacterDebug"
+
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalLocation)
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
@@ -20,7 +22,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Debug
 	auto MaxVerticalLocation{VerticalLocation};
 	auto HorizontalLocation{5.0f * Scale};
 
-	static const auto DebugModeHeaderText{FText::AsCultureInvariant(TEXT("Debug mode is enabled! Press (Shift + 0) to disable."))};
+	static const auto DebugModeHeaderText{LOCTEXT("DebugModeHeader", "Debug mode is enabled! Press (Shift + 0) to disable.")};
 
 	DisplayDebugHeader(Canvas, DebugModeHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
 
@@ -502,7 +504,7 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 
 	const auto RowOffset{12.0f * Scale};
 
-	static const auto FootOffsetTraceText{FText::AsCultureInvariant(TEXT("Foot Offset"))};
+	static const auto FootOffsetTraceText{LOCTEXT("FootOffsetTrace", "Foot Offset")};
 
 	Text.SetColor({0.0f, 0.75f, 1.0f});
 
@@ -511,7 +513,7 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 
 	VerticalLocation += RowOffset;
 
-	static const auto GroundPredictionTraceText{FText::AsCultureInvariant(TEXT("Ground Prediction"))};
+	static const auto GroundPredictionTraceText{LOCTEXT("GroundPredictionTrace", "Ground Prediction")};
 
 	Text.SetColor({0.75f, 0.0f, 1.0f});
 
@@ -520,7 +522,7 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 
 	VerticalLocation += RowOffset;
 
-	static const auto FootstepEffectsTraceText{FText::AsCultureInvariant(TEXT("Footstep Effects"))};
+	static const auto FootstepEffectsTraceText{LOCTEXT("FootstepEffectsTrace", "Footstep Effects")};
 
 	Text.SetColor(FLinearColor::Red);
 
@@ -547,7 +549,7 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	const auto RowOffset{12.0f * Scale};
 
-	static const auto ForwardTraceText{FText::AsCultureInvariant(TEXT("Forward Trace"))};
+	static const auto ForwardTraceText{LOCTEXT("ForwardTrace", "Forward Trace")};
 
 	Text.SetColor({0.0f, 0.75f, 1.0f});
 
@@ -556,7 +558,7 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	VerticalLocation += RowOffset;
 
-	static const auto DownwardTraceText{FText::AsCultureInvariant(TEXT("Downward Trace"))};
+	static const auto DownwardTraceText{LOCTEXT("DownwardTrace", "Downward Trace")};
 
 	Text.SetColor({0.75f, 0.0f, 1.0f});
 
@@ -565,12 +567,14 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	VerticalLocation += RowOffset;
 
-	static const auto FreeSpaceOverlapText{FText::AsCultureInvariant(TEXT("Failed Free Space Overlap"))};
+	static const auto FailedFreeSpaceOverlapText{LOCTEXT("FailedFreeSpaceOverlap", "Failed Free Space Overlap")};
 
 	Text.SetColor(FLinearColor::Red);
 
-	Text.Text = FreeSpaceOverlapText;
+	Text.Text = FailedFreeSpaceOverlapText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 	VerticalLocation += RowOffset;
 }
+
+#undef LOCTEXT_NAMESPACE
