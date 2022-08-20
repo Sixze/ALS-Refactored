@@ -67,9 +67,11 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
 	{
+		const auto& ActorTransform{Character->GetActorTransform()};
+
 		// Manually synchronize mesh rotation with character rotation.
 
-		GetSkelMeshComponent()->SetWorldRotation(Character->GetActorQuat() * Character->GetBaseRotationOffset());
+		GetSkelMeshComponent()->SetWorldRotation(ActorTransform.GetRotation() * Character->GetBaseRotationOffset());
 
 		// Re-cache transforms because the skeletal mesh transform has changed before.
 
@@ -77,7 +79,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		const_cast<FTransform&>(Proxy.GetComponentTransform()) = GetSkelMeshComponent()->GetComponentTransform();
 		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = GetSkelMeshComponent()->GetRelativeTransform();
-		const_cast<FTransform&>(Proxy.GetActorTransform()) = Character->GetActorTransform();
+		const_cast<FTransform&>(Proxy.GetActorTransform()) = ActorTransform;
 	}
 
 	bTeleported |= Character->IsSimulatedProxyTeleported();

@@ -83,10 +83,12 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void AAlsCharacter::PreRegisterAllComponents()
 {
-	Super::PreRegisterAllComponents();
+	// Set some default values here to ensure that the animation instance and the
+	// camera component can read the most up-to-date values during their initialization.
 
-	// Set the default rotation values in this function to ensure that the animation instance
-	// and the camera component can read the most up-to-date values during their initialization.
+	RotationMode = bDesiredAiming ? AlsRotationModeTags::Aiming : DesiredRotationMode;
+	Stance = DesiredStance;
+	Gait = DesiredGait;
 
 	SetViewRotation(Super::GetViewRotation().GetNormalized());
 
@@ -106,6 +108,8 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
+
+	Super::PreRegisterAllComponents();
 }
 
 void AAlsCharacter::PostInitializeComponents()
