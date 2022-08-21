@@ -6,7 +6,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "Components/AudioComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -38,7 +37,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		return;
 	}
 
-	const auto CapsuleScale{IsValid(Character) ? Character->GetCapsuleComponent()->GetComponentScale().Z : 1.0f};
+	const auto MeshScale{Mesh->GetComponentScale().Z};
 
 	const auto* World{Mesh->GetWorld()};
 	const auto* AnimationInstance{Mesh->GetAnimInstance()};
@@ -62,7 +61,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	FHitResult Hit;
 	if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
 	                                    FootTransform.GetLocation() - FootZAxis *
-	                                    (FootstepEffectsSettings->SurfaceTraceDistance * CapsuleScale),
+	                                    (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
 	                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
 	                                    QueryParameters))
 	{
@@ -166,21 +165,21 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		};
 
 		const auto DecalLocation{
-			FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset * CapsuleScale)
+			FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset * MeshScale)
 		};
 
 		UDecalComponent* Decal;
 
 		if (EffectSettings->DecalSpawnMode == EAlsFootstepDecalSpawnMode::SpawnAttachedToTraceHitComponent && Hit.Component.IsValid())
 		{
-			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize * CapsuleScale,
+			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize * MeshScale,
 			                                             Hit.Component.Get(), NAME_None, DecalLocation,
 			                                             DecalRotation.Rotator(), EAttachLocation::KeepWorldPosition);
 		}
 		else
 		{
 			Decal = UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(),
-			                                               EffectSettings->DecalSize * CapsuleScale,
+			                                               EffectSettings->DecalSize * MeshScale,
 			                                               DecalLocation, DecalRotation.Rotator());
 		}
 
@@ -204,20 +203,20 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 				const auto ParticleSystemLocation{
 					FootstepLocation +
-					ParticleSystemRotation.RotateVector(EffectSettings->ParticleSystemLocationOffset * CapsuleScale)
+					ParticleSystemRotation.RotateVector(EffectSettings->ParticleSystemLocationOffset * MeshScale)
 				};
 
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSettings->ParticleSystem.Get(),
 				                                               ParticleSystemLocation, ParticleSystemRotation.Rotator(),
-				                                               FVector::OneVector * CapsuleScale, true, true, ENCPoolMethod::AutoRelease);
+				                                               FVector::OneVector * MeshScale, true, true, ENCPoolMethod::AutoRelease);
 			}
 			break;
 
 			case EAlsFootstepParticleEffectSpawnMode::SpawnAttachedToFootBone:
 				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), Mesh, FootBoneName,
-				                                             EffectSettings->ParticleSystemLocationOffset * CapsuleScale,
+				                                             EffectSettings->ParticleSystemLocationOffset * MeshScale,
 				                                             EffectSettings->ParticleSystemFootLeftRotationOffset,
-				                                             FVector::OneVector * CapsuleScale, EAttachLocation::KeepRelativeOffset,
+				                                             FVector::OneVector * MeshScale, EAttachLocation::KeepRelativeOffset,
 				                                             true, ENCPoolMethod::AutoRelease);
 				break;
 		}

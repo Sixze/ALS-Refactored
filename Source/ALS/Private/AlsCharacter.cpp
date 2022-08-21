@@ -991,7 +991,7 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation(const float DeltaTime)
 	}
 	else if (GetMesh()->IsUsingAbsoluteRotation())
 	{
-		LocomotionState.Location = GetMesh()->GetComponentLocation() - GetBaseTranslationOffset();
+		LocomotionState.Location = ActorTransform.TransformPosition(GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset());
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
 	}

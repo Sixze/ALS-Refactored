@@ -299,7 +299,7 @@ FVector UAlsCameraComponent::CalculatePivotOffset(const FQuat& PivotTargetRotati
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurve())
-		} * Character->GetCapsuleComponent()->GetComponentScale().Z);
+		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraOffset() const
@@ -309,7 +309,7 @@ FVector UAlsCameraComponent::CalculateCameraOffset() const
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurve()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurve())
-		} * Character->GetCapsuleComponent()->GetComponentScale().Z);
+		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
 FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
@@ -321,7 +321,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto bDisplayDebugCameraTraces{false};
 #endif
 
-	const auto CapsuleScale{Character->GetCapsuleComponent()->GetComponentScale().Z};
+	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
 
 	static const FName MainTraceTag{FString::Format(TEXT("{0} (Main Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
@@ -335,7 +335,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto TraceEnd{CameraTargetLocation};
 
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * CapsuleScale)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale)};
 
 	auto TraceResult{TraceEnd};
 
@@ -363,7 +363,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraTraces)
 	{
-		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * CapsuleScale,
+		UAlsUtility::DrawDebugSweptSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * MeshScale,
 		                                  Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
 	}
 #endif
@@ -399,10 +399,10 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 {
 	// Based on ComponentEncroachesBlockingGeometry_WithAdjustment().
 
-	const auto CapsuleScale{Character->GetCapsuleComponent()->GetComponentScale().Z};
+	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
 
 	const auto TraceChanel{UEngineTypes::ConvertToCollisionChannel(Settings->ThirdPerson.TraceChannel)};
-	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * CapsuleScale)};
+	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * MeshScale)};
 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.IsEmpty())
@@ -473,6 +473,6 @@ bool UAlsCameraComponent::TryFindBlockingGeometryAdjustedLocation(FVector& Locat
 	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
-	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * CapsuleScale),
+	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
