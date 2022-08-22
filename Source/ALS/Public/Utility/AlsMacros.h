@@ -21,7 +21,7 @@
 			bExecuted = true; \
 			\
 			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") ALS_STRINGIFY(__LINE__) TEXT(".")); \
-			UE_LOG(LogOutputDevice, Warning, Format, __VA_ARGS__); \
+			UE_LOG(LogOutputDevice, Warning, Format, ##__VA_ARGS__); \
 			\
 			PrintScriptCallstack(); \
 			\
@@ -37,9 +37,9 @@
 	}(), false))
 
 #define ALS_ENSURE(Expression) ALS_ENSURE_IMPLEMENTATION(Expression, false, TEXT(""), )
-#define ALS_ENSURE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression, false, Format, &, __VA_ARGS__)
+#define ALS_ENSURE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression, false, Format, &, ##__VA_ARGS__)
 #define ALS_ENSURE_ALWAYS(Expression) ALS_ENSURE_IMPLEMENTATION(Expression true, TEXT(""), )
-#define ALS_ENSURE_ALWAYS_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression true, Format, &, __VA_ARGS__)
+#define ALS_ENSURE_ALWAYS_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression true, Format, &, ##__VA_ARGS__)
 
 #else
 

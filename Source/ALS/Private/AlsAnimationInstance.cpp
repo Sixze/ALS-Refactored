@@ -976,7 +976,8 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) co
 
 void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const
 {
-	if (!bPendingUpdate && !LocomotionState.BasedMovement.bBaseChanged ||
+	// ReSharper disable once CppRedundantParentheses
+	if ((!bPendingUpdate && !LocomotionState.BasedMovement.bBaseChanged) ||
 	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;

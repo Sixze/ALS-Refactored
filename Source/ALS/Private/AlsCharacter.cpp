@@ -739,7 +739,8 @@ bool AAlsCharacter::CanSprint() const
 	// if there is input and it is facing forward relative to the camera + or - 50 degrees.
 
 	if (!LocomotionState.bHasInput || Stance != AlsStanceTags::Standing ||
-	    RotationMode == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming)
+	    // ReSharper disable once CppRedundantParentheses
+	    (RotationMode == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming))
 	{
 		return false;
 	}
