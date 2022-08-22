@@ -112,8 +112,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 			: Character->GetViewState().Rotation
 	};
 
-	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
-
 	const auto PivotTargetTransform{GetThirdPersonPivotTransform()};
 
 	PivotTargetLocation = PivotTargetTransform.GetLocation();
@@ -125,9 +123,12 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 		PivotLocation = PivotTargetLocation;
 
 		CameraLocation = GetFirstPersonCameraLocation();
+		CameraRotation = CameraTargetRotation;
 		CameraFov = Settings->FirstPerson.Fov;
 		return;
 	}
+
+	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
 
 	const FRotator CameraYawRotation{0.0f, CameraRotation.Yaw, 0.0f};
 
