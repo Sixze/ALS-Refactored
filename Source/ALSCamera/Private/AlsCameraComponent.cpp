@@ -5,6 +5,7 @@
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/WorldSettings.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -54,8 +55,20 @@ void UAlsCameraComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UAlsCameraComponent::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	if (IsValid(Settings) && Settings->bIgnoreTimeDilation)
+	{
+		// Use the previous global time dilation, as this frame's delta time may not yet be affected
+		// by the current global time dilation, and thus unscaling will produce the wrong delta time.
+
+		const auto TimeDilation{PreviousGlobalTimeDilation * GetOwner()->CustomTimeDilation};
+
+		DeltaTime = TimeDilation <= SMALL_NUMBER ? DeltaTime : DeltaTime / TimeDilation;
+	}
+
+	PreviousGlobalTimeDilation = GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation();
+
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	TickCamera(DeltaTime);
