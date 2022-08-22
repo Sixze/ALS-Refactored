@@ -13,7 +13,7 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	TObjectPtr<UAlsAnimationInstance> Parent;
+	TWeakObjectPtr<UAlsAnimationInstance> Parent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	TObjectPtr<AAlsCharacter> Character;
@@ -38,5 +38,5 @@ protected:
 
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const
 {
-	return Parent;
+	return Parent.Get();
 }

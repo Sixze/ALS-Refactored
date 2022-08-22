@@ -55,7 +55,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
 		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
-	TObjectPtr<UAlsAnimationInstance> AnimationInstance;
+	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};

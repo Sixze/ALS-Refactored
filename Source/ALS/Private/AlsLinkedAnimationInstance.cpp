@@ -22,7 +22,7 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 	{
 		// Use default objects for editor preview.
 
-		if (!IsValid(Parent))
+		if (!Parent.IsValid())
 		{
 			Parent = GetMutableDefault<UAlsAnimationInstance>();
 		}
@@ -37,7 +37,7 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 
 void UAlsLinkedAnimationInstance::NativeBeginPlay()
 {
-	ALS_ENSURE_MESSAGE(IsValid(Parent),
+	ALS_ENSURE_MESSAGE(Parent.IsValid(),
 	                   TEXT("%s (%s) should only be used as a linked animation instance within the %s animation blueprint!"),
 	                   ALS_GET_TYPE_STRING(UAlsLinkedAnimationInstance), *GetClass()->GetName(),
 	                   ALS_GET_TYPE_STRING(UAlsAnimationInstance));

@@ -140,7 +140,7 @@ void AAlsCharacter::BeginPlay()
 {
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(MovementSettings));
-	ALS_ENSURE(IsValid(AnimationInstance));
+	ALS_ENSURE(AnimationInstance.IsValid());
 
 	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 	                   TEXT("These settings are not allowed and must be turned off!"));
@@ -222,7 +222,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick()"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
 
-	if (!IsValid(Settings) || !IsValid(AnimationInstance))
+	if (!IsValid(Settings) || !AnimationInstance.IsValid())
 	{
 		Super::Tick(DeltaTime);
 		return;
@@ -1090,7 +1090,10 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	AnimationInstance->Jump();
+	if (AnimationInstance.IsValid())
+	{
+		AnimationInstance->Jump();
+	}
 }
 
 void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTime)
