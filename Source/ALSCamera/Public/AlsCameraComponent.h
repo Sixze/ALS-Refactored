@@ -6,7 +6,7 @@
 #include "AlsCameraComponent.generated.h"
 
 class UAlsCameraSettings;
-class AAlsCharacter;
+class ACharacter;
 
 UCLASS(HideCategories = ("ComponentTick", "Clothing", "Physics", "MasterPoseComponent", "Collision",
 	"AnimationRig", "Lighting", "Deformer", "Rendering", "HLOD", "Navigation", "VirtualTexture", "SkeletalMesh",
@@ -23,7 +23,10 @@ private:
 	float PostProcessWeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
-	TObjectPtr<AAlsCharacter> Character;
+	TObjectPtr<ACharacter> Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
+	TWeakObjectPtr<UAnimInstance> AnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
 	FVector PivotTargetLocation;
@@ -56,6 +59,8 @@ public:
 	virtual void OnRegister() override;
 
 	virtual void Activate(bool bReset) override;
+
+	virtual void InitAnim(bool bForceReinitialize) override;
 
 	virtual void BeginPlay() override;
 

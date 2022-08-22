@@ -1,10 +1,10 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
-#include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/Character.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -20,7 +20,7 @@ UAlsCameraComponent::UAlsCameraComponent()
 
 void UAlsCameraComponent::OnRegister()
 {
-	Character = Cast<AAlsCharacter>(GetOwner());
+	Character = Cast<ACharacter>(GetOwner());
 
 	Super::OnRegister();
 }
@@ -36,6 +36,13 @@ void UAlsCameraComponent::Activate(const bool bReset)
 	Super::Activate(bReset);
 
 	TickCamera(0.0f, false);
+}
+
+void UAlsCameraComponent::InitAnim(const bool bForceReinitialize)
+{
+	Super::InitAnim(bForceReinitialize);
+
+	AnimationInstance = GetAnimInstance();
 }
 
 void UAlsCameraComponent::BeginPlay()
