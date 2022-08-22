@@ -106,11 +106,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, const bool bAllowLag
 
 	// Calculate camera rotation.
 
-	const auto CameraTargetRotation{
-		Character->GetViewState().NetworkSmoothing.bEnabled || Character->IsLocallyControlled()
-			? Character->GetViewState().NetworkSmoothing.Rotation
-			: Character->GetViewState().Rotation
-	};
+	const auto CameraTargetRotation{Character->GetViewRotation()};
 
 	const auto PivotTargetTransform{GetThirdPersonPivotTransform()};
 

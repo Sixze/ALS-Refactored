@@ -74,8 +74,8 @@ private:
 
 	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicated_ViewRotation", Meta = (AllowPrivateAccess))
-	FRotator ViewRotation;
+		ReplicatedUsing = "OnReplicated_RawViewRotation", Meta = (AllowPrivateAccess))
+	FRotator RawViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
 	FAlsViewState ViewState;
@@ -310,13 +310,13 @@ public:
 	virtual FRotator GetViewRotation() const override;
 
 private:
-	void SetViewRotation(const FRotator& NewViewRotation);
+	void SetRawViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetViewRotation(const FRotator& NewViewRotation);
+	void ServerSetRawViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION()
-	void OnReplicated_ViewRotation();
+	void OnReplicated_RawViewRotation();
 
 public:
 	void CorrectViewNetworkSmoothing(const FRotator& NewViewRotation);

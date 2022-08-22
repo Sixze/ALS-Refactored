@@ -76,7 +76,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewRotation, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RawViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
@@ -90,12 +90,12 @@ void AAlsCharacter::PreRegisterAllComponents()
 	Stance = DesiredStance;
 	Gait = DesiredGait;
 
-	SetViewRotation(Super::GetViewRotation().GetNormalized());
+	SetRawViewRotation(Super::GetViewRotation().GetNormalized());
 
-	ViewState.NetworkSmoothing.InitialRotation = ViewRotation;
-	ViewState.NetworkSmoothing.Rotation = ViewRotation;
-	ViewState.Rotation = ViewRotation;
-	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewRotation.Yaw);
+	ViewState.NetworkSmoothing.InitialRotation = RawViewRotation;
+	ViewState.NetworkSmoothing.Rotation = RawViewRotation;
+	ViewState.Rotation = RawViewRotation;
+	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(RawViewRotation.Yaw);
 
 	const auto& ActorTransform{GetActorTransform()};
 
@@ -753,7 +753,7 @@ bool AAlsCharacter::CanSprint() const
 	static constexpr auto ViewRelativeAngleThreshold{50.0f};
 
 	if (FMath::Abs(FRotator3f::NormalizeAxis(
-		    LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(ViewState.NetworkSmoothing.Rotation.Yaw))) < ViewRelativeAngleThreshold)
+		    LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw))) < ViewRelativeAngleThreshold)
 	{
 		return true;
 	}
@@ -815,50 +815,50 @@ void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag&
 
 FRotator AAlsCharacter::GetViewRotation() const
 {
-	return ViewState.NetworkSmoothing.Rotation;
+	return ViewState.Rotation;
 }
 
-void AAlsCharacter::SetViewRotation(const FRotator& NewViewRotation)
+void AAlsCharacter::SetRawViewRotation(const FRotator& NewViewRotation)
 {
-	if (ViewRotation != NewViewRotation)
+	if (RawViewRotation != NewViewRotation)
 	{
-		ViewRotation = NewViewRotation;
+		RawViewRotation = NewViewRotation;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewRotation, this)
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, RawViewRotation, this)
 
 		// The character movement component already sends the view rotation to the
 		// server if the movement is replicated, so we don't have to do it ourselves.
 
 		if (!IsReplicatingMovement() && GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			ServerSetViewRotation(NewViewRotation);
+			ServerSetRawViewRotation(NewViewRotation);
 		}
 	}
 }
 
-void AAlsCharacter::ServerSetViewRotation_Implementation(const FRotator& NewViewRotation)
+void AAlsCharacter::ServerSetRawViewRotation_Implementation(const FRotator& NewViewRotation)
 {
-	SetViewRotation(NewViewRotation);
+	SetRawViewRotation(NewViewRotation);
 }
 
-void AAlsCharacter::OnReplicated_ViewRotation()
+void AAlsCharacter::OnReplicated_RawViewRotation()
 {
-	CorrectViewNetworkSmoothing(ViewRotation);
+	CorrectViewNetworkSmoothing(RawViewRotation);
 }
 
 void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
 {
 	// Based on UCharacterMovementComponent::SmoothCorrection().
 
-	ViewRotation = NewViewRotation;
-	ViewRotation.Normalize();
+	RawViewRotation = NewViewRotation;
+	RawViewRotation.Normalize();
 
 	auto& NetworkSmoothing{ViewState.NetworkSmoothing};
 
 	if (!NetworkSmoothing.bEnabled)
 	{
-		NetworkSmoothing.InitialRotation = ViewRotation;
-		NetworkSmoothing.Rotation = ViewRotation;
+		NetworkSmoothing.InitialRotation = RawViewRotation;
+		NetworkSmoothing.Rotation = RawViewRotation;
 		return;
 	}
 
@@ -913,18 +913,12 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	// ReSharper disable once CppRedundantParentheses
 	if ((IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy) || IsLocallyControlled())
 	{
-		SetViewRotation(Super::GetViewRotation().GetNormalized());
+		SetRawViewRotation(Super::GetViewRotation().GetNormalized());
 	}
 
 	RefreshViewNetworkSmoothing(DeltaTime);
 
-	// Interpolate view rotation to current raw view rotation for smooth character
-	// rotation movement. Decrease interpolation speed for slower but smoother movement.
-
-	static constexpr auto InterpolationSpeed{30.0f};
-
-	ViewState.Rotation = UAlsMath::ExponentialDecay(ViewState.Rotation, ViewState.NetworkSmoothing.Rotation,
-	                                                DeltaTime, InterpolationSpeed);
+	ViewState.Rotation = ViewState.NetworkSmoothing.Rotation;
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided by
 	// delta seconds. This represents the speed the camera is rotating from left to right.
@@ -943,8 +937,8 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 	    NetworkSmoothing.ClientTime >= NetworkSmoothing.ServerTime ||
 	    NetworkSmoothing.Duration <= SMALL_NUMBER)
 	{
-		NetworkSmoothing.InitialRotation = ViewRotation;
-		NetworkSmoothing.Rotation = ViewRotation;
+		NetworkSmoothing.InitialRotation = RawViewRotation;
+		NetworkSmoothing.Rotation = RawViewRotation;
 		return;
 	}
 
@@ -956,12 +950,12 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 	if (!FAnimWeight::IsFullWeight(InterpolationAmount))
 	{
-		NetworkSmoothing.Rotation = UAlsMath::LerpRotator(NetworkSmoothing.InitialRotation, ViewRotation, InterpolationAmount);
+		NetworkSmoothing.Rotation = UAlsMath::LerpRotator(NetworkSmoothing.InitialRotation, RawViewRotation, InterpolationAmount);
 	}
 	else
 	{
 		NetworkSmoothing.ClientTime = NetworkSmoothing.ServerTime;
-		NetworkSmoothing.Rotation = ViewRotation;
+		NetworkSmoothing.Rotation = RawViewRotation;
 	}
 }
 
