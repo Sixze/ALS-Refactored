@@ -10,7 +10,7 @@ class ALSEXTRAS_API AAlsAIController : public AAIController
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
-	TObjectPtr<UBehaviorTree> BehaviourTree;
+	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 public:
 	AAlsAIController();

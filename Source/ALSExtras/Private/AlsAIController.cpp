@@ -9,7 +9,7 @@ void AAlsAIController::OnPossess(APawn* NewPawn)
 {
 	Super::OnPossess(NewPawn);
 
-	RunBehaviorTree(BehaviourTree);
+	RunBehaviorTree(BehaviorTree);
 }
 
 FVector AAlsAIController::GetFocalPointOnActor(const AActor* Actor) const
