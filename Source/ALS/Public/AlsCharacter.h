@@ -109,11 +109,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-protected:
 	virtual void PreRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;
 
+protected:
 	virtual void BeginPlay() override;
 
 public:
