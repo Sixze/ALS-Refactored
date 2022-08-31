@@ -51,49 +51,49 @@ struct ALS_API FAlsFootstepEffectSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<USoundBase> Sound;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	EAlsFootstepSoundSpawnMode SoundSpawnMode{EAlsFootstepSoundSpawnMode::SpawnAtTraceHitLocation};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UMaterialInterface> DecalMaterial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (AllowPreserveRatio))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPreserveRatio))
 	FVector DecalSize{10.0f, 20.0f, 20.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float DecalDuration{4.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal", Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float DecalFadeOutDuration{2.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	EAlsFootstepDecalSpawnMode DecalSpawnMode{EAlsFootstepDecalSpawnMode::SpawnAttachedToTraceHitComponent};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector DecalLocationOffset{0.0f, -10.0f, -1.75f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator DecalFootLeftRotationOffset{90.0f, -90.0f, 180.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Decal")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator DecalFootRightRotationOffset{-90.0f, 90.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	EAlsFootstepParticleEffectSpawnMode ParticleSystemSpawnMode{EAlsFootstepParticleEffectSpawnMode::SpawnAtTraceHitLocation};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector ParticleSystemLocationOffset{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator ParticleSystemFootLeftRotationOffset{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Particle System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator ParticleSystemFootRightRotationOffset{ForceInit};
 };
 
@@ -103,25 +103,25 @@ class ALS_API UAlsFootstepEffectsSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
 	TEnumAsByte<ETraceTypeQuery> SurfaceTraceChannel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = 0, ForceUnits = "cm"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float SurfaceTraceDistance{50.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Left Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Left Y Axis")
 	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Left Z Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Left Z Axis")
 	FVector FootLeftZAxis{1.0f, 0.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Right Y Axis")
 	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Foot Right Z Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Right Z Axis")
 	FVector FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ForceInlineRow))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceInlineRow))
 	TMap<TEnumAsByte<EPhysicalSurface>, FAlsFootstepEffectSettings> Effects;
 };
 
