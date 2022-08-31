@@ -614,6 +614,13 @@ void AAlsCharacter::ApplyDesiredStance()
 	}
 }
 
+bool AAlsCharacter::CanCrouch() const
+{
+	// This allows to execute the ACharacter::Crouch() function properly when bIsCrouched is true.
+
+	return bIsCrouched || Super::CanCrouch();
+}
+
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
 {
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
