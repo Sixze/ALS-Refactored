@@ -75,7 +75,7 @@ class ALS_API UAlsMovementSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceInlineRow))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
 	TMap<FGameplayTag, FAlsMovementStanceSettings> RotationModes
 	{
 		{AlsRotationModeTags::VelocityDirection, {}},

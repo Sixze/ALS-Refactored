@@ -79,23 +79,23 @@ class ALSCAMERA_API UAlsCameraSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	bool bIgnoreTimeDilation{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsFirstPersonCameraSettings FirstPerson;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FAlsThirdPersonCameraSettings ThirdPerson;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (InlineEditConditionToggle))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
 	bool bUseLagSubstepping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Use Lag Substepping",
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Use Lag Substepping",
 		Meta = (AllowPrivateAccess, EditCondition = "bUseLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
 	FPostProcessSettings PostProcess;
 
 #if WITH_EDITORONLY_DATA

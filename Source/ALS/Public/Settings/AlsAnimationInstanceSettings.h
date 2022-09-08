@@ -17,28 +17,28 @@ class ALS_API UAlsAnimationInstanceSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralAnimationSettings General;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewAnimationSettings View;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGroundedSettings Grounded;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsInAirSettings InAir;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsFeetSettings Feet;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsTransitionsSettings Transitions;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRotateInPlaceSettings RotateInPlace;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralTurnInPlaceSettings TurnInPlace;
 
 public:

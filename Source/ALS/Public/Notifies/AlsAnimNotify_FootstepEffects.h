@@ -103,25 +103,25 @@ class ALS_API UAlsFootstepEffectsSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TEnumAsByte<ETraceTypeQuery> SurfaceTraceChannel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float SurfaceTraceDistance{50.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Left Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Foot Left Y Axis")
 	FVector FootLeftYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Left Z Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Foot Left Z Axis")
 	FVector FootLeftZAxis{1.0f, 0.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Right Y Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Foot Right Y Axis")
 	FVector FootRightYAxis{0.0f, 0.0f, 1.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", DisplayName = "Foot Right Z Axis")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Foot Right Z Axis")
 	FVector FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceInlineRow))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
 	TMap<TEnumAsByte<EPhysicalSurface>, FAlsFootstepEffectSettings> Effects;
 };
 

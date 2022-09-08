@@ -14,31 +14,31 @@ class ALS_API UAlsCharacterSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float MovingSpeedThreshold{50.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSprintHasPriorityOverAiming;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bRotateToVelocityWhenSprinting;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	EAlsInAirRotationMode InAirRotationMode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bAllowAimingWhenInAir{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralMantlingSettings Mantling;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRagdollingSettings Ragdolling;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRollingSettings Rolling;
 
 public:
