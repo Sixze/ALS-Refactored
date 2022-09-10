@@ -8,8 +8,8 @@ class ALSEXTRAS_API AAlsAIController : public AAIController
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 public:

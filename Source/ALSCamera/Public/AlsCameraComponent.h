@@ -15,45 +15,44 @@ class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAlsCameraSettings> Settings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<ACharacter> Character;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ShowInnerProperties))
 	TWeakObjectPtr<UAnimInstance> AnimationInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	float PreviousGlobalTimeDilation{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector PivotTargetLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector PivotLagLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector PivotLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector CameraLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FRotator CameraRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess, ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
 	float TraceDistanceRatio{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient,
-		Meta = (AllowPrivateAccess, ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
 	float CameraFov{90.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	bool bRightShoulder{true};
 
 public:

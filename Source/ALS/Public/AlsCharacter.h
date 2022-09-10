@@ -20,82 +20,81 @@ class ALS_API AAlsCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicated_DesiredAiming", Meta = (AllowPrivateAccess))
+		ReplicatedUsing = "OnReplicated_DesiredAiming")
 	bool bDesiredAiming;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsRotationModeTags::LookingDirection};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredStance{AlsStanceTags::Standing};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredGait{AlsGaitTags::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicated_OverlayMode", Meta = (AllowPrivateAccess))
+		ReplicatedUsing = "OnReplicated_OverlayMode")
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	bool bSimulatedProxyTeleported;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
-		Transient, Meta = (AllowPrivateAccess, ShowInnerProperties))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ShowInnerProperties))
 	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag Stance{AlsStanceTags::Standing};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag Gait{AlsGaitTags::Walking};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionAction;
 
 	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicated_RawViewRotation", Meta = (AllowPrivateAccess))
+		ReplicatedUsing = "OnReplicated_RawViewRotation")
 	FRotator RawViewRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsViewState ViewState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
 	FVector_NetQuantizeNormal InputDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsLocomotionState LocomotionState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	int32 MantlingRootMotionSourceId;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
 	FVector_NetQuantize100 RagdollTargetLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRagdollingState RagdollingState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRollingState RollingState;
 
 	FTimerHandle BrakingFrictionFactorResetTimer;
@@ -425,13 +424,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	void TryStartRolling(float PlayRate = 1.0f);
 
-protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	UAnimMontage* SelectRollMontage();
 
-private:
 	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
 
+private:
 	void StartRolling(float PlayRate, float TargetYawAngle);
 
 	UFUNCTION(Server, Reliable)
@@ -448,11 +446,10 @@ private:
 
 	// Mantling
 
-protected:
+public:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	bool IsMantlingAllowedToStart() const;
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	bool TryStartMantlingGrounded();
 
@@ -487,10 +484,9 @@ protected:
 
 	// Ragdolling
 
-private:
+public:
 	bool IsRagdollingAllowedToStart() const;
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	void StartRagdolling();
 
@@ -507,10 +503,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
 	void OnRagdollingStarted();
 
-private:
+public:
 	bool IsRagdollingAllowedToStop() const;
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	bool TryStopRagdolling();
 

@@ -11,11 +11,11 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<UAlsAnimationInstance> Parent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<AAlsCharacter> Character;
 
 public:
