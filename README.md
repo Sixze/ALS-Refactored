@@ -37,7 +37,7 @@ Reading the changelogs is a good way to keep up to date with all the latest feat
 
 | Plugin Version                                                            | Unreal Engine Version           |
 |---------------------------------------------------------------------------|---------------------------------|
-| [4.9](https://github.com/Sixze/ALS-Refactored/releases/tag/4.9)           | 5.0                             |
+| [4.10](https://github.com/Sixze/ALS-Refactored/releases/tag/4.10) - 4.9   | 5.0                             |
 | [4.8](https://github.com/Sixze/ALS-Refactored/releases/tag/4.8) and below | 4.26, 4.27 and 5.0 Early Access |
 
 **The plugin is mainly developed and tested on Windows, so use it on other platforms at your own risk.**
