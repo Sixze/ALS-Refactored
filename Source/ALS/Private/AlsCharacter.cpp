@@ -392,10 +392,15 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 			static constexpr auto ResetDelay{0.5f};
 
 			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer, FTimerDelegate::CreateWeakLambda(
-				                                this, [&BrakingFrictionFactor = GetCharacterMovement()->BrakingFrictionFactor]
+				                                this, [this]
 				                                {
-					                                BrakingFrictionFactor = 0.0f;
+					                                GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 				                                }), ResetDelay, false);
+
+			// Block character rotation towards the last input direction after landing to
+			// prevent legs from twisting into a spiral while the landing animation is playing.
+
+			LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
 		}
 	}
 	else if (LocomotionMode == AlsLocomotionModeTags::InAir &&
@@ -1162,8 +1167,11 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode == AlsRotationModeTags::VelocityDirection)
+	if (RotationMode == AlsRotationModeTags::VelocityDirection &&
+	    (LocomotionState.bHasInput || !LocomotionState.bRotationTowardsLastInputDirectionBlocked))
 	{
+		LocomotionState.bRotationTowardsLastInputDirectionBlocked = false;
+
 		static constexpr auto TargetYawAngleRotationSpeed{800.0f};
 
 		RefreshRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime,

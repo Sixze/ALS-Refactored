@@ -46,7 +46,7 @@ void UAlsAnimationInstance::NativeBeginPlay()
 		// Teleportation of simulated proxies is done in a different way.
 
 		Character->GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
-			this, [&bTeleported = bTeleported](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
+			this, [this](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
 			{
 				bTeleported |= TeleportType != ETeleportType::None;
 			});
@@ -324,8 +324,10 @@ void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 		return;
 	}
 
+	// Block look towards the input direction when the character is in the air to prevent head rotation "snap" when changing look sides.
+
 	const auto TargetYawAngle{
-		FRotator3f::NormalizeAxis((LocomotionState.bHasInput
+		FRotator3f::NormalizeAxis((LocomotionState.bHasInput && LocomotionMode != AlsLocomotionModeTags::InAir
 			                           ? LocomotionState.InputYawAngle
 			                           : LocomotionState.TargetYawAngle) - CharacterYawAngle)
 	};

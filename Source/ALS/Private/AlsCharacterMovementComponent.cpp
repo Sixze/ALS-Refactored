@@ -537,7 +537,7 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 {
 	if (ClientPredictionData == nullptr)
 	{
-		auto* MutableThis{const_cast<UAlsCharacterMovementComponent*>(this)};
+		auto* MutableThis{const_cast<ThisClass*>(this)};
 
 		MutableThis->ClientPredictionData = new FAlsNetworkPredictionData{*this};
 	}
@@ -666,7 +666,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 		FHitResult Hit(1.f);
 		bBlockingHit = FloorSweepTest(Hit, CapsuleLocation, CapsuleLocation + FVector(0.f,0.f,-TraceDist), CollisionChannel, CapsuleShape, QueryParams, ResponseParam);
 
-		const_cast<UAlsCharacterMovementComponent*>(this)->SavePenetrationAdjustment(Hit);
+		const_cast<ThisClass*>(this)->SavePenetrationAdjustment(Hit);
 
 		if (bBlockingHit)
 		{
