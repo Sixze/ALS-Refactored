@@ -1191,7 +1191,6 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		// values are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
 
 		FootState.OffsetTargetLocation = Hit.ImpactPoint - FootLocation + Hit.ImpactNormal * FootHeight;
-		FootState.OffsetTargetLocation.Z -= FootHeight;
 
 		// Calculate the rotation offset.
 
