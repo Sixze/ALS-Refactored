@@ -9,8 +9,8 @@ class ALS_API UAlsAnimNotifyState_SetLocomotionAction : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FGameplayTag LocomotionAction;
 
 public:

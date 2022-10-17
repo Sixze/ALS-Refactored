@@ -11,11 +11,11 @@ class ALSCAMERA_API UAlsAnimNotify_CameraShake : public UAnimNotify
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float CameraShakeScale{1.0f};
 
 public:

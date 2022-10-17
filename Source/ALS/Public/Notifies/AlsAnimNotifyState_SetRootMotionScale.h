@@ -8,8 +8,8 @@ class ALS_API UAlsAnimNotifyState_SetRootMotionScale : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess, ClampMin = 0, ForceUnits = "x"))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float TranslationScale{1.0f};
 
 public:

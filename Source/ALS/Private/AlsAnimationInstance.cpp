@@ -1151,13 +1151,18 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
 
-	auto FootLocation{FinalLocation};
-	FootLocation.Z = GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().GetLocation().Z;
+	const FVector TraceLocation{
+		FinalLocation.X, FinalLocation.Y, GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().GetLocation().Z
+	};
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     FootLocation + FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale},
-	                                     FootLocation - FVector{0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale},
+	                                     TraceLocation + FVector{
+		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+	                                     },
+	                                     TraceLocation - FVector{
+		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+	                                     },
 	                                     UEngineTypes::ConvertToCollisionChannel(Settings->Feet.IkTraceChannel),
 	                                     {ANSI_TO_TCHAR(__FUNCTION__), true, Character});
 
@@ -1190,7 +1195,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		// Find the difference in location between the impact location and the expected (flat) floor location. These
 		// values are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
 
-		FootState.OffsetTargetLocation = Hit.ImpactPoint - FootLocation + Hit.ImpactNormal * FootHeight;
+		FootState.OffsetTargetLocation = Hit.ImpactPoint - TraceLocation + Hit.ImpactNormal * FootHeight;
 		FootState.OffsetTargetLocation.Z -= FootHeight;
 
 		// Calculate the rotation offset.

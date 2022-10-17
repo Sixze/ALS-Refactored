@@ -9,8 +9,8 @@ class ALSEDITOR_API UAlsAnimGraphNode_CurvesBlend : public UAnimGraphNode_Base
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsAnimNode_CurvesBlend Node;
 
 public:

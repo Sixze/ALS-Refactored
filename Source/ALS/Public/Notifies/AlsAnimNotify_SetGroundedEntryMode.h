@@ -9,8 +9,8 @@ class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FGameplayTag GroundedEntryMode;
 
 public:

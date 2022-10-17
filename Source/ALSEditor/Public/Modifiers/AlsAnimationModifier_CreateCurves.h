@@ -39,11 +39,11 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifi
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bOverrideExistingCurves;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FAlsAnimationCurve> Curves
 	{
 		{UAlsConstants::PoseGaitCurve()},
