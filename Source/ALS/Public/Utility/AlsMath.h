@@ -118,7 +118,7 @@ public:
 
 	static FVector3f ClampMagnitude01(const FVector3f& Vector);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", Meta = (AutoCreateRefTerm = "Vector"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector", DisplayName = "Clamp Magnitude 01 2D", Meta = (AutoCreateRefTerm = "Vector"))
 	static FVector2D ClampMagnitude012D(const FVector2D& Vector);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math|Vector")
