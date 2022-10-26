@@ -55,7 +55,7 @@ public:
 	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDelta) const override;
 
 	virtual void CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
-	                         APlayerController* PlayerController, const FVector& PreviousStartLocation) override;
+	                         APlayerController* Player, const FVector& PreviousStartLocation) override;
 
 	virtual void PrepMoveFor(ACharacter* Character) override;
 };

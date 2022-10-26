@@ -71,12 +71,12 @@ bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* 
 }
 
 void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
-                                APlayerController* PlayerController, const FVector& PreviousStartLocation)
+                                APlayerController* Player, const FVector& PreviousStartLocation)
 {
 	const auto* Movement{Character->GetCharacterMovement()};
 	const auto InitialRotation{Movement->UpdatedComponent->GetComponentRotation()};
 
-	Super::CombineWith(PreviousMove, Character, PlayerController, PreviousStartLocation);
+	Super::CombineWith(PreviousMove, Character, Player, PreviousStartLocation);
 
 	// Restore initial rotation after movement combining. Without this, any rotation applied in
 	// the character class will be discarded and the character will not be able to rotate properly.
