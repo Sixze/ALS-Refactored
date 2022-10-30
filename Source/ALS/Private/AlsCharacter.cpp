@@ -391,11 +391,11 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousMode
 
 			static constexpr auto ResetDelay{0.5f};
 
-			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer, FTimerDelegate::CreateWeakLambda(
-				                                this, [this]
-				                                {
-					                                GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
-				                                }), ResetDelay, false);
+			GetWorldTimerManager().SetTimer(BrakingFrictionFactorResetTimer,
+			                                FTimerDelegate::CreateWeakLambda(this, [this]
+			                                {
+				                                GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
+			                                }), ResetDelay, false);
 
 			// Block character rotation towards the last input direction after landing to
 			// prevent legs from twisting into a spiral while the landing animation is playing.
