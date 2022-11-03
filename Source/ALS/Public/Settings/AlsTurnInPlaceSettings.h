@@ -10,16 +10,16 @@ class ALS_API UAlsTurnInPlaceSettings : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	TObjectPtr<UAnimSequenceBase> Animation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bScalePlayRateByAnimatedTurnAngle{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float AnimatedTurnAngle;
 };
 
