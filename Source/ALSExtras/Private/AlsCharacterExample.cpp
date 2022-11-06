@@ -16,11 +16,13 @@ AAlsCharacterExample::AAlsCharacterExample()
 void AAlsCharacterExample::NotifyControllerChanged()
 {
 	const auto* PreviousPlayer{Cast<APlayerController>(PreviousController)};
-	const auto* PreviousLocalPlayer{IsValid(PreviousPlayer) ? PreviousPlayer->GetLocalPlayer() : nullptr};
-
-	if (IsValid(PreviousLocalPlayer))
+	if (IsValid(PreviousPlayer))
 	{
-		PreviousLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(InputMappingContext);
+		auto* PreviousInputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PreviousPlayer->GetLocalPlayer())};
+		if (IsValid(PreviousInputSubsystem))
+		{
+			PreviousInputSubsystem->RemoveMappingContext(InputMappingContext);
+		}
 	}
 
 	auto* NewPlayer{Cast<APlayerController>(GetController())};
@@ -30,10 +32,10 @@ void AAlsCharacterExample::NotifyControllerChanged()
 		NewPlayer->InputPitchScale_DEPRECATED = 1.0f;
 		NewPlayer->InputRollScale_DEPRECATED = 1.0f;
 
-		const auto* NewLocalPlayer{IsValid(NewPlayer) ? NewPlayer->GetLocalPlayer() : nullptr};
-		if (IsValid(NewLocalPlayer))
+		auto* NewInputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewPlayer->GetLocalPlayer())};
+		if (IsValid(NewInputSubsystem))
 		{
-			NewLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(InputMappingContext, 0);
+			NewInputSubsystem->AddMappingContext(InputMappingContext, 0);
 		}
 	}
 
