@@ -3,10 +3,10 @@
 #include "AlsCharacter.h"
 #include "AlsCharacterExample.generated.h"
 
+struct FInputActionValue;
 class UAlsCameraComponent;
 class UInputMappingContext;
 class UInputAction;
-struct FInputActionValue;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter

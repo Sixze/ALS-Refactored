@@ -9,8 +9,8 @@ struct ALS_API FAlsAnimNode_GameplayTagsBlend : public FAnimNode_BlendListBase
 {
 	GENERATED_BODY()
 
-public:
 #if WITH_EDITORONLY_DATA
+public:
 	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty, PinShownByDefault))
 	FGameplayTag ActiveTag;
 

@@ -158,7 +158,7 @@ private:
 	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
 
 	// Desired Aiming
@@ -177,7 +177,7 @@ private:
 	void OnReplicated_DesiredAiming(bool bPreviousDesiredAiming);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnDesiredAimingChanged(bool bPreviousDesiredAiming);
 
 	// Desired Rotation Mode
@@ -201,7 +201,7 @@ private:
 	void SetRotationMode(const FGameplayTag& NewModeTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRotationModeChanged(const FGameplayTag& PreviousModeTag);
 
 	void RefreshRotationMode();
@@ -237,7 +237,7 @@ private:
 	void SetStance(const FGameplayTag& NewStanceTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnStanceChanged(const FGameplayTag& PreviousStanceTag);
 
 	// Desired Gait
@@ -261,7 +261,7 @@ private:
 	void SetGait(const FGameplayTag& NewGaitTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnGaitChanged(const FGameplayTag& PreviousGaitTag);
 
 private:
@@ -289,7 +289,7 @@ private:
 	void OnReplicated_OverlayMode(const FGameplayTag& PreviousModeTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnOverlayModeChanged(const FGameplayTag& PreviousModeTag);
 
 	// Locomotion Action
@@ -302,7 +302,7 @@ public:
 	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
 
 	// View
@@ -424,7 +424,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
 	void TryStartRolling(float PlayRate = 1.0f);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	UAnimMontage* SelectRollMontage();
 
 	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
@@ -447,7 +447,7 @@ private:
 	// Mantling
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	bool IsMantlingAllowedToStart() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
@@ -467,10 +467,10 @@ private:
 	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	UAlsMantlingSettings* SelectMantlingSettings(EAlsMantlingType MantlingType);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
@@ -479,7 +479,7 @@ private:
 	void StopMantling();
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingEnded();
 
 	// Ragdolling
@@ -500,7 +500,7 @@ private:
 	void StartRagdollingImplementation();
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRagdollingStarted();
 
 public:
@@ -522,10 +522,10 @@ public:
 	void FinalizeRagdolling();
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	UAnimMontage* SelectGetUpMontage(bool bRagdollFacedUpward);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRagdollingEnded();
 
 private:
