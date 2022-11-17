@@ -20,8 +20,8 @@ namespace AlsCharacterConstants
 	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
 
-AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super(
-	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
+AAlsCharacter::AAlsCharacter(const FObjectInitializer& Initializer) : Super(
+	Initializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 

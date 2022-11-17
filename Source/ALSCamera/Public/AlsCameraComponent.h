@@ -71,7 +71,7 @@ public:
 public:
 	float GetPostProcessWeight() const;
 
-	void SetPostProcessWeight(bool NewPostProcessWeight);
+	void SetPostProcessWeight(float NewPostProcessWeight);
 
 	bool IsRightShoulder() const;
 
@@ -127,7 +127,7 @@ inline float UAlsCameraComponent::GetPostProcessWeight() const
 	return PostProcessWeight;
 }
 
-inline void UAlsCameraComponent::SetPostProcessWeight(const bool NewPostProcessWeight)
+inline void UAlsCameraComponent::SetPostProcessWeight(const float NewPostProcessWeight)
 {
 	PostProcessWeight = UAlsMath::Clamp01(NewPostProcessWeight);
 }
