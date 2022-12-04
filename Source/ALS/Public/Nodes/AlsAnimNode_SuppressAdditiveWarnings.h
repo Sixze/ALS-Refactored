@@ -9,7 +9,7 @@ struct ALS_API FAlsAnimNode_SuppressAdditiveWarnings : public FAnimNode_Base
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	FPoseLink Pose;
 
 public:

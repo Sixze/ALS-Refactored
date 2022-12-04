@@ -8,7 +8,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMacros.h"
-#include "Utility/AlsMath.h"
 
 FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)
 {
@@ -71,7 +70,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
-		static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
@@ -103,7 +102,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
-		static constexpr auto DeltaAngle{UAlsMath::TwoPi / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
