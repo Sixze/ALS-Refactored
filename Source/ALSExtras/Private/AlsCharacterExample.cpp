@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/WorldSettings.h"
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
@@ -88,8 +89,11 @@ void AAlsCharacterExample::InputLook(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
-	AddControllerPitchInput(Value.Y * LookUpRate * GetWorld()->GetDeltaSeconds());
-	AddControllerYawInput(Value.X * LookRightRate * GetWorld()->GetDeltaSeconds());
+	const auto TimeDilation{GetWorldSettings()->GetEffectiveTimeDilation()};
+	const auto DeltaTime{TimeDilation > SMALL_NUMBER ? GetWorld()->GetDeltaSeconds() / TimeDilation : GetWorld()->DeltaRealTimeSeconds};
+
+	AddControllerPitchInput(Value.Y * LookUpRate * DeltaTime);
+	AddControllerYawInput(Value.X * LookRightRate * DeltaTime);
 }
 
 void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)

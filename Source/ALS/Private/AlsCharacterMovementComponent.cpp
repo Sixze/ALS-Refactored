@@ -99,7 +99,7 @@ void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
 	}
 }
 
-FAlsNetworkPredictionData::FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement) : Super(Movement) {}
+FAlsNetworkPredictionData::FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement) : Super{Movement} {}
 
 FSavedMovePtr FAlsNetworkPredictionData::AllocateNewMove()
 {

@@ -35,6 +35,7 @@ private:
 public:
 	FAlsMovementDirectionCache() = default;
 
+	// ReSharper disable once CppNonExplicitConvertingConstructor
 	FAlsMovementDirectionCache(const EAlsMovementDirection InitialMovementDirection)
 	{
 		*this = InitialMovementDirection;

@@ -66,7 +66,7 @@ private:
 	using Super = FNetworkPredictionData_Client_Character;
 
 public:
-	FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement);
+	explicit FAlsNetworkPredictionData(const UCharacterMovementComponent& Movement);
 
 	virtual FSavedMovePtr AllocateNewMove() override;
 };

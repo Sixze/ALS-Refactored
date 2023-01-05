@@ -100,7 +100,7 @@ protected:
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
-	AAlsCharacter(const FObjectInitializer& Initializer = FObjectInitializer::Get());
+	explicit AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 #if WITH_EDITOR
 	virtual bool CanEditChange(const FProperty* Property) const override;
