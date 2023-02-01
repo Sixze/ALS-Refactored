@@ -46,8 +46,8 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* M
 		}
 		else
 		{
-			UE_LOG(LogAls, Warning, TEXT("%s: The current translation scale does not match the translation scale from the animation notify!"
-				       " Probably something changed it before the animation notify ended."), ANSI_TO_TCHAR(__FUNCTION__));
+			UE_LOG(LogAls, Warning, __FUNCTION__ TEXT(": The current translation scale does not match the translation scale"
+				       " from the animation notify! Probably something changed it before the animation notify ended."));
 		}
 	}
 }

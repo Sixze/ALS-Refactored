@@ -79,10 +79,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float ExponentialDecay(float DeltaTime, float Lambda);
 
-	template <class ValueType>
+	template <typename ValueType>
 	static ValueType Damp(const ValueType& Current, const ValueType& Target, float DeltaTime, float Smoothing);
 
-	template <class ValueType>
+	template <typename ValueType>
 	static ValueType ExponentialDecay(const ValueType& Current, const ValueType& Target, float DeltaTime, float Lambda);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
@@ -100,7 +100,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
 
-	template <class ValueType, class StateType>
+	template <typename ValueType, typename StateType>
 	static ValueType SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState,
 	                            float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
@@ -223,7 +223,7 @@ inline float UAlsMath::ExponentialDecay(const float DeltaTime, const float Lambd
 	return 1.0f - FMath::InvExpApprox(Lambda * DeltaTime);
 }
 
-template <class ValueType>
+template <typename ValueType>
 ValueType UAlsMath::Damp(const ValueType& Current, const ValueType& Target, const float DeltaTime, const float Smoothing)
 {
 	return Smoothing > 0.0f
@@ -231,7 +231,7 @@ ValueType UAlsMath::Damp(const ValueType& Current, const ValueType& Target, cons
 		       : Target;
 }
 
-template <class ValueType>
+template <typename ValueType>
 ValueType UAlsMath::ExponentialDecay(const ValueType& Current, const ValueType& Target, const float DeltaTime, const float Lambda)
 {
 	return Lambda > 0.0f

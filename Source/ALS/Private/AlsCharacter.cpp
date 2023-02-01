@@ -121,7 +121,7 @@ void AAlsCharacter::PostInitializeComponents()
 
 	GetMesh()->AddTickPrerequisiteActor(this);
 
-	AlsCharacterMovement->OnPhysicsRotation.AddUObject(this, &ThisClass::PhysicsRotation);
+	AlsCharacterMovement->OnPhysicsRotation.AddUObject(this, &ThisClass::CharacterMovement_OnPhysicsRotation);
 
 	// Pass current movement settings to the movement component.
 
@@ -1109,7 +1109,7 @@ void AAlsCharacter::FaceRotation(const FRotator NewRotation, const float DeltaTi
 	// Left empty intentionally.
 }
 
-void AAlsCharacter::PhysicsRotation(const float DeltaTime)
+void AAlsCharacter::CharacterMovement_OnPhysicsRotation(const float DeltaTime)
 {
 	RefreshRollingPhysics(DeltaTime);
 }
@@ -1424,7 +1424,7 @@ void AAlsCharacter::LockRotation(const float TargetYawAngle)
 {
 	if (LocomotionState.bRotationLocked)
 	{
-		UE_LOG(LogAls, Warning, TEXT("%s: Trying to lock a rotation when it is already locked!"), ANSI_TO_TCHAR(__FUNCTION__));
+		UE_LOG(LogAls, Warning, __FUNCTION__ TEXT(": Trying to lock a rotation when it is already locked!"));
 		return;
 	}
 
@@ -1435,7 +1435,7 @@ void AAlsCharacter::UnLockRotation()
 {
 	if (!LocomotionState.bRotationLocked)
 	{
-		UE_LOG(LogAls, Log, TEXT("%s: Trying to unlock a rotation when it is already unlocked!"), ANSI_TO_TCHAR(__FUNCTION__));
+		UE_LOG(LogAls, Log, __FUNCTION__ TEXT(": Trying to unlock a rotation when it is already unlocked!"));
 		return;
 	}
 

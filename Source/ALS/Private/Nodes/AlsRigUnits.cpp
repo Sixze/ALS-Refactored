@@ -48,7 +48,7 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
 	const auto* Hierarchy{Context.Hierarchy};
-	if (Hierarchy == nullptr)
+	if (!IsValid(Hierarchy))
 	{
 		return;
 	}
@@ -102,7 +102,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
 	auto* Hierarchy{ExecuteContext.Hierarchy};
-	if (Hierarchy == nullptr)
+	if (!IsValid(Hierarchy))
 	{
 		return;
 	}

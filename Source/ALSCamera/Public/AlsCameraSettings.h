@@ -98,8 +98,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FPostProcessSettings PostProcess;
 
-#if WITH_EDITORONLY_DATA
 public:
+#if WITH_EDITORONLY_DATA
 	virtual void Serialize(FArchive& Archive) override;
 #endif
 };

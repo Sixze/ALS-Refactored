@@ -61,23 +61,23 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
 	auto* EnhancedInput{Cast<UEnhancedInputComponent>(Input)};
 	if (IsValid(EnhancedInput))
 	{
-		EnhancedInput->BindAction(LookMouseAction, ETriggerEvent::Triggered, this, &ThisClass::InputLookMouse);
-		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::InputLook);
-		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::InputMove);
-		EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ThisClass::InputSprint);
-		EnhancedInput->BindAction(WalkAction, ETriggerEvent::Triggered, this, &ThisClass::InputWalk);
-		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ThisClass::InputCrouch);
-		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ThisClass::InputJump);
-		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::InputAim);
-		EnhancedInput->BindAction(RagdollAction, ETriggerEvent::Triggered, this, &ThisClass::InputRagdoll);
-		EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ThisClass::InputRoll);
-		EnhancedInput->BindAction(RotationModeAction, ETriggerEvent::Triggered, this, &ThisClass::InputRotationMode);
-		EnhancedInput->BindAction(ViewModeAction, ETriggerEvent::Triggered, this, &ThisClass::InputViewMode);
-		EnhancedInput->BindAction(SwitchShoulderAction, ETriggerEvent::Triggered, this, &ThisClass::InputSwitchShoulder);
+		EnhancedInput->BindAction(LookMouseAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnLookMouse);
+		EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnLook);
+		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnMove);
+		EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnSprint);
+		EnhancedInput->BindAction(WalkAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnWalk);
+		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnCrouch);
+		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnJump);
+		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnAim);
+		EnhancedInput->BindAction(RagdollAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRagdoll);
+		EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRoll);
+		EnhancedInput->BindAction(RotationModeAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRotationMode);
+		EnhancedInput->BindAction(ViewModeAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnViewMode);
+		EnhancedInput->BindAction(SwitchShoulderAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnSwitchShoulder);
 	}
 }
 
-void AAlsCharacterExample::InputLookMouse(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnLookMouse(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
@@ -85,7 +85,7 @@ void AAlsCharacterExample::InputLookMouse(const FInputActionValue& ActionValue)
 	AddControllerYawInput(Value.X * LookRightMouseSensitivity);
 }
 
-void AAlsCharacterExample::InputLook(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnLook(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
@@ -96,7 +96,7 @@ void AAlsCharacterExample::InputLook(const FInputActionValue& ActionValue)
 	AddControllerYawInput(Value.X * LookRightRate * DeltaTime);
 }
 
-void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnMove(const FInputActionValue& ActionValue)
 {
 	const auto Value{UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
 
@@ -106,12 +106,12 @@ void AAlsCharacterExample::InputMove(const FInputActionValue& ActionValue)
 	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);
 }
 
-void AAlsCharacterExample::InputSprint(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnSprint(const FInputActionValue& ActionValue)
 {
 	SetDesiredGait(ActionValue.Get<bool>() ? AlsGaitTags::Sprinting : AlsGaitTags::Running);
 }
 
-void AAlsCharacterExample::InputWalk()
+void AAlsCharacterExample::Input_OnWalk()
 {
 	if (GetDesiredGait() == AlsGaitTags::Walking)
 	{
@@ -123,7 +123,7 @@ void AAlsCharacterExample::InputWalk()
 	}
 }
 
-void AAlsCharacterExample::InputCrouch()
+void AAlsCharacterExample::Input_OnCrouch()
 {
 	if (GetDesiredStance() == AlsStanceTags::Standing)
 	{
@@ -135,7 +135,7 @@ void AAlsCharacterExample::InputCrouch()
 	}
 }
 
-void AAlsCharacterExample::InputJump(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
@@ -163,12 +163,12 @@ void AAlsCharacterExample::InputJump(const FInputActionValue& ActionValue)
 	}
 }
 
-void AAlsCharacterExample::InputAim(const FInputActionValue& ActionValue)
+void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 {
 	SetDesiredAiming(ActionValue.Get<bool>());
 }
 
-void AAlsCharacterExample::InputRagdoll()
+void AAlsCharacterExample::Input_OnRagdoll()
 {
 	if (!TryStopRagdolling())
 	{
@@ -176,37 +176,37 @@ void AAlsCharacterExample::InputRagdoll()
 	}
 }
 
-void AAlsCharacterExample::InputRoll()
+void AAlsCharacterExample::Input_OnRoll()
 {
 	static constexpr auto PlayRate{1.3f};
 
 	TryStartRolling(PlayRate);
 }
 
-void AAlsCharacterExample::InputRotationMode()
+void AAlsCharacterExample::Input_OnRotationMode()
 {
 	SetDesiredRotationMode(GetDesiredRotationMode() == AlsRotationModeTags::VelocityDirection
 		                       ? AlsRotationModeTags::LookingDirection
 		                       : AlsRotationModeTags::VelocityDirection);
 }
 
-void AAlsCharacterExample::InputViewMode()
+void AAlsCharacterExample::Input_OnViewMode()
 {
 	SetViewMode(GetViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void AAlsCharacterExample::InputSwitchShoulder()
+void AAlsCharacterExample::Input_OnSwitchShoulder()
 {
 	Camera->SetRightShoulder(!Camera->IsRightShoulder());
 }
 
-void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DebugDisplay, float& Unused, float& VerticalLocation)
+void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
 	if (Camera->IsActive())
 	{
-		Camera->DisplayDebug(Canvas, DebugDisplay, VerticalLocation);
+		Camera->DisplayDebug(Canvas, DisplayInfo, VerticalLocation);
 	}
 
-	Super::DisplayDebug(Canvas, DebugDisplay, Unused, VerticalLocation);
+	Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);
 }

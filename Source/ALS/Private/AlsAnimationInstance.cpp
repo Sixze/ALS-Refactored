@@ -827,7 +827,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	FHitResult Hit;
 	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ObjectQueryParameters,
 	                                    FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
-	                                    {ANSI_TO_TCHAR(__FUNCTION__), false, Character});
+	                                    {__FUNCTION__, false, Character});
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
@@ -1164,7 +1164,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
 	                                     },
 	                                     UEngineTypes::ConvertToCollisionChannel(Settings->Feet.IkTraceChannel),
-	                                     {ANSI_TO_TCHAR(__FUNCTION__), true, Character});
+	                                     {__FUNCTION__, true, Character});
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 

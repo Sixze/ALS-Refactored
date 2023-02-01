@@ -1,6 +1,6 @@
 #include "Utility/AlsMath.h"
 
-template <class ValueType, class StateType>
+template <typename ValueType, typename StateType>
 ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
                                const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {

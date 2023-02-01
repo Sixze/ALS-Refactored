@@ -2,14 +2,9 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
-#include "DrawDebugHelpers.h"
-#include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveVector.h"
-#include "Engine/CollisionProfile.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/GameStateBase.h"
-#include "Net/Core/PushModel/PushModel.h"
+#include "Engine/NetConnection.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
@@ -211,7 +206,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace forward to find an object the character cannot walk on.
 
-	static const FName ForwardTraceTag{FString::Format(TEXT("{0} (Forward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName ForwardTraceTag{__FUNCTION__ TEXT(" (Forward Trace)")};
 
 	auto ForwardTraceStart{CapsuleBottomLocation - ForwardTraceDirection * CapsuleRadius};
 	ForwardTraceStart.Z += (TraceSettings.LedgeHeight.X + TraceSettings.LedgeHeight.Y) *
@@ -248,7 +243,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	// Trace downward from the first trace's impact point and determine if the hit location is walkable.
 
-	static const FName DownwardTraceTag{FString::Format(TEXT("{0} (Downward Trace)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName DownwardTraceTag{__FUNCTION__ TEXT(" (Downward Trace)")};
 
 	const auto TargetLocationOffset{
 		FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * (TraceSettings.TargetLocationOffset * CapsuleScale)
@@ -293,7 +288,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	// Check if the capsule has room to stand at the downward trace's location. If so,
 	// set that location as the target transform and calculate the mantling height.
 
-	static const FName FreeSpaceTraceTag{FString::Format(TEXT("{0} (Free Space Overlap)"), {ANSI_TO_TCHAR(__FUNCTION__)})};
+	static const FName FreeSpaceTraceTag{__FUNCTION__ TEXT(" (Free Space Overlap)")};
 
 	const FVector TargetLocation{
 		DownwardTraceHit.ImpactPoint.X,
@@ -460,7 +455,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	// Apply mantling root motion.
 
 	const auto Mantling{MakeShared<FAlsRootMotionSource_Mantling>()};
-	Mantling->InstanceName = ANSI_TO_TCHAR(__FUNCTION__);
+	Mantling->InstanceName = __FUNCTION__;
 	Mantling->Duration = Duration / PlayRate;
 	Mantling->MantlingSettings = MantlingSettings;
 	Mantling->TargetPrimitive = bUseRelativeLocation ? Parameters.TargetPrimitive : nullptr;
@@ -741,7 +736,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		                                        RagdollTargetLocation.X,
 		                                        RagdollTargetLocation.Y,
 		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
-	                                        }, ObjectQueryParameters, {ANSI_TO_TCHAR(__FUNCTION__), false, this});
+	                                        }, ObjectQueryParameters, {__FUNCTION__, false, this});
 
 	auto NewActorLocation{RagdollTargetLocation};
 
@@ -882,7 +877,7 @@ void AAlsCharacter::FinalizeRagdolling()
 	if (!IsNetMode(NM_Client))
 	{
 		GetMesh()->bOnlyAllowAutonomousTickPose = GetRemoteRole() == ROLE_AutonomousProxy &&
-		                                          GetNetConnection() != nullptr && IsPawnControlled();
+		                                          IsValid(GetNetConnection()) && IsPawnControlled();
 	}
 }
 

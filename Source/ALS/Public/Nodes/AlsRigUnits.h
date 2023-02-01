@@ -22,7 +22,7 @@ struct ALS_API FAlsRigUnit_SimulationBase : public FRigUnit
 };
 
 // Calculates the intersection location and direction of the perpendicular to AC through B.
-USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS|Als"))
+USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FAlsRigUnit_MathBase
 {
 	GENERATED_BODY()
@@ -73,7 +73,7 @@ public:
 	virtual void Execute(const FRigUnitContext& Context) override;
 };
 
-USTRUCT(DisplayName = "Exponential Decay (Vector)", Meta = (Category = "ALS|Als"))
+USTRUCT(DisplayName = "Exponential Decay (Vector)", Meta = (Category = "ALS"))
 struct ALS_API FAlsRigUnit_ExponentialDecayVector : public FAlsRigUnit_SimulationBase
 {
 	GENERATED_BODY()
@@ -94,7 +94,7 @@ public:
 	virtual void Execute(const FRigUnitContext& Context) override;
 };
 
-USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS|Als"))
+USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS"))
 struct ALS_API FAlsRigUnit_HandIkRetargeting : public FAlsRigUnit_HighLevelBase
 {
 	GENERATED_BODY()
