@@ -19,9 +19,9 @@ FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() c
 }
 
 void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                                         const float TotalDuration, const FAnimNotifyEventReference& EventReference)
+                                                         const float Duration, const FAnimNotifyEventReference& EventReference)
 {
-	Super::NotifyBegin(Mesh, Animation, TotalDuration, EventReference);
+	Super::NotifyBegin(Mesh, Animation, Duration, EventReference);
 
 	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
 

@@ -791,31 +791,31 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 	RefreshMaxWalkSpeed();
 }
 
-void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewModeTag)
+void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewRotationMode)
 {
-	if (RotationMode != NewModeTag)
+	if (RotationMode != NewRotationMode)
 	{
-		RotationMode = NewModeTag;
+		RotationMode = NewRotationMode;
 
 		RefreshGaitSettings();
 	}
 }
 
-void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStanceTag)
+void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStance)
 {
-	if (Stance != NewStanceTag)
+	if (Stance != NewStance)
 	{
-		Stance = NewStanceTag;
+		Stance = NewStance;
 
 		RefreshGaitSettings();
 	}
 }
 
-void UAlsCharacterMovementComponent::SetMaxAllowedGait(const FGameplayTag& NewGaitTag)
+void UAlsCharacterMovementComponent::SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait)
 {
-	if (MaxAllowedGait != NewGaitTag)
+	if (MaxAllowedGait != NewMaxAllowedGait)
 	{
-		MaxAllowedGait = NewGaitTag;
+		MaxAllowedGait = NewMaxAllowedGait;
 
 		RefreshMaxWalkSpeed();
 	}

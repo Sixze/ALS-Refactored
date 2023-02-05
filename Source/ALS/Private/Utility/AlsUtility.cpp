@@ -9,12 +9,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMacros.h"
 
-FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bIsBool)
+FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bNameIsBool)
 {
-	return FName::NameToDisplayString(Name.ToString(), bIsBool);
+	return FName::NameToDisplayString(Name.ToString(), bNameIsBool);
 }
 
-float UAlsUtility::GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName)
+float UAlsUtility::GetAnimationCurveValueFromCharacter(const ACharacter* Character, const FName& CurveName)
 {
 	const auto* Mesh{IsValid(Character) ? Character->GetMesh() : nullptr};
 	const auto* AnimationInstance{IsValid(Mesh) ? Mesh->GetAnimInstance() : nullptr};
@@ -43,7 +43,7 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 	return IsValid(PlayerState) ? PlayerState->ExactPing * 0.001f : 0.0f;
 }
 
-bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName)
+bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
 {
 	const auto* World{IsValid(Actor) ? Actor->GetWorld() : nullptr};
 	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
@@ -52,7 +52,7 @@ bool UAlsUtility::ShouldDisplayDebug(const AActor* Actor, const FName& DisplayNa
 	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
 }
 
-void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,
+void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
                                  const FVector& YAxis, const float Radius, const FLinearColor& Color,
                                  const float Duration, const float Thickness, const uint8 DepthPriority)
 {
@@ -66,7 +66,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	auto PreviousVertex{Center + XAxis * Radius};
+	auto PreviousVertex{Location + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
@@ -75,7 +75,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
-		const auto NextVertex{Center + Radius * Cos * XAxis + Radius * Sin * YAxis};
+		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
 		DrawDebugLine(World, PreviousVertex, NextVertex, FColor, bPersistent, Duration, DepthPriority, Thickness);
 
@@ -84,7 +84,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Cen
 #endif
 }
 
-void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,
+void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
                                     const FVector& YAxis, const float Radius, const FLinearColor& Color,
                                     const float Duration, const float Thickness, const uint8 DepthPriority)
 {
@@ -98,7 +98,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	auto PreviousVertex{Center + XAxis * Radius};
+	auto PreviousVertex{Location + XAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
@@ -107,7 +107,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
 
-		const auto NextVertex{Center + Radius * Cos * XAxis + Radius * Sin * YAxis};
+		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
 		DrawDebugLine(World, PreviousVertex, NextVertex, FColor, bPersistent, Duration, DepthPriority, Thickness);
 
@@ -116,7 +116,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 #endif
 }
 
-void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const FVector& Center, const FRotator& Rotation,
+void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const FVector& Location, const FRotator& Rotation,
                                              const float Radius, const FLinearColor& Color, const float Duration,
                                              const float Thickness, const uint8 DepthPriority)
 {
@@ -135,9 +135,9 @@ void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const 
 	FVector XAxis, YAxis, ZAxis;
 	RotationMatrix.GetScaledAxes(XAxis, YAxis, ZAxis);
 
-	DrawCircle(World, Center, XAxis, YAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
-	DrawCircle(World, Center, XAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
-	DrawCircle(World, Center, YAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+	DrawCircle(World, Location, XAxis, YAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+	DrawCircle(World, Location, XAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+	DrawCircle(World, Location, YAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
 #endif
 }
 

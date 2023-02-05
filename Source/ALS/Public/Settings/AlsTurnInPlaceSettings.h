@@ -42,7 +42,7 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	float Turn180AngleThreshold{130.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float BlendTime{0.2f};
+	float BlendDuration{0.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bDisableFootLock{false};

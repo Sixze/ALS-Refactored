@@ -17,9 +17,9 @@ FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() 
 }
 
 void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                                          const float TotalDuration, const FAnimNotifyEventReference& EventReference)
+                                                          const float Duration, const FAnimNotifyEventReference& EventReference)
 {
-	Super::NotifyBegin(Mesh, Animation, TotalDuration, EventReference);
+	Super::NotifyBegin(Mesh, Animation, Duration, EventReference);
 
 	auto* Character{Cast<AAlsCharacter>(Mesh->GetOwner())};
 	if (IsValid(Character))

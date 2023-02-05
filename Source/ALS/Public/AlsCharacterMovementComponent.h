@@ -167,11 +167,11 @@ private:
 	void RefreshGaitSettings();
 
 public:
-	void SetRotationMode(const FGameplayTag& NewModeTag);
+	void SetRotationMode(const FGameplayTag& NewRotationMode);
 
-	void SetStance(const FGameplayTag& NewStanceTag);
+	void SetStance(const FGameplayTag& NewStance);
 
-	void SetMaxAllowedGait(const FGameplayTag& NewGaitTag);
+	void SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait);
 
 private:
 	void RefreshMaxWalkSpeed();

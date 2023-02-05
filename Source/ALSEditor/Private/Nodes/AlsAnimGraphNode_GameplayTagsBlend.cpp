@@ -42,9 +42,9 @@ FString UAlsAnimGraphNode_GameplayTagsBlend::GetNodeCategory() const
 	return TEXT("ALS");
 }
 
-void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, const FName SourcePropertyName, const int32 ArrayIndex) const
+void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, const FName SourcePropertyName, const int32 PinIndex) const
 {
-	Super::CustomizePinData(Pin, SourcePropertyName, ArrayIndex);
+	Super::CustomizePinData(Pin, SourcePropertyName, PinIndex);
 
 	bool bBlendPosePin;
 	bool bBlendTimePin;
@@ -55,11 +55,11 @@ void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, con
 		return;
 	}
 
-	Pin->PinFriendlyName = ArrayIndex <= 0
+	Pin->PinFriendlyName = PinIndex <= 0
 		                       ? LOCTEXT("Default", "Default")
-		                       : ArrayIndex > Node.Tags.Num()
+		                       : PinIndex > Node.Tags.Num()
 		                       ? LOCTEXT("Invalid", "Invalid")
-		                       : FText::AsCultureInvariant(UAlsUtility::GetSimpleTagName(Node.Tags[ArrayIndex - 1]).ToString());
+		                       : FText::AsCultureInvariant(UAlsUtility::GetSimpleTagName(Node.Tags[PinIndex - 1]).ToString());
 
 	if (bBlendPosePin)
 	{

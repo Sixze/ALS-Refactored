@@ -139,7 +139,7 @@ public:
 	virtual bool IsSpineRotationAllowed();
 
 private:
-	void RefreshViewGameThread();
+	void RefreshViewOnGameThread();
 
 	void RefreshView(float DeltaTime);
 
@@ -161,24 +161,24 @@ public:
 	// Locomotion
 
 private:
-	void RefreshLocomotionGameThread();
+	void RefreshLocomotionOnGameThread();
 
 	// Grounded
 
 public:
-	void SetGroundedEntryMode(const FGameplayTag& NewModeTag);
+	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
-	void SetHipsDirection(EAlsHipsDirection NewDirection);
+	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ActivatePivot();
 
 private:
-	void RefreshGroundedGameThread();
+	void RefreshGroundedOnGameThread();
 
 	void RefreshGrounded(float DeltaTime);
 
@@ -211,7 +211,7 @@ public:
 	void ResetJumped();
 
 private:
-	void RefreshInAirGameThread();
+	void RefreshInAirOnGameThread();
 
 	void RefreshInAir(float DeltaTime);
 
@@ -222,7 +222,7 @@ private:
 	// Feet
 
 private:
-	void RefreshFeetGameThread();
+	void RefreshFeetOnGameThread();
 
 	void RefreshFeet(float DeltaTime);
 
@@ -245,19 +245,19 @@ public:
 	void PlayQuickStopAnimation();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInTime = 0.2f, float BlendOutTime = 0.2f,
+	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f,
 	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionLeftAnimation(float BlendInTime = 0.2f, float BlendOutTime = 0.2f, float PlayRate = 1.0f,
+	void PlayTransitionLeftAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                 float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void PlayTransitionRightAnimation(float BlendInTime = 0.2f, float BlendOutTime = 0.2f, float PlayRate = 1.0f,
+	void PlayTransitionRightAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                  float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void StopTransitionAndTurnInPlaceAnimations(float BlendOutTime = 0.2f);
+	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = 0.2f);
 
 private:
 	void RefreshTransitions();
@@ -287,7 +287,7 @@ private:
 	// Ragdolling
 
 private:
-	void RefreshRagdollingGameThread();
+	void RefreshRagdollingOnGameThread();
 
 public:
 	void StopRagdolling();
@@ -312,9 +312,9 @@ inline void UAlsAnimationInstance::MarkPendingUpdate()
 	bPendingUpdate |= true;
 }
 
-inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewModeTag)
+inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode)
 {
-	GroundedEntryMode = NewModeTag;
+	GroundedEntryMode = NewGroundedEntryMode;
 }
 
 inline void UAlsAnimationInstance::ResetGroundedEntryMode()
@@ -322,9 +322,9 @@ inline void UAlsAnimationInstance::ResetGroundedEntryMode()
 	GroundedEntryMode = FGameplayTag::EmptyTag;
 }
 
-inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewDirection)
+inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewHipsDirection)
 {
-	GroundedState.HipsDirection = NewDirection;
+	GroundedState.HipsDirection = NewHipsDirection;
 }
 
 inline void UAlsAnimationInstance::ActivatePivot()

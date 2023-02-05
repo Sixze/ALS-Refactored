@@ -46,24 +46,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FAlsAnimationCurve> Curves
 	{
-		{UAlsConstants::PoseGaitCurve()},
-		{UAlsConstants::PoseMovingCurve()},
-		{UAlsConstants::PoseStandingCurve()},
-		{UAlsConstants::PoseCrouchingCurve()},
-		{UAlsConstants::PoseInAirCurve()},
-		{UAlsConstants::PoseGroundedCurve()},
+		{UAlsConstants::PoseGaitCurveName()},
+		{UAlsConstants::PoseMovingCurveName()},
+		{UAlsConstants::PoseStandingCurveName()},
+		{UAlsConstants::PoseCrouchingCurveName()},
+		{UAlsConstants::PoseInAirCurveName()},
+		{UAlsConstants::PoseGroundedCurveName()},
 
-		{UAlsConstants::FootLeftIkCurve()},
-		{UAlsConstants::FootLeftLockCurve()},
-		{UAlsConstants::FootRightIkCurve()},
-		{UAlsConstants::FootRightLockCurve()},
-		{UAlsConstants::FootPlantedCurve()},
-		{UAlsConstants::FeetCrossingCurve()},
+		{UAlsConstants::FootLeftIkCurveName()},
+		{UAlsConstants::FootLeftLockCurveName()},
+		{UAlsConstants::FootRightIkCurveName()},
+		{UAlsConstants::FootRightLockCurveName()},
+		{UAlsConstants::FootPlantedCurveName()},
+		{UAlsConstants::FeetCrossingCurveName()},
 
-		{UAlsConstants::AllowTransitionsCurve()},
-		{UAlsConstants::SprintBlockCurve()},
-		{UAlsConstants::GroundPredictionBlockCurve()},
-		{UAlsConstants::FootstepSoundBlockCurve()}
+		{UAlsConstants::AllowTransitionsCurveName()},
+		{UAlsConstants::SprintBlockCurveName()},
+		{UAlsConstants::GroundPredictionBlockCurveName()},
+		{UAlsConstants::FootstepSoundBlockCurveName()}
 	};
 
 public:

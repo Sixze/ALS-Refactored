@@ -137,29 +137,29 @@ public:
 public:
 	const FGameplayTag& GetViewMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
-	void SetViewMode(const FGameplayTag& NewModeTag);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewViewMode"))
+	void SetViewMode(const FGameplayTag& NewViewMode);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetViewMode(const FGameplayTag& NewModeTag);
+	void ServerSetViewMode(const FGameplayTag& NewViewMode);
 
 	// Locomotion Mode
 
 public:
-	virtual void OnMovementModeChanged(EMovementMode PreviousMode, uint8 PreviousCustomMode = 0) override;
+	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode = 0) override;
 
 public:
 	const FGameplayTag& GetLocomotionMode() const;
 
 private:
-	void SetLocomotionMode(const FGameplayTag& NewModeTag);
+	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
 
-	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
+	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnLocomotionModeChanged(const FGameplayTag& PreviousModeTag);
+	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
 	// Desired Aiming
 
@@ -185,12 +185,12 @@ protected:
 public:
 	const FGameplayTag& GetDesiredRotationMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
-	void SetDesiredRotationMode(const FGameplayTag& NewModeTag);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
+	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredRotationMode(const FGameplayTag& NewModeTag);
+	void ServerSetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
 
 	// Rotation Mode
 
@@ -198,11 +198,11 @@ public:
 	const FGameplayTag& GetRotationMode() const;
 
 private:
-	void SetRotationMode(const FGameplayTag& NewModeTag);
+	void SetRotationMode(const FGameplayTag& NewRotationMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnRotationModeChanged(const FGameplayTag& PreviousModeTag);
+	void OnRotationModeChanged(const FGameplayTag& PreviousRotationMode);
 
 	void RefreshRotationMode();
 
@@ -211,12 +211,12 @@ protected:
 public:
 	const FGameplayTag& GetDesiredStance() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewStanceTag"))
-	void SetDesiredStance(const FGameplayTag& NewStanceTag);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
+	void SetDesiredStance(const FGameplayTag& NewDesiredStance);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredStance(const FGameplayTag& NewStanceTag);
+	void ServerSetDesiredStance(const FGameplayTag& NewDesiredStance);
 
 protected:
 	virtual void ApplyDesiredStance();
@@ -234,23 +234,23 @@ public:
 	const FGameplayTag& GetStance() const;
 
 private:
-	void SetStance(const FGameplayTag& NewStanceTag);
+	void SetStance(const FGameplayTag& NewStance);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnStanceChanged(const FGameplayTag& PreviousStanceTag);
+	void OnStanceChanged(const FGameplayTag& PreviousStance);
 
 	// Desired Gait
 
 public:
 	const FGameplayTag& GetDesiredGait() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewGaitTag"))
-	void SetDesiredGait(const FGameplayTag& NewGaitTag);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
+	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredGait(const FGameplayTag& NewGaitTag);
+	void ServerSetDesiredGait(const FGameplayTag& NewDesiredGait);
 
 	// Gait
 
@@ -258,18 +258,18 @@ public:
 	const FGameplayTag& GetGait() const;
 
 private:
-	void SetGait(const FGameplayTag& NewGaitTag);
+	void SetGait(const FGameplayTag& NewGait);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnGaitChanged(const FGameplayTag& PreviousGaitTag);
+	void OnGaitChanged(const FGameplayTag& PreviousGait);
 
 private:
 	void RefreshGait();
 
 	FGameplayTag CalculateMaxAllowedGait() const;
 
-	FGameplayTag CalculateActualGait(const FGameplayTag& MaxAllowedGaitTag) const;
+	FGameplayTag CalculateActualGait(const FGameplayTag& MaxAllowedGait) const;
 
 	bool CanSprint() const;
 
@@ -278,32 +278,32 @@ private:
 public:
 	const FGameplayTag& GetOverlayMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewModeTag"))
-	void SetOverlayMode(const FGameplayTag& NewModeTag);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (AutoCreateRefTerm = "NewOverlayMode"))
+	void SetOverlayMode(const FGameplayTag& NewOverlayMode);
 
 private:
 	UFUNCTION(Server, Reliable)
-	void ServerSetOverlayMode(const FGameplayTag& NewModeTag);
+	void ServerSetOverlayMode(const FGameplayTag& NewOverlayMode);
 
 	UFUNCTION()
-	void OnReplicated_OverlayMode(const FGameplayTag& PreviousModeTag);
+	void OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnOverlayModeChanged(const FGameplayTag& PreviousModeTag);
+	void OnOverlayModeChanged(const FGameplayTag& PreviousOverlayMode);
 
 	// Locomotion Action
 
 public:
 	const FGameplayTag& GetLocomotionAction() const;
 
-	void SetLocomotionAction(const FGameplayTag& NewActionTag);
+	void SetLocomotionAction(const FGameplayTag& NewLocomotionAction);
 
-	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
+	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnLocomotionActionChanged(const FGameplayTag& PreviousActionTag);
+	void OnLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
 
 	// View
 
@@ -368,9 +368,9 @@ private:
 	void RefreshGroundedRotation(float DeltaTime);
 
 protected:
-	virtual bool TryRefreshCustomGroundedMovingRotation(float DeltaTime);
+	virtual bool RefreshCustomGroundedMovingRotation(float DeltaTime);
 
-	virtual bool TryRefreshCustomGroundedNotMovingRotation(float DeltaTime);
+	virtual bool RefreshCustomGroundedNotMovingRotation(float DeltaTime);
 
 	void RefreshGroundedMovingAimingRotation(float DeltaTime);
 
@@ -384,15 +384,14 @@ private:
 	void RefreshInAirRotation(float DeltaTime);
 
 protected:
-	virtual bool TryRefreshCustomInAirRotation(float DeltaTime);
+	virtual bool RefreshCustomInAirRotation(float DeltaTime);
 
 	void RefreshInAirAimingRotation(float DeltaTime);
 
 	void RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
 
 	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
-	                                float RotationInterpolationSpeed,
-	                                float TargetYawAngleRotationSpeed);
+	                                float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed);
 
 	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
@@ -529,10 +528,10 @@ protected:
 	void OnRagdollingEnded();
 
 private:
-	void SetRagdollTargetLocation(const FVector& NewLocation);
+	void SetRagdollTargetLocation(const FVector& NewTargetLocation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRagdollTargetLocation(const FVector_NetQuantize100& NewLocation);
+	void ServerSetRagdollTargetLocation(const FVector_NetQuantize100& NewTargetLocation);
 
 	void RefreshRagdolling(float DeltaTime);
 

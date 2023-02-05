@@ -34,6 +34,6 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Mesh,
 	     (bCheckStance && Character->GetStance() == StanceEquals)))
 	// ReSharper restore CppRedundantParentheses
 	{
-		AnimationInstance->Montage_Stop(BlendOutTime, Montage);
+		AnimationInstance->Montage_Stop(BlendOutDuration, Montage);
 	}
 }

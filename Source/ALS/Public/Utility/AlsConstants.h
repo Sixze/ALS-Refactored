@@ -12,188 +12,188 @@ public:
 	// Bones
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& RootBone();
+	static const FName& RootBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& PelvisBone();
+	static const FName& PelvisBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& HeadBone();
+	static const FName& HeadBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& Spine03Bone();
+	static const FName& Spine03BoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootLeftBone();
+	static const FName& FootLeftBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootRightBone();
+	static const FName& FootRightBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& HandLeftGunVirtualBone();
+	static const FName& HandLeftGunVirtualBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& HandRightGunVirtualBone();
+	static const FName& HandRightGunVirtualBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootLeftIkBone();
+	static const FName& FootLeftIkBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootRightIkBone();
+	static const FName& FootRightIkBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootLeftVirtualBone();
+	static const FName& FootLeftVirtualBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
-	static const FName& FootRightVirtualBone();
+	static const FName& FootRightVirtualBoneName();
 
 	// Animation Slots
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
-	static const FName& TransitionSlot();
+	static const FName& TransitionSlotName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
-	static const FName& TurnInPlaceStandingSlot();
+	static const FName& TurnInPlaceStandingSlotName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
-	static const FName& TurnInPlaceCrouchingSlot();
+	static const FName& TurnInPlaceCrouchingSlotName();
 
 	// Layering Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerHeadCurve();
+	static const FName& LayerHeadCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerHeadAdditiveCurve();
+	static const FName& LayerHeadAdditiveCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerHeadSlotCurve();
+	static const FName& LayerHeadSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmLeftCurve();
+	static const FName& LayerArmLeftCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmLeftAdditiveCurve();
+	static const FName& LayerArmLeftAdditiveCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmLeftLocalSpaceCurve();
+	static const FName& LayerArmLeftLocalSpaceCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmLeftSlotCurve();
+	static const FName& LayerArmLeftSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmRightCurve();
+	static const FName& LayerArmRightCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmRightAdditiveCurve();
+	static const FName& LayerArmRightAdditiveCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmRightLocalSpaceCurve();
+	static const FName& LayerArmRightLocalSpaceCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerArmRightSlotCurve();
+	static const FName& LayerArmRightSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerHandLeftCurve();
+	static const FName& LayerHandLeftCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerHandRightCurve();
+	static const FName& LayerHandRightCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerSpineCurve();
+	static const FName& LayerSpineCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerSpineAdditiveCurve();
+	static const FName& LayerSpineAdditiveCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerSpineSlotCurve();
+	static const FName& LayerSpineSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerPelvisCurve();
+	static const FName& LayerPelvisCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerPelvisSlotCurve();
+	static const FName& LayerPelvisSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerLegsCurve();
+	static const FName& LayerLegsCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& LayerLegsSlotCurve();
+	static const FName& LayerLegsSlotCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& HandLeftIkCurve();
+	static const FName& HandLeftIkCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& HandRightIkCurve();
+	static const FName& HandRightIkCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& ViewBlockCurve();
+	static const FName& ViewBlockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& AllowAimingCurve();
+	static const FName& AllowAimingCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& HipsDirectionLockCurve();
+	static const FName& HipsDirectionLockCurveName();
 
 	// Pose Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseGaitCurve();
+	static const FName& PoseGaitCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseMovingCurve();
+	static const FName& PoseMovingCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseStandingCurve();
+	static const FName& PoseStandingCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseCrouchingCurve();
+	static const FName& PoseCrouchingCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseGroundedCurve();
+	static const FName& PoseGroundedCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& PoseInAirCurve();
+	static const FName& PoseInAirCurveName();
 
 	// Feet Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootLeftIkCurve();
+	static const FName& FootLeftIkCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootLeftLockCurve();
+	static const FName& FootLeftLockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootRightIkCurve();
+	static const FName& FootRightIkCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootRightLockCurve();
+	static const FName& FootRightLockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootPlantedCurve();
+	static const FName& FootPlantedCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FeetCrossingCurve();
+	static const FName& FeetCrossingCurveName();
 
 	// Other Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& RotationYawSpeedCurve();
+	static const FName& RotationYawSpeedCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& RotationYawOffsetCurve();
+	static const FName& RotationYawOffsetCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& AllowTransitionsCurve();
+	static const FName& AllowTransitionsCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& SprintBlockCurve();
+	static const FName& SprintBlockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& GroundPredictionBlockCurve();
+	static const FName& GroundPredictionBlockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
-	static const FName& FootstepSoundBlockCurve();
+	static const FName& FootstepSoundBlockCurveName();
 
 	// Debug
 
@@ -213,349 +213,349 @@ public:
 	static const FName& MantlingDisplayName();
 };
 
-inline const FName& UAlsConstants::RootBone()
+inline const FName& UAlsConstants::RootBoneName()
 {
 	static const FName Name{TEXT("root")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PelvisBone()
+inline const FName& UAlsConstants::PelvisBoneName()
 {
 	static const FName Name{TEXT("pelvis")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HeadBone()
+inline const FName& UAlsConstants::HeadBoneName()
 {
 	static const FName Name{TEXT("head")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::Spine03Bone()
+inline const FName& UAlsConstants::Spine03BoneName()
 {
 	static const FName Name{TEXT("spine_03")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftBone()
+inline const FName& UAlsConstants::FootLeftBoneName()
 {
 	static const FName Name{TEXT("foot_l")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightBone()
+inline const FName& UAlsConstants::FootRightBoneName()
 {
 	static const FName Name{TEXT("foot_r")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HandLeftGunVirtualBone()
+inline const FName& UAlsConstants::HandLeftGunVirtualBoneName()
 {
 	static const FName Name{TEXT("VB hand_l_to_ik_hand_gun")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HandRightGunVirtualBone()
+inline const FName& UAlsConstants::HandRightGunVirtualBoneName()
 {
 	static const FName Name{TEXT("VB hand_r_to_ik_hand_gun")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftIkBone()
+inline const FName& UAlsConstants::FootLeftIkBoneName()
 {
 	static const FName Name{TEXT("ik_foot_l")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightIkBone()
+inline const FName& UAlsConstants::FootRightIkBoneName()
 {
 	static const FName Name{TEXT("ik_foot_r")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftVirtualBone()
+inline const FName& UAlsConstants::FootLeftVirtualBoneName()
 {
 	static const FName Name{TEXT("VB foot_l")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightVirtualBone()
+inline const FName& UAlsConstants::FootRightVirtualBoneName()
 {
 	static const FName Name{TEXT("VB foot_r")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::TransitionSlot()
+inline const FName& UAlsConstants::TransitionSlotName()
 {
 	static const FName Name{TEXT("Transition")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::TurnInPlaceStandingSlot()
+inline const FName& UAlsConstants::TurnInPlaceStandingSlotName()
 {
 	static const FName Name{TEXT("TurnInPlaceStanding")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::TurnInPlaceCrouchingSlot()
+inline const FName& UAlsConstants::TurnInPlaceCrouchingSlotName()
 {
 	static const FName Name{TEXT("TurnInPlaceCrouching")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerHeadCurve()
+inline const FName& UAlsConstants::LayerHeadCurveName()
 {
 	static const FName Name{TEXT("LayerHead")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerHeadAdditiveCurve()
+inline const FName& UAlsConstants::LayerHeadAdditiveCurveName()
 {
 	static const FName Name{TEXT("LayerHeadAdditive")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerHeadSlotCurve()
+inline const FName& UAlsConstants::LayerHeadSlotCurveName()
 {
 	static const FName Name{TEXT("LayerHeadSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmLeftCurve()
+inline const FName& UAlsConstants::LayerArmLeftCurveName()
 {
 	static const FName Name{TEXT("LayerArmLeft")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmLeftAdditiveCurve()
+inline const FName& UAlsConstants::LayerArmLeftAdditiveCurveName()
 {
 	static const FName Name{TEXT("LayerArmLeftAdditive")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmLeftLocalSpaceCurve()
+inline const FName& UAlsConstants::LayerArmLeftLocalSpaceCurveName()
 {
 	static const FName Name{TEXT("LayerArmLeftLocalSpace")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmLeftSlotCurve()
+inline const FName& UAlsConstants::LayerArmLeftSlotCurveName()
 {
 	static const FName Name{TEXT("LayerArmLeftSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmRightCurve()
+inline const FName& UAlsConstants::LayerArmRightCurveName()
 {
 	static const FName Name{TEXT("LayerArmRight")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmRightAdditiveCurve()
+inline const FName& UAlsConstants::LayerArmRightAdditiveCurveName()
 {
 	static const FName Name{TEXT("LayerArmRightAdditive")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmRightLocalSpaceCurve()
+inline const FName& UAlsConstants::LayerArmRightLocalSpaceCurveName()
 {
 	static const FName Name{TEXT("LayerArmRightLocalSpace")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerArmRightSlotCurve()
+inline const FName& UAlsConstants::LayerArmRightSlotCurveName()
 {
 	static const FName Name{TEXT("LayerArmRightSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerHandLeftCurve()
+inline const FName& UAlsConstants::LayerHandLeftCurveName()
 {
 	static const FName Name{TEXT("LayerHandLeft")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerHandRightCurve()
+inline const FName& UAlsConstants::LayerHandRightCurveName()
 {
 	static const FName Name{TEXT("LayerHandRight")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerSpineCurve()
+inline const FName& UAlsConstants::LayerSpineCurveName()
 {
 	static const FName Name{TEXT("LayerSpine")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerSpineAdditiveCurve()
+inline const FName& UAlsConstants::LayerSpineAdditiveCurveName()
 {
 	static const FName Name{TEXT("LayerSpineAdditive")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerSpineSlotCurve()
+inline const FName& UAlsConstants::LayerSpineSlotCurveName()
 {
 	static const FName Name{TEXT("LayerSpineSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerPelvisCurve()
+inline const FName& UAlsConstants::LayerPelvisCurveName()
 {
 	static const FName Name{TEXT("LayerPelvis")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerPelvisSlotCurve()
+inline const FName& UAlsConstants::LayerPelvisSlotCurveName()
 {
 	static const FName Name{TEXT("LayerPelvisSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerLegsCurve()
+inline const FName& UAlsConstants::LayerLegsCurveName()
 {
 	static const FName Name{TEXT("LayerLegs")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::LayerLegsSlotCurve()
+inline const FName& UAlsConstants::LayerLegsSlotCurveName()
 {
 	static const FName Name{TEXT("LayerLegsSlot")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HandLeftIkCurve()
+inline const FName& UAlsConstants::HandLeftIkCurveName()
 {
 	static const FName Name{TEXT("HandLeftIk")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HandRightIkCurve()
+inline const FName& UAlsConstants::HandRightIkCurveName()
 {
 	static const FName Name{TEXT("HandRightIk")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::ViewBlockCurve()
+inline const FName& UAlsConstants::ViewBlockCurveName()
 {
 	static const FName Name{TEXT("ViewBlock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::AllowAimingCurve()
+inline const FName& UAlsConstants::AllowAimingCurveName()
 {
 	static const FName Name{TEXT("AllowAiming")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::HipsDirectionLockCurve()
+inline const FName& UAlsConstants::HipsDirectionLockCurveName()
 {
 	static const FName Name{TEXT("HipsDirectionLock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseGaitCurve()
+inline const FName& UAlsConstants::PoseGaitCurveName()
 {
 	static const FName Name{TEXT("PoseGait")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseMovingCurve()
+inline const FName& UAlsConstants::PoseMovingCurveName()
 {
 	static const FName Name{TEXT("PoseMoving")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseStandingCurve()
+inline const FName& UAlsConstants::PoseStandingCurveName()
 {
 	static const FName Name{TEXT("PoseStanding")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseCrouchingCurve()
+inline const FName& UAlsConstants::PoseCrouchingCurveName()
 {
 	static const FName Name{TEXT("PoseCrouching")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseGroundedCurve()
+inline const FName& UAlsConstants::PoseGroundedCurveName()
 {
 	static const FName Name{TEXT("PoseGrounded")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PoseInAirCurve()
+inline const FName& UAlsConstants::PoseInAirCurveName()
 {
 	static const FName Name{TEXT("PoseInAir")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftIkCurve()
+inline const FName& UAlsConstants::FootLeftIkCurveName()
 {
 	static const FName Name{TEXT("FootLeftIk")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootLeftLockCurve()
+inline const FName& UAlsConstants::FootLeftLockCurveName()
 {
 	static const FName Name{TEXT("FootLeftLock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightIkCurve()
+inline const FName& UAlsConstants::FootRightIkCurveName()
 {
 	static const FName Name{TEXT("FootRightIk")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootRightLockCurve()
+inline const FName& UAlsConstants::FootRightLockCurveName()
 {
 	static const FName Name{TEXT("FootRightLock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootPlantedCurve()
+inline const FName& UAlsConstants::FootPlantedCurveName()
 {
 	static const FName Name{TEXT("FootPlanted")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FeetCrossingCurve()
+inline const FName& UAlsConstants::FeetCrossingCurveName()
 {
 	static const FName Name{TEXT("FeetCrossing")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::RotationYawSpeedCurve()
+inline const FName& UAlsConstants::RotationYawSpeedCurveName()
 {
 	static const FName Name{TEXT("RotationYawSpeed")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::RotationYawOffsetCurve()
+inline const FName& UAlsConstants::RotationYawOffsetCurveName()
 {
 	static const FName Name{TEXT("RotationYawOffset")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::AllowTransitionsCurve()
+inline const FName& UAlsConstants::AllowTransitionsCurveName()
 {
 	static const FName Name{TEXT("AllowTransitions")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::SprintBlockCurve()
+inline const FName& UAlsConstants::SprintBlockCurveName()
 {
 	static const FName Name{TEXT("SprintBlock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::GroundPredictionBlockCurve()
+inline const FName& UAlsConstants::GroundPredictionBlockCurveName()
 {
 	static const FName Name{TEXT("GroundPredictionBlock")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FootstepSoundBlockCurve()
+inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 {
 	static const FName Name{TEXT("FootstepSoundBlock")};
 	return Name;

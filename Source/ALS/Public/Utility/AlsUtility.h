@@ -24,10 +24,10 @@ public:
 	static constexpr const TCHAR* BoolToString(bool bValue);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
-	static FString NameToDisplayString(const FName& Name, bool bIsBool = false);
+	static FString NameToDisplayString(const FName& Name, bool bNameIsBool);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Character", AutoCreateRefTerm = "CurveName"))
-	static float GetAnimationCurveValue(const ACharacter* Character, const FName& CurveName);
+	static float GetAnimationCurveValueFromCharacter(const ACharacter* Character, const FName& CurveName);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Tag"))
 	static FGameplayTagContainer GetChildTags(const FGameplayTag& Tag);
@@ -39,25 +39,25 @@ public:
 	static float GetFirstPlayerPingSeconds(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName"))
-	static bool ShouldDisplayDebug(const AActor* Actor, const FName& DisplayName);
+	static bool ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
-		DevelopmentOnly, AutoCreateRefTerm = "Center, XAxis, YAxis, Color"))
-	static void DrawHalfCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,
+		DevelopmentOnly, AutoCreateRefTerm = "Location, XAxis, YAxis, Color"))
+	static void DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
 	                           const FVector& YAxis, float Radius, const FLinearColor& Color,
 	                           float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
-		DevelopmentOnly, AutoCreateRefTerm = "Center, XAxis, YAxis, Color"))
-	static void DrawQuarterCircle(const UObject* WorldContext, const FVector& Center, const FVector& XAxis,
+		DevelopmentOnly, AutoCreateRefTerm = "Location, XAxis, YAxis, Color"))
+	static void DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
 	                              const FVector& YAxis, float Radius, const FLinearColor& Color,
 	                              float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
-		DevelopmentOnly, AutoCreateRefTerm = "Center, Rotation, Color"))
-	static void DrawDebugSphereAlternative(const UObject* WorldContext, const FVector& Center, const FRotator& Rotation, float Radius,
-	                                       const FLinearColor& Color, float Duration = 0.0f, float Thickness = 1.0f,
-	                                       uint8 DepthPriority = 0);
+		DevelopmentOnly, AutoCreateRefTerm = "Location, Rotation, Color"))
+	static void DrawDebugSphereAlternative(const UObject* WorldContext, const FVector& Location, const FRotator& Rotation,
+	                                       float Radius, const FLinearColor& Color, float Duration = 0.0f,
+	                                       float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
 		DevelopmentOnly, AutoCreateRefTerm = "Start, End, Color"))

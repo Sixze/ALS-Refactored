@@ -12,7 +12,7 @@ class ALS_API UAlsAnimNotifyState_EarlyBlendOut : public UAnimNotifyState
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceUnits = "s"))
-	float BlendOutTime{0.25f};
+	float BlendOutDuration{0.25f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bCheckInput{true};

@@ -36,10 +36,10 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	float Fov{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName FirstPivotSocketName{UAlsConstants::RootBone()};
+	FName FirstPivotSocketName{UAlsConstants::RootBoneName()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName SecondPivotSocketName{UAlsConstants::HeadBone()};
+	FName SecondPivotSocketName{UAlsConstants::HeadBoneName()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float TraceRadius{15.0f};
@@ -57,10 +57,10 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	FVector TraceOverrideOffset{0.0f, 0.0f, 40.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (InlineEditConditionToggle))
-	bool bUseTraceDistanceSmoothing{true};
+	bool bEnableTraceDistanceSmoothing{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
-		DisplayName = "Use Trace Distance Smoothing", Meta = (EditCondition = "bUseTraceDistanceSmoothing"))
+		DisplayName = "Enable Trace Distance Smoothing", Meta = (EditCondition = "bEnableTraceDistanceSmoothing"))
 	FAlsTraceDistanceSmoothingSettings TraceDistanceSmoothing;
 };
 
@@ -89,10 +89,10 @@ public:
 	FAlsThirdPersonCameraSettings ThirdPerson;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
-	bool bUseLagSubstepping;
+	bool bEnableCameraLagSubstepping;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Use Lag Substepping",
-		Meta = (EditCondition = "bUseLagSubstepping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Enable Camera Lag Substepping",
+		Meta = (EditCondition = "bEnableCameraLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")

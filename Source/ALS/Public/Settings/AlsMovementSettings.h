@@ -33,22 +33,22 @@ public:
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve{nullptr};
 
 public:
-	float GetSpeedForGait(const FGameplayTag& GaitTag) const;
+	float GetSpeedForGait(const FGameplayTag& Gait) const;
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& GaitTag) const
+inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& Gait) const
 {
-	if (GaitTag == AlsGaitTags::Walking)
+	if (Gait == AlsGaitTags::Walking)
 	{
 		return WalkSpeed;
 	}
 
-	if (GaitTag == AlsGaitTags::Running)
+	if (Gait == AlsGaitTags::Running)
 	{
 		return RunSpeed;
 	}
 
-	if (GaitTag == AlsGaitTags::Sprinting)
+	if (Gait == AlsGaitTags::Sprinting)
 	{
 		return SprintSpeed;
 	}

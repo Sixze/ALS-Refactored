@@ -65,13 +65,13 @@ public:
 	static float Clamp01(float Value);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
-	static float LerpClamped(float A, float B, float Alpha);
+	static float LerpClamped(float From, float To, float Alpha);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
-	static float LerpAngle(float A, float B, float Alpha);
+	static float LerpAngle(float From, float To, float Alpha);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Math", Meta = (AutoCreateRefTerm = "A, B"))
-	static FRotator LerpRotator(const FRotator& A, const FRotator& B, float Alpha);
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Math", Meta = (AutoCreateRefTerm = "From, To"))
+	static FRotator LerpRotator(const FRotator& From, const FRotator& To, float Alpha);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")
 	static float Damp(float DeltaTime, float Smoothing);
@@ -165,26 +165,26 @@ inline float UAlsMath::Clamp01(const float Value)
 		       : Value;
 }
 
-inline float UAlsMath::LerpClamped(const float A, const float B, const float Alpha)
+inline float UAlsMath::LerpClamped(const float From, const float To, const float Alpha)
 {
-	return A + (B - A) * Clamp01(Alpha);
+	return From + (To - From) * Clamp01(Alpha);
 }
 
-inline float UAlsMath::LerpAngle(const float A, const float B, const float Alpha)
+inline float UAlsMath::LerpAngle(const float From, const float To, const float Alpha)
 {
-	auto Delta{FRotator3f::NormalizeAxis(B - A)};
+	auto Delta{FRotator3f::NormalizeAxis(To - From)};
 
 	if (Delta > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
 		Delta -= 360.0f;
 	}
 
-	return FRotator3f::NormalizeAxis(A + Delta * Alpha);
+	return FRotator3f::NormalizeAxis(From + Delta * Alpha);
 }
 
-inline FRotator UAlsMath::LerpRotator(const FRotator& A, const FRotator& B, const float Alpha)
+inline FRotator UAlsMath::LerpRotator(const FRotator& From, const FRotator& To, const float Alpha)
 {
-	auto Result{B - A};
+	auto Result{To - From};
 	Result.Normalize();
 
 	if (Result.Pitch > 180.0f - CounterClockwiseRotationAngleThreshold)
@@ -203,7 +203,7 @@ inline FRotator UAlsMath::LerpRotator(const FRotator& A, const FRotator& B, cons
 	}
 
 	Result *= Alpha;
-	Result += A;
+	Result += From;
 	Result.Normalize();
 
 	return Result;
