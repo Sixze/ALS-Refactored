@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 11,
-	"VersionName": "4.10",
+	"Version": 12,
+	"VersionName": "4.11",
 	"FriendlyName": "Advanced Locomotion System Refactored",
 	"Description": "Completely reworked and improved version of the Community Version of Advanced Locomotion System V4.",
 	"Category": "Animation",
@@ -10,7 +10,7 @@
 	"DocsURL": "https://github.com/Sixze/ALS-Refactored",
 	"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1",
 	"SupportURL": "https://github.com/Sixze/ALS-Refactored/discussions",
-	"EngineVersion": "5.0.0",
+	"EngineVersion": "5.1.0",
 	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
