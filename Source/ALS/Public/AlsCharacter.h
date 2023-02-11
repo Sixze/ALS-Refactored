@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "State/AlsLocomotionState.h"

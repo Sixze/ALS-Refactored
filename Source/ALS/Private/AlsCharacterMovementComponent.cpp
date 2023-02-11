@@ -7,6 +7,8 @@
 #include "GameFramework/Controller.h"
 #include "Utility/AlsMacros.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterMovementComponent)
+
 void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, const ENetworkMoveType MoveType)
 {
 	Super::ClientFillNetworkMoveData(Move, MoveType);

@@ -3,7 +3,6 @@
 #include "Animation/AnimInstance.h"
 #include "AlsLinkedAnimationInstance.generated.h"
 
-class UAlsAnimationInstance;
 class AAlsCharacter;
 
 UCLASS()

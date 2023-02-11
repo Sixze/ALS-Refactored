@@ -1,10 +1,11 @@
 ﻿#pragma once
 
 #include "Engine/DataAsset.h"
-#include "Engine/EngineTypes.h"
 #include "Engine/Scene.h"
 #include "Utility/AlsConstants.h"
 #include "AlsCameraSettings.generated.h"
+
+enum ETraceTypeQuery;
 
 USTRUCT(BlueprintType)
 struct ALSCAMERA_API FAlsFirstPersonCameraSettings

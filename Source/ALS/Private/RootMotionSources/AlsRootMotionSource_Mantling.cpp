@@ -8,6 +8,9 @@
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacros.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionSource_Mantling)
+
 FAlsRootMotionSource_Mantling::FAlsRootMotionSource_Mantling()
 {
 	Priority = 1000;

@@ -5,6 +5,9 @@ public class ALSEditor : ModuleRules
 	public ALSEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
+
+		bEnableNonInlinedGenCppWarnings = true;
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{

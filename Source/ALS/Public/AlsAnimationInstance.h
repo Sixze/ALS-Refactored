@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
@@ -17,7 +16,6 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
-class UAlsAnimationInstanceSettings;
 class AAlsCharacter;
 
 UCLASS()

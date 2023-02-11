@@ -3,8 +3,6 @@
 #include "Engine/EngineTypes.h"
 #include "AlsFeetSettings.generated.h"
 
-class UCurveFloat;
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsFeetSettings
 {

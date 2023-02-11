@@ -7,6 +7,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/WorldSettings.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExample)
+
 AAlsCharacterExample::AAlsCharacterExample()
 {
 	Camera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("Camera"));

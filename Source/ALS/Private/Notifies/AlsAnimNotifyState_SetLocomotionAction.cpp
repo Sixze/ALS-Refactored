@@ -4,6 +4,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Utility/AlsUtility.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_SetLocomotionAction)
+
 UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction()
 {
 	bIsNativeBranchingPoint = true;

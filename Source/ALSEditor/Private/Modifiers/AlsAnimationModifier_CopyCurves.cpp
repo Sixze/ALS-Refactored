@@ -3,6 +3,9 @@
 #include "Animation/AnimSequence.h"
 #include "Utility/AlsMacros.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationModifier_CopyCurves)
+
 void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
 	Super::OnApply_Implementation(Sequence);

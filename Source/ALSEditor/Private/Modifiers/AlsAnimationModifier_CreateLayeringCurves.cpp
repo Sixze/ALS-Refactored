@@ -2,6 +2,9 @@
 
 #include "Animation/AnimSequence.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationModifier_CreateLayeringCurves)
+
 void UAlsAnimationModifier_CreateLayeringCurves::OnApply_Implementation(UAnimSequence* Sequence)
 {
 	Super::OnApply_Implementation(Sequence);

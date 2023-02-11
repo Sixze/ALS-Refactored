@@ -3,6 +3,8 @@
 #include "AlsAnimationInstance.h"
 #include "Utility/AlsUtility.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_SetGroundedEntryMode)
+
 UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 {
 #if WITH_EDITORONLY_DATA

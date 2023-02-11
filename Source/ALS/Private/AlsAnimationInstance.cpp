@@ -7,9 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
-#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {

@@ -1,5 +1,7 @@
 #include "Nodes/AlsAnimNode_SuppressAdditiveWarnings.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNode_SuppressAdditiveWarnings)
+
 void FAlsAnimNode_SuppressAdditiveWarnings::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Initialize_AnyThread)

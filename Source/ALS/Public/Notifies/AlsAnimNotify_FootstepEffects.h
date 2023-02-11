@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "Chaos/ChaosEngineInterface.h"
 #include "Engine/DataAsset.h"
-#include "Engine/EngineTypes.h"
 #include "AlsAnimNotify_FootstepEffects.generated.h"
 
+enum ETraceTypeQuery;
+enum EPhysicalSurface;
 class USoundBase;
 class UMaterialInterface;
 class UNiagaraSystem;

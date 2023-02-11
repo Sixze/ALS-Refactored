@@ -1,11 +1,7 @@
 #pragma once
 
-#include "GameplayTagContainer.h"
-#include "Engine/EngineTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AlsUtility.generated.h"
-
-class ACharacter;
 
 DECLARE_STATS_GROUP(TEXT("Als"), STATGROUP_Als, STATCAT_Advanced)
 

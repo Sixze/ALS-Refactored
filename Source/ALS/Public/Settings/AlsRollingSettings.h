@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Animation/AnimMontage.h"
 #include "AlsRollingSettings.generated.h"
+
+class UAnimMontage;
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsRollingSettings

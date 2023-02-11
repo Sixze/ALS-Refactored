@@ -4,6 +4,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/PlayerController.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_CameraShake)
+
 UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
 {
 #if WITH_EDITORONLY_DATA

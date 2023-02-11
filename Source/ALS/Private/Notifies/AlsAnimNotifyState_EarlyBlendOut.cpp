@@ -3,6 +3,8 @@
 #include "AlsCharacter.h"
 #include "Animation/AnimInstance.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_EarlyBlendOut)
+
 UAlsAnimNotifyState_EarlyBlendOut::UAlsAnimNotifyState_EarlyBlendOut()
 {
 #if WITH_EDITORONLY_DATA

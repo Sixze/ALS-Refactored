@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "Engine/DataAsset.h"
-#include "Engine/EngineTypes.h"
+#include "Engine/NetSerialization.h"
 #include "AlsMantlingSettings.generated.h"
 
+enum EObjectTypeQuery;
 class UAnimMontage;
 class UCurveFloat;
 class UCurveVector;

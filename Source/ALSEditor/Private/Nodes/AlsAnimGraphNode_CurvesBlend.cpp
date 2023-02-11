@@ -2,6 +2,8 @@
 
 #define LOCTEXT_NAMESPACE "AlsCurvesBlendAnimationGraphNode"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimGraphNode_CurvesBlend)
+
 FText UAlsAnimGraphNode_CurvesBlend::GetNodeTitle(const ENodeTitleType::Type TitleType) const
 {
 	return LOCTEXT("Title", "Blend Curves");

@@ -1,7 +1,8 @@
 #include "Nodes/AlsAnimNode_CurvesBlend.h"
 
-#include "Animation/AnimInstanceProxy.h"
 #include "Utility/AlsEnumUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNode_CurvesBlend)
 
 void FAlsAnimNode_CurvesBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {

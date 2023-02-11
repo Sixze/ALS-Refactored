@@ -1,5 +1,7 @@
 #include "AlsAIController.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAIController)
+
 AAlsAIController::AAlsAIController()
 {
 	bAttachToPawn = true;

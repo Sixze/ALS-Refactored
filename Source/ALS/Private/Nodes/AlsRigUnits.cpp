@@ -1,8 +1,9 @@
 #include "Nodes/AlsRigUnits.h"
 
-#include "Animation/AnimTypes.h"
 #include "Units/RigUnitContext.h"
 #include "Utility/AlsMath.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRigUnits)
 
 static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
                                    FVector& ProjectionLocation, FVector& Direction)

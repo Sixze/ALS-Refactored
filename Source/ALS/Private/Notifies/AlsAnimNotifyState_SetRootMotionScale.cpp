@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "Utility/AlsLog.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_SetRootMotionScale)
+
 UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 {
 #if WITH_EDITORONLY_DATA

@@ -1,14 +1,14 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
-#include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
 
 UAlsCameraComponent::UAlsCameraComponent()
 {
