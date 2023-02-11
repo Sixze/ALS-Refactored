@@ -291,8 +291,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	static const FName FreeSpaceTraceTag{__FUNCTION__ TEXT(" (Free Space Overlap)")};
 
 	const FVector TargetLocation{
-		DownwardTraceHit.ImpactPoint.X,
-		DownwardTraceHit.ImpactPoint.Y,
+		DownwardTraceHit.Location.X,
+		DownwardTraceHit.Location.Y,
 		DownwardTraceHit.ImpactPoint.Z + UCharacterMovementComponent::MIN_FLOOR_DIST
 	};
 
@@ -331,6 +331,9 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), DownwardTraceStart, DownwardTraceEnd,
 		                                        TraceCapsuleRadius, true, DownwardTraceHit,
 		                                        {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f}, 7.5f);
+
+		DrawDebugCapsule(GetWorld(), TargetCapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity,
+							 FColor::Green, false, 10.0f);
 	}
 #endif
 
