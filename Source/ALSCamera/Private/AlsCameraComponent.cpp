@@ -64,7 +64,7 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 
 		const auto TimeDilation{PreviousGlobalTimeDilation * GetOwner()->CustomTimeDilation};
 
-		DeltaTime = TimeDilation > SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
+		DeltaTime = TimeDilation > UE_SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
 	}
 
 	PreviousGlobalTimeDilation = GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation();
@@ -103,7 +103,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 
 	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
 
-	if (ViewInfo.PostProcessBlendWeight > SMALL_NUMBER)
+	if (ViewInfo.PostProcessBlendWeight > UE_SMALL_NUMBER)
 	{
 		ViewInfo.PostProcessSettings = Settings->PostProcess;
 	}
@@ -238,7 +238,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - UE_SMALL_NUMBER)
 		{
 			NewCameraRotation = FMath::RInterpTo(NewCameraRotation, CameraInitialRotation + SubstepRotationSpeed * SubstepTime,
 			                                     SubstepTime - PreviousSubstepTime, RotationLag);
@@ -286,7 +286,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - UE_SMALL_NUMBER)
 		{
 			const auto SubstepRelativePivotTargetLocation{RelativePivotInitialLagLocation + SubstepMovementSpeed * SubstepTime};
 			const auto SubstepDeltaTime{SubstepTime - PreviousSubstepTime};
@@ -405,7 +405,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto TraceVector{TraceEnd - TraceStart};
 	const auto TraceDistance{TraceVector.Size()};
 
-	if (TraceDistance <= KINDA_SMALL_NUMBER)
+	if (TraceDistance <= UE_KINDA_SMALL_NUMBER)
 	{
 		NewTraceDistanceRatio = 1.0f;
 		return TraceResult;

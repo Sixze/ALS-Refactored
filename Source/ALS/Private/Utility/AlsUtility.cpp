@@ -71,7 +71,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Loc
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
-		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
@@ -103,7 +103,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
-		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);

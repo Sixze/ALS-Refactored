@@ -949,7 +949,7 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 	if (!NetworkSmoothing.bEnabled ||
 	    NetworkSmoothing.ClientTime >= NetworkSmoothing.ServerTime ||
-	    NetworkSmoothing.Duration <= SMALL_NUMBER)
+	    NetworkSmoothing.Duration <= UE_SMALL_NUMBER)
 	{
 		NetworkSmoothing.InitialRotation = RawViewRotation;
 		NetworkSmoothing.Rotation = RawViewRotation;
@@ -1033,7 +1033,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	// If the character has the input, update the input yaw angle.
 
-	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > UE_KINDA_SMALL_NUMBER;
 
 	if (LocomotionState.bHasInput)
 	{
@@ -1278,7 +1278,7 @@ float AAlsCharacter::CalculateRotationInterpolationSpeed() const
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 {
 	const auto DeltaYawAngle{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurveName()) * DeltaTime};
-	if (FMath::Abs(DeltaYawAngle) > SMALL_NUMBER)
+	if (FMath::Abs(DeltaYawAngle) > UE_SMALL_NUMBER)
 	{
 		auto NewRotation{GetActorRotation()};
 		NewRotation.Yaw += DeltaYawAngle;

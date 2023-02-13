@@ -8,7 +8,7 @@ template <typename ValueType, typename StateType>
 ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
                                const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	if (DeltaTime <= SMALL_NUMBER)
+	if (DeltaTime <= UE_SMALL_NUMBER)
 	{
 		return Current;
 	}

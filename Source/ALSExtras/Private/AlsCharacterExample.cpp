@@ -92,7 +92,7 @@ void AAlsCharacterExample::Input_OnLook(const FInputActionValue& ActionValue)
 	const auto Value{ActionValue.Get<FVector2D>()};
 
 	const auto TimeDilation{GetWorldSettings()->GetEffectiveTimeDilation()};
-	const auto DeltaTime{TimeDilation > SMALL_NUMBER ? GetWorld()->GetDeltaSeconds() / TimeDilation : GetWorld()->DeltaRealTimeSeconds};
+	const auto DeltaTime{TimeDilation > UE_SMALL_NUMBER ? GetWorld()->GetDeltaSeconds() / TimeDilation : GetWorld()->DeltaRealTimeSeconds};
 
 	AddControllerPitchInput(Value.Y * LookUpRate * DeltaTime);
 	AddControllerYawInput(Value.X * LookRightRate * DeltaTime);

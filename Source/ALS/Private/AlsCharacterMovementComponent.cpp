@@ -245,7 +245,6 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	// ReSharper disable All
 
 	// SCOPE_CYCLE_COUNTER(STAT_CharPhysWalking);
-	CSV_SCOPED_TIMING_STAT_EXCLUSIVE(CharPhysWalking);
 
 	if (DeltaTime < MIN_TICK_TIME)
 	{
@@ -330,7 +329,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			{
 				// pawn decided to jump up
 				const float DesiredDist = Delta.Size();
-				if (DesiredDist > KINDA_SMALL_NUMBER)
+				if (DesiredDist > UE_KINDA_SMALL_NUMBER)
 				{
 					const float ActualDist = (UpdatedComponent->GetComponentLocation() - OldLocation).Size2D();
 					remainingTime += timeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
@@ -620,7 +619,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 	{
 		// Only if the supplied sweep was vertical and downward.
 		if ((DownwardSweepResult->TraceStart.Z > DownwardSweepResult->TraceEnd.Z) &&
-			(DownwardSweepResult->TraceStart - DownwardSweepResult->TraceEnd).SizeSquared2D() <= KINDA_SMALL_NUMBER)
+			(DownwardSweepResult->TraceStart - DownwardSweepResult->TraceEnd).SizeSquared2D() <= UE_KINDA_SMALL_NUMBER)
 		{
 			// Reject hits that are barely on the cusp of the radius of the capsule
 			if (IsWithinEdgeTolerance(DownwardSweepResult->Location, DownwardSweepResult->ImpactPoint, PawnRadius))
@@ -678,7 +677,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 			{
 				// Use a capsule with a slightly smaller radius and shorter height to avoid the adjacent object.
 				// Capsule must not be nearly zero or the trace will fall back to a line trace from the start point and have the wrong length.
-				CapsuleShape.Capsule.Radius = FMath::Max(0.f, CapsuleShape.Capsule.Radius - SWEEP_EDGE_REJECT_DISTANCE - KINDA_SMALL_NUMBER);
+				CapsuleShape.Capsule.Radius = FMath::Max(0.f, CapsuleShape.Capsule.Radius - SWEEP_EDGE_REJECT_DISTANCE - UE_KINDA_SMALL_NUMBER);
 				if (!CapsuleShape.IsNearlyZero())
 				{
 					ShrinkHeight = (PawnHalfHeight - PawnRadius) * (1.f - ShrinkScaleOverlap);

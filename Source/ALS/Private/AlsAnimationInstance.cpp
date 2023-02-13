@@ -346,7 +346,7 @@ void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 		{
 			DeltaYawAngle -= 360.0f;
 		}
-		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
 		{
 			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
 			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
@@ -402,7 +402,7 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
 		{
 			DeltaYawAngle -= 360.0f;
 		}
-		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
 		{
 			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
 			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
@@ -795,7 +795,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	}
 
 	const auto AllowanceAmount{1.0f - GetCurveValueClamped01(UAlsConstants::GroundPredictionBlockCurveName())};
-	if (AllowanceAmount <= KINDA_SMALL_NUMBER)
+	if (AllowanceAmount <= UE_KINDA_SMALL_NUMBER)
 	{
 		InAirState.GroundPredictionAmount = 0.0f;
 		return;
