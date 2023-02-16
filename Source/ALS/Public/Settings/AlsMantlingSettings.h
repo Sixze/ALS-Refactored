@@ -56,16 +56,16 @@ public:
 	TObjectPtr<UCurveVector> InterpolationAndCorrectionAmountsCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FVector StartRelativeLocation{-65.0f, 0.0f, -100.0f};
+	FVector3f StartRelativeLocation{-65.0f, 0.0f, -100.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	FVector2D ReferenceHeight{50.0f, 100.0f};
+	FVector2f ReferenceHeight{50.0f, 100.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	FVector2D StartTime{0.5f, 0.0f};
+	FVector2f StartTime{0.5f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	FVector2D PlayRate{1.0f, 1.0f};
+	FVector2f PlayRate{1.0f, 1.0f};
 
 public:
 	float GetStartTimeForHeight(float MantlingHeight) const;
@@ -89,7 +89,7 @@ struct ALS_API FAlsMantlingTraceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	FVector2D LedgeHeight{50.0f, 225.0f};
+	FVector2f LedgeHeight{50.0f, 225.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float ReachDistance{75.0f};

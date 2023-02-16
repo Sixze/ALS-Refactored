@@ -1450,9 +1450,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		RotateInPlaceState.bRotatingRight = false;
 
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
-			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
+			                              ? Settings->RotateInPlace.PlayRate.X
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1467,9 +1466,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
-			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
+			                              ? Settings->RotateInPlace.PlayRate.X
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1480,8 +1478,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	// speed. This makes the character rotate faster when moving the camera faster.
 
 	const auto PlayRate{
-		FMath::GetMappedRangeValueClamped(FVector2f{Settings->RotateInPlace.ReferenceViewYawSpeed},
-		                                  FVector2f{Settings->RotateInPlace.PlayRate}, ViewState.YawSpeed)
+		FMath::GetMappedRangeValueClamped(Settings->RotateInPlace.ReferenceViewYawSpeed,
+		                                  Settings->RotateInPlace.PlayRate, ViewState.YawSpeed)
 	};
 
 	RotateInPlaceState.PlayRate = bPendingUpdate
@@ -1546,7 +1544,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 
 	const auto ActivationDelay{
 		FMath::GetMappedRangeValueClamped({Settings->TurnInPlace.ViewYawAngleThreshold, 180.0f},
-		                                  FVector2f{Settings->TurnInPlace.ViewYawAngleToActivationDelay},
+		                                  Settings->TurnInPlace.ViewYawAngleToActivationDelay,
 		                                  FMath::Abs(ViewState.YawAngle))
 	};
 

@@ -354,7 +354,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	auto TraceStart{
 		FMath::Lerp(
 			GetThirdPersonTraceStartLocation(),
-			PivotTargetLocation + PivotOffset + Settings->ThirdPerson.TraceOverrideOffset,
+			PivotTargetLocation + PivotOffset + FVector{Settings->ThirdPerson.TraceOverrideOffset},
 			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName())))
 	};
 

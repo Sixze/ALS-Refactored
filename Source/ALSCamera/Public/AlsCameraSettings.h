@@ -55,7 +55,7 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	FName TraceShoulderRightSocketName{TEXT("ThirdPersonTraceShoulderRight")};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector TraceOverrideOffset{0.0f, 0.0f, 40.0f};
+	FVector3f TraceOverrideOffset{0.0f, 0.0f, 40.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (InlineEditConditionToggle))
 	bool bEnableTraceDistanceSmoothing{true};

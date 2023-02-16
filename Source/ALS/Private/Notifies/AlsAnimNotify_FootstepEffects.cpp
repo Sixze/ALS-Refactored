@@ -48,8 +48,8 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	const auto FootZAxis{
 		FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
-			                                     ? FootstepEffectsSettings->FootLeftZAxis
-			                                     : FootstepEffectsSettings->FootRightZAxis)
+			                                     ? FVector{FootstepEffectsSettings->FootLeftZAxis}
+			                                     : FVector{FootstepEffectsSettings->FootRightZAxis})
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -102,8 +102,8 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	const auto FootstepRotation{
 		FRotationMatrix::MakeFromZY(Hit.ImpactNormal,
 		                            FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
-			                                                                 ? FootstepEffectsSettings->FootLeftYAxis
-			                                                                 : FootstepEffectsSettings->FootRightYAxis)).ToQuat()
+			                                                                 ? FVector{FootstepEffectsSettings->FootLeftYAxis}
+			                                                                 : FVector{FootstepEffectsSettings->FootRightYAxis})).ToQuat()
 	};
 
 #if ENABLE_DRAW_DEBUG
@@ -166,21 +166,22 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 		};
 
 		const auto DecalLocation{
-			FootstepLocation + DecalRotation.RotateVector(EffectSettings->DecalLocationOffset * MeshScale)
+			FootstepLocation + DecalRotation.RotateVector(FVector{EffectSettings->DecalLocationOffset} * MeshScale)
 		};
 
 		UDecalComponent* Decal;
 
 		if (EffectSettings->DecalSpawnMode == EAlsFootstepDecalSpawnMode::SpawnAttachedToTraceHitComponent && Hit.Component.IsValid())
 		{
-			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(), EffectSettings->DecalSize * MeshScale,
+			Decal = UGameplayStatics::SpawnDecalAttached(EffectSettings->DecalMaterial.Get(),
+			                                             FVector{EffectSettings->DecalSize} * MeshScale,
 			                                             Hit.Component.Get(), NAME_None, DecalLocation,
 			                                             DecalRotation.Rotator(), EAttachLocation::KeepWorldPosition);
 		}
 		else
 		{
 			Decal = UGameplayStatics::SpawnDecalAtLocation(World, EffectSettings->DecalMaterial.Get(),
-			                                               EffectSettings->DecalSize * MeshScale,
+			                                               FVector{EffectSettings->DecalSize} * MeshScale,
 			                                               DecalLocation, DecalRotation.Rotator());
 		}
 
@@ -204,7 +205,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 				const auto ParticleSystemLocation{
 					FootstepLocation +
-					ParticleSystemRotation.RotateVector(EffectSettings->ParticleSystemLocationOffset * MeshScale)
+					ParticleSystemRotation.RotateVector(FVector{EffectSettings->ParticleSystemLocationOffset} * MeshScale)
 				};
 
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, EffectSettings->ParticleSystem.Get(),
@@ -215,7 +216,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 			case EAlsFootstepParticleEffectSpawnMode::SpawnAttachedToFootBone:
 				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), Mesh, FootBoneName,
-				                                             EffectSettings->ParticleSystemLocationOffset * MeshScale,
+				                                             FVector{EffectSettings->ParticleSystemLocationOffset} * MeshScale,
 				                                             EffectSettings->ParticleSystemFootLeftRotationOffset,
 				                                             FVector::OneVector * MeshScale, EAttachLocation::KeepRelativeOffset,
 				                                             true, ENCPoolMethod::AutoRelease);
