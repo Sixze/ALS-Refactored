@@ -487,25 +487,24 @@ void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const
 
 void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Iterations)
 {
-	if (DeltaTime < MIN_TICK_TIME)
+	// PhysMantling
+	if (DeltaTime >= MIN_TICK_TIME
+		&& Cast<AAlsCharacter>(CharacterOwner)->GetLocomotionAction() == AlsLocomotionActionTags::Mantling)
 	{
-		Super::PhysCustom(DeltaTime, Iterations);
-		return;
+		Iterations += 1;
+		bJustTeleported = false;
+
+		RestorePreAdditiveRootMotionVelocity();
+
+		if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
+		{
+			Velocity = FVector::ZeroVector;
+		}
+
+		ApplyRootMotionToVelocity(DeltaTime);
+
+		MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 	}
-
-	Iterations += 1;
-	bJustTeleported = false;
-
-	RestorePreAdditiveRootMotionVelocity();
-
-	if (!HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity())
-	{
-		Velocity = FVector::ZeroVector;
-	}
-
-	ApplyRootMotionToVelocity(DeltaTime);
-
-	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
 	Super::PhysCustom(DeltaTime, Iterations);
 }
