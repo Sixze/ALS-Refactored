@@ -133,13 +133,13 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 bool AAlsCharacter::TryStartMantlingGrounded()
 {
 	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	       TryStartMantling(Settings->Mantling.GroundedTrace);
+	       TryStartMantling(Settings->Mantling.GroundedTrace, CalculateForwardTraceDeltaAngle());
 }
 
 bool AAlsCharacter::TryStartMantlingInAir()
 {
 	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
-	       TryStartMantling(Settings->Mantling.InAirTrace);
+	       TryStartMantling(Settings->Mantling.InAirTrace, CalculateForwardTraceDeltaAngle());
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
@@ -147,31 +147,13 @@ bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 	return !LocomotionAction.IsValid();
 }
 
-bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
+bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings, const float ForwardTraceDeltaAngle)
 {
 	if (!Settings->Mantling.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
 		return false;
 	}
 
-	const auto ActorLocation{GetActorLocation()};
-	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
-
-	float ForwardTraceAngle;
-	if (LocomotionState.bHasSpeed)
-	{
-		ForwardTraceAngle = LocomotionState.bHasInput
-			                    ? LocomotionState.VelocityYawAngle +
-			                      FMath::ClampAngle(LocomotionState.InputYawAngle - LocomotionState.VelocityYawAngle,
-			                                        -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle)
-			                    : LocomotionState.VelocityYawAngle;
-	}
-	else
-	{
-		ForwardTraceAngle = LocomotionState.bHasInput ? LocomotionState.InputYawAngle : ActorYawAngle;
-	}
-
-	const auto ForwardTraceDeltaAngle{FRotator3f::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
@@ -183,6 +165,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
 	}
 
+	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirectionXY(
 			ActorYawAngle + FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
@@ -198,6 +181,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto CapsuleRadius{Capsule->GetScaledCapsuleRadius()};
 	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
+	const auto ActorLocation{GetActorLocation()};
 	const FVector CapsuleBottomLocation{ActorLocation.X, ActorLocation.Y, ActorLocation.Z - CapsuleHalfHeight};
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
@@ -497,6 +481,27 @@ UAlsMantlingSettings* AAlsCharacter::SelectMantlingSettings_Implementation(EAlsM
 }
 
 void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
+
+float AAlsCharacter::CalculateForwardTraceDeltaAngle() const
+{
+	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
+
+	float ForwardTraceAngle;
+	if (LocomotionState.bHasSpeed)
+	{
+		ForwardTraceAngle = LocomotionState.bHasInput
+								? LocomotionState.VelocityYawAngle +
+								  FMath::ClampAngle(LocomotionState.InputYawAngle - LocomotionState.VelocityYawAngle,
+													-Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle)
+								: LocomotionState.VelocityYawAngle;
+	}
+	else
+	{
+		ForwardTraceAngle = LocomotionState.bHasInput ? LocomotionState.InputYawAngle : ActorYawAngle;
+	}
+
+	return {FRotator3f::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
+}
 
 void AAlsCharacter::RefreshMantling()
 {
