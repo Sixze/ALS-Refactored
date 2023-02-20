@@ -57,7 +57,7 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
+	inline static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math")

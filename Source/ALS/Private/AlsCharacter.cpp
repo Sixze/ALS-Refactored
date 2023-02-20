@@ -17,7 +17,7 @@
 
 namespace AlsCharacterConstants
 {
-	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
+	inline static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
