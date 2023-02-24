@@ -9,10 +9,13 @@
 #define ALS_GET_TYPE_STRING(Type) \
 	((void) sizeof UEAsserts_Private::GetMemberNameCheckedJunk(static_cast<Type*>(nullptr)), TEXT(#Type))
 
+// A lightweight version of the ensure() macro that doesn't generate a C++ call stack and doesn't send a
+// crash report, because it doesn't happen instantly and causes the editor to freeze, which can be annoying.
+
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 
 #define ALS_ENSURE_IMPLEMENTATION(Expression, bEnsureAlways, Format, Capture, ...) \
-	(LIKELY(Expression) || ([Capture]() FORCENOINLINE UE_DEBUG_SECTION \
+	(LIKELY(Expression) || ([Capture]() UE_DEBUG_SECTION \
 	{ \
 		static auto bExecuted{false}; \
 		\
@@ -27,7 +30,7 @@
 			\
 			if (FPlatformMisc::IsDebuggerPresent()) \
 			{ \
-				PLATFORM_BREAK(); \
+				PLATFORM_BREAK_IF_DESIRED(); \
 			} \
 			else \
 			{ \
