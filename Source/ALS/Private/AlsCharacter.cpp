@@ -977,12 +977,7 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
 	NewInputDirection = NewInputDirection.GetSafeNormal();
 
-	if (InputDirection != NewInputDirection)
-	{
-		InputDirection = NewInputDirection;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InputDirection, this)
-	}
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
 }
 
 void AAlsCharacter::RefreshLocomotionLocationAndRotation(const float DeltaTime)
