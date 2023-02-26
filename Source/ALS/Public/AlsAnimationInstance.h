@@ -148,13 +148,13 @@ public:
 	void ReinitializeLookTowardsInput();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLookTowardsInput(float DeltaTime);
+	void RefreshLookTowardsInput();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ReinitializeLookTowardsCamera();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLookTowardsCamera(float DeltaTime);
+	void RefreshLookTowardsCamera();
 
 	// Locomotion
 
