@@ -41,7 +41,7 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
 	const auto* PlayerState{IsValid(PlayerController) ? PlayerController->PlayerState.Get() : nullptr};
 
-	return IsValid(PlayerState) ? PlayerState->ExactPing * 0.001f : 0.0f;
+	return IsValid(PlayerState) ? PlayerState->GetPingInMilliseconds() * 0.001f : 0.0f;
 }
 
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
