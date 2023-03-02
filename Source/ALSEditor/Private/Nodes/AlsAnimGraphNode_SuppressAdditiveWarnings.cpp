@@ -21,12 +21,12 @@ FText UAlsAnimGraphNode_SuppressAdditiveWarnings::GetTooltipText() const
 
 FString UAlsAnimGraphNode_SuppressAdditiveWarnings::GetNodeCategory() const
 {
-	return TEXT("ALS");
+	return FString{TEXTVIEW("ALS")};
 }
 
 void UAlsAnimGraphNode_SuppressAdditiveWarnings::PostProcessPinName(const UEdGraphPin* Pin, FString& DisplayName) const
 {
-	DisplayName = TEXT("");
+	DisplayName = TEXTVIEW("");
 }
 
 #undef LOCTEXT_NAMESPACE

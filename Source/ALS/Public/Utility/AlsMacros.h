@@ -2,12 +2,12 @@
 
 #include "HAL/Platform.h"
 
-#define ALS_STRINGIFY_IMPLEMENTATION(Value) TEXT(#Value)
+#define ALS_STRINGIFY_IMPLEMENTATION(Value) #Value
 
 #define ALS_STRINGIFY(Value) ALS_STRINGIFY_IMPLEMENTATION(Value)
 
 #define ALS_GET_TYPE_STRING(Type) \
-	((void) sizeof UEAsserts_Private::GetMemberNameCheckedJunk(static_cast<Type*>(nullptr)), TEXT(#Type))
+	((void) sizeof UEAsserts_Private::GetMemberNameCheckedJunk(static_cast<Type*>(nullptr)), TEXTVIEW(#Type))
 
 // A lightweight version of the ensure() macro that doesn't generate a C++ call stack and doesn't send a
 // crash report, because it doesn't happen instantly and causes the editor to freeze, which can be annoying.
@@ -23,7 +23,7 @@
 		{ \
 			bExecuted = true; \
 			\
-			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") ALS_STRINGIFY(__LINE__) TEXT(".")); \
+			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") TEXT(ALS_STRINGIFY(__LINE__)) TEXT(".")); \
 			UE_LOG(LogOutputDevice, Warning, Format, ##__VA_ARGS__); \
 			\
 			PrintScriptCallstack(); \

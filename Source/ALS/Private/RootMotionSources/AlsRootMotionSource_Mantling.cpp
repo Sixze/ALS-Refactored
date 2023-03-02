@@ -167,7 +167,12 @@ UScriptStruct* FAlsRootMotionSource_Mantling::GetScriptStruct() const
 
 FString FAlsRootMotionSource_Mantling::ToSimpleString() const
 {
-	return FString::Format(TEXT("{0} ({1}, {2})"), {ALS_GET_TYPE_STRING(FAlsRootMotionSource_Mantling), *InstanceName.ToString(), LocalID});
+	TStringBuilder<256> StringBuilder;
+
+	StringBuilder << ALS_GET_TYPE_STRING(FAlsRootMotionSource_Mantling)
+		<< TEXTVIEW(" (") << InstanceName << TEXTVIEW(", ") << LocalID << TEXT(')');
+
+	return FString{StringBuilder};
 }
 
 void FAlsRootMotionSource_Mantling::AddReferencedObjects(FReferenceCollector& Collector)

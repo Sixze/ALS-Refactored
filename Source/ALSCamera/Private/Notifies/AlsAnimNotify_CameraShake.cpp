@@ -15,7 +15,16 @@ UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
 
 FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Camera Shake: {0}"), {IsValid(CameraShakeClass) ? CameraShakeClass->GetName() : TEXT("None")});
+	TStringBuilder<256> NotifyNameBuilder;
+
+	NotifyNameBuilder << TEXTVIEW("Als Camera Shake: ");
+
+	if (IsValid(CameraShakeClass))
+	{
+		NotifyNameBuilder << CameraShakeClass->GetFName();
+	}
+
+	return FString{NotifyNameBuilder};
 }
 
 void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

@@ -93,7 +93,12 @@ void FAlsAnimNode_CurvesBlend::GatherDebugData(FNodeDebugData& DebugData)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(GatherDebugData)
 
-	DebugData.AddDebugItem(FString::Printf(TEXT("%s: Blend Amount: %.2f."), *DebugData.GetNodeName(this), GetBlendAmount()));
+	TStringBuilder<256> DebugItemBuilder;
+
+	DebugItemBuilder << DebugData.GetNodeName(this) << TEXTVIEW(": Blend Amount: ");
+	DebugItemBuilder.Appendf(TEXT("%.2f"), GetBlendAmount());
+
+	DebugData.AddDebugItem(FString{DebugItemBuilder});
 	SourcePose.GatherDebugData(DebugData.BranchFlow(1.0f));
 	CurvesPose.GatherDebugData(DebugData.BranchFlow(GetBlendAmount()));
 }

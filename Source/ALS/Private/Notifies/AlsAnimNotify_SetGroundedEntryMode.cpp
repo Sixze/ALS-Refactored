@@ -16,9 +16,12 @@ UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 
 FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Set Grounded Entry Mode: {0}"), {
-		                       FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(GroundedEntryMode).ToString(), false)
-	                       });
+	TStringBuilder<256> NotifyNameBuilder;
+
+	NotifyNameBuilder << TEXTVIEW("Als Set Grounded Entry Mode: ")
+		<< FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(GroundedEntryMode).ToString(), false);
+
+	return FString{NotifyNameBuilder};
 }
 
 void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

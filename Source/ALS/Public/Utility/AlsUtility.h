@@ -17,7 +17,7 @@ public:
 	inline static constexpr auto DrawCircleSidesCount{16};
 
 public:
-	static constexpr const TCHAR* BoolToString(bool bValue);
+	static constexpr FStringView BoolToString(bool bValue);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
 	static FString NameToDisplayString(const FName& Name, bool bNameIsBool);
@@ -87,7 +87,7 @@ public:
 	                                                   float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 };
 
-constexpr const TCHAR* UAlsUtility::BoolToString(const bool bValue)
+constexpr FStringView UAlsUtility::BoolToString(const bool bValue)
 {
-	return bValue ? TEXT("True") : TEXT("False");
+	return bValue ? TEXTVIEW("True") : TEXTVIEW("False");
 }

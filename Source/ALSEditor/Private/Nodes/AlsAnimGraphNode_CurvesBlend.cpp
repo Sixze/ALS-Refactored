@@ -16,7 +16,7 @@ FText UAlsAnimGraphNode_CurvesBlend::GetTooltipText() const
 
 FString UAlsAnimGraphNode_CurvesBlend::GetNodeCategory() const
 {
-	return TEXT("ALS");
+	return FString{TEXTVIEW("ALS")};
 }
 
 #undef LOCTEXT_NAMESPACE

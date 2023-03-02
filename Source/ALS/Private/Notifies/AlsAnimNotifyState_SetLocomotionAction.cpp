@@ -13,9 +13,12 @@ UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction
 
 FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Set Locomotion Action: {0}"), {
-		                       FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false)
-	                       });
+	TStringBuilder<256> NotifyNameBuilder;
+
+	NotifyNameBuilder << TEXTVIEW("Als Set Locomotion Action: ")
+		<< FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false);
+
+	return FString{NotifyNameBuilder};
 }
 
 void UAlsAnimNotifyState_SetLocomotionAction::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

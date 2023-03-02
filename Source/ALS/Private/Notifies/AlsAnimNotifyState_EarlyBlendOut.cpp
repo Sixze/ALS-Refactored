@@ -16,7 +16,7 @@ UAlsAnimNotifyState_EarlyBlendOut::UAlsAnimNotifyState_EarlyBlendOut()
 
 FString UAlsAnimNotifyState_EarlyBlendOut::GetNotifyName_Implementation() const
 {
-	return TEXT("Als Early Blend Out");
+	return FString{TEXTVIEW("Als Early Blend Out")};
 }
 
 void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

@@ -40,7 +40,7 @@ void UAlsAnimGraphNode_GameplayTagsBlend::ReallocatePinsDuringReconstruction(TAr
 
 FString UAlsAnimGraphNode_GameplayTagsBlend::GetNodeCategory() const
 {
-	return TEXT("ALS");
+	return FString{TEXTVIEW("ALS")};
 }
 
 void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, const FName SourcePropertyName, const int32 PinIndex) const
@@ -64,11 +64,15 @@ void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, con
 
 	if (bBlendPosePin)
 	{
-		Pin->PinFriendlyName = FText::Format(LOCTEXT("Pose", "{PinName} Pose"), {{TEXT("PinName"), Pin->PinFriendlyName}});
+		static const FTextFormat BlendPosePinFormat{LOCTEXT("Pose", "{PinName} Pose")};
+
+		Pin->PinFriendlyName = FText::Format(BlendPosePinFormat, {{FString{TEXTVIEW("PinName")}, Pin->PinFriendlyName}});
 	}
 	else if (bBlendTimePin)
 	{
-		Pin->PinFriendlyName = FText::Format(LOCTEXT("BlendTime", "{PinName} Blend Time"), {{TEXT("PinName"), Pin->PinFriendlyName}});
+		static const FTextFormat BlendTimePinFormat{LOCTEXT("BlendTime", "{PinName} Blend Time")};
+
+		Pin->PinFriendlyName = FText::Format(BlendTimePinFormat, {{FString{TEXTVIEW("PinName")}, Pin->PinFriendlyName}});
 	}
 }
 
@@ -85,8 +89,8 @@ void UAlsAnimGraphNode_GameplayTagsBlend::GetBlendPinProperties(const UEdGraphPi
 	}
 
 	const auto PinName{PinFullName.Left(SeparatorIndex)};
-	bBlendPosePin = PinName == TEXT("BlendPose");
-	bBlendTimePin = PinName == TEXT("BlendTime");
+	bBlendPosePin = PinName == TEXTVIEW("BlendPose");
+	bBlendTimePin = PinName == TEXTVIEW("BlendTime");
 }
 
 #undef LOCTEXT_NAMESPACE
