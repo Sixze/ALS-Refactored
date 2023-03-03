@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
@@ -17,7 +16,6 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
-class UAlsAnimationInstanceSettings;
 class AAlsCharacter;
 
 UCLASS()
@@ -44,7 +42,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	bool bDisplayDebugTraces;
 
-	TArray<TFunction<void()>> DisplayDebugTracesQueue;
+	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
@@ -150,13 +148,13 @@ public:
 	void ReinitializeLookTowardsInput();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLookTowardsInput(float DeltaTime);
+	void RefreshLookTowardsInput();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
 	void ReinitializeLookTowardsCamera();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLookTowardsCamera(float DeltaTime);
+	void RefreshLookTowardsCamera();
 
 	// Locomotion
 

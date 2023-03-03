@@ -1,11 +1,7 @@
 #pragma once
 
-#include "GameplayTagContainer.h"
-#include "Engine/EngineTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AlsUtility.generated.h"
-
-class ACharacter;
 
 DECLARE_STATS_GROUP(TEXT("Als"), STATGROUP_Als, STATCAT_Advanced)
 
@@ -15,13 +11,13 @@ class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr auto DrawImpactPointSize{32.0f};
-	static constexpr auto DrawLineThickness{1.0f};
-	static constexpr auto DrawArrowSize{50.0f};
-	static constexpr auto DrawCircleSidesCount{16};
+	inline static constexpr auto DrawImpactPointSize{32.0f};
+	inline static constexpr auto DrawLineThickness{1.0f};
+	inline static constexpr auto DrawArrowSize{50.0f};
+	inline static constexpr auto DrawCircleSidesCount{16};
 
 public:
-	static constexpr const TCHAR* BoolToString(bool bValue);
+	static constexpr FStringView BoolToString(bool bValue);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (AutoCreateRefTerm = "Name"))
 	static FString NameToDisplayString(const FName& Name, bool bNameIsBool);
@@ -91,7 +87,7 @@ public:
 	                                                   float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 };
 
-constexpr const TCHAR* UAlsUtility::BoolToString(const bool bValue)
+constexpr FStringView UAlsUtility::BoolToString(const bool bValue)
 {
-	return bValue ? TEXT("True") : TEXT("False");
+	return bValue ? TEXTVIEW("True") : TEXTVIEW("False");
 }

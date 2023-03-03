@@ -1,5 +1,7 @@
 #include "Nodes/AlsAnimNode_GameplayTagsBlend.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNode_GameplayTagsBlend)
+
 int32 FAlsAnimNode_GameplayTagsBlend::GetActiveChildIndex()
 {
 	const auto& CurrentActiveTag{GetActiveTag()};

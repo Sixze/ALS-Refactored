@@ -8,6 +8,9 @@
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacros.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionSource_Mantling)
+
 FAlsRootMotionSource_Mantling::FAlsRootMotionSource_Mantling()
 {
 	Priority = 1000;
@@ -36,7 +39,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
-	if (!ALS_ENSURE(Duration > SMALL_NUMBER) || DeltaTime <= SMALL_NUMBER)
+	if (!ALS_ENSURE(Duration > UE_SMALL_NUMBER) || DeltaTime <= UE_SMALL_NUMBER)
 	{
 		RootMotionParams.Clear();
 		return;
@@ -164,7 +167,12 @@ UScriptStruct* FAlsRootMotionSource_Mantling::GetScriptStruct() const
 
 FString FAlsRootMotionSource_Mantling::ToSimpleString() const
 {
-	return FString::Format(TEXT("{0} ({1}, {2})"), {ALS_GET_TYPE_STRING(FAlsRootMotionSource_Mantling), *InstanceName.ToString(), LocalID});
+	TStringBuilder<256> StringBuilder;
+
+	StringBuilder << ALS_GET_TYPE_STRING(FAlsRootMotionSource_Mantling)
+		<< TEXTVIEW(" (") << InstanceName << TEXTVIEW(", ") << LocalID << TEXT(')');
+
+	return FString{StringBuilder};
 }
 
 void FAlsRootMotionSource_Mantling::AddReferencedObjects(FReferenceCollector& Collector)

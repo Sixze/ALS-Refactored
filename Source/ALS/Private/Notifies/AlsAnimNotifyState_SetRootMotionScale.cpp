@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "Utility/AlsLog.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_SetRootMotionScale)
+
 UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 {
 #if WITH_EDITORONLY_DATA
@@ -15,7 +17,12 @@ UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 
 FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() const
 {
-	return FString::Format(TEXT("Als Set Root Motion Scale: {0}"), {TranslationScale});
+	TStringBuilder<64> NotifyNameBuilder;
+
+	NotifyNameBuilder << TEXTVIEW("Als Set Root Motion Scale: ");
+	NotifyNameBuilder.Appendf(TEXT("%.2f"), TranslationScale);
+
+	return FString{NotifyNameBuilder};
 }
 
 void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
@@ -46,8 +53,8 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* M
 		}
 		else
 		{
-			UE_LOG(LogAls, Warning, __FUNCTION__ TEXT(": The current translation scale does not match the translation scale"
-				       " from the animation notify! Probably something changed it before the animation notify ended."));
+			UE_LOG(LogAls, Warning, __FUNCTION__ TEXT(": The current translation scale does not match the translation scale")
+			       TEXT(" from the animation notify! Probably something changed it before the animation notify ended."));
 		}
 	}
 }

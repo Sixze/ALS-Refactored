@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Engine/EngineTypes.h"
 #include "AlsInAirSettings.generated.h"
 
+enum EObjectTypeQuery;
 class UCurveFloat;
 
 USTRUCT(BlueprintType)

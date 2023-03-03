@@ -1,5 +1,7 @@
 #include "Nodes/AlsAnimGraphNode_SuppressAdditiveWarnings.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimGraphNode_SuppressAdditiveWarnings)
+
 #define LOCTEXT_NAMESPACE "AlsSuppressAdditiveWarningsAnimationGraphNode"
 
 FText UAlsAnimGraphNode_SuppressAdditiveWarnings::GetNodeTitle(ENodeTitleType::Type TitleType) const
@@ -19,12 +21,12 @@ FText UAlsAnimGraphNode_SuppressAdditiveWarnings::GetTooltipText() const
 
 FString UAlsAnimGraphNode_SuppressAdditiveWarnings::GetNodeCategory() const
 {
-	return TEXT("ALS");
+	return FString{TEXTVIEW("ALS")};
 }
 
 void UAlsAnimGraphNode_SuppressAdditiveWarnings::PostProcessPinName(const UEdGraphPin* Pin, FString& DisplayName) const
 {
-	DisplayName = TEXT("");
+	DisplayName = TEXTVIEW("");
 }
 
 #undef LOCTEXT_NAMESPACE

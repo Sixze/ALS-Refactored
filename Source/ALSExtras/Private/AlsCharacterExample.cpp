@@ -5,11 +5,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
-#include "GameFramework/WorldSettings.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExample)
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
-	Camera = CreateDefaultSubobject<UAlsCameraComponent>(TEXT("Camera"));
+	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->SetupAttachment(GetMesh());
 	Camera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 }
@@ -89,11 +90,8 @@ void AAlsCharacterExample::Input_OnLook(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
-	const auto TimeDilation{GetWorldSettings()->GetEffectiveTimeDilation()};
-	const auto DeltaTime{TimeDilation > SMALL_NUMBER ? GetWorld()->GetDeltaSeconds() / TimeDilation : GetWorld()->DeltaRealTimeSeconds};
-
-	AddControllerPitchInput(Value.Y * LookUpRate * DeltaTime);
-	AddControllerYawInput(Value.X * LookRightRate * DeltaTime);
+	AddControllerPitchInput(Value.Y * LookUpRate);
+	AddControllerYawInput(Value.X * LookRightRate);
 }
 
 void AAlsCharacterExample::Input_OnMove(const FInputActionValue& ActionValue)

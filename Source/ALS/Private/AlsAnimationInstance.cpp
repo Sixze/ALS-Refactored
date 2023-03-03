@@ -7,9 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Utility/AlsConstants.h"
-#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
 UAlsAnimationInstance::UAlsAnimationInstance()
 {
@@ -309,8 +310,11 @@ void UAlsAnimationInstance::ReinitializeLookTowardsInput()
 	ViewState.LookTowardsInput.bReinitializationRequired = true;
 }
 
-void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
+void UAlsAnimationInstance::RefreshLookTowardsInput()
 {
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLookTowardsInput()"),
+	                            STAT_UAlsAnimationInstance_RefreshLookTowardsInput, STATGROUP_Als)
+
 	auto& LookTowardsInput{ViewState.LookTowardsInput};
 
 	LookTowardsInput.bReinitializationRequired |= bPendingUpdate;
@@ -345,7 +349,7 @@ void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 		{
 			DeltaYawAngle -= 360.0f;
 		}
-		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
 		{
 			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
 			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
@@ -353,7 +357,9 @@ void UAlsAnimationInstance::RefreshLookTowardsInput(const float DeltaTime)
 			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
 		}
 
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsInputYawAngleInterpolationSpeed)};
+		const auto InterpolationAmount{
+			UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->View.LookTowardsInputYawAngleInterpolationSpeed)
+		};
 
 		LookTowardsInput.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
 	}
@@ -370,8 +376,11 @@ void UAlsAnimationInstance::ReinitializeLookTowardsCamera()
 	ViewState.LookTowardsCamera.bReinitializationRequired = true;
 }
 
-void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
+void UAlsAnimationInstance::RefreshLookTowardsCamera()
 {
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLookTowardsCamera()"),
+	                            STAT_UAlsAnimationInstance_RefreshLookTowardsCamera, STATGROUP_Als)
+
 	auto& LookTowardsCamera{ViewState.LookTowardsCamera};
 
 	LookTowardsCamera.bReinitializationRequired |= bPendingUpdate;
@@ -401,7 +410,7 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
 		{
 			DeltaYawAngle -= 360.0f;
 		}
-		else if (FMath::Abs(LocomotionState.YawSpeed) > SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
 		{
 			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
 			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
@@ -409,7 +418,9 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera(const float DeltaTime)
 			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
 		}
 
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, Settings->View.LookTowardsCameraRotationInterpolationSpeed)};
+		const auto InterpolationAmount{
+			UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->View.LookTowardsCameraRotationInterpolationSpeed)
+		};
 
 		LookTowardsCamera.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
 		LookTowardsCamera.PitchAngle = UAlsMath::LerpAngle(LookTowardsCamera.PitchAngle, ViewState.PitchAngle, InterpolationAmount);
@@ -794,7 +805,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	}
 
 	const auto AllowanceAmount{1.0f - GetCurveValueClamped01(UAlsConstants::GroundPredictionBlockCurveName())};
-	if (AllowanceAmount <= KINDA_SMALL_NUMBER)
+	if (AllowanceAmount <= UE_KINDA_SMALL_NUMBER)
 	{
 		InAirState.GroundPredictionAmount = 0.0f;
 		return;
@@ -1178,7 +1189,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		}
 		else
 		{
-			const_cast<TArray<TFunction<void()>>&>(DisplayDebugTracesQueue).Add([this, Hit, bGroundValid]
+			DisplayDebugTracesQueue.Add([this, Hit, bGroundValid]
 				{
 					UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
 					                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
@@ -1449,9 +1460,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		RotateInPlaceState.bRotatingRight = false;
 
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
-			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
+			                              ? Settings->RotateInPlace.PlayRate.X
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1466,9 +1476,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
 		RotateInPlaceState.PlayRate = bPendingUpdate
-			                              ? UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X)
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate,
-			                                                 UE_REAL_TO_FLOAT(Settings->RotateInPlace.PlayRate.X),
+			                              ? Settings->RotateInPlace.PlayRate.X
+			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
 		RotateInPlaceState.FootLockBlockAmount = 0.0f;
@@ -1479,8 +1488,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 	// speed. This makes the character rotate faster when moving the camera faster.
 
 	const auto PlayRate{
-		FMath::GetMappedRangeValueClamped(FVector2f{Settings->RotateInPlace.ReferenceViewYawSpeed},
-		                                  FVector2f{Settings->RotateInPlace.PlayRate}, ViewState.YawSpeed)
+		FMath::GetMappedRangeValueClamped(Settings->RotateInPlace.ReferenceViewYawSpeed,
+		                                  Settings->RotateInPlace.PlayRate, ViewState.YawSpeed)
 	};
 
 	RotateInPlaceState.PlayRate = bPendingUpdate
@@ -1545,7 +1554,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 
 	const auto ActivationDelay{
 		FMath::GetMappedRangeValueClamped({Settings->TurnInPlace.ViewYawAngleThreshold, 180.0f},
-		                                  FVector2f{Settings->TurnInPlace.ViewYawAngleToActivationDelay},
+		                                  Settings->TurnInPlace.ViewYawAngleToActivationDelay,
 		                                  FMath::Abs(ViewState.YawAngle))
 	};
 

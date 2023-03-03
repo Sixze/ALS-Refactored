@@ -35,7 +35,7 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	float ViewYawSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	FVector2D ViewYawAngleToActivationDelay{0.0f, 0.75f};
+	FVector2f ViewYawAngleToActivationDelay{0.0f, 0.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Turn 180 Angle Threshold",
 		Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))

@@ -3,6 +3,8 @@
 #include "AlsCharacter.h"
 #include "Animation/AnimInstance.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_EarlyBlendOut)
+
 UAlsAnimNotifyState_EarlyBlendOut::UAlsAnimNotifyState_EarlyBlendOut()
 {
 #if WITH_EDITORONLY_DATA
@@ -14,7 +16,7 @@ UAlsAnimNotifyState_EarlyBlendOut::UAlsAnimNotifyState_EarlyBlendOut()
 
 FString UAlsAnimNotifyState_EarlyBlendOut::GetNotifyName_Implementation() const
 {
-	return TEXT("Als Early Blend Out");
+	return FString{TEXTVIEW("Als Early Blend Out")};
 }
 
 void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,

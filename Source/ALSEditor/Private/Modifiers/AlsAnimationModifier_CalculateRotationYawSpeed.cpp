@@ -3,6 +3,8 @@
 #include "Animation/AnimSequence.h"
 #include "Utility/AlsConstants.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationModifier_CalculateRotationYawSpeed)
+
 void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAnimSequence* Sequence)
 {
 	Super::OnApply_Implementation(Sequence);

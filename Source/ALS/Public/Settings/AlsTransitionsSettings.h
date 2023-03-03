@@ -16,7 +16,7 @@ struct ALS_API FAlsTransitionsSettings
 	float QuickStopBlendOutDuration{0.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	FVector2D QuickStopPlayRate{1.75f, 3.0f};
+	FVector2f QuickStopPlayRate{1.75f, 3.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float QuickStopStartTime{0.3f};

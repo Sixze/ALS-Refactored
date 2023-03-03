@@ -2,6 +2,8 @@
 
 #include "Engine/CollisionProfile.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterSettings)
+
 UAlsCharacterSettings::UAlsCharacterSettings()
 {
 	Ragdolling.GroundTraceObjectTypes =

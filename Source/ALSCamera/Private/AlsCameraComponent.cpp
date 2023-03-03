@@ -1,14 +1,14 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
-#include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
 
 UAlsCameraComponent::UAlsCameraComponent()
 {
@@ -64,7 +64,7 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 
 		const auto TimeDilation{PreviousGlobalTimeDilation * GetOwner()->CustomTimeDilation};
 
-		DeltaTime = TimeDilation > SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
+		DeltaTime = TimeDilation > UE_SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
 	}
 
 	PreviousGlobalTimeDilation = GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation();
@@ -103,7 +103,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 
 	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
 
-	if (ViewInfo.PostProcessBlendWeight > SMALL_NUMBER)
+	if (ViewInfo.PostProcessBlendWeight > UE_SMALL_NUMBER)
 	{
 		ViewInfo.PostProcessSettings = Settings->PostProcess;
 	}
@@ -238,7 +238,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - UE_SMALL_NUMBER)
 		{
 			NewCameraRotation = FMath::RInterpTo(NewCameraRotation, CameraInitialRotation + SubstepRotationSpeed * SubstepTime,
 			                                     SubstepTime - PreviousSubstepTime, RotationLag);
@@ -286,7 +286,7 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	for (auto SubstepNumber{1};; SubstepNumber++)
 	{
 		const auto SubstepTime{SubstepNumber * Settings->CameraLagSubstepping.LagSubstepDeltaTime};
-		if (SubstepTime < DeltaTime - SMALL_NUMBER)
+		if (SubstepTime < DeltaTime - UE_SMALL_NUMBER)
 		{
 			const auto SubstepRelativePivotTargetLocation{RelativePivotInitialLagLocation + SubstepMovementSpeed * SubstepTime};
 			const auto SubstepDeltaTime{SubstepTime - PreviousSubstepTime};
@@ -349,12 +349,12 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
 
-	static const FName MainTraceTag{__FUNCTION__ TEXT(" (Main Trace)")};
+	static const FName MainTraceTag{__FUNCTION__ TEXTVIEW(" (Main Trace)")};
 
 	auto TraceStart{
 		FMath::Lerp(
 			GetThirdPersonTraceStartLocation(),
-			PivotTargetLocation + PivotOffset + Settings->ThirdPerson.TraceOverrideOffset,
+			PivotTargetLocation + PivotOffset + FVector{Settings->ThirdPerson.TraceOverrideOffset},
 			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName())))
 	};
 
@@ -375,7 +375,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 		}
 		else if (TryAdjustLocationBlockedByGeometry(TraceStart, bDisplayDebugCameraTraces))
 		{
-			static const FName AdjustedTraceTag{__FUNCTION__ TEXT(" (Adjusted Trace)")};
+			static const FName AdjustedTraceTag{__FUNCTION__ TEXTVIEW(" (Adjusted Trace)")};
 
 			GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, TraceChanel,
 			                                 CollisionShape, {AdjustedTraceTag, false, GetOwner()});
@@ -405,7 +405,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto TraceVector{TraceEnd - TraceStart};
 	const auto TraceDistance{TraceVector.Size()};
 
-	if (TraceDistance <= KINDA_SMALL_NUMBER)
+	if (TraceDistance <= UE_KINDA_SMALL_NUMBER)
 	{
 		NewTraceDistanceRatio = 1.0f;
 		return TraceResult;
@@ -433,7 +433,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.IsEmpty())
 
-	static const FName OverlapMultiTraceTag{__FUNCTION__ TEXT(" (Overlap Multi)")};
+	static const FName OverlapMultiTraceTag{__FUNCTION__ TEXTVIEW(" (Overlap Multi)")};
 
 	if (!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, TraceChanel,
 	                                       CollisionShape, {OverlapMultiTraceTag, false, GetOwner()}))
@@ -496,7 +496,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 
 	Location += Adjustment;
 
-	static const FName FreeSpaceTraceTag{__FUNCTION__ TEXT(" (Free Space Overlap)")};
+	static const FName FreeSpaceTraceTag{__FUNCTION__ TEXTVIEW(" (Free Space Overlap)")};
 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),

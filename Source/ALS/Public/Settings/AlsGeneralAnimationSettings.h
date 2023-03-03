@@ -2,8 +2,6 @@
 
 #include "AlsGeneralAnimationSettings.generated.h"
 
-class UCurveFloat;
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsGeneralAnimationSettings
 {

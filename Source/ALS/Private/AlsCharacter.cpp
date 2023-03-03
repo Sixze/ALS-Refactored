@@ -7,17 +7,17 @@
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
 #include "Net/UnrealNetwork.h"
-#include "Net/Core/PushModel/PushModel.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
-#include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacter)
 
 namespace AlsCharacterConstants
 {
-	static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
+	inline static constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
@@ -46,9 +46,9 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	// Component details can still be accessed from the actor's component hierarchy.
 
 #if WITH_EDITOR
-	StaticClass()->FindPropertyByName(TEXT("Mesh"))->SetPropertyFlags(CPF_DisableEditOnInstance);
-	StaticClass()->FindPropertyByName(TEXT("CapsuleComponent"))->SetPropertyFlags(CPF_DisableEditOnInstance);
-	StaticClass()->FindPropertyByName(TEXT("CharacterMovement"))->SetPropertyFlags(CPF_DisableEditOnInstance);
+	StaticClass()->FindPropertyByName(FName{TEXTVIEW("Mesh")})->SetPropertyFlags(CPF_DisableEditOnInstance);
+	StaticClass()->FindPropertyByName(FName{TEXTVIEW("CapsuleComponent")})->SetPropertyFlags(CPF_DisableEditOnInstance);
+	StaticClass()->FindPropertyByName(FName{TEXTVIEW("CharacterMovement")})->SetPropertyFlags(CPF_DisableEditOnInstance);
 #endif
 }
 
@@ -379,7 +379,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 			StartRolling(PlayRate, LocomotionState.bHasSpeed
 				                       ? LocomotionState.VelocityYawAngle
-				                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
+				                       : UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(GetActorRotation().Yaw)));
 		}
 		else
 		{
@@ -949,7 +949,7 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 	if (!NetworkSmoothing.bEnabled ||
 	    NetworkSmoothing.ClientTime >= NetworkSmoothing.ServerTime ||
-	    NetworkSmoothing.Duration <= SMALL_NUMBER)
+	    NetworkSmoothing.Duration <= UE_SMALL_NUMBER)
 	{
 		NetworkSmoothing.InitialRotation = RawViewRotation;
 		NetworkSmoothing.Rotation = RawViewRotation;
@@ -977,12 +977,7 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
 	NewInputDirection = NewInputDirection.GetSafeNormal();
 
-	if (InputDirection != NewInputDirection)
-	{
-		InputDirection = NewInputDirection;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InputDirection, this)
-	}
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
 }
 
 void AAlsCharacter::RefreshLocomotionLocationAndRotation(const float DeltaTime)
@@ -1033,7 +1028,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 	// If the character has the input, update the input yaw angle.
 
-	LocomotionState.bHasInput = InputDirection.SizeSquared() > KINDA_SMALL_NUMBER;
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > UE_KINDA_SMALL_NUMBER;
 
 	if (LocomotionState.bHasInput)
 	{
@@ -1278,7 +1273,7 @@ float AAlsCharacter::CalculateRotationInterpolationSpeed() const
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 {
 	const auto DeltaYawAngle{GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawSpeedCurveName()) * DeltaTime};
-	if (FMath::Abs(DeltaYawAngle) > SMALL_NUMBER)
+	if (FMath::Abs(DeltaYawAngle) > UE_SMALL_NUMBER)
 	{
 		auto NewRotation{GetActorRotation()};
 		NewRotation.Yaw += DeltaYawAngle;
@@ -1358,7 +1353,7 @@ void AAlsCharacter::RefreshRotation(const float TargetYawAngle, const float Delt
 	RefreshTargetYawAngle(TargetYawAngle);
 
 	auto NewRotation{GetActorRotation()};
-	NewRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewRotation.Yaw)),
+	NewRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(NewRotation.Yaw)),
 	                                                  TargetYawAngle, DeltaTime, RotationInterpolationSpeed);
 
 	SetActorRotation(NewRotation);
@@ -1379,7 +1374,7 @@ void AAlsCharacter::RefreshRotationExtraSmooth(const float TargetYawAngle, const
 	                                                                          DeltaTime, TargetYawAngleRotationSpeed);
 
 	auto NewRotation{GetActorRotation()};
-	NewRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewRotation.Yaw)),
+	NewRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(NewRotation.Yaw)),
 	                                                  LocomotionState.SmoothTargetYawAngle, DeltaTime, RotationInterpolationSpeed);
 
 	SetActorRotation(NewRotation);

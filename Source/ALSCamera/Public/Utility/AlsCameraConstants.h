@@ -61,90 +61,90 @@ public:
 
 inline const FName& UAlsCameraConstants::CameraOffsetXCurveName()
 {
-	static const FName Name{TEXT("CameraOffsetX")};
+	static const FName Name{TEXTVIEW("CameraOffsetX")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::CameraOffsetYCurveName()
 {
-	static const FName Name{TEXT("CameraOffsetY")};
+	static const FName Name{TEXTVIEW("CameraOffsetY")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::CameraOffsetZCurveName()
 {
-	static const FName Name{TEXT("CameraOffsetZ")};
+	static const FName Name{TEXTVIEW("CameraOffsetZ")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::PivotOffsetXCurveName()
 {
-	static const FName Name{TEXT("PivotOffsetX")};
+	static const FName Name{TEXTVIEW("PivotOffsetX")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::PivotOffsetYCurveName()
 {
-	static const FName Name{TEXT("PivotOffsetY")};
+	static const FName Name{TEXTVIEW("PivotOffsetY")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::PivotOffsetZCurveName()
 {
-	static const FName Name{TEXT("PivotOffsetZ")};
+	static const FName Name{TEXTVIEW("PivotOffsetZ")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::LocationLagXCurveName()
 {
-	static const FName Name{TEXT("LocationLagX")};
+	static const FName Name{TEXTVIEW("LocationLagX")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::LocationLagYCurveName()
 {
-	static const FName Name{TEXT("LocationLagY")};
+	static const FName Name{TEXTVIEW("LocationLagY")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::LocationLagZCurveName()
 {
-	static const FName Name{TEXT("LocationLagZ")};
+	static const FName Name{TEXTVIEW("LocationLagZ")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::RotationLagCurveName()
 {
-	static const FName Name{TEXT("RotationLag")};
+	static const FName Name{TEXTVIEW("RotationLag")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::FirstPersonOverrideCurveName()
 {
-	static const FName Name{TEXT("FirstPersonOverride")};
+	static const FName Name{TEXTVIEW("FirstPersonOverride")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::TraceOverrideCurveName()
 {
-	static const FName Name{TEXT("TraceOverride")};
+	static const FName Name{TEXTVIEW("TraceOverride")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::CameraCurvesDisplayName()
 {
-	static const FName Name{TEXT("ALS.CameraCurves")};
+	static const FName Name{TEXTVIEW("ALS.CameraCurves")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::CameraShapesDisplayName()
 {
-	static const FName Name{TEXT("ALS.CameraShapes")};
+	static const FName Name{TEXTVIEW("ALS.CameraShapes")};
 	return Name;
 }
 
 inline const FName& UAlsCameraConstants::CameraTracesDisplayName()
 {
-	static const FName Name{TEXT("ALS.CameraTraces")};
+	static const FName Name{TEXTVIEW("ALS.CameraTraces")};
 	return Name;
 }

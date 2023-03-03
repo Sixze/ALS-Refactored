@@ -1,6 +1,5 @@
 #include "Utility/AlsUtility.h"
 
-#include "DrawDebugHelpers.h"
 #include "GameplayTagsManager.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
@@ -8,6 +7,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMacros.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsUtility)
 
 FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bNameIsBool)
 {
@@ -40,7 +41,7 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
 	const auto* PlayerState{IsValid(PlayerController) ? PlayerController->PlayerState.Get() : nullptr};
 
-	return IsValid(PlayerState) ? PlayerState->ExactPing * 0.001f : 0.0f;
+	return IsValid(PlayerState) ? PlayerState->GetPingInMilliseconds() * 0.001f : 0.0f;
 }
 
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
@@ -70,7 +71,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Loc
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
-		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
@@ -102,7 +103,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
-		static constexpr auto DeltaAngle{TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);

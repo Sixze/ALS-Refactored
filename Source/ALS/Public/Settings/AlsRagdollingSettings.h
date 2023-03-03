@@ -1,7 +1,9 @@
 ﻿#pragma once
 
-#include "Animation/AnimMontage.h"
 #include "AlsRagdollingSettings.generated.h"
+
+enum EObjectTypeQuery;
+class UAnimMontage;
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsRagdollingSettings

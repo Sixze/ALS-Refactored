@@ -9,7 +9,7 @@ struct ALS_API FAlsRigUnit_MathBase : public FRigUnit
 	GENERATED_BODY()
 };
 
-USTRUCT(Meta = (Abstract, NodeColor = "0 0.35 1.0"))
+USTRUCT(Meta = (Abstract, NodeColor = "0.46 1.0 0.33"))
 struct ALS_API FAlsRigUnit_HighLevelBase : public FRigUnitMutable
 {
 	GENERATED_BODY()
@@ -40,32 +40,25 @@ public:
 	UPROPERTY(Meta = (Input))
 	bool bInitial{false};
 
-	// UPROPERTY(Transient, Meta = (Output))
-	UPROPERTY(Meta = (Output))
+	UPROPERTY(Transient, Meta = (Output))
 	bool bSuccess{false};
 
-	// UPROPERTY(Transient, Meta = (Output))
-	UPROPERTY(Meta = (Output))
+	UPROPERTY(Transient, Meta = (Output))
 	FVector StartLocation{ForceInit};
 
-	// UPROPERTY(Transient, Meta = (Output))
-	UPROPERTY(Meta = (Output))
+	UPROPERTY(Transient, Meta = (Output))
 	FVector EndLocation{ForceInit};
 
-	// UPROPERTY(Transient, Meta = (Output))
-	UPROPERTY(Meta = (Output))
+	UPROPERTY(Transient, Meta = (Output))
 	FVector Direction{FVector::ForwardVector};
 
-	// UPROPERTY(Transient)
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedItemA;
 
-	// UPROPERTY(Transient)
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedItemB;
 
-	// UPROPERTY(Transient)
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedItemC;
 
 public:
@@ -85,8 +78,7 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = 0))
 	float Lambda{1.0f};
 
-	// UPROPERTY(Transient, Meta = (Output))
-	UPROPERTY(Meta = (Output))
+	UPROPERTY(Transient, Meta = (Output))
 	FVector Current{ForceInit};
 
 public:
@@ -125,19 +117,19 @@ public:
 	UPROPERTY(Meta = (Input, Constant))
 	bool bPropagateToChildren{false};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedLeftHandBone;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedLeftHandIkBone;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedRightHandBone;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FCachedRigElement CachedRightHandIkBone;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<FCachedRigElement> CachedBonesToMove;
 
 public:
