@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	bool bDisplayDebugTraces;
 
-	TArray<TFunction<void()>> DisplayDebugTracesQueue;
+	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};

@@ -33,40 +33,10 @@ private:
 	bool bRight{false};
 
 public:
-	FAlsMovementDirectionCache() = default;
+	constexpr FAlsMovementDirectionCache() = default;
 
 	// ReSharper disable once CppNonExplicitConvertingConstructor
-	FAlsMovementDirectionCache(const EAlsMovementDirection InitialMovementDirection)
-	{
-		*this = InitialMovementDirection;
-	}
-
-	bool IsForward() const
-	{
-		return bForward;
-	}
-
-	bool IsBackward() const
-	{
-		return bBackward;
-	}
-
-	bool IsLeft() const
-	{
-		return bLeft;
-	}
-
-	bool IsRight() const
-	{
-		return bRight;
-	}
-
-	operator EAlsMovementDirection() const
-	{
-		return MovementDirection;
-	}
-
-	void operator=(const EAlsMovementDirection NewMovementDirection)
+	constexpr FAlsMovementDirectionCache(const EAlsMovementDirection NewMovementDirection)
 	{
 		MovementDirection = NewMovementDirection;
 
@@ -74,5 +44,31 @@ public:
 		bBackward = MovementDirection == EAlsMovementDirection::Backward;
 		bLeft = MovementDirection == EAlsMovementDirection::Left;
 		bRight = MovementDirection == EAlsMovementDirection::Right;
+	}
+
+	constexpr bool IsForward() const
+	{
+		return bForward;
+	}
+
+	constexpr bool IsBackward() const
+	{
+		return bBackward;
+	}
+
+	constexpr bool IsLeft() const
+	{
+		return bLeft;
+	}
+
+	constexpr bool IsRight() const
+	{
+		return bRight;
+	}
+
+	// ReSharper disable once CppNonExplicitConversionOperator
+	constexpr operator EAlsMovementDirection() const
+	{
+		return MovementDirection;
 	}
 };
