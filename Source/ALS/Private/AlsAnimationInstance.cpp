@@ -66,6 +66,11 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
+	// AAlsCharacter::FinalizeRagdolling() should only be called from here, not from AAlsCharacter::StopRagdollingImplementation(),
+	// otherwise the character mesh can sometimes take a strange pose when transitioning from ragdoll states to animation states.
+
+	Character->FinalizeRagdolling();
+
 	if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
 	{
 		const auto& ActorTransform{Character->GetActorTransform()};
@@ -1677,13 +1682,6 @@ void UAlsAnimationInstance::StopRagdolling()
 	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
 	SnapshotPose(RagdollingState.FinalRagdollPose);
-}
-
-void UAlsAnimationInstance::FinalizeRagdolling() const
-{
-	check(IsInGameThread())
-
-	Character->FinalizeRagdolling();
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

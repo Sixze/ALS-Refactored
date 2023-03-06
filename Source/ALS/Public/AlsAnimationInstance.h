@@ -290,10 +290,6 @@ private:
 public:
 	void StopRagdolling();
 
-public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
-	void FinalizeRagdolling() const;
-
 	// Utility
 
 public:

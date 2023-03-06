@@ -825,35 +825,6 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	RagdollingState.bPendingFinalization = true;
 
-	SetLocomotionAction(FGameplayTag::EmptyTag);
-
-	OnRagdollingEnded();
-
-	if (RagdollingState.bGrounded &&
-	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
-	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
-	{
-		SetLocomotionAction(AlsLocomotionActionTags::GettingUp);
-	}
-}
-
-void AAlsCharacter::FinalizeRagdolling()
-{
-	if (!ALS_ENSURE(RagdollingState.bPendingFinalization))
-	{
-		return;
-	}
-
-	RagdollingState.bPendingFinalization = false;
-
-	// Disable physics simulation of a mesh and enable capsule collision.
-
-	GetMesh()->SetAllBodiesSimulatePhysics(false);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetMesh()->SetCollisionObjectType(ECC_Pawn);
-
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
 	// If the ragdoll is on the ground, set the movement mode to walking and play a get-up montage. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
 
@@ -879,6 +850,35 @@ void AAlsCharacter::FinalizeRagdolling()
 		GetMesh()->bOnlyAllowAutonomousTickPose = GetRemoteRole() == ROLE_AutonomousProxy &&
 		                                          IsValid(GetNetConnection()) && IsPawnControlled();
 	}
+
+	SetLocomotionAction(FGameplayTag::EmptyTag);
+
+	OnRagdollingEnded();
+
+	if (RagdollingState.bGrounded &&
+	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
+	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	{
+		SetLocomotionAction(AlsLocomotionActionTags::GettingUp);
+	}
+}
+
+void AAlsCharacter::FinalizeRagdolling()
+{
+	if (!RagdollingState.bPendingFinalization)
+	{
+		return;
+	}
+
+	RagdollingState.bPendingFinalization = false;
+
+	// Disable physics simulation of a mesh and enable capsule collision.
+
+	GetMesh()->SetAllBodiesSimulatePhysics(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdollFacedUpward)
