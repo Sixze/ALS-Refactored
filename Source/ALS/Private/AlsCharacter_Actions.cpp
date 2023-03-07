@@ -596,6 +596,8 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	if (!IsNetMode(NM_Client))
 	{
+		// This is necessary to keep the animation instance ticking on the server during ragdolling.
+
 		GetMesh()->bOnlyAllowAutonomousTickPose = false;
 	}
 
@@ -847,6 +849,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	if (!IsNetMode(NM_Client))
 	{
+		// Restore bOnlyAllowAutonomousTickPose in the same way as in ACharacter::PossessedBy().
+
 		GetMesh()->bOnlyAllowAutonomousTickPose = GetRemoteRole() == ROLE_AutonomousProxy &&
 		                                          IsValid(GetNetConnection()) && IsPawnControlled();
 	}
