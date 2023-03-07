@@ -398,7 +398,7 @@ protected:
 
 	void RefreshTargetYawAngle(float TargetYawAngle);
 
-	void RefreshViewRelativeTargetYawAngle();
+	void RefreshRelativeTargetYawAngles();
 
 	// Rotation Lock
 
