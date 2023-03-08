@@ -204,7 +204,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 				const auto ParticleSystemRotation{
 					FootstepRotation * (FootBone == EAlsFootBone::Left
 						                    ? EffectSettings->ParticleSystemFootLeftRotationOffset
-						                    : EffectSettings->ParticleSystemFootLeftRotationOffset).Quaternion()
+						                    : EffectSettings->ParticleSystemFootRightRotationOffset).Quaternion()
 				};
 
 				const auto ParticleSystemLocation{
@@ -221,7 +221,9 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 			case EAlsFootstepParticleEffectSpawnMode::SpawnAttachedToFootBone:
 				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), Mesh, FootBoneName,
 				                                             FVector{EffectSettings->ParticleSystemLocationOffset} * MeshScale,
-				                                             EffectSettings->ParticleSystemFootLeftRotationOffset,
+				                                             FootBone == EAlsFootBone::Left
+					                                             ? EffectSettings->ParticleSystemFootLeftRotationOffset
+					                                             : EffectSettings->ParticleSystemFootRightRotationOffset,
 				                                             FVector::OneVector * MeshScale, EAttachLocation::KeepRelativeOffset,
 				                                             true, ENCPoolMethod::AutoRelease);
 				break;
