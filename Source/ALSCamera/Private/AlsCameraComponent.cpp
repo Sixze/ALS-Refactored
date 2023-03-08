@@ -126,6 +126,39 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	const auto bDisplayDebugCameraShapes{false};
 #endif
 
+	// Refresh movement base.
+
+	const auto& BasedMovement{Character->GetBasedMovement()};
+	const auto bMovementBaseHasRelativeRotation{BasedMovement.HasRelativeRotation()};
+
+	auto MovementBaseLocation{FVector::ZeroVector};
+	auto MovementBaseRotation{FQuat::Identity};
+
+	if (bMovementBaseHasRelativeRotation)
+	{
+		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
+		                                              MovementBaseLocation, MovementBaseRotation);
+	}
+
+	if (BasedMovement.MovementBase != MovementBasePrimitive || BasedMovement.BoneName != MovementBaseBoneName)
+	{
+		MovementBasePrimitive = BasedMovement.MovementBase;
+		MovementBaseBoneName = BasedMovement.BoneName;
+
+		if (bMovementBaseHasRelativeRotation)
+		{
+			const auto MovementBaseRotationInverse{MovementBaseRotation.Inverse()};
+
+			PivotMovementBaseRelativeLagLocation = MovementBaseRotationInverse.RotateVector(PivotLagLocation - MovementBaseLocation);
+			CameraMovementBaseRelativeRotation = MovementBaseRotationInverse * CameraRotation.Quaternion();
+		}
+		else
+		{
+			PivotMovementBaseRelativeLagLocation = FVector::ZeroVector;
+			CameraMovementBaseRelativeRotation = FQuat::Identity;
+		}
+	}
+
 	const auto CameraTargetRotation{Character->GetViewRotation()};
 
 	const auto PreviousPivotTargetLocation{PivotTargetLocation};
@@ -157,7 +190,18 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	// Calculate camera rotation.
 
-	CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
+	if (bMovementBaseHasRelativeRotation)
+	{
+		CameraRotation = (MovementBaseRotation * CameraMovementBaseRelativeRotation).Rotator();
+
+		CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
+
+		CameraMovementBaseRelativeRotation = MovementBaseRotation.Inverse() * CameraRotation.Quaternion();
+	}
+	else
+	{
+		CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
+	}
 
 	const FRotator CameraYawRotation{0.0f, CameraRotation.Yaw, 0.0f};
 
@@ -170,7 +214,18 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	// Calculate pivot lag location. Get the pivot target location and interpolate using axis-independent lag for maximum control.
 
-	PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
+	if (bMovementBaseHasRelativeRotation)
+	{
+		PivotLagLocation = MovementBaseLocation + MovementBaseRotation.RotateVector(PivotMovementBaseRelativeLagLocation);
+
+		PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
+
+		PivotMovementBaseRelativeLagLocation = MovementBaseRotation.UnrotateVector(PivotLagLocation - MovementBaseLocation);
+	}
+	else
+	{
+		PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
+	}
 
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraShapes)
