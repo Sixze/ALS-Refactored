@@ -35,8 +35,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	bool bPendingUpdate{true};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bTeleported;
+	// Time of the last teleportation event.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0))
+	float TeleportedTime;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -125,6 +126,8 @@ protected:
 
 public:
 	void MarkPendingUpdate();
+
+	void MarkTeleported();
 
 private:
 	void RefreshLayering();
@@ -304,6 +307,11 @@ inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe()
 inline void UAlsAnimationInstance::MarkPendingUpdate()
 {
 	bPendingUpdate |= true;
+}
+
+inline void UAlsAnimationInstance::MarkTeleported()
+{
+	TeleportedTime = GetWorld()->GetTimeSeconds();
 }
 
 inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode)

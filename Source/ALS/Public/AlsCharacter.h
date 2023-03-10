@@ -49,9 +49,6 @@ protected:
 		ReplicatedUsing = "OnReplicated_OverlayMode")
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	bool bSimulatedProxyTeleported;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ShowInnerProperties))
 	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
@@ -127,9 +124,6 @@ public:
 
 private:
 	void RefreshVisibilityBasedAnimTickOption() const;
-
-public:
-	bool IsSimulatedProxyTeleported() const;
 
 	// View Mode
 
@@ -555,11 +549,6 @@ private:
 
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
-
-inline bool AAlsCharacter::IsSimulatedProxyTeleported() const
-{
-	return bSimulatedProxyTeleported;
-}
 
 inline const FGameplayTag& AAlsCharacter::GetViewMode() const
 {

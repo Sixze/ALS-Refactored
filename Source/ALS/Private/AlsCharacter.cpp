@@ -115,8 +115,6 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 void AAlsCharacter::PostInitializeComponents()
 {
-	RefreshVisibilityBasedAnimTickOption();
-
 	// Make sure the mesh and animation blueprint update after the character to guarantee it gets the most recent values.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
@@ -148,6 +146,23 @@ void AAlsCharacter::BeginPlay()
 
 	Super::BeginPlay();
 
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		// Teleportation of simulated proxies is detected differently, see
+		// AAlsCharacter::PostNetReceiveLocationAndRotation() and AAlsCharacter::OnRep_ReplicatedBasedMovement().
+
+		GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
+			this, [this](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
+			{
+				if (TeleportType != ETeleportType::None && AnimationInstance.IsValid())
+				{
+					AnimationInstance->MarkTeleported();
+				}
+			});
+	}
+
+	RefreshVisibilityBasedAnimTickOption();
+
 	// Ignore root motion on simulated proxies, because in some situations it causes
 	// issues with network smoothing, such as when the character uncrouches while rolling.
 
@@ -178,45 +193,75 @@ void AAlsCharacter::BeginPlay()
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
-	bSimulatedProxyTeleported = false;
+	// AActor::PostNetReceiveLocationAndRotation() function is only called on simulated proxies, so there is no need to check roles here.
 
-	if (GetLocalRole() <= ROLE_SimulatedProxy)
-	{
-		// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
+	const auto PreviousLocation{GetActorLocation()};
 
-		GetReplicatedMovement_Mutable().Rotation = GetActorRotation();
+	// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
 
-		if (!ReplicatedBasedMovement.HasRelativeLocation())
-		{
-			const auto PreviousLocation{GetActorLocation()};
-			const auto NewLocation{FRepMovement::RebaseOntoLocalOrigin(GetReplicatedMovement().Location, this)};
-
-			bSimulatedProxyTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) >
-				AlsCharacterConstants::TeleportDistanceThresholdSquared;
-		}
-	}
+	GetReplicatedMovement_Mutable().Rotation = GetActorRotation();
 
 	Super::PostNetReceiveLocationAndRotation();
 
-	bSimulatedProxyTeleported |= bSimGravityDisabled;
+	// Detect teleportation of simulated proxies.
+
+	auto bTeleported{static_cast<bool>(bSimGravityDisabled)};
+
+	if (!bTeleported && !ReplicatedBasedMovement.HasRelativeLocation())
+	{
+		const auto NewLocation{FRepMovement::RebaseOntoLocalOrigin(GetReplicatedMovement().Location, this)};
+
+		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > AlsCharacterConstants::TeleportDistanceThresholdSquared;
+	}
+
+	if (bTeleported && AnimationInstance.IsValid())
+	{
+		AnimationInstance->MarkTeleported();
+	}
 }
 
 void AAlsCharacter::OnRep_ReplicatedBasedMovement()
 {
-	bSimulatedProxyTeleported = false;
+	// ACharacter::OnRep_ReplicatedBasedMovement() is only called on simulated proxies, so there is no need to check roles here.
 
-	if (GetLocalRole() <= ROLE_SimulatedProxy && ReplicatedBasedMovement.HasRelativeLocation())
+	const auto PreviousLocation{GetActorLocation()};
+
+	// Ignore server-replicated rotation on simulated proxies because ALS itself has full control over character rotation.
+
+	if (ReplicatedBasedMovement.HasRelativeRotation())
 	{
-		const auto PreviousLocation{GetActorLocation()};
-		const auto NewLocation{GetCharacterMovement()->OldBaseLocation + ReplicatedBasedMovement.Location};
+		FVector MovementBaseLocation;
+		FQuat MovementBaseRotation;
 
-		bSimulatedProxyTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) >
-			AlsCharacterConstants::TeleportDistanceThresholdSquared;
+		MovementBaseUtility::GetMovementBaseTransform(ReplicatedBasedMovement.MovementBase, ReplicatedBasedMovement.BoneName,
+		                                              MovementBaseLocation, MovementBaseRotation);
+
+		ReplicatedBasedMovement.Rotation = (MovementBaseRotation.Inverse() * GetActorQuat()).Rotator();
+	}
+	else
+	{
+		ReplicatedBasedMovement.Rotation = GetActorRotation();
 	}
 
 	Super::OnRep_ReplicatedBasedMovement();
 
-	bSimulatedProxyTeleported |= bSimGravityDisabled;
+	// Detect teleportation of simulated proxies.
+
+	auto bTeleported{static_cast<bool>(bSimGravityDisabled)};
+
+	if (!bTeleported && BasedMovement.HasRelativeLocation())
+	{
+		const auto NewLocation{
+			GetCharacterMovement()->OldBaseLocation + GetCharacterMovement()->OldBaseQuat.RotateVector(BasedMovement.Location)
+		};
+
+		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > AlsCharacterConstants::TeleportDistanceThresholdSquared;
+	}
+
+	if (bTeleported && AnimationInstance.IsValid())
+	{
+		AnimationInstance->MarkTeleported();
+	}
 }
 
 void AAlsCharacter::Tick(const float DeltaTime)
