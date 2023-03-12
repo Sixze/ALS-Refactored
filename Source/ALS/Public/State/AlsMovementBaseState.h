@@ -20,8 +20,14 @@ struct ALS_API FAlsMovementBaseState
 	bool bHasRelativeLocation{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bHasRelativeRotation{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector Location{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat Rotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FRotator DeltaRotation{ForceInit};
 };

@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "State/AlsLocomotionState.h"
+#include "State/AlsMovementBaseState.h"
 #include "State/AlsRagdollingState.h"
 #include "State/AlsRollingState.h"
 #include "State/AlsViewState.h"
@@ -67,6 +68,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionAction;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FAlsMovementBaseState MovementBase;
+
 	// Replicated raw view rotation. In most cases, it's better to use FAlsViewState::Rotation to take advantage of network smoothing.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
 		ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
@@ -124,6 +128,8 @@ public:
 
 private:
 	void RefreshVisibilityBasedAnimTickOption() const;
+
+	void RefreshMovementBase();
 
 	// View Mode
 
@@ -333,9 +339,13 @@ public:
 private:
 	void SetInputDirection(FVector NewInputDirection);
 
-	void RefreshLocomotionLocationAndRotation(float DeltaTime);
+	void RefreshLocomotionLocationAndRotation();
+
+	void RefreshLocomotionEarly();
 
 	void RefreshLocomotion(float DeltaTime);
+
+	void RefreshLocomotionLate(float DeltaTime);
 
 	// Jumping
 
@@ -353,7 +363,7 @@ private:
 	// Rotation
 
 public:
-	virtual void FaceRotation(FRotator NewRotation, float DeltaTime) override final;
+	virtual void FaceRotation(FRotator Rotation, float DeltaTime) override final;
 
 	void CharacterMovement_OnPhysicsRotation(float DeltaTime);
 
@@ -392,7 +402,7 @@ protected:
 
 	void RefreshTargetYawAngle(float TargetYawAngle);
 
-	void RefreshRelativeTargetYawAngles();
+	void RefreshViewRelativeTargetYawAngle();
 
 	// Rotation Lock
 

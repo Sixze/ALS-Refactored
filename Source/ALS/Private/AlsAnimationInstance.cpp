@@ -176,9 +176,16 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 	}
 
 	MovementBase.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
+	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation && BasedMovement.bRelativeRotation;
+
+	const auto PreviousRotation{MovementBase.Rotation};
 
 	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
 	                                              MovementBase.Location, MovementBase.Rotation);
+
+	MovementBase.DeltaRotation = MovementBase.bHasRelativeLocation && !MovementBase.bBaseChanged
+		                             ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator()
+		                             : FRotator::ZeroRotator;
 }
 
 void UAlsAnimationInstance::RefreshLayering()
@@ -337,6 +344,13 @@ void UAlsAnimationInstance::RefreshLookTowardsInput()
 		return;
 	}
 
+	if (MovementBase.bHasRelativeRotation)
+	{
+		// Offset the angle to keep it relative to the movement base.
+
+		LookTowardsInput.WorldYawAngle = FRotator3f::NormalizeAxis(LookTowardsInput.WorldYawAngle + MovementBase.DeltaRotation.Yaw);
+	}
+
 	// Block look towards the input direction when the character is in the air to prevent head rotation "snap" when changing look sides.
 
 	const auto TargetYawAngle{
@@ -401,6 +415,13 @@ void UAlsAnimationInstance::RefreshLookTowardsCamera()
 		LookTowardsCamera.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsCamera.YawAngle);
 		LookTowardsCamera.bReinitializationRequired = false;
 		return;
+	}
+
+	if (MovementBase.bHasRelativeRotation)
+	{
+		// Offset the angle to keep it relative to the movement base.
+
+		LookTowardsCamera.WorldYawAngle = FRotator3f::NormalizeAxis(LookTowardsCamera.WorldYawAngle + MovementBase.DeltaRotation.Yaw);
 	}
 
 	const auto TargetYawAngle{ViewState.YawAngle};

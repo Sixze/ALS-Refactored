@@ -156,7 +156,6 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) const
 {
 	return Super::CanEditChange(Property) &&
-	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bIgnoreBaseRotation) &&
 	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) &&
 	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) &&
 	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement);
@@ -165,8 +164,6 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 
 void UAlsCharacterMovementComponent::BeginPlay()
 {
-	ALS_ENSURE_MESSAGE(bIgnoreBaseRotation, TEXT("Non-ignored base rotation is not supported."));
-
 	ALS_ENSURE_MESSAGE(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
 	                   TEXT("These settings are not allowed and must be turned off!"));
 
@@ -189,6 +186,32 @@ void UAlsCharacterMovementComponent::OnMovementModeChanged(const EMovementMode P
 	// character automatically uncrouches at the end of the roll in the air.
 
 	bCrouchMaintainsBaseLocation = true;
+}
+
+void UAlsCharacterMovementComponent::UpdateBasedRotation(FRotator& FinalRotation, const FRotator& ReducedRotation)
+{
+	// Ignore the parent implementation of this function and provide our own, because the parent
+	// implementation has no effect when we ignore rotation changes in AAlsCharacter::FaceRotation().
+
+	const auto& BasedMovement{CharacterOwner->GetBasedMovement()};
+
+	FVector MovementBaseLocation;
+	FQuat MovementBaseRotation;
+
+	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
+	                                              MovementBaseLocation, MovementBaseRotation);
+
+	if (!OldBaseQuat.Equals(MovementBaseRotation, UE_SMALL_NUMBER))
+	{
+		const auto DeltaRotation{(MovementBaseRotation * OldBaseQuat.Inverse()).Rotator()};
+		auto NewControlRotation{CharacterOwner->Controller->GetControlRotation()};
+
+		NewControlRotation.Pitch += DeltaRotation.Pitch;
+		NewControlRotation.Yaw += DeltaRotation.Yaw;
+		NewControlRotation.Normalize();
+
+		CharacterOwner->Controller->SetControlRotation(NewControlRotation);
+	}
 }
 
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
