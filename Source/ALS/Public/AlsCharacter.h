@@ -67,10 +67,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionAction;
 
-	// Raw replicated view rotation. For smooth rotation use FAlsViewState::Rotation.
+	// Replicated raw view rotation. In most cases, it's better to use FAlsViewState::Rotation to take advantage of network smoothing.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicated_RawViewRotation")
-	FRotator RawViewRotation;
+		ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
+	FRotator ReplicatedViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsViewState ViewState;
@@ -304,13 +304,13 @@ public:
 	virtual FRotator GetViewRotation() const override;
 
 private:
-	void SetRawViewRotation(const FRotator& NewViewRotation);
+	void SetReplicatedViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRawViewRotation(const FRotator& NewViewRotation);
+	void ServerSetReplicatedViewRotation(const FRotator& NewViewRotation);
 
 	UFUNCTION()
-	void OnReplicated_RawViewRotation();
+	void OnReplicated_ReplicatedViewRotation();
 
 public:
 	void CorrectViewNetworkSmoothing(const FRotator& NewViewRotation);
