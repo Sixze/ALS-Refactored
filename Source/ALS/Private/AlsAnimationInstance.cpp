@@ -93,8 +93,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		ResetGroundedEntryMode();
 	}
 
+	RefreshMovementBaseOnGameThread();
 	RefreshViewOnGameThread();
-
 	RefreshLocomotionOnGameThread();
 	RefreshGroundedOnGameThread();
 	RefreshInAirOnGameThread();
@@ -120,7 +120,6 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 	RefreshPose();
 
 	RefreshView(DeltaTime);
-
 	RefreshGrounded(DeltaTime);
 	RefreshInAir(DeltaTime);
 
@@ -159,6 +158,27 @@ void UAlsAnimationInstance::NativePostEvaluateAnimation()
 #endif
 
 	bPendingUpdate = false;
+}
+
+void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
+{
+	const auto& BasedMovement{Character->GetBasedMovement()};
+
+	if (BasedMovement.MovementBase != MovementBase.Primitive || BasedMovement.BoneName != MovementBase.BoneName)
+	{
+		MovementBase.Primitive = BasedMovement.MovementBase;
+		MovementBase.BoneName = BasedMovement.BoneName;
+		MovementBase.bBaseChanged = true;
+	}
+	else
+	{
+		MovementBase.bBaseChanged = false;
+	}
+
+	MovementBase.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
+
+	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
+	                                              MovementBase.Location, MovementBase.Rotation);
 }
 
 void UAlsAnimationInstance::RefreshLayering()
@@ -466,25 +486,6 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.CapsuleRadius = Capsule->GetScaledCapsuleRadius();
 	LocomotionState.CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
-
-	const auto& BasedMovement{Character->GetBasedMovement()};
-
-	if (BasedMovement.MovementBase != LocomotionState.BasedMovement.Primitive ||
-	    BasedMovement.BoneName != LocomotionState.BasedMovement.BoneName)
-	{
-		LocomotionState.BasedMovement.Primitive = BasedMovement.MovementBase;
-		LocomotionState.BasedMovement.BoneName = BasedMovement.BoneName;
-		LocomotionState.BasedMovement.bBaseChanged = true;
-	}
-	else
-	{
-		LocomotionState.BasedMovement.bBaseChanged = false;
-	}
-
-	LocomotionState.BasedMovement.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
-
-	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
-	                                              LocomotionState.BasedMovement.Location, LocomotionState.BasedMovement.Rotation);
 }
 
 void UAlsAnimationInstance::RefreshGroundedOnGameThread()
@@ -970,13 +971,11 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) co
 	FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockComponentRelativeLocation);
 	FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockComponentRelativeRotation);
 
-	if (LocomotionState.BasedMovement.bHasRelativeLocation)
+	if (MovementBase.bHasRelativeLocation)
 	{
-		const auto BaseRotationInverse{LocomotionState.BasedMovement.Rotation.Inverse()};
+		const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse
-			.RotateVector(FootState.LockLocation - LocomotionState.BasedMovement.Location);
-
+		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
 		FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
 	}
 }
@@ -984,8 +983,7 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) co
 void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const
 {
 	// ReSharper disable once CppRedundantParentheses
-	if ((!bPendingUpdate && !LocomotionState.BasedMovement.bBaseChanged) ||
-	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
+	if ((!bPendingUpdate && !MovementBase.bBaseChanged) || !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;
 	}
@@ -999,13 +997,11 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 	FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
 	FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
 
-	if (LocomotionState.BasedMovement.bHasRelativeLocation)
+	if (MovementBase.bHasRelativeLocation)
 	{
-		const auto BaseRotationInverse{LocomotionState.BasedMovement.Rotation.Inverse()};
+		const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-		FootState.LockMovementBaseRelativeLocation =
-			BaseRotationInverse.RotateVector(FootState.LockLocation - LocomotionState.BasedMovement.Location);
-
+		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
 		FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
 	}
 	else
@@ -1080,13 +1076,11 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 				FootState.LockRotation = FinalRotation;
 			}
 
-			if (LocomotionState.BasedMovement.bHasRelativeLocation)
+			if (MovementBase.bHasRelativeLocation)
 			{
-				const auto BaseRotationInverse{LocomotionState.BasedMovement.Rotation.Inverse()};
+				const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-				FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.
-					RotateVector(FinalLocation - LocomotionState.BasedMovement.Location);
-
+				FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FinalLocation - MovementBase.Location);
 				FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FinalRotation;
 			}
 			else
@@ -1103,12 +1097,10 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		FootState.LockAmount = NewFootLockAmount;
 	}
 
-	if (LocomotionState.BasedMovement.bHasRelativeLocation)
+	if (MovementBase.bHasRelativeLocation)
 	{
-		FootState.LockLocation = LocomotionState.BasedMovement.Location +
-		                         LocomotionState.BasedMovement.Rotation.RotateVector(FootState.LockMovementBaseRelativeLocation);
-
-		FootState.LockRotation = LocomotionState.BasedMovement.Rotation * FootState.LockMovementBaseRelativeRotation;
+		FootState.LockLocation = MovementBase.Location + MovementBase.Rotation.RotateVector(FootState.LockMovementBaseRelativeLocation);
+		FootState.LockRotation = MovementBase.Rotation * FootState.LockMovementBaseRelativeRotation;
 	}
 
 	FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);

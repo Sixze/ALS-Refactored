@@ -7,6 +7,7 @@
 #include "State/AlsLayeringState.h"
 #include "State/AlsLeanState.h"
 #include "State/AlsLocomotionAnimationState.h"
+#include "State/AlsMovementBaseState.h"
 #include "State/AlsPoseState.h"
 #include "State/AlsRagdollingAnimationState.h"
 #include "State/AlsRotateInPlaceState.h"
@@ -70,6 +71,9 @@ protected:
 	FGameplayTag GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsMovementBaseState MovementBase;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsLayeringState LayeringState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -130,6 +134,8 @@ public:
 	void MarkTeleported();
 
 private:
+	void RefreshMovementBaseOnGameThread();
+
 	void RefreshLayering();
 
 	void RefreshPose();

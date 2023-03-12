@@ -3,30 +3,6 @@
 #include "AlsLocomotionAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsBasedMovementState
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UPrimitiveComponent> Primitive{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName BoneName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bBaseChanged{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bHasRelativeLocation{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector Location{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat Rotation{ForceInit};
-};
-
-USTRUCT(BlueprintType)
 struct ALS_API FAlsLocomotionAnimationState
 {
 	GENERATED_BODY()
@@ -87,7 +63,4 @@ struct ALS_API FAlsLocomotionAnimationState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float CapsuleHalfHeight{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsBasedMovementState BasedMovement;
 };
