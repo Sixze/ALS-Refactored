@@ -79,6 +79,8 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void CompleteParallelAnimationEvaluation(bool bDoPostAnimationEvaluation) override;
+
 public:
 	float GetPostProcessWeight() const;
 

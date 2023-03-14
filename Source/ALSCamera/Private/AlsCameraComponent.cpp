@@ -71,7 +71,19 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	TickCamera(DeltaTime);
+	// Skip camera tick until parallel animation evaluation completes.
+
+	if (!IsRunningParallelEvaluation())
+	{
+		TickCamera(DeltaTime);
+	}
+}
+
+void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
+{
+	Super::CompleteParallelAnimationEvaluation(bDoPostAnimationEvaluation);
+
+	TickCamera(GetAnimInstance()->GetDeltaSeconds());
 }
 
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
@@ -117,6 +129,10 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	{
 		return;
 	}
+
+	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(),
+	                   __FUNCTION__ TEXT(" should not be called during parallel animation evaluation, because accessing animation curves")
+	                   TEXT(" causes the game thread to wait for the parallel task to complete, resulting in performance degradation."));
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{
