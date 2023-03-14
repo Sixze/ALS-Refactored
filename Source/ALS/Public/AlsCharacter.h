@@ -127,6 +127,8 @@ public:
 	virtual void Restart() override;
 
 private:
+	void RefreshUsingAbsoluteRotation() const;
+
 	void RefreshVisibilityBasedAnimTickOption() const;
 
 	void RefreshMovementBase();

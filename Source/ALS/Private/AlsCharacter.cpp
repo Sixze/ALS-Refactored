@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
+#include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
@@ -128,11 +129,6 @@ void AAlsCharacter::PostInitializeComponents()
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
 	Super::PostInitializeComponents();
-
-	// Use absolute mesh rotation to be able to synchronize character rotation with
-	// rotation animations by updating the mesh rotation only from the animation instance.
-
-	GetMesh()->SetUsingAbsoluteRotation(true);
 }
 
 void AAlsCharacter::BeginPlay()
@@ -161,6 +157,7 @@ void AAlsCharacter::BeginPlay()
 			});
 	}
 
+	RefreshUsingAbsoluteRotation();
 	RefreshVisibilityBasedAnimTickOption();
 
 	// Ignore root motion on simulated proxies, because in some situations it causes
@@ -312,6 +309,9 @@ void AAlsCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	RefreshUsingAbsoluteRotation();
+	RefreshVisibilityBasedAnimTickOption();
+
 	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
 
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
@@ -323,6 +323,29 @@ void AAlsCharacter::Restart()
 	Super::Restart();
 
 	ApplyDesiredStance();
+}
+
+void AAlsCharacter::RefreshUsingAbsoluteRotation() const
+{
+	// Use absolute mesh rotation to be able to precisely synchronize character rotation
+	// with animations by manually updating the mesh rotation from the animation instance.
+
+	// This is necessary in cases where the character and the animation instance are ticking
+	// at different frequencies, which leads to desynchronization of rotation animations
+	// with the character rotation, as well as foot sliding when the foot lock is active.
+
+	// To save performance, Use it only when it is really necessary, such as
+	// when URO is enabled, or for autonomous proxies on the listen server.
+
+	const auto bNotDedicatedServer{!IsNetMode(NM_DedicatedServer)};
+
+	const auto bAutonomousProxyOnListenServer{IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy};
+
+	const auto bNonLocallyControllerCharacterWithURO{
+		GetMesh()->ShouldUseUpdateRateOptimizations() && !IsValid(GetInstigatorController<APlayerController>())
+	};
+
+	GetMesh()->SetUsingAbsoluteRotation(bNotDedicatedServer && (bAutonomousProxyOnListenServer || bNonLocallyControllerCharacterWithURO));
 }
 
 void AAlsCharacter::RefreshVisibilityBasedAnimTickOption() const
