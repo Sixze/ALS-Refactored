@@ -15,7 +15,7 @@
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 
 #define ALS_ENSURE_IMPLEMENTATION(Expression, bEnsureAlways, Format, Capture, ...) \
-	(LIKELY(Expression) || ([Capture]() UE_DEBUG_SECTION \
+	(LIKELY(Expression) || ([Capture](const auto& FinalFormat) UE_DEBUG_SECTION \
 	{ \
 		static auto bExecuted{false}; \
 		\
@@ -24,7 +24,7 @@
 			bExecuted = true; \
 			\
 			UE_LOG(LogOutputDevice, Warning, TEXT("Ensure failed: ") TEXT(#Expression) TEXT(", File: ") __FILE__ TEXT(", Line: ") TEXT(ALS_STRINGIFY(__LINE__)) TEXT(".")); \
-			UE_LOG(LogOutputDevice, Warning, Format, ##__VA_ARGS__); \
+			UE_LOG(LogOutputDevice, Warning, FinalFormat, ##__VA_ARGS__); \
 			\
 			PrintScriptCallstack(); \
 			\
@@ -37,7 +37,7 @@
 				FPlatformMisc::PromptForRemoteDebugging(true); \
 			} \
 		} \
-	}(), false))
+	}(Format), false))
 
 #define ALS_ENSURE(Expression) ALS_ENSURE_IMPLEMENTATION(Expression, false, TEXT(""), )
 #define ALS_ENSURE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(Expression, false, Format, &, ##__VA_ARGS__)
