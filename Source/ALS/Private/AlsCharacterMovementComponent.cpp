@@ -75,15 +75,22 @@ bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* 
 void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
                                 APlayerController* Player, const FVector& PreviousStartLocation)
 {
-	const auto* Movement{Character->GetCharacterMovement()};
-	const auto InitialRotation{Movement->UpdatedComponent->GetComponentRotation()};
+	// Calling Super::CombineWith() will force change the character's rotation to the rotation from the previous move, which is
+	// undesirable because it will erase our rotation changes made in the AAlsCharacter class. So, to keep the rotation unchanged,
+	// we simply override the saved rotations with the current rotation, and after calling Super::CombineWith() we restore them.
+
+	const auto OriginalRotation{PreviousMove->StartRotation};
+	const auto OriginalRelativeRotation{PreviousMove->StartAttachRelativeRotation};
+
+	const auto* UpdatedComponent{Character->GetCharacterMovement()->UpdatedComponent.Get()};
+
+	const_cast<FSavedMove_Character*>(PreviousMove)->StartRotation = UpdatedComponent->GetComponentRotation();
+	const_cast<FSavedMove_Character*>(PreviousMove)->StartAttachRelativeRotation = UpdatedComponent->GetRelativeRotation();
 
 	Super::CombineWith(PreviousMove, Character, Player, PreviousStartLocation);
 
-	// Restore initial rotation after movement combining. Without this, any rotation applied in
-	// the character class will be discarded and the character will not be able to rotate properly.
-
-	Movement->UpdatedComponent->SetWorldRotation(InitialRotation, false, nullptr, Movement->GetTeleportType());
+	const_cast<FSavedMove_Character*>(PreviousMove)->StartRotation = OriginalRotation;
+	const_cast<FSavedMove_Character*>(PreviousMove)->StartAttachRelativeRotation = OriginalRelativeRotation;
 }
 
 void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
@@ -571,22 +578,23 @@ FNetworkPredictionData_Client* UAlsCharacterMovementComponent::GetPredictionData
 
 void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
 {
-	auto* Mesh{HasValidData() ? CharacterOwner->GetMesh() : nullptr};
+	auto* PredictionData{GetPredictionData_Client_Character()};
+	const auto* Mesh{HasValidData() ? CharacterOwner->GetMesh() : nullptr};
 
-	if (NetworkSmoothingMode == ENetworkSmoothingMode::Disabled || !IsValid(Mesh) ||
-	    !Mesh->IsUsingAbsoluteRotation() || Mesh->IsSimulatingPhysics())
+	if (PredictionData != nullptr && IsValid(Mesh) && Mesh->IsUsingAbsoluteRotation())
 	{
-		Super::SmoothClientPosition(DeltaTime);
-		return;
+		// Calling Super::SmoothClientPosition() will change the mesh's rotation, which is undesirable when using
+		// absolute mesh rotation since we're manually updating the mesh's rotation from the animation instance. So,
+		// to keep the rotation unchanged, we simply override the predicted rotations with the mesh's current rotation.
+
+		const auto Rotation{Mesh->GetComponentQuat() * CharacterOwner->GetBaseRotationOffset().Inverse()};
+
+		PredictionData->OriginalMeshRotationOffset = Rotation;
+		PredictionData->MeshRotationOffset = Rotation;
+		PredictionData->MeshRotationTarget = Rotation;
 	}
 
-	// Ignore mesh rotation smoothing when using absolute mesh rotation because in this case ALS controls the mesh rotation itself.
-
-	const auto InitialRotation{Mesh->GetComponentQuat()};
-
 	Super::SmoothClientPosition(DeltaTime);
-
-	Mesh->SetWorldRotation(InitialRotation);
 }
 
 void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp, const float DeltaTime,

@@ -103,7 +103,7 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	LocomotionState.Location = ActorTransform.GetLocation();
 	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
-	LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+	LocomotionState.Rotation = GetActorRotation();
 	LocomotionState.PreviousYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 
 	RefreshTargetYawAngleUsingLocomotionRotation();
@@ -1104,13 +1104,13 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 	{
 		LocomotionState.Location = ActorTransform.GetLocation();
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
-		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+		LocomotionState.Rotation = GetActorRotation();
 	}
 	else if (GetMesh()->IsUsingAbsoluteRotation())
 	{
 		LocomotionState.Location = ActorTransform.TransformPosition(GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset());
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
-		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+		LocomotionState.Rotation = GetActorRotation();
 	}
 	else
 	{
