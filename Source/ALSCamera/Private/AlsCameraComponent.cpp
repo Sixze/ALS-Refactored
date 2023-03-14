@@ -131,8 +131,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 
 	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(),
-	                   __FUNCTION__ TEXT(" should not be called during parallel animation evaluation, because accessing animation curves")
-	                   TEXT(" causes the game thread to wait for the parallel task to complete, resulting in performance degradation."));
+	                   TEXT("%hs should not be called during parallel animation evaluation, because accessing animation curves")
+	                   TEXT(" causes the game thread to wait for the parallel task to complete, resulting in performance degradation."),
+	                   __FUNCTION__);
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{
@@ -428,7 +429,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
 
-	static const FName MainTraceTag{__FUNCTION__ TEXTVIEW(" (Main Trace)")};
+	static const FName MainTraceTag{FString::Printf(TEXT("%hs (Main Trace)"), __FUNCTION__)};
 
 	auto TraceStart{
 		FMath::Lerp(
@@ -454,7 +455,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 		}
 		else if (TryAdjustLocationBlockedByGeometry(TraceStart, bDisplayDebugCameraTraces))
 		{
-			static const FName AdjustedTraceTag{__FUNCTION__ TEXTVIEW(" (Adjusted Trace)")};
+			static const FName AdjustedTraceTag{FString::Printf(TEXT("%hs (Adjusted Trace)"), __FUNCTION__)};
 
 			GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, TraceChanel,
 			                                 CollisionShape, {AdjustedTraceTag, false, GetOwner()});
@@ -512,7 +513,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.IsEmpty())
 
-	static const FName OverlapMultiTraceTag{__FUNCTION__ TEXTVIEW(" (Overlap Multi)")};
+	static const FName OverlapMultiTraceTag{FString::Printf(TEXT("%hs (Overlap Multi)"), __FUNCTION__)};
 
 	if (!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, TraceChanel,
 	                                       CollisionShape, {OverlapMultiTraceTag, false, GetOwner()}))
@@ -575,7 +576,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 
 	Location += Adjustment;
 
-	static const FName FreeSpaceTraceTag{__FUNCTION__ TEXTVIEW(" (Free Space Overlap)")};
+	static const FName FreeSpaceTraceTag{FString::Printf(TEXT("%hs (Free Space Overlap)"), __FUNCTION__)};
 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, TraceChanel,
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
