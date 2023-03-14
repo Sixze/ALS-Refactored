@@ -1198,11 +1198,7 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 
 void AAlsCharacter::RefreshLocomotionLate(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked)
-	{
-		RefreshViewRelativeTargetYawAngle();
-	}
-	else if (!LocomotionMode.IsValid() || LocomotionAction.IsValid())
+	if (!LocomotionMode.IsValid() || LocomotionAction.IsValid())
 	{
 		RefreshLocomotionLocationAndRotation();
 		RefreshTargetYawAngleUsingLocomotionRotation();
@@ -1265,8 +1261,7 @@ void AAlsCharacter::CharacterMovement_OnPhysicsRotation(const float DeltaTime)
 
 void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
-	    LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (LocomotionAction.IsValid() || LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -1447,8 +1442,7 @@ void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
 
 void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 {
-	if (LocomotionState.bRotationLocked || LocomotionAction.IsValid() ||
-	    LocomotionMode != AlsLocomotionModeTags::InAir)
+	if (LocomotionAction.IsValid() || LocomotionMode != AlsLocomotionModeTags::InAir)
 	{
 		return;
 	}
@@ -1572,38 +1566,4 @@ void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
 	LocomotionState.ViewRelativeTargetYawAngle =
 		FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - LocomotionState.TargetYawAngle);
-}
-
-void AAlsCharacter::LockRotation(const float TargetYawAngle)
-{
-	if (LocomotionState.bRotationLocked)
-	{
-		UE_LOG(LogAls, Warning, __FUNCTION__ TEXT(": Trying to lock a rotation when it is already locked!"));
-		return;
-	}
-
-	MulticastLockRotation(TargetYawAngle);
-}
-
-void AAlsCharacter::UnLockRotation()
-{
-	if (!LocomotionState.bRotationLocked)
-	{
-		UE_LOG(LogAls, Log, __FUNCTION__ TEXT(": Trying to unlock a rotation when it is already unlocked!"));
-		return;
-	}
-
-	MulticastUnLockRotation();
-}
-
-void AAlsCharacter::MulticastLockRotation_Implementation(const float TargetYawAngle)
-{
-	LocomotionState.bRotationLocked = true;
-
-	RefreshRotationInstant(TargetYawAngle, ETeleportType::TeleportPhysics);
-}
-
-void AAlsCharacter::MulticastUnLockRotation_Implementation()
-{
-	LocomotionState.bRotationLocked = false;
 }

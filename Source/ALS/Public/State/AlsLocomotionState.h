@@ -35,9 +35,6 @@ struct ALS_API FAlsLocomotionState
 	bool bMoving{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bRotationLocked{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bRotationTowardsLastInputDirectionBlocked{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))

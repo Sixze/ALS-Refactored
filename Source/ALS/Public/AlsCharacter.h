@@ -406,22 +406,6 @@ protected:
 
 	void RefreshViewRelativeTargetYawAngle();
 
-	// Rotation Lock
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void LockRotation(float TargetYawAngle);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void UnLockRotation();
-
-private:
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastLockRotation(float TargetYawAngle);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastUnLockRotation();
-
 	// Rolling
 
 public:
