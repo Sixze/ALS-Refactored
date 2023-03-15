@@ -160,16 +160,6 @@ void AAlsCharacter::BeginPlay()
 	RefreshUsingAbsoluteRotation();
 	RefreshVisibilityBasedAnimTickOption();
 
-	// Ignore root motion on simulated proxies, because in some situations it causes
-	// issues with network smoothing, such as when the character uncrouches while rolling.
-
-	// TODO Check the need for this temporary fix in future engine versions.
-
-	if (GetLocalRole() <= ROLE_SimulatedProxy && IsValid(GetMesh()->GetAnimInstance()))
-	{
-		GetMesh()->GetAnimInstance()->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
-	}
-
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) &&
 		Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
 
@@ -717,6 +707,21 @@ bool AAlsCharacter::CanCrouch() const
 
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
 {
+	auto* PredictionData{GetCharacterMovement()->GetPredictionData_Client_Character()};
+
+	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
+	    ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
+	{
+		// The code below essentially undoes the changes that will be made later at the end of the UCharacterMovementComponent::Crouch()
+		// function because they literally break network smoothing when crouching while the root motion montage is playing, causing the
+		// mesh to take an incorrect location for a while.
+
+		// TODO Check the need for this fix in future engine versions.
+
+		PredictionData->MeshTranslationOffset.Z += ScaledHalfHeightAdjust;
+		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
+	}
+
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	SetStance(AlsStanceTags::Crouching);
@@ -724,6 +729,17 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 
 void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
 {
+	auto* PredictionData{GetCharacterMovement()->GetPredictionData_Client_Character()};
+
+	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
+	    ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
+	{
+		// Same fix as in AAlsCharacter::OnStartCrouch().
+
+		PredictionData->MeshTranslationOffset.Z -= ScaledHalfHeightAdjust;
+		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
+	}
+
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	SetStance(AlsStanceTags::Standing);
