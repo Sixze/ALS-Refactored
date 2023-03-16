@@ -448,7 +448,11 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	if (GetLocalRole() >= ROLE_Authority)
 	{
 		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
-		GetMesh()->SetRelativeLocationAndRotation(BaseTranslationOffset, BaseRotationOffset);
+
+		GetMesh()->SetRelativeLocationAndRotation(GetBaseTranslationOffset(),
+		                                          GetMesh()->IsUsingAbsoluteRotation()
+			                                          ? GetActorTransform().GetRotation() * GetBaseRotationOffset()
+			                                          : GetBaseRotationOffset());
 	}
 
 	// Apply mantling root motion.
