@@ -13,5 +13,10 @@ public class ALS : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "NetCore", "PhysicsCore", "GameplayTags", "AnimGraphRuntime", "ControlRig", "RigVM", "Niagara"
 		});
+
+		if (Target.Type == TargetRules.TargetType.Editor)
+		{
+			PrivateDependencyModuleNames.AddRange(new[] {"MessageLog"});
+		}
 	}
 }
