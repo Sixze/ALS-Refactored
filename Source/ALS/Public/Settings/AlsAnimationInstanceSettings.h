@@ -43,4 +43,8 @@ public:
 
 public:
 	UAlsAnimationInstanceSettings();
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 };

@@ -841,16 +841,10 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 		                                                      InAirState.VerticalVelocity) * LocomotionState.Scale
 	};
 
-	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : Settings->InAir.GroundPredictionSweepObjectTypes)
-	{
-		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
-	}
-
 	FHitResult Hit;
-	GetWorld()->SweepSingleByObjectType(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ObjectQueryParameters,
-	                                    FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
-	                                    {__FUNCTION__, false, Character});
+	GetWorld()->SweepSingleByChannel(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ECC_WorldStatic,
+	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
+	                                 {__FUNCTION__, false, Character}, Settings->InAir.GroundPredictionSweepResponses);
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
@@ -1241,9 +1235,9 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		static constexpr auto LocationInterpolationDampingRatio{4.0f};
 		static constexpr auto LocationInterpolationTargetVelocityAmount{1.0f};
 
-		FootState.OffsetLocation = UAlsMath::SpringDamp(FootState.OffsetLocation, FootState.OffsetTargetLocation,
-		                                                FootState.OffsetSpringState, DeltaTime, LocationInterpolationFrequency,
-		                                                LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
+		FootState.OffsetLocation = UAlsMath::SpringDampVector(FootState.OffsetLocation, FootState.OffsetTargetLocation,
+		                                                      FootState.OffsetSpringState, DeltaTime, LocationInterpolationFrequency,
+		                                                      LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
 
 		static constexpr auto RotationInterpolationSpeed{30.0f};
 

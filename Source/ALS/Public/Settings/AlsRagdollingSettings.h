@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Engine/EngineTypes.h"
 #include "AlsRagdollingSettings.generated.h"
 
-enum EObjectTypeQuery;
 class UAnimMontage;
 
 USTRUCT(BlueprintType)
@@ -10,6 +10,7 @@ struct ALS_API FAlsRagdollingSettings
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bStartRagdollingOnLand{true};
 
@@ -21,9 +22,17 @@ struct ALS_API FAlsRagdollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TArray<TEnumAsByte<EObjectTypeQuery>> GroundTraceObjectTypes;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimMontage> GetUpFrontMontage{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimMontage> GetUpBackMontage{nullptr};
+
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 };

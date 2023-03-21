@@ -176,12 +176,6 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 		return false;
 	}
 
-	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : Settings->Mantling.MantlingTraceObjectTypes)
-	{
-		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
-	}
-
 	const auto ForwardTraceDirection{
 		UAlsMath::AngleToDirectionXY(
 			ActorYawAngle + FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
@@ -216,9 +210,9 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
 	FHitResult ForwardTraceHit;
-	GetWorld()->SweepSingleByObjectType(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, ObjectQueryParameters,
-	                                    FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
-	                                    {ForwardTraceTag, false, this});
+	GetWorld()->SweepSingleByChannel(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, ECC_WorldStatic,
+	                                 FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
+	                                 {ForwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
 	auto* TargetPrimitive{ForwardTraceHit.GetComponent()};
 
@@ -262,9 +256,9 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	};
 
 	FHitResult DownwardTraceHit;
-	GetWorld()->SweepSingleByObjectType(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
-	                                    ObjectQueryParameters, FCollisionShape::MakeSphere(TraceCapsuleRadius),
-	                                    {DownwardTraceTag, false, this});
+	GetWorld()->SweepSingleByChannel(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
+	                                 ECC_WorldStatic, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+	                                 {DownwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
 	if (!GetCharacterMovement()->IsWalkable(DownwardTraceHit))
 	{
@@ -297,9 +291,9 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const FVector TargetCapsuleLocation{TargetLocation.X, TargetLocation.Y, TargetLocation.Z + CapsuleHalfHeight};
 
-	if (GetWorld()->OverlapAnyTestByObjectType(TargetCapsuleLocation, FQuat::Identity, ObjectQueryParameters,
-	                                           FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                           {FreeSpaceTraceTag, false, this}))
+	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, ECC_WorldStatic,
+	                                             FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
+	                                             {FreeSpaceTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -731,18 +725,12 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	// Trace downward from the target location to offset the target location, preventing the lower
 	// half of the capsule from going through the floor when the ragdoll is laying on the ground.
 
-	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : Settings->Ragdolling.GroundTraceObjectTypes)
-	{
-		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
-	}
-
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByObjectType(Hit, RagdollTargetLocation, {
-		                                        RagdollTargetLocation.X,
-		                                        RagdollTargetLocation.Y,
-		                                        RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
-	                                        }, ObjectQueryParameters, {__FUNCTION__, false, this});
+	GetWorld()->LineTraceSingleByChannel(Hit, RagdollTargetLocation, {
+		                                     RagdollTargetLocation.X,
+		                                     RagdollTargetLocation.Y,
+		                                     RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
+	                                     }, ECC_WorldStatic, {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
 
 	auto NewActorLocation{RagdollTargetLocation};
 
