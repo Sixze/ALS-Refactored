@@ -39,22 +39,22 @@ FAlsRigUnit_ExponentialDecayVector_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	Current = Context.State == EControlRigState::Init
+	Current = (!bIsInitialized)
 		          ? Target
-		          : UAlsMath::ExponentialDecay(Current, Target, Context.DeltaTime, Lambda);
+		          : UAlsMath::ExponentialDecay(Current, Target, ExecuteContext.GetDeltaTime(), Lambda);
 }
 
 FAlsRigUnit_CalculatePoleVector_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	const auto* Hierarchy{Context.Hierarchy};
+	URigHierarchy* Hierarchy = ExecuteContext.Hierarchy;
 	if (!IsValid(Hierarchy))
 	{
 		return;
 	}
 
-	if (Context.State == EControlRigState::Init)
+	if (!bIsInitialized)
 	{
 		CachedItemA.Reset();
 		CachedItemB.Reset();
@@ -108,7 +108,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 		return;
 	}
 
-	if (Context.State == EControlRigState::Init)
+	if (!bIsInitialized)
 	{
 		CachedLeftHandBone.Reset();
 		CachedLeftHandIkBone.Reset();
@@ -168,7 +168,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 
 	for (auto i{0}; i < BonesToMove.Num(); i++)
 	{
-		if (Context.State == EControlRigState::Init)
+		if (!bIsInitialized)
 		{
 			CachedBonesToMove[i].Reset();
 		}
@@ -183,4 +183,19 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 
 		Hierarchy->SetGlobalTransform(CachedBonesToMove[i], BoneTransform, bPropagateToChildren);
 	}
+}
+
+void FAlsRigUnit_CalculatePoleVector::Initialize() {
+	bIsInitialized = true;
+	FAlsRigUnit_MathBase::Initialize();
+}
+
+void FAlsRigUnit_ExponentialDecayVector::Initialize() {
+	bIsInitialized = true;
+	FAlsRigUnit_SimulationBase::Initialize();
+}
+
+void FAlsRigUnit_HandIkRetargeting::Initialize() {
+	bIsInitialized = true;
+	FAlsRigUnit_HighLevelBase::Initialize();
 }
