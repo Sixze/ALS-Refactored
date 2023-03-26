@@ -817,7 +817,10 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
 	if (ALS_ENSURE(IsValid(MovementSettings)))
 	{
-		GaitSettings = *MovementSettings->RotationModes.Find(RotationMode)->Stances.Find(Stance);
+		const auto* StanceSettings{MovementSettings->RotationModes.Find(RotationMode)};
+		const auto* NewGaitSettings{ALS_ENSURE(StanceSettings != nullptr) ? StanceSettings->Stances.Find(Stance) : nullptr};
+
+		GaitSettings = ALS_ENSURE(NewGaitSettings != nullptr) ? *NewGaitSettings : FAlsMovementGaitSettings{};
 	}
 
 	RefreshMaxWalkSpeed();

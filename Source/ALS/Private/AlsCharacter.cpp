@@ -1434,12 +1434,21 @@ float AAlsCharacter::CalculateRotationInterpolationSpeed() const
 	// the curve in conjunction with the gait amount gives you a high level of control over the rotation
 	// rates for each speed. Increase the speed if the camera is rotating quickly for more responsive rotation.
 
-	static constexpr auto ReferenceViewYawSpeed{300.0f};
-	static constexpr auto InterpolationSpeedMultiplier{3.0f};
+	const auto* RotationInterpolationSpeedCurve{AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve.Get()};
 
-	return AlsCharacterMovement->GetGaitSettings().RotationInterpolationSpeedCurve
-	                           ->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount()) *
-	       UAlsMath::LerpClamped(1.0f, InterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
+	static constexpr auto DefaultRotationInterpolationSpeed{5.0f};
+
+	const auto RotationInterpolationSpeed{
+		ALS_ENSURE(IsValid(RotationInterpolationSpeedCurve))
+			? RotationInterpolationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount())
+			: DefaultRotationInterpolationSpeed
+	};
+
+	static constexpr auto MaxInterpolationSpeedMultiplier{3.0f};
+	static constexpr auto ReferenceViewYawSpeed{300.0f};
+
+	return RotationInterpolationSpeed *
+	       UAlsMath::LerpClamped(1.0f, MaxInterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
 }
 
 void AAlsCharacter::ApplyRotationYawSpeed(const float DeltaTime)
