@@ -576,7 +576,7 @@ void AAlsCharacter::RefreshRotationMode()
 			}
 			else
 			{
-				SetRotationMode(AlsRotationModeTags::LookingDirection);
+				SetRotationMode(AlsRotationModeTags::ViewDirection);
 			}
 
 			return;
@@ -590,7 +590,7 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else
 		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
+			SetRotationMode(AlsRotationModeTags::ViewDirection);
 		}
 
 		return;
@@ -606,7 +606,7 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else if (bAiming)
 		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
+			SetRotationMode(AlsRotationModeTags::ViewDirection);
 		}
 		else
 		{
@@ -630,7 +630,7 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else if (bAiming)
 		{
-			SetRotationMode(AlsRotationModeTags::LookingDirection);
+			SetRotationMode(AlsRotationModeTags::ViewDirection);
 		}
 		else
 		{
@@ -852,9 +852,9 @@ FGameplayTag AAlsCharacter::CalculateActualGait(const FGameplayTag& MaxAllowedGa
 
 bool AAlsCharacter::CanSprint() const
 {
-	// Determine if the character is currently able to sprint based on the rotation mode and input
-	// rotation. If the character is in the looking direction rotation mode, only allow sprinting
-	// if there is input and it is facing forward relative to the camera + or - 50 degrees.
+	// Determine if the character can sprint based on the rotation mode and input direction.
+	// If the character is in view direction rotation mode, only allow sprinting if there is
+	// input and if the input direction is aligned with the view direction within 50 degrees.
 
 	if (!LocomotionState.bHasInput || Stance != AlsStanceTags::Standing ||
 	    // ReSharper disable once CppRedundantParentheses
@@ -1347,7 +1347,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode == AlsRotationModeTags::LookingDirection)
+	if (RotationMode == AlsRotationModeTags::ViewDirection)
 	{
 		const auto TargetYawAngle{
 			Gait == AlsGaitTags::Sprinting
@@ -1480,7 +1480,7 @@ void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 
 	static constexpr auto RotationInterpolationSpeed{5.0f};
 
-	if (RotationMode == AlsRotationModeTags::VelocityDirection || RotationMode == AlsRotationModeTags::LookingDirection)
+	if (RotationMode == AlsRotationModeTags::VelocityDirection || RotationMode == AlsRotationModeTags::ViewDirection)
 	{
 		switch (Settings->InAirRotationMode)
 		{

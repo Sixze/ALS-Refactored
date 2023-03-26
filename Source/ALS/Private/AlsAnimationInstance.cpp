@@ -577,7 +577,7 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 void UAlsAnimationInstance::RefreshMovementDirection()
 {
 	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
-	// the looking direction / aiming modes and is used in the cycle blending to blend to the appropriate directional states.
+	// the view direction / aiming rotation modes and is used in the cycle blending to blend to the appropriate directional states.
 
 	if (RotationMode == AlsRotationModeTags::VelocityDirection || Gait == AlsGaitTags::Sprinting)
 	{
@@ -1517,7 +1517,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
 {
-	return RotationMode == AlsRotationModeTags::LookingDirection && ViewMode != AlsViewModeTags::FirstPerson;
+	return RotationMode == AlsRotationModeTags::ViewDirection && ViewMode != AlsViewModeTags::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)

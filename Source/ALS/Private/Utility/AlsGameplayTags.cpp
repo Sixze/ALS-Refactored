@@ -15,7 +15,7 @@ namespace AlsLocomotionModeTags
 namespace AlsRotationModeTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(VelocityDirection, FName{TEXTVIEW("Als.RotationMode.VelocityDirection")})
-	UE_DEFINE_GAMEPLAY_TAG(LookingDirection, FName{TEXTVIEW("Als.RotationMode.LookingDirection")})
+	UE_DEFINE_GAMEPLAY_TAG(ViewDirection, FName{TEXTVIEW("Als.RotationMode.ViewDirection")})
 	UE_DEFINE_GAMEPLAY_TAG(Aiming, FName{TEXTVIEW("Als.RotationMode.Aiming")})
 }
 

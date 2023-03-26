@@ -35,7 +35,7 @@ protected:
 	bool bDesiredAiming;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
-	FGameplayTag DesiredRotationMode{AlsRotationModeTags::LookingDirection};
+	FGameplayTag DesiredRotationMode{AlsRotationModeTags::ViewDirection};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredStance{AlsStanceTags::Standing};
@@ -57,7 +57,7 @@ protected:
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	FGameplayTag RotationMode{AlsRotationModeTags::LookingDirection};
+	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag Stance{AlsStanceTags::Standing};

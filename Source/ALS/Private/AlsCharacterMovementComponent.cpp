@@ -25,7 +25,7 @@ bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Moveme
 {
 	Super::Serialize(Movement, Archive, Map, MoveType);
 
-	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, AlsRotationModeTags::LookingDirection.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, AlsRotationModeTags::ViewDirection.GetTag(), Map);
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance, AlsStanceTags::Standing.GetTag(), Map);
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, AlsGaitTags::Walking.GetTag(), Map);
 
@@ -43,7 +43,7 @@ void FAlsSavedMove::Clear()
 {
 	Super::Clear();
 
-	RotationMode = AlsRotationModeTags::LookingDirection;
+	RotationMode = AlsRotationModeTags::ViewDirection;
 	Stance = AlsStanceTags::Standing;
 	MaxAllowedGait = AlsGaitTags::Walking;
 }

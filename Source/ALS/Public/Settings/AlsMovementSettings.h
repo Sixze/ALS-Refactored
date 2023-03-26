@@ -79,7 +79,7 @@ public:
 	TMap<FGameplayTag, FAlsMovementStanceSettings> RotationModes
 	{
 		{AlsRotationModeTags::VelocityDirection, {}},
-		{AlsRotationModeTags::LookingDirection, {}},
+		{AlsRotationModeTags::ViewDirection, {}},
 		{AlsRotationModeTags::Aiming, {}}
 	};
 };
