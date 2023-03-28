@@ -432,7 +432,11 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					HandleWalkingOffLedge(OldFloor.HitResult.ImpactNormal, OldFloor.HitResult.Normal, OldLocation, timeTick);
 					if (IsMovingOnGround())
 					{
+						// TODO Start of custom ALS code block.
+
 						ApplyPendingPenetrationAdjustment();
+
+						// TODO End of custom ALS code block.
 
 						// If still walking, then fall. If not, assume the user set a different mode they want to keep.
 						StartFalling(Iterations, remainingTime, timeTick, Delta, OldLocation);
@@ -440,7 +444,11 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					return;
 				}
 
+				// TODO Start of custom ALS code block.
+
 				ApplyPendingPenetrationAdjustment();
+
+				// TODO End of custom ALS code block.
 
 				AdjustFloorHeight();
 				SetBase(CurrentFloor.HitResult.Component.Get(), CurrentFloor.HitResult.BoneName);
@@ -482,6 +490,13 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			// Make velocity reflect actual move
 			if( !bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() && timeTick >= MIN_TICK_TIME)
 			{
+				// TODO Start of custom ALS code block.
+
+				PrePenetrationAdjustmentVelocity = MoveVelocity;
+				bPrePenetrationAdjustmentVelocityValid = true;
+
+				// TODO End of custom ALS code block.
+
 				// TODO-RootMotionSource: Allow this to happen during partial override Velocity, but only set allowed axes?
 				Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / timeTick;
 				MaintainHorizontalGroundVelocity();
@@ -698,7 +713,11 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 		FHitResult Hit(1.f);
 		bBlockingHit = FloorSweepTest(Hit, CapsuleLocation, CapsuleLocation + FVector(0.f,0.f,-TraceDist), CollisionChannel, CapsuleShape, QueryParams, ResponseParam);
 
+		// TODO Start of custom ALS code block.
+
 		const_cast<ThisClass*>(this)->SavePenetrationAdjustment(Hit);
+
+		// TODO End of custom ALS code block.
 
 		if (bBlockingHit)
 		{
@@ -892,4 +911,20 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 void UAlsCharacterMovementComponent::SetMovementModeLocked(const bool bNewMovementModeLocked)
 {
 	bMovementModeLocked = bNewMovementModeLocked;
+}
+
+bool UAlsCharacterMovementComponent::TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity)
+{
+	if (!bPrePenetrationAdjustmentVelocityValid)
+	{
+		OutVelocity = FVector::ZeroVector;
+		return false;
+	}
+
+	OutVelocity = PrePenetrationAdjustmentVelocity;
+
+	PrePenetrationAdjustmentVelocity = FVector::ZeroVector;
+	bPrePenetrationAdjustmentVelocityValid = false;
+
+	return true;
 }

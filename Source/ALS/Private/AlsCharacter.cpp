@@ -80,6 +80,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
@@ -1111,6 +1112,11 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
 }
 
+void AAlsCharacter::SetDesiredVelocityYawAngle(const float NewDesiredVelocityYawAngle)
+{
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, DesiredVelocityYawAngle, NewDesiredVelocityYawAngle, this);
+}
+
 void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 {
 	const auto& ActorTransform{GetActorTransform()};
@@ -1197,11 +1203,24 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	// be useful to know the last orientation of a movement even after the character has stopped.
 
 	LocomotionState.Speed = UE_REAL_TO_FLOAT(LocomotionState.Velocity.Size2D());
-	LocomotionState.bHasSpeed = LocomotionState.Speed >= 1.0f;
+
+	static constexpr auto HasSpeedThreshold{1.0f};
+
+	LocomotionState.bHasSpeed = LocomotionState.Speed >= HasSpeedThreshold;
 
 	if (LocomotionState.bHasSpeed)
 	{
 		LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(LocomotionState.Velocity));
+	}
+
+	if (Settings->bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode && GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		FVector DesiredVelocity;
+
+		SetDesiredVelocityYawAngle(AlsCharacterMovement->TryConsumePrePenetrationAdjustmentVelocity(DesiredVelocity) &&
+		                           DesiredVelocity.Size2D() >= HasSpeedThreshold
+			                           ? UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(DesiredVelocity))
+			                           : LocomotionState.VelocityYawAngle);
 	}
 
 	LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
@@ -1342,8 +1361,11 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 
 		static constexpr auto TargetYawAngleRotationSpeed{800.0f};
 
-		RefreshRotationExtraSmooth(LocomotionState.VelocityYawAngle, DeltaTime,
-		                           CalculateRotationInterpolationSpeed(), TargetYawAngleRotationSpeed);
+		RefreshRotationExtraSmooth(
+			Settings->bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode
+				? DesiredVelocityYawAngle
+				: LocomotionState.VelocityYawAngle,
+			DeltaTime, CalculateRotationInterpolationSpeed(), TargetYawAngleRotationSpeed);
 		return;
 	}
 

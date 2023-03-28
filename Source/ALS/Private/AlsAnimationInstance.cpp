@@ -576,10 +576,10 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 
 void UAlsAnimationInstance::RefreshMovementDirection()
 {
-	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
-	// the view direction / aiming rotation modes and is used in the cycle blending to blend to the appropriate directional states.
+	// Calculate the movement direction. This value represents the direction the character is moving relative
+	// to the camera and is used in the cycle blending to blend to the appropriate directional states.
 
-	if (RotationMode == AlsRotationModeTags::VelocityDirection || Gait == AlsGaitTags::Sprinting)
+	if (Gait == AlsGaitTags::Sprinting)
 	{
 		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
 		return;

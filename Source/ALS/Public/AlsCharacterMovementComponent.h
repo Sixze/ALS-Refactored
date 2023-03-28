@@ -105,6 +105,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector PendingPenetrationAdjustment;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FVector PrePenetrationAdjustmentVelocity;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	bool bPrePenetrationAdjustmentVelocityValid;
+
 public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;
 
@@ -181,6 +187,8 @@ public:
 	float CalculateGaitAmount() const;
 
 	void SetMovementModeLocked(bool bNewMovementModeLocked);
+
+	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);
 };
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const

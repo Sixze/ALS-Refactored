@@ -33,6 +33,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bInheritMovementBaseRotationInVelocityDirectionRotationMode;
 
+	// If enabled, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode{true};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
