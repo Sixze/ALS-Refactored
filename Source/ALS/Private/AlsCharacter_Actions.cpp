@@ -592,6 +592,9 @@ void AAlsCharacter::StartRagdollingImplementation()
 		return;
 	}
 
+	GetMesh()->bUpdateJointsFromAnimation = true; // Required for the flail animation to work properly.
+	GetMesh()->UpdateRBJointMotors();
+
 	if (!IsNetMode(NM_Client))
 	{
 		// This is necessary to keep the animation instance ticking on the server during ragdolling.
@@ -846,6 +849,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 		GetMesh()->bOnlyAllowAutonomousTickPose = GetRemoteRole() == ROLE_AutonomousProxy &&
 		                                          IsValid(GetNetConnection()) && IsPawnControlled();
 	}
+
+	GetMesh()->bUpdateJointsFromAnimation = false;
 
 	SetLocomotionAction(FGameplayTag::EmptyTag);
 
