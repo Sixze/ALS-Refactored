@@ -166,6 +166,24 @@ FAnimInstanceProxy* UAlsAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
+FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
+{
+	return {
+		!IsValid(Settings) || Settings->General.bUseHandIkBones,
+		!IsValid(Settings) || Settings->General.bUseFootIkBones,
+		GroundedState.VelocityBlend.ForwardAmount,
+		GroundedState.VelocityBlend.BackwardAmount,
+		ViewState.SpineRotation.YawAngle,
+		FeetState.Left.IkRotation,
+		FeetState.Left.IkLocation,
+		FeetState.Left.IkAmount,
+		FeetState.Right.IkRotation,
+		FeetState.Right.IkLocation,
+		FeetState.Right.IkAmount,
+		FeetState.MinMaxPelvisOffsetZ,
+	};
+}
+
 void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 {
 	const auto& BasedMovement{Character->GetBasedMovement()};

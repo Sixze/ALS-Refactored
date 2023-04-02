@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Animation/AnimInstance.h"
+#include "State/AlsControlRigInput.h"
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
 #include "State/AlsInAirState.h"
@@ -131,8 +132,11 @@ protected:
 	// Core
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	UAlsAnimationInstanceSettings* GetSettingsUnsafe() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	FAlsControlRigInput GetControlRigInput() const;
 
 public:
 	void MarkPendingUpdate();
