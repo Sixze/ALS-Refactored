@@ -25,6 +25,9 @@ public:
 	virtual void NativeBeginPlay() override;
 
 protected:
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+
+protected:
 	// Be very careful when using this function to read your custom variables using the property access system. It is
 	// safe to use this function to read variables that change only inside UAlsAnimationInstance::NativeUpdateAnimation()
 	// because it is guaranteed that this function will be called before parallel animation evaluation. Reading variables

@@ -122,6 +122,9 @@ public:
 
 	virtual void NativePostEvaluateAnimation() override;
 
+protected:
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+
 	// Core
 
 protected:

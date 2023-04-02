@@ -1,6 +1,7 @@
 #include "AlsLinkedAnimationInstance.h"
 
 #include "AlsAnimationInstance.h"
+#include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
 #include "Utility/AlsMacros.h"
 
@@ -45,4 +46,9 @@ void UAlsLinkedAnimationInstance::NativeBeginPlay()
 	                   ALS_GET_TYPE_STRING(UAlsAnimationInstance).GetData());
 
 	Super::NativeBeginPlay();
+}
+
+FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
+{
+	return new FAlsAnimationInstanceProxy{this};
 }
