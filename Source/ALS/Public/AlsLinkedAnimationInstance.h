@@ -36,6 +36,30 @@ protected:
 	// sure what you're doing, then it's better to access your custom variables through the "Parent" variable.
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	UAlsAnimationInstance* GetParentUnsafe() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ReinitializeLookTowardsInput();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshLookTowardsInput();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ReinitializeLookTowardsCamera();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshLookTowardsCamera();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ResetGroundedEntryMode();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ActivatePivot();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ResetJumped();
 };
 
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const

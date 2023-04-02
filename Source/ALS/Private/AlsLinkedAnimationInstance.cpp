@@ -52,3 +52,67 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 {
 	return new FAlsAnimationInstanceProxy{this};
 }
+
+void UAlsLinkedAnimationInstance::ReinitializeLookTowardsInput()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ReinitializeLookTowardsInput();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshLookTowardsInput()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshLookTowardsInput();
+	}
+}
+
+void UAlsLinkedAnimationInstance::ReinitializeLookTowardsCamera()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ReinitializeLookTowardsCamera();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshLookTowardsCamera()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshLookTowardsCamera();
+	}
+}
+
+void UAlsLinkedAnimationInstance::ResetGroundedEntryMode()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ResetGroundedEntryMode();
+	}
+}
+
+void UAlsLinkedAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewHipsDirection)
+{
+	if (Parent.IsValid())
+	{
+		Parent->SetHipsDirection(NewHipsDirection);
+	}
+}
+
+void UAlsLinkedAnimationInstance::ActivatePivot()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ActivatePivot();
+	}
+}
+
+void UAlsLinkedAnimationInstance::ResetJumped()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ResetJumped();
+	}
+}
