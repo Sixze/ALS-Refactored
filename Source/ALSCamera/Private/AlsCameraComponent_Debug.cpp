@@ -18,9 +18,9 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 	auto MaxVerticalLocation{VerticalLocation};
 	auto HorizontalLocation{5.0f * Scale};
 
-	if (!DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDisplayName()) &&
-	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDisplayName()) &&
-	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDisplayName()))
+	if (!DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDebugDisplayName()) &&
+	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDebugDisplayName()) &&
+	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDebugDisplayName()))
 	{
 		VerticalLocation = MaxVerticalLocation;
 		return;
@@ -30,7 +30,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 
 	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraCurves (Shift + 6)")})};
 
-	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDisplayName()))
+	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDebugDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
 		DisplayDebugCurves(Canvas, Scale, HorizontalLocation, VerticalLocation);
@@ -50,7 +50,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 
 	static const auto ShapesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraShapes (Shift + 7)")})};
 
-	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDisplayName()))
+	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDebugDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, ShapesHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
 		DisplayDebugShapes(Canvas, Scale, HorizontalLocation, VerticalLocation);
@@ -65,7 +65,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 
 	static const auto TracesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraTraces (Shift + 8)")})};
 
-	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDisplayName()))
+	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDebugDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, TracesHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
 		DisplayDebugTraces(Canvas, Scale, HorizontalLocation, VerticalLocation);

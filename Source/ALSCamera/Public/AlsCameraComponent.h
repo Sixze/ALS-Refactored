@@ -91,13 +91,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Camera")
 	void SetRightShoulder(bool bNewRightShoulder);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Pivot Transform"))
 	FTransform GetThirdPersonPivotTransform() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Camera")

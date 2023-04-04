@@ -11,206 +11,206 @@ class ALS_API UAlsConstants : public UBlueprintFunctionLibrary
 public:
 	// Bones
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& RootBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& PelvisBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& HeadBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& Spine03BoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootLeftBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootRightBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& HandLeftGunVirtualBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& HandRightGunVirtualBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootLeftIkBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootRightIkBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootLeftVirtualBoneName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootRightVirtualBoneName();
 
 	// Animation Slots
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots", Meta = (ReturnDisplayName = "Slot Name"))
 	static const FName& TransitionSlotName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots", Meta = (ReturnDisplayName = "Slot Name"))
 	static const FName& TurnInPlaceStandingSlotName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Slots", Meta = (ReturnDisplayName = "Slot Name"))
 	static const FName& TurnInPlaceCrouchingSlotName();
 
 	// Layering Animation Curves
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerHeadCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerHeadAdditiveCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerHeadSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmLeftCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmLeftAdditiveCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmLeftLocalSpaceCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmLeftSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmRightCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmRightAdditiveCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmRightLocalSpaceCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerArmRightSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerHandLeftCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerHandRightCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerSpineCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerSpineAdditiveCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerSpineSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerPelvisCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerPelvisSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerLegsCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LayerLegsSlotCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& HandLeftIkCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& HandRightIkCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& ViewBlockCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& AllowAimingCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& HipsDirectionLockCurveName();
 
 	// Pose Animation Curves
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseGaitCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseMovingCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseStandingCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseCrouchingCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseGroundedCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PoseInAirCurveName();
 
 	// Feet Animation Curves
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootLeftIkCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootLeftLockCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootRightIkCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootRightLockCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootPlantedCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FeetCrossingCurveName();
 
 	// Other Animation Curves
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& RotationYawSpeedCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& RotationYawOffsetCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& AllowTransitionsCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& SprintBlockCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& GroundPredictionBlockCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootstepSoundBlockCurveName();
 
 	// Debug
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& CurvesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& CurvesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& StateDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& StateDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& ShapesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& ShapesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& TracesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& TracesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& MantlingDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& MantlingDebugDisplayName();
 };
 
 inline const FName& UAlsConstants::RootBoneName()
@@ -561,31 +561,31 @@ inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::CurvesDisplayName()
+inline const FName& UAlsConstants::CurvesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.Curves")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::StateDisplayName()
+inline const FName& UAlsConstants::StateDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.State")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::ShapesDisplayName()
+inline const FName& UAlsConstants::ShapesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.Shapes")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::TracesDisplayName()
+inline const FName& UAlsConstants::TracesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.Traces")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::MantlingDisplayName()
+inline const FName& UAlsConstants::MantlingDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.Mantling")};
 	return Name;

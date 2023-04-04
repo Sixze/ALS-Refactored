@@ -444,7 +444,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	bool IsMantlingAllowedToStart() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (ReturnDisplayName = "Success"))
 	bool TryStartMantlingGrounded();
 
 private:
@@ -500,7 +500,7 @@ protected:
 public:
 	bool IsRagdollingAllowedToStop() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (ReturnDisplayName = "Success"))
 	bool TryStopRagdolling();
 
 private:

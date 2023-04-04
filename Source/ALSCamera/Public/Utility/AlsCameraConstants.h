@@ -11,52 +11,52 @@ class ALSCAMERA_API UAlsCameraConstants : public UBlueprintFunctionLibrary
 public:
 	// Animation Curves
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& CameraOffsetXCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& CameraOffsetYCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& CameraOffsetZCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PivotOffsetXCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PivotOffsetYCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PivotOffsetZCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LocationLagXCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LocationLagYCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& LocationLagZCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& RotationLagCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FirstPersonOverrideCurveName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves")
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& TraceOverrideCurveName();
 
 	// Debug
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants")
-	static const FName& CameraCurvesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& CameraCurvesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& CameraShapesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& CameraShapesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants")
-	static const FName& CameraTracesDisplayName();
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& CameraTracesDebugDisplayName();
 };
 
 inline const FName& UAlsCameraConstants::CameraOffsetXCurveName()
@@ -131,19 +131,19 @@ inline const FName& UAlsCameraConstants::TraceOverrideCurveName()
 	return Name;
 }
 
-inline const FName& UAlsCameraConstants::CameraCurvesDisplayName()
+inline const FName& UAlsCameraConstants::CameraCurvesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.CameraCurves")};
 	return Name;
 }
 
-inline const FName& UAlsCameraConstants::CameraShapesDisplayName()
+inline const FName& UAlsCameraConstants::CameraShapesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.CameraShapes")};
 	return Name;
 }
 
-inline const FName& UAlsCameraConstants::CameraTracesDisplayName()
+inline const FName& UAlsCameraConstants::CameraTracesDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.CameraTraces")};
 	return Name;
