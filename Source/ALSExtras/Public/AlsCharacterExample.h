@@ -60,10 +60,10 @@ protected:
 	TObjectPtr<UInputAction> SwitchShoulderAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (ClampMin = 0, ForceUnits = "x"))
-	float LookUpMouseSensitivity{3.0f};
+	float LookUpMouseSensitivity{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character Example", Meta = (ClampMin = 0, ForceUnits = "x"))
-	float LookRightMouseSensitivity{3.0f};
+	float LookRightMouseSensitivity{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character Example",
 		Meta = (ClampMin = 0, ForceUnits = "deg/s"))
