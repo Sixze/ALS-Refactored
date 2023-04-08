@@ -28,13 +28,11 @@ void UAlsAnimNotifyState_EarlyBlendOut::NotifyTick(USkeletalMeshComponent* Mesh,
 	auto* AnimationInstance{IsValid(Montage) ? Mesh->GetAnimInstance() : nullptr};
 	const auto* Character{IsValid(AnimationInstance) ? Cast<AAlsCharacter>(Mesh->GetOwner()) : nullptr};
 
-	// ReSharper disable CppRedundantParentheses
 	if (IsValid(Character) &&
 	    ((bCheckInput && Character->GetLocomotionState().bHasInput) ||
 	     (bCheckLocomotionMode && Character->GetLocomotionMode() == LocomotionModeEquals) ||
 	     (bCheckRotationMode && Character->GetRotationMode() == RotationModeEquals) ||
 	     (bCheckStance && Character->GetStance() == StanceEquals)))
-	// ReSharper restore CppRedundantParentheses
 	{
 		AnimationInstance->Montage_Stop(BlendOutDuration, Montage);
 	}

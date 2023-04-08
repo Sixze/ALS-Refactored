@@ -537,7 +537,6 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.bMoving = Locomotion.bMoving;
 
-	// ReSharper disable once CppRedundantParentheses
 	LocomotionState.bMovingSmooth = (Locomotion.bHasInput && Locomotion.bHasSpeed) ||
 	                                Locomotion.Speed > Settings->General.MovingSmoothSpeedThreshold;
 
@@ -1043,7 +1042,6 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) co
 
 void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const
 {
-	// ReSharper disable once CppRedundantParentheses
 	if ((!bPendingUpdate && !MovementBase.bBaseChanged) || !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
 	{
 		return;

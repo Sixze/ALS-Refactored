@@ -24,7 +24,6 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
 	return !LocomotionAction.IsValid() ||
-	       // ReSharper disable once CppRedundantParentheses
 	       (LocomotionAction == AlsLocomotionActionTags::Rolling &&
 	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
@@ -507,7 +506,6 @@ void AAlsCharacter::RefreshMantling()
 	if (!RootMotionSource.IsValid() ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::Finished) ||
 	    RootMotionSource->Status.HasFlag(ERootMotionSourceStatusFlags::MarkedForRemoval) ||
-	    // ReSharper disable once CppRedundantParentheses
 	    (LocomotionAction.IsValid() && LocomotionAction != AlsLocomotionActionTags::Mantling) ||
 	    GetCharacterMovement()->MovementMode != MOVE_Custom)
 	{
