@@ -20,6 +20,8 @@ The main purpose of this ALS version is is a complete and high-quality refactori
 >
 - Added the ability to disable the use of IK bones and use only virtual bones for all bone manipulation tasks, which can be useful in cases where IK bones are not animated in your custom animations.
 >
+- Added a skeleton asset action that can help set up all the necessary skeleton stuff: animation curves, slots, virtual bones, and so on. Can be accessed by right clicking on the skeleton asset -> Scripted Asset Actions -> Setup Als Skeleton.
+>
 - Reworked foot locking to make it more performant and reliable, especially in network multiplayer.
 >
 - Reworked foot and pelvis offset logic for smoother character movement on stairs or sloped surfaces.
