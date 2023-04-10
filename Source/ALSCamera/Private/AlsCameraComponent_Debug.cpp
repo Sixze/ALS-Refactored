@@ -3,6 +3,7 @@
 #include "DisplayDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/Canvas.h"
+#include "Engine/Engine.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsUtility.h"
 

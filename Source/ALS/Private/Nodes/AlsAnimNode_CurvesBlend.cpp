@@ -1,5 +1,6 @@
 #include "Nodes/AlsAnimNode_CurvesBlend.h"
 
+#include "Animation/AnimTrace.h"
 #include "Utility/AlsEnumUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNode_CurvesBlend)

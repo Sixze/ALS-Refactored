@@ -2,6 +2,7 @@
 
 #include "Camera/CameraShakeBase.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_CameraShake)

@@ -2,6 +2,7 @@
 
 #include "Animation/BlendProfile.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Logging/MessageLog.h"
 #include "Misc/UObjectToken.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"

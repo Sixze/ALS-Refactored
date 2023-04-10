@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-#include "Settings/AlsMantlingSettings.h"
 #include "State/AlsLocomotionState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsRagdollingState.h"
@@ -10,10 +9,13 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsCharacter.generated.h"
 
+struct FAlsMantlingParameters;
+struct FAlsMantlingTraceSettings;
 class UAlsCharacterMovementComponent;
 class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
+class UAlsMantlingSettings;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter

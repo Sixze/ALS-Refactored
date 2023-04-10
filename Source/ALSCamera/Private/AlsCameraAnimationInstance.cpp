@@ -2,6 +2,7 @@
 
 #include "AlsCameraComponent.h"
 #include "AlsCharacter.h"
+#include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraAnimationInstance)
 

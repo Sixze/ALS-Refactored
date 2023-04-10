@@ -4,7 +4,7 @@
 #include "Engine/DataAsset.h"
 #include "AlsAnimNotify_FootstepEffects.generated.h"
 
-enum ETraceTypeQuery;
+enum ETraceTypeQuery : int;
 enum EPhysicalSurface : int;
 class USoundBase;
 class UMaterialInterface;

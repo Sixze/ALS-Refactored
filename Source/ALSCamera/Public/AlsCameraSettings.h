@@ -5,8 +5,6 @@
 #include "Utility/AlsConstants.h"
 #include "AlsCameraSettings.generated.h"
 
-enum ETraceTypeQuery;
-
 USTRUCT(BlueprintType)
 struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 {

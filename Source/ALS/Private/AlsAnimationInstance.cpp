@@ -2,6 +2,7 @@
 
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
+#include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
