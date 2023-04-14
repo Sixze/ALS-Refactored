@@ -21,7 +21,7 @@ void AAlsCharacter::TryStartRolling(const float PlayRate)
 	{
 		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle
-			                       : UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(GetActorRotation().Yaw)));
+			                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
 	}
 }
 
@@ -46,7 +46,7 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 		return;
 	}
 
-	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(GetActorRotation().Yaw))};
+	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
@@ -124,7 +124,7 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 	else
 	{
-		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(TargetRotation.Yaw)),
+		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
 		                                                     RollingState.TargetYawAngle, DeltaTime,
 		                                                     Settings->Rolling.RotationInterpolationSpeed);
 
@@ -157,7 +157,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	}
 
 	const auto ActorLocation{GetActorLocation()};
-	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator3d::NormalizeAxis(GetActorRotation().Yaw))};
+	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 
 	float ForwardTraceAngle;
 	if (LocomotionState.bHasSpeed)
