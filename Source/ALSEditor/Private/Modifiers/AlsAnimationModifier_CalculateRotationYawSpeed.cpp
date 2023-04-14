@@ -16,17 +16,20 @@ void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAn
 
 	UAnimationBlueprintLibrary::AddCurve(Sequence, UAlsConstants::RotationYawSpeedCurveName());
 
+	const auto* DataModel{Sequence->GetDataModel()};
 	const auto FrameRate{Sequence->GetSamplingFrameRate().AsDecimal()};
 
-	FTransform CurrentPoseTransform;
-	FTransform NextPoseTransform;
+	UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, UAlsConstants::RotationYawSpeedCurveName(), 0.0f, 0.0f);
 
-	for (auto i{0}; i < Sequence->GetNumberOfSampledKeys(); i++)
+	for (auto i{1}; i < Sequence->GetNumberOfSampledKeys(); i++)
 	{
-		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBoneName(), i, false, CurrentPoseTransform);
+		auto CurrentPoseTransform{
+			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? -1 : 0))
+		};
 
-		UAnimationBlueprintLibrary::GetBonePoseForFrame(Sequence, UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? 1 : -1),
-		                                                false, NextPoseTransform);
+		auto NextPoseTransform{
+			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? 0 : -1))
+		};
 
 		UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, UAlsConstants::RotationYawSpeedCurveName(), Sequence->GetTimeAtFrame(i),
 		                                             UE_REAL_TO_FLOAT(
