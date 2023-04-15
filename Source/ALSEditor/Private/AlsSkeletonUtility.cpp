@@ -13,7 +13,7 @@
 
 namespace AlsSkeletonUtility
 {
-	static void LogMissingBoneWarning(const USkeleton* Skeleton, const FName& BoneName, const FString& FunctionName)
+	void LogMissingBoneWarning(const USkeleton* Skeleton, const FName& BoneName, const FString& FunctionName)
 	{
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 

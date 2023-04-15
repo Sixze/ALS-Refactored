@@ -4,34 +4,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsMath)
 
-template <typename ValueType, typename StateType>
-ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
-                               const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
-{
-	if (DeltaTime <= UE_SMALL_NUMBER)
-	{
-		return Current;
-	}
-
-	if (!SpringState.bStateValid)
-	{
-		SpringState.Velocity = ValueType{0.0f};
-		SpringState.PreviousTarget = Target;
-		SpringState.bStateValid = true;
-
-		return Target;
-	}
-
-	ValueType Result{Current};
-	FMath::SpringDamper(Result, SpringState.Velocity, Target,
-	                    (Target - SpringState.PreviousTarget) * (Clamp01(TargetVelocityAmount) / DeltaTime),
-	                    DeltaTime, Frequency, DampingRatio);
-
-	SpringState.PreviousTarget = Target;
-
-	return Result;
-}
-
 float UAlsMath::SpringDampFloat(const float Current, const float Target, FAlsSpringFloatState& SpringState, const float DeltaTime,
                                 const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {

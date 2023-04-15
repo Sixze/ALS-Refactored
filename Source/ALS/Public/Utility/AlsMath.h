@@ -57,7 +57,7 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	inline static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
+	static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Math", Meta = (ReturnDisplayName = "Value"))
@@ -298,6 +298,34 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 	const auto Alpha{InterpolationSpeed * DeltaTime};
 
 	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -Alpha, Alpha));
+}
+
+template <typename ValueType, typename StateType>
+ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
+                               const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
+{
+	if (DeltaTime <= UE_SMALL_NUMBER)
+	{
+		return Current;
+	}
+
+	if (!SpringState.bStateValid)
+	{
+		SpringState.Velocity = ValueType{0.0f};
+		SpringState.PreviousTarget = Target;
+		SpringState.bStateValid = true;
+
+		return Target;
+	}
+
+	ValueType Result{Current};
+	FMath::SpringDamper(Result, SpringState.Velocity, Target,
+	                    (Target - SpringState.PreviousTarget) * (Clamp01(TargetVelocityAmount) / DeltaTime),
+	                    DeltaTime, Frequency, DampingRatio);
+
+	SpringState.PreviousTarget = Target;
+
+	return Result;
 }
 
 inline FVector UAlsMath::ClampMagnitude01(const FVector& Vector)
