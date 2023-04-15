@@ -121,6 +121,11 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	static TArray<FName> CurveNames;
 	check(CurveNames.IsEmpty())
 
+	ON_SCOPE_EXIT
+	{
+		CurveNames.Reset();
+	};
+
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
@@ -145,8 +150,6 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 
 		VerticalLocation += RowOffset;
 	}
-
-	CurveNames.Reset();
 }
 
 void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,

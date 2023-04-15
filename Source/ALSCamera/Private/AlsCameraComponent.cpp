@@ -513,6 +513,11 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.IsEmpty())
 
+	ON_SCOPE_EXIT
+	{
+		Overlaps.Reset();
+	};
+
 	static const FName OverlapMultiTraceTag{FString::Printf(TEXT("%hs (Overlap Multi)"), __FUNCTION__)};
 
 	if (!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, TraceChanel,
@@ -538,7 +543,6 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 		if (OverlapBodyInstance == nullptr ||
 		    !OverlapBodyInstance->OverlapTest(Location, FQuat::Identity, CollisionShape, &MtdResult))
 		{
-			Overlaps.Reset();
 			return false;
 		}
 
@@ -548,8 +552,6 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 			bAnyValidBlock = true;
 		}
 	}
-
-	Overlaps.Reset();
 
 	if (!bAnyValidBlock)
 	{

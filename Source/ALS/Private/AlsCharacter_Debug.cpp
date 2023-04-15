@@ -169,6 +169,11 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	static TArray<FName> CurveNames;
 	check(CurveNames.IsEmpty())
 
+	ON_SCOPE_EXIT
+	{
+		CurveNames.Reset();
+	};
+
 	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
@@ -193,8 +198,6 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 
 		VerticalLocation += RowOffset;
 	}
-
-	CurveNames.Reset();
 }
 
 void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
