@@ -426,16 +426,14 @@ void UAlsAnimationInstance::RefreshLookTowardsInput()
 			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
 		}
 
-		const auto InterpolationAmount{
-			UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->View.LookTowardsInputYawAngleInterpolationSpeed)
-		};
-
-		LookTowardsInput.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
+		LookTowardsInput.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle);
 	}
-
+	
 	LookTowardsInput.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + LookTowardsInput.YawAngle);
 
-	LookTowardsInput.YawAmount = LookTowardsInput.YawAngle / 360.0f + 0.5f;
+	const auto TargetYawAmount = LookTowardsInput.YawAngle / 360.0f + 0.5f;
+	LookTowardsInput.YawAmount = UAlsMath::ExponentialDecay(LookTowardsInput.YawAmount, TargetYawAmount,
+		GetDeltaSeconds(), Settings->View.LookTowardsInputYawAngleInterpolationSpeed);
 
 	LookTowardsInput.bReinitializationRequired = false;
 }
