@@ -24,7 +24,7 @@ class ALSEDITOR_API UAlsSkeletonUtility : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Skeleton Utility", Meta = (AutoCreateRefTerm = "CurveNames"))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Als Skeleton Utility")
 	static void AddAnimationCurves(USkeleton* Skeleton, const TArray<FName>& CurveNames);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Skeleton Utility")

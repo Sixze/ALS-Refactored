@@ -20,13 +20,6 @@ struct ALS_API FAlsSpringFloatState
 	void Reset();
 };
 
-inline void FAlsSpringFloatState::Reset()
-{
-	Velocity = 0.f;
-	PreviousTarget = 0.f;
-	bStateValid = false;
-}
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsSpringVectorState
 {
@@ -43,13 +36,6 @@ struct ALS_API FAlsSpringVectorState
 
 	void Reset();
 };
-
-inline void FAlsSpringVectorState::Reset()
-{
-	Velocity = FVector::ZeroVector;
-	PreviousTarget = FVector::ZeroVector;
-	bStateValid = false;
-}
 
 UCLASS()
 class ALS_API UAlsMath : public UBlueprintFunctionLibrary
@@ -155,6 +141,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Math|Input", Meta = (ReturnDisplayName = "Direction"))
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
 };
+
+inline void FAlsSpringFloatState::Reset()
+{
+	Velocity = 0.f;
+	PreviousTarget = 0.f;
+	bStateValid = false;
+}
+
+inline void FAlsSpringVectorState::Reset()
+{
+	Velocity = FVector::ZeroVector;
+	PreviousTarget = FVector::ZeroVector;
+	bStateValid = false;
+}
 
 inline float UAlsMath::Clamp01(const float Value)
 {

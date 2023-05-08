@@ -93,9 +93,9 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	if (EffectSettings == nullptr)
 	{
-		for (const auto& Pair : FootstepEffectsSettings->Effects)
+		for (const auto& Tuple : FootstepEffectsSettings->Effects)
 		{
-			EffectSettings = &Pair.Value;
+			EffectSettings = &Tuple.Value;
 			break;
 		}
 

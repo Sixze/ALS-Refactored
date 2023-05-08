@@ -668,7 +668,7 @@ void AAlsCharacter::SetRagdollTargetLocation(const FVector& NewTargetLocation)
 
 		if (GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			ServerSetRagdollTargetLocation(NewTargetLocation);
+			ServerSetRagdollTargetLocation(RagdollTargetLocation);
 		}
 	}
 }
