@@ -1105,7 +1105,22 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
 	NewInputDirection = NewInputDirection.GetSafeNormal();
 
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
+	if (NewInputDirection != InputDirection)
+	{
+		InputDirection = NewInputDirection;
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InputDirection, this)
+
+		if (GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			ServerSetInputDirection(NewInputDirection);
+		}
+	}
+}
+
+void AAlsCharacter::ServerSetInputDirection_Implementation(const FVector& NewInputDirection)
+{
+	SetInputDirection(NewInputDirection);
 }
 
 void AAlsCharacter::SetDesiredVelocityYawAngle(const float NewDesiredVelocityYawAngle)
@@ -1177,18 +1192,17 @@ void AAlsCharacter::RefreshLocomotionEarly()
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 {
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
-	{
-		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
-	}
-
 	// If the character has the input, update the input yaw angle.
 
 	LocomotionState.bHasInput = InputDirection.SizeSquared() > UE_KINDA_SMALL_NUMBER;
 
 	if (LocomotionState.bHasInput)
 	{
-		LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(InputDirection));
+		const auto LocalInputAngle = UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(InputDirection));
+
+		const auto RotationYaw = UE_REAL_TO_FLOAT(GetViewState().Rotation.Yaw);
+		
+		LocomotionState.InputYawAngle = FRotator3f::NormalizeAxis(LocalInputAngle + RotationYaw);
 	}
 
 	LocomotionState.Velocity = GetVelocity();

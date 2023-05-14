@@ -343,8 +343,11 @@ public:
 
 	const FAlsLocomotionState& GetLocomotionState() const;
 
-private:
 	void SetInputDirection(FVector NewInputDirection);
+
+private:
+	UFUNCTION(Server, Reliable)
+	void ServerSetInputDirection(const FVector& NewInputDirection);
 
 	void SetDesiredVelocityYawAngle(float NewDesiredVelocityYawAngle);
 
