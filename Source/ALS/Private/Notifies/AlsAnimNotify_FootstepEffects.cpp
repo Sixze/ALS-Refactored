@@ -168,9 +168,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	if (bSpawnDecal && IsValid(EffectSettings->DecalMaterial.LoadSynchronous()))
 	{
 		const auto DecalRotation{
-			FootstepRotation * (FootBone == EAlsFootBone::Left
-				                    ? EffectSettings->DecalFootLeftRotationOffset
-				                    : EffectSettings->DecalFootRightRotationOffset).Quaternion()
+			FootstepRotation * FQuat{
+				(FootBone == EAlsFootBone::Left
+					 ? EffectSettings->DecalFootLeftRotationOffset
+					 : EffectSettings->DecalFootRightRotationOffset).Quaternion()
+			}
 		};
 
 		const auto DecalLocation{
@@ -206,9 +208,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 			case EAlsFootstepParticleEffectSpawnMode::SpawnAtTraceHitLocation:
 			{
 				const auto ParticleSystemRotation{
-					FootstepRotation * (FootBone == EAlsFootBone::Left
-						                    ? EffectSettings->ParticleSystemFootLeftRotationOffset
-						                    : EffectSettings->ParticleSystemFootRightRotationOffset).Quaternion()
+					FootstepRotation * FQuat{
+						(FootBone == EAlsFootBone::Left
+							 ? EffectSettings->ParticleSystemFootLeftRotationOffset
+							 : EffectSettings->ParticleSystemFootRightRotationOffset).Quaternion()
+					}
 				};
 
 				const auto ParticleSystemLocation{
@@ -225,9 +229,11 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 			case EAlsFootstepParticleEffectSpawnMode::SpawnAttachedToFootBone:
 				UNiagaraFunctionLibrary::SpawnSystemAttached(EffectSettings->ParticleSystem.Get(), Mesh, FootBoneName,
 				                                             FVector{EffectSettings->ParticleSystemLocationOffset} * MeshScale,
-				                                             FootBone == EAlsFootBone::Left
-					                                             ? EffectSettings->ParticleSystemFootLeftRotationOffset
-					                                             : EffectSettings->ParticleSystemFootRightRotationOffset,
+				                                             FRotator{
+					                                             FootBone == EAlsFootBone::Left
+						                                             ? EffectSettings->ParticleSystemFootLeftRotationOffset
+						                                             : EffectSettings->ParticleSystemFootRightRotationOffset
+				                                             },
 				                                             FVector::OneVector * MeshScale, EAttachLocation::KeepRelativeOffset,
 				                                             true, ENCPoolMethod::AutoRelease);
 				break;

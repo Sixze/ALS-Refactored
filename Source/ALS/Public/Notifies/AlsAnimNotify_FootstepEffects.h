@@ -76,10 +76,10 @@ struct ALS_API FAlsFootstepEffectSettings
 	FVector3f DecalLocationOffset{0.0f, -10.0f, -1.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator DecalFootLeftRotationOffset{90.0f, -90.0f, 180.0f};
+	FRotator3f DecalFootLeftRotationOffset{90.0f, -90.0f, 180.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator DecalFootRightRotationOffset{-90.0f, 90.0f, 0.0f};
+	FRotator3f DecalFootRightRotationOffset{-90.0f, 90.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
@@ -91,10 +91,10 @@ struct ALS_API FAlsFootstepEffectSettings
 	FVector3f ParticleSystemLocationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator ParticleSystemFootLeftRotationOffset{ForceInit};
+	FRotator3f ParticleSystemFootLeftRotationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator ParticleSystemFootRightRotationOffset{ForceInit};
+	FRotator3f ParticleSystemFootRightRotationOffset{ForceInit};
 };
 
 UCLASS(Blueprintable, BlueprintType)
