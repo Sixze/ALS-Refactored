@@ -869,8 +869,8 @@ bool AAlsCharacter::CanSprint() const
 
 	static constexpr auto ViewRelativeAngleThreshold{50.0f};
 
-	if (FMath::Abs(FRotator3f::NormalizeAxis(
-		    LocomotionState.InputYawAngle - UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw))) < ViewRelativeAngleThreshold)
+	if (FMath::Abs(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		    LocomotionState.InputYawAngle - ViewState.Rotation.Yaw))) < ViewRelativeAngleThreshold)
 	{
 		return true;
 	}
@@ -1052,7 +1052,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided by
 	// delta seconds. This represents the speed the camera is rotating from left to right.
 
-	ViewState.YawSpeed = FMath::Abs(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - ViewState.PreviousYawAngle) / DeltaTime;
+	ViewState.YawSpeed = FMath::Abs(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ViewState.PreviousYawAngle)) / DeltaTime;
 }
 
 void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
@@ -1235,8 +1235,8 @@ void AAlsCharacter::RefreshLocomotionLate(const float DeltaTime)
 		RefreshTargetYawAngleUsingLocomotionRotation();
 	}
 
-	LocomotionState.YawSpeed = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw) -
-	                                                     LocomotionState.PreviousYawAngle) / DeltaTime;
+	LocomotionState.YawSpeed = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		                           LocomotionState.Rotation.Yaw - LocomotionState.PreviousYawAngle)) / DeltaTime;
 }
 
 void AAlsCharacter::Jump()
@@ -1369,8 +1369,8 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		const auto TargetYawAngle{
 			Gait == AlsGaitTags::Sprinting
 				? LocomotionState.VelocityYawAngle
-				: UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) +
-				  GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName())
+				: UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw +
+					GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName()))
 		};
 
 		static constexpr auto TargetYawAngleRotationSpeed{500.0f};
@@ -1433,10 +1433,8 @@ void AAlsCharacter::RefreshGroundedNotMovingAimingRotation(const float DeltaTime
 			ViewRelativeYawAngle -= 360.0f;
 		}
 
-		RefreshRotation(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) +
-		                                          (ViewRelativeYawAngle >= 0.0f
-			                                           ? -ViewRelativeYawAngleThreshold
-			                                           : ViewRelativeYawAngleThreshold)),
+		RefreshRotation(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw +
+			                (ViewRelativeYawAngle >= 0.0f ? -ViewRelativeYawAngleThreshold : ViewRelativeYawAngleThreshold))),
 		                DeltaTime, RotationInterpolationSpeed);
 	}
 	else
@@ -1513,9 +1511,9 @@ void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 				break;
 
 			case EAlsInAirRotationMode::KeepRelativeRotation:
-				RefreshRotation(
-					FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - LocomotionState.ViewRelativeTargetYawAngle),
-					DeltaTime, RotationInterpolationSpeed);
+				RefreshRotation(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+					                ViewState.Rotation.Yaw - LocomotionState.ViewRelativeTargetYawAngle)),
+				                DeltaTime, RotationInterpolationSpeed);
 				break;
 
 			default:
@@ -1607,6 +1605,6 @@ void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
 
 void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
-	LocomotionState.ViewRelativeTargetYawAngle =
-		FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) - LocomotionState.TargetYawAngle);
+	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
 }

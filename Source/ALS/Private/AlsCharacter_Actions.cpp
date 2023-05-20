@@ -107,6 +107,7 @@ void AAlsCharacter::RefreshRolling(const float DeltaTime)
 	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 {
 	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
@@ -711,7 +712,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	static constexpr auto Stiffness{25000.0f};
 
 	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(UE_REAL_TO_FLOAT(
-		                                          RagdollingState.RootBoneVelocity.Size()) / ReferenceSpeed) * Stiffness,
+		                                          RagdollingState.RootBoneVelocity.Size() / ReferenceSpeed)) * Stiffness,
 	                                          0.0f, 0.0f, false);
 
 	RefreshRagdollingActorTransform(DeltaTime);
