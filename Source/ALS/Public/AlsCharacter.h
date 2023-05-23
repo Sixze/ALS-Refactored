@@ -159,9 +159,9 @@ public:
 public:
 	const FGameplayTag& GetLocomotionMode() const;
 
-private:
 	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
-
+	
+private:	
 	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
 protected:
