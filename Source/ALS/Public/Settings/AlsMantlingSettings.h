@@ -73,16 +73,6 @@ public:
 	float GetPlayRateForHeight(float MantlingHeight) const;
 };
 
-inline float UAlsMantlingSettings::GetStartTimeForHeight(const float MantlingHeight) const
-{
-	return FMath::GetMappedRangeValueClamped(ReferenceHeight, StartTime, MantlingHeight);
-}
-
-inline float UAlsMantlingSettings::GetPlayRateForHeight(const float MantlingHeight) const
-{
-	return FMath::GetMappedRangeValueClamped(ReferenceHeight, PlayRate, MantlingHeight);
-}
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMantlingTraceSettings
 {
@@ -140,3 +130,13 @@ public:
 	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
 #endif
 };
+
+inline float UAlsMantlingSettings::GetStartTimeForHeight(const float MantlingHeight) const
+{
+	return FMath::GetMappedRangeValueClamped(ReferenceHeight, StartTime, MantlingHeight);
+}
+
+inline float UAlsMantlingSettings::GetPlayRateForHeight(const float MantlingHeight) const
+{
+	return FMath::GetMappedRangeValueClamped(ReferenceHeight, PlayRate, MantlingHeight);
+}

@@ -1,6 +1,7 @@
 #include "Notifies/AlsAnimNotify_SetGroundedEntryMode.h"
 
 #include "AlsAnimationInstance.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_SetGroundedEntryMode)

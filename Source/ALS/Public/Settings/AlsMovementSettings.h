@@ -36,26 +36,6 @@ public:
 	float GetSpeedForGait(const FGameplayTag& Gait) const;
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& Gait) const
-{
-	if (Gait == AlsGaitTags::Walking)
-	{
-		return WalkSpeed;
-	}
-
-	if (Gait == AlsGaitTags::Running)
-	{
-		return RunSpeed;
-	}
-
-	if (Gait == AlsGaitTags::Sprinting)
-	{
-		return SprintSpeed;
-	}
-
-	return 0.0f;
-}
-
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMovementStanceSettings
 {
@@ -83,3 +63,23 @@ public:
 		{AlsRotationModeTags::Aiming, {}}
 	};
 };
+
+inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& Gait) const
+{
+	if (Gait == AlsGaitTags::Walking)
+	{
+		return WalkSpeed;
+	}
+
+	if (Gait == AlsGaitTags::Running)
+	{
+		return RunSpeed;
+	}
+
+	if (Gait == AlsGaitTags::Sprinting)
+	{
+		return SprintSpeed;
+	}
+
+	return 0.0f;
+}

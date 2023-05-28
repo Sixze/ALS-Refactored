@@ -11,10 +11,10 @@ class ALS_API UAlsUtility : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	inline static constexpr auto DrawImpactPointSize{32.0f};
-	inline static constexpr auto DrawLineThickness{1.0f};
-	inline static constexpr auto DrawArrowSize{50.0f};
-	inline static constexpr auto DrawCircleSidesCount{16};
+	static constexpr auto DrawImpactPointSize{32.0f};
+	static constexpr auto DrawLineThickness{1.0f};
+	static constexpr auto DrawArrowSize{50.0f};
+	static constexpr auto DrawCircleSidesCount{16};
 
 public:
 	static constexpr FStringView BoolToString(bool bValue);

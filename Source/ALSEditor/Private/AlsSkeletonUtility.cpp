@@ -2,6 +2,7 @@
 
 #include "Animation/BlendProfile.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Logging/MessageLog.h"
 #include "Misc/UObjectToken.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
@@ -12,7 +13,7 @@
 
 namespace AlsSkeletonUtility
 {
-	static void LogMissingBoneWarning(const USkeleton* Skeleton, const FName& BoneName, const FString& FunctionName)
+	void LogMissingBoneWarning(const USkeleton* Skeleton, const FName& BoneName, const FString& FunctionName)
 	{
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 
@@ -175,10 +176,13 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 		static TArray<FName> BoneNames;
 		check(BoneNames.IsEmpty())
 
+		ON_SCOPE_EXIT
+		{
+			BoneNames.Reset();
+		};
+
 		BoneNames.Add(VirtualBoneName);
 		Skeleton->RemoveVirtualBones(BoneNames);
-
-		BoneNames.Reset();
 	}
 
 	FName TempVirtualBoneName;

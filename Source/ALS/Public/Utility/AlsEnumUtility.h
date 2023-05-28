@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include "Containers/UnrealString.h"
+#include "UObject/ReflectedTypeAccessors.h"
+
 namespace AlsEnumUtility
 {
 	template <typename EnumType>
