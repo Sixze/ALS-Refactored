@@ -596,7 +596,11 @@ void AAlsCharacter::StartRagdollingImplementation()
 	}
 
 	GetMesh()->bUpdateJointsFromAnimation = true; // Required for the flail animation to work properly.
-	GetMesh()->UpdateRBJointMotors();
+
+	if (!GetMesh()->IsRunningParallelEvaluation() && GetMesh()->GetBoneSpaceTransforms().Num() > 0)
+	{
+		GetMesh()->UpdateRBJointMotors();
+	}
 
 	if (!IsNetMode(NM_Client))
 	{
