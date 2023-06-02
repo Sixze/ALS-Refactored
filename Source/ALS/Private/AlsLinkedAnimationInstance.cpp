@@ -53,35 +53,19 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
-void UAlsLinkedAnimationInstance::ReinitializeLookTowardsInput()
+void UAlsLinkedAnimationInstance::ReinitializeLook()
 {
 	if (Parent.IsValid())
 	{
-		Parent->ReinitializeLookTowardsInput();
+		Parent->ReinitializeLook();
 	}
 }
 
-void UAlsLinkedAnimationInstance::RefreshLookTowardsInput()
+void UAlsLinkedAnimationInstance::RefreshLook()
 {
 	if (Parent.IsValid())
 	{
-		Parent->RefreshLookTowardsInput();
-	}
-}
-
-void UAlsLinkedAnimationInstance::ReinitializeLookTowardsCamera()
-{
-	if (Parent.IsValid())
-	{
-		Parent->ReinitializeLookTowardsCamera();
-	}
-}
-
-void UAlsLinkedAnimationInstance::RefreshLookTowardsCamera()
-{
-	if (Parent.IsValid())
-	{
-		Parent->RefreshLookTowardsCamera();
+		Parent->RefreshLook();
 	}
 }
 

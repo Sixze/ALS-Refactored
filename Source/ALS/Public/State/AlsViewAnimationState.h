@@ -3,25 +3,7 @@
 #include "AlsViewAnimationState.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsLookTowardsInputState
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bReinitializationRequired{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float WorldYawAngle{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float YawAngle{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float YawAmount{0.5f};
-};
-
-USTRUCT(BlueprintType)
-struct ALS_API FAlsLookTowardsCameraState
+struct ALS_API FAlsLookState
 {
 	GENERATED_BODY()
 
@@ -98,8 +80,5 @@ struct ALS_API FAlsViewAnimationState
 	FAlsSpineRotationState SpineRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsLookTowardsInputState LookTowardsInput;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsLookTowardsCameraState LookTowardsCamera;
+	FAlsLookState Look;
 };

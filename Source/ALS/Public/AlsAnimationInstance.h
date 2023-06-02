@@ -167,16 +167,10 @@ private:
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLookTowardsInput();
+	void ReinitializeLook();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void RefreshLookTowardsInput();
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLookTowardsCamera();
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void RefreshLookTowardsCamera();
+	void RefreshLook();
 
 	// Locomotion
 
