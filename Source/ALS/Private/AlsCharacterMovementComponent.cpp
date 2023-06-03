@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
+#include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "Utility/AlsMacros.h"
 
