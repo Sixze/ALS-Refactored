@@ -27,6 +27,15 @@ void UAlsCameraComponent::OnRegister()
 	Super::OnRegister();
 }
 
+void UAlsCameraComponent::RegisterComponentTickFunctions(const bool bRegister)
+{
+	Super::RegisterComponentTickFunctions(bRegister);
+
+	// Tick after the owner to have access to the most up-to-date character state.
+
+	AddTickPrerequisiteActor(GetOwner());
+}
+
 void UAlsCameraComponent::Activate(const bool bReset)
 {
 	if (!bReset && !ShouldActivate())
@@ -92,13 +101,10 @@ FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
 }
 
-FTransform UAlsCameraComponent::GetThirdPersonPivotTransform() const
+FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
 {
-	return {
-		GetComponentRotation(),
-		(Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
-		 Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f
-	};
+	return (Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
+	        Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
 }
 
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
@@ -180,9 +186,8 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	const auto CameraTargetRotation{Character->GetViewRotation()};
 
 	const auto PreviousPivotTargetLocation{PivotTargetLocation};
-	const auto PivotTargetTransform{GetThirdPersonPivotTransform()};
 
-	PivotTargetLocation = PivotTargetTransform.GetLocation();
+	PivotTargetLocation = GetThirdPersonPivotLocation();
 
 	const auto FirstPersonOverride{
 		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
@@ -258,7 +263,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	// Calculate pivot location.
 
-	const auto PivotOffset{CalculatePivotOffset(PivotTargetTransform.GetRotation())};
+	const auto PivotOffset{CalculatePivotOffset()};
 
 	PivotLocation = PivotLagLocation + PivotOffset;
 
@@ -396,9 +401,9 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	}
 }
 
-FVector UAlsCameraComponent::CalculatePivotOffset(const FQuat& PivotTargetRotation) const
+FVector UAlsCameraComponent::CalculatePivotOffset() const
 {
-	return PivotTargetRotation.RotateVector(
+	return Character->GetMesh()->GetComponentQuat().RotateVector(
 		FVector{
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurveName()),
 			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurveName()),

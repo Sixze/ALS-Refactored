@@ -71,6 +71,8 @@ public:
 
 	virtual void OnRegister() override;
 
+	virtual void RegisterComponentTickFunctions(bool bRegister) override;
+
 	virtual void Activate(bool bReset) override;
 
 	virtual void InitAnim(bool bForceReinitialize) override;
@@ -94,8 +96,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Pivot Transform"))
-	FTransform GetThirdPersonPivotTransform() const;
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Pivot Location"))
+	FVector GetThirdPersonPivotLocation() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
@@ -110,7 +112,7 @@ private:
 
 	FVector CalculatePivotLagLocation(const FQuat& CameraYawRotation, float DeltaTime, bool bAllowLag) const;
 
-	FVector CalculatePivotOffset(const FQuat& PivotTargetRotation) const;
+	FVector CalculatePivotOffset() const;
 
 	FVector CalculateCameraOffset() const;
 

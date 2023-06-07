@@ -115,7 +115,7 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 void AAlsCharacter::PostInitializeComponents()
 {
-	// Make sure the mesh and animation blueprint update after the character to guarantee it gets the most recent values.
+	// Make sure the mesh and animation blueprint are ticking after the character so they can access the most up-to-date character state.
 
 	GetMesh()->AddTickPrerequisiteActor(this);
 

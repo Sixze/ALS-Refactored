@@ -150,6 +150,11 @@ protected:
 
 	virtual FVector ConsumeInputVector() override;
 
+public:
+	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,
+	                              float SweepRadius, const FHitResult* DownwardSweepResult) const override;
+
+protected:
 	virtual void PerformMovement(float DeltaTime) override;
 
 public:
@@ -159,9 +164,6 @@ protected:
 	virtual void SmoothClientPosition(float DeltaTime) override;
 
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
-
-	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,
-	                              float SweepRadius, const FHitResult* DownwardSweepResult) const override;
 
 private:
 	void SavePenetrationAdjustment(const FHitResult& Hit);
