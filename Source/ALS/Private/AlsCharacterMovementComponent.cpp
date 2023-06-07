@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterMovementComponent)
 
@@ -120,6 +121,8 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 {
 	SetNetworkMoveDataContainer(MoveDataContainer);
 
+	bTickBeforeOwner = true;
+
 	// NetworkMaxSmoothUpdateDistance = 92.0f;
 	// NetworkNoSmoothUpdateDistance = 140.0f;
 
@@ -134,6 +137,12 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	MaxWalkSpeedCrouched = 200.0f;
 	MinAnalogWalkSpeed = 25.0f;
 	bCanWalkOffLedgesWhenCrouching = true;
+
+	// bImpartBaseVelocityX = false;
+	// bImpartBaseVelocityY = false;
+	// bImpartBaseVelocityZ = false;
+	// bImpartBaseAngularVelocity = false;
+
 	bIgnoreBaseRotation = true;
 
 	PerchRadiusThreshold = 20.0f;
@@ -220,6 +229,19 @@ void UAlsCharacterMovementComponent::UpdateBasedRotation(FRotator& FinalRotation
 
 		CharacterOwner->Controller->SetControlRotation(NewControlRotation);
 	}
+}
+
+void UAlsCharacterMovementComponent::CalcVelocity(const float DeltaTime, const float Friction,
+                                                  const bool bFluid, const float BrakingDeceleration)
+{
+	FRotator BaseRotationSpeed;
+	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
+	{
+		// Offset the velocity to keep it relative to the movement base.
+		Velocity = (BaseRotationSpeed * DeltaTime).RotateVector(Velocity);
+	}
+
+	Super::CalcVelocity(DeltaTime, Friction, bFluid, BrakingDeceleration);
 }
 
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
@@ -555,6 +577,20 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
 	Super::PhysCustom(DeltaTime, Iterations);
+}
+
+FVector UAlsCharacterMovementComponent::ConsumeInputVector()
+{
+	auto InputVector{Super::ConsumeInputVector()};
+
+	FRotator BaseRotationSpeed;
+	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
+	{
+		// Offset the input vector to keep it relative to the movement base.
+		InputVector = (BaseRotationSpeed * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
+	}
+
+	return InputVector;
 }
 
 void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)

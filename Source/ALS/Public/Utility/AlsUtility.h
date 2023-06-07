@@ -3,6 +3,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AlsUtility.generated.h"
 
+struct FBasedMovementInfo;
+
 DECLARE_STATS_GROUP(TEXT("Als"), STATGROUP_Als, STATCAT_Advanced)
 
 UCLASS()
@@ -34,6 +36,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext", ReturnDisplayName = "Ping"))
 	static float GetFirstPlayerPingSeconds(const UObject* WorldContext);
+
+	static bool TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& BasedMovement, FRotator& RotationSpeed);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Utility",
 		Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName", ReturnDisplayName = "Value"))

@@ -129,6 +129,8 @@ public:
 
 	virtual void UpdateBasedRotation(FRotator& FinalRotation, const FRotator& ReducedRotation) override;
 
+	virtual void CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration) override;
+
 	virtual float GetMaxAcceleration() const override;
 
 	virtual float GetMaxBrakingDeceleration() const override;
@@ -145,6 +147,8 @@ protected:
 	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
 
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
+
+	virtual FVector ConsumeInputVector() override;
 
 	virtual void PerformMovement(float DeltaTime) override;
 
