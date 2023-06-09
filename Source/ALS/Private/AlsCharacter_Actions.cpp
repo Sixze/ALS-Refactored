@@ -635,20 +635,24 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
 
-	// Limit ragdoll speed to a few frames, because for some unclear reason,
-	// it can get a much higher initial speed than the character's last speed.
-
-	// TODO Find a better solution or wait for a fix in future engine versions.
-
-	static constexpr auto MinSpeedLimit{200.0f};
-
-	RagdollingState.SpeedLimitFrameTimeRemaining = 8;
-	RagdollingState.SpeedLimit = FMath::Max(LocomotionState.Velocity.Size(), MinSpeedLimit);
-
-	GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [SpeedLimit = RagdollingState.SpeedLimit](FBodyInstance* Body)
+	if (Settings->Ragdolling.bLimitInitialRagdollSpeed)
 	{
-		Body->SetLinearVelocity(Body->GetUnrealWorldVelocity().GetClampedToMaxSize(SpeedLimit), false);
-	});
+		// Limit the ragdoll's speed for a few frames, because for some unclear reason,
+		// it can get a much higher initial speed than the character's last speed.
+
+		// TODO Find a better solution or wait for a fix in future engine versions.
+
+		static constexpr auto MinSpeedLimit{200.0f};
+
+		RagdollingState.SpeedLimitFrameTimeRemaining = 8;
+		RagdollingState.SpeedLimit = FMath::Max(LocomotionState.Velocity.Size(), MinSpeedLimit);
+
+		GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false,
+		                            [SpeedLimit = RagdollingState.SpeedLimit](FBodyInstance* Body)
+		                            {
+			                            Body->SetLinearVelocity(Body->GetUnrealWorldVelocity().GetClampedToMaxSize(SpeedLimit), false);
+		                            });
+	}
 
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
