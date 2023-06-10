@@ -264,6 +264,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshMovementBase();
 
+	RefreshInput(DeltaTime);
+
 	RefreshLocomotionEarly();
 
 	RefreshView(DeltaTime);
@@ -935,6 +937,28 @@ FRotator AAlsCharacter::GetViewRotation() const
 	return ViewState.Rotation;
 }
 
+void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
+{
+	NewInputDirection = NewInputDirection.GetSafeNormal();
+
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
+}
+
+void AAlsCharacter::RefreshInput(const float DeltaTime)
+{
+	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	{
+		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
+	}
+
+	LocomotionState.bHasInput = InputDirection.SizeSquared() > UE_KINDA_SMALL_NUMBER;
+
+	if (LocomotionState.bHasInput)
+	{
+		LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(InputDirection));
+	}
+}
+
 void AAlsCharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation)
 {
 	if (ReplicatedViewRotation != NewViewRotation)
@@ -1101,13 +1125,6 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 	}
 }
 
-void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
-{
-	NewInputDirection = NewInputDirection.GetSafeNormal();
-
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
-}
-
 void AAlsCharacter::SetDesiredVelocityYawAngle(const float NewDesiredVelocityYawAngle)
 {
 	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, DesiredVelocityYawAngle, NewDesiredVelocityYawAngle, this);
@@ -1177,20 +1194,6 @@ void AAlsCharacter::RefreshLocomotionEarly()
 
 void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 {
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
-	{
-		SetInputDirection(GetCharacterMovement()->GetCurrentAcceleration() / GetCharacterMovement()->GetMaxAcceleration());
-	}
-
-	// If the character has the input, update the input yaw angle.
-
-	LocomotionState.bHasInput = InputDirection.SizeSquared() > UE_KINDA_SMALL_NUMBER;
-
-	if (LocomotionState.bHasInput)
-	{
-		LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(UAlsMath::DirectionToAngleXY(InputDirection));
-	}
-
 	LocomotionState.Velocity = GetVelocity();
 
 	// Determine if the character is moving by getting its speed. The speed equals the length

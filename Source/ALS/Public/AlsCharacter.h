@@ -311,6 +311,16 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
 
+	// Input
+
+public:
+	const FVector& GetInputDirection() const;
+
+protected:
+	void SetInputDirection(FVector NewInputDirection);
+
+	virtual void RefreshInput(float DeltaTime);
+
 	// View
 
 public:
@@ -339,13 +349,9 @@ private:
 	// Locomotion
 
 public:
-	const FVector& GetInputDirection() const;
-
 	const FAlsLocomotionState& GetLocomotionState() const;
 
 private:
-	void SetInputDirection(FVector NewInputDirection);
-
 	void SetDesiredVelocityYawAngle(float NewDesiredVelocityYawAngle);
 
 	void RefreshLocomotionLocationAndRotation();
