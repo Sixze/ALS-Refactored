@@ -33,11 +33,15 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	GetCapsuleComponent()->InitCapsuleSize(30.0f, 90.0f);
 
-	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -92.0f});
-	GetMesh()->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
+	//	This will prevent the editor from getting unresponsive when skeletalmesh is not set while editing ,or it is integrated with USkeletalMeshComponentBudgeted like childclasses by overriding in blueprints
 
-	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
-	GetMesh()->bEnableUpdateRateOptimizations = false;
+	auto mesh = GetMesh();
+	if ( IsValid( mesh) ) {
+		mesh->SetRelativeLocation_Direct({0.0f, 0.0f, -92.0f});
+		mesh->SetRelativeRotation_Direct({0.0f, -90.0f, 0.0f});
+		mesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+		mesh->bEnableUpdateRateOptimizations = false;
+	}
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
 
