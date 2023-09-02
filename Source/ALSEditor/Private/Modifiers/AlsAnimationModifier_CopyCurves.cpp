@@ -36,24 +36,15 @@ void UAlsAnimationModifier_CopyCurves::OnApply_Implementation(UAnimSequence* Seq
 
 void UAlsAnimationModifier_CopyCurves::CopyCurve(UAnimSequence* SourceSequence, UAnimSequence* TargetSequence, const FName& CurveName)
 {
-	static TArray<float> CurveTimes;
-	check(CurveTimes.IsEmpty())
-
-	static TArray<float> CurveValues;
-	check(CurveValues.IsEmpty())
-
-	ON_SCOPE_EXIT
-	{
-		CurveTimes.Reset();
-		CurveValues.Reset();
-	};
-
 	if (UAnimationBlueprintLibrary::DoesCurveExist(TargetSequence, CurveName, ERawCurveTrackTypes::RCT_Float))
 	{
 		UAnimationBlueprintLibrary::RemoveCurve(TargetSequence, CurveName);
 	}
 
 	UAnimationBlueprintLibrary::AddCurve(TargetSequence, CurveName);
+
+	TArray<float> CurveTimes;
+	TArray<float> CurveValues;
 
 	UAnimationBlueprintLibrary::GetFloatKeys(SourceSequence, CurveName, CurveTimes, CurveValues);
 	UAnimationBlueprintLibrary::AddFloatCurveKeys(TargetSequence, CurveName, CurveTimes, CurveValues);

@@ -173,16 +173,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 	{
 		ExistingVirtualBone = nullptr;
 
-		static TArray<FName> BoneNames;
-		check(BoneNames.IsEmpty())
-
-		ON_SCOPE_EXIT
-		{
-			BoneNames.Reset();
-		};
-
-		BoneNames.Add(VirtualBoneName);
-		Skeleton->RemoveVirtualBones(BoneNames);
+		Skeleton->RemoveVirtualBones({VirtualBoneName});
 	}
 
 	FName TempVirtualBoneName;

@@ -166,14 +166,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
-	static TArray<FName> CurveNames;
-	check(CurveNames.IsEmpty())
-
-	ON_SCOPE_EXIT
-	{
-		CurveNames.Reset();
-	};
-
+	TArray<FName> CurveNames;
 	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
