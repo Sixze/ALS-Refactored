@@ -17,7 +17,6 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-// ReSharper disable once CppUnusedIncludeDirective
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_FootstepEffects)
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
