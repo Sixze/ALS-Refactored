@@ -33,7 +33,7 @@ public:
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve{nullptr};
 
 public:
-	float GetSpeedForGait(const FGameplayTag& Gait) const;
+	float GetSpeedByGait(const FGameplayTag& Gait) const;
 };
 
 USTRUCT(BlueprintType)
@@ -64,7 +64,7 @@ public:
 	};
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedForGait(const FGameplayTag& Gait) const
+inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait) const
 {
 	if (Gait == AlsGaitTags::Walking)
 	{

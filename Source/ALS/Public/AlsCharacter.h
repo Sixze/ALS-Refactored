@@ -423,7 +423,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character")
-	void TryStartRolling(float PlayRate = 1.0f);
+	void StartRolling(float PlayRate = 1.0f);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	UAnimMontage* SelectRollMontage();
@@ -452,12 +452,12 @@ public:
 	bool IsMantlingAllowedToStart() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (ReturnDisplayName = "Success"))
-	bool TryStartMantlingGrounded();
+	bool StartMantlingGrounded();
 
 private:
-	bool TryStartMantlingInAir();
+	bool StartMantlingInAir();
 
-	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings);
+	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
 	UFUNCTION(Server, Reliable)
 	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
@@ -508,7 +508,7 @@ public:
 	bool IsRagdollingAllowedToStop() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character", Meta = (ReturnDisplayName = "Success"))
-	bool TryStopRagdolling();
+	bool StopRagdolling();
 
 private:
 	UFUNCTION(Server, Reliable)

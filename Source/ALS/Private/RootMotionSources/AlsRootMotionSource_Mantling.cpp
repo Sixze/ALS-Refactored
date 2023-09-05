@@ -44,7 +44,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		return;
 	}
 
-	const auto MantlingTime{GetTime() * MantlingSettings->GetPlayRateForHeight(MantlingHeight)};
+	const auto MantlingTime{GetTime() * MantlingSettings->GetPlayRateByHeight(MantlingHeight)};
 
 	// Calculate target transform from the stored relative transform to follow along with moving objects.
 
@@ -69,7 +69,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	{
 		const FVector3f InterpolationAndCorrectionAmounts{
 			MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetVectorValue(
-				MantlingTime + MantlingSettings->GetStartTimeForHeight(MantlingHeight))
+				MantlingTime + MantlingSettings->GetStartTimeByHeight(MantlingHeight))
 		};
 
 		const auto InterpolationAmount{InterpolationAndCorrectionAmounts.X};

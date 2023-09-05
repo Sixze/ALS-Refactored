@@ -15,7 +15,7 @@
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
-void AAlsCharacter::TryStartRolling(const float PlayRate)
+void AAlsCharacter::StartRolling(const float PlayRate)
 {
 	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 	{
@@ -133,16 +133,16 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 }
 
-bool AAlsCharacter::TryStartMantlingGrounded()
+bool AAlsCharacter::StartMantlingGrounded()
 {
 	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	       TryStartMantling(Settings->Mantling.GroundedTrace);
+	       StartMantling(Settings->Mantling.GroundedTrace);
 }
 
-bool AAlsCharacter::TryStartMantlingInAir()
+bool AAlsCharacter::StartMantlingInAir()
 {
 	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
-	       TryStartMantling(Settings->Mantling.InAirTrace);
+	       StartMantling(Settings->Mantling.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
@@ -150,7 +150,7 @@ bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 	return !LocomotionAction.IsValid();
 }
 
-bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
+bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
 	if (!Settings->Mantling.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
@@ -410,8 +410,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		return;
 	}
 
-	const auto StartTime{MantlingSettings->GetStartTimeForHeight(Parameters.MantlingHeight)};
-	const auto PlayRate{MantlingSettings->GetPlayRateForHeight(Parameters.MantlingHeight)};
+	const auto StartTime{MantlingSettings->GetStartTimeByHeight(Parameters.MantlingHeight)};
+	const auto PlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
 
 	// Calculate mantling duration.
 
@@ -791,7 +791,7 @@ bool AAlsCharacter::IsRagdollingAllowedToStop() const
 	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
 }
 
-bool AAlsCharacter::TryStopRagdolling()
+bool AAlsCharacter::StopRagdolling()
 {
 	if (GetLocalRole() <= ROLE_SimulatedProxy || !IsRagdollingAllowedToStop())
 	{

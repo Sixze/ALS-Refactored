@@ -63,7 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",
 		DevelopmentOnly, AutoCreateRefTerm = "Start, End, Color"))
-	static void DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
+	static void DrawDebugSweepSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
 	                                 const FLinearColor& Color, float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Utility", Meta = (WorldContext = "WorldContext",

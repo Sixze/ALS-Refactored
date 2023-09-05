@@ -68,9 +68,9 @@ public:
 	FVector2f PlayRate{1.0f, 1.0f};
 
 public:
-	float GetStartTimeForHeight(float MantlingHeight) const;
+	float GetStartTimeByHeight(float MantlingHeight) const;
 
-	float GetPlayRateForHeight(float MantlingHeight) const;
+	float GetPlayRateByHeight(float MantlingHeight) const;
 };
 
 USTRUCT(BlueprintType)
@@ -134,12 +134,12 @@ public:
 #endif
 };
 
-inline float UAlsMantlingSettings::GetStartTimeForHeight(const float MantlingHeight) const
+inline float UAlsMantlingSettings::GetStartTimeByHeight(const float MantlingHeight) const
 {
 	return FMath::GetMappedRangeValueClamped(ReferenceHeight, StartTime, MantlingHeight);
 }
 
-inline float UAlsMantlingSettings::GetPlayRateForHeight(const float MantlingHeight) const
+inline float UAlsMantlingSettings::GetPlayRateByHeight(const float MantlingHeight) const
 {
 	return FMath::GetMappedRangeValueClamped(ReferenceHeight, PlayRate, MantlingHeight);
 }
