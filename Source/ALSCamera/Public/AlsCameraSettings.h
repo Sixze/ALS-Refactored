@@ -44,7 +44,7 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	float TraceRadius{15.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TEnumAsByte<ETraceTypeQuery> TraceChannel{UEngineTypes::ConvertToTraceType(ECC_Visibility)};
+	TEnumAsByte<ECollisionChannel> TraceChannel{ECC_Visibility};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName TraceShoulderLeftSocketName{TEXTVIEW("ThirdPersonTraceShoulderLeft")};

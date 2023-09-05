@@ -120,7 +120,10 @@ public:
 	FAlsMantlingTraceSettings InAirTrace{{50.0f, 150.0f}, 70.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TArray<TEnumAsByte<EObjectTypeQuery>> MantlingTraceObjectTypes;
+	TEnumAsByte<ECollisionChannel> MantlingTraceChannel{ECC_Visibility};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	TArray<TEnumAsByte<ECollisionChannel>> MantlingTraceResponseChannels;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
 	FCollisionResponseContainer MantlingTraceResponses{ECR_Ignore};

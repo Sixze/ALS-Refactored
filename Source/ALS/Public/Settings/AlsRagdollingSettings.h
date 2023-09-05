@@ -26,7 +26,10 @@ public:
 	bool bLimitInitialRagdollSpeed{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TArray<TEnumAsByte<EObjectTypeQuery>> GroundTraceObjectTypes;
+	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};

@@ -5,16 +5,16 @@
 #if WITH_EDITOR
 void FAlsInAirSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsInAirSettings, GroundPredictionSweepObjectTypes))
+	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsInAirSettings, GroundPredictionResponseChannels))
 	{
 		return;
 	}
 
 	GroundPredictionSweepResponses.SetAllChannels(ECR_Ignore);
 
-	for (const auto ObjectType : GroundPredictionSweepObjectTypes)
+	for (const auto CollisionChannel : GroundPredictionResponseChannels)
 	{
-		GroundPredictionSweepResponses.SetResponse(UEngineTypes::ConvertToCollisionChannel(ObjectType), ECR_Block);
+		GroundPredictionSweepResponses.SetResponse(CollisionChannel, ECR_Block);
 	}
 }
 #endif

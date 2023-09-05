@@ -214,7 +214,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
 	FHitResult ForwardTraceHit;
-	GetWorld()->SweepSingleByChannel(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, ECC_WorldStatic,
+	GetWorld()->SweepSingleByChannel(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd,
+	                                 FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                 FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
 	                                 {ForwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
@@ -261,7 +262,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByChannel(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
-	                                 ECC_WorldStatic, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+	                                 Settings->Mantling.MantlingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
 	                                 {DownwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
 	if (!GetCharacterMovement()->IsWalkable(DownwardTraceHit))
@@ -295,7 +296,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const FVector TargetCapsuleLocation{TargetLocation.X, TargetLocation.Y, TargetLocation.Z + CapsuleHalfHeight};
 
-	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, ECC_WorldStatic,
+	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                             FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
 	                                             {FreeSpaceTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
 	{
@@ -744,7 +745,8 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		                                     RagdollTargetLocation.X,
 		                                     RagdollTargetLocation.Y,
 		                                     RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
-	                                     }, ECC_WorldStatic, {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
+	                                     }, Settings->Ragdolling.GroundTraceChannel, {__FUNCTION__, false, this},
+	                                     Settings->Ragdolling.GroundTraceResponses);
 
 	auto NewActorLocation{RagdollTargetLocation};
 

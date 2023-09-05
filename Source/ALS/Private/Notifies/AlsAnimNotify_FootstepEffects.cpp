@@ -70,8 +70,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
 	                                    FootTransform.GetLocation() - FootZAxis *
 	                                    (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
-	                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-	                                    QueryParameters))
+	                                    FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)

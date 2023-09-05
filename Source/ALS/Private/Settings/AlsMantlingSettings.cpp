@@ -5,16 +5,16 @@
 #if WITH_EDITOR
 void FAlsGeneralMantlingSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsGeneralMantlingSettings, MantlingTraceObjectTypes))
+	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsGeneralMantlingSettings, MantlingTraceResponseChannels))
 	{
 		return;
 	}
 
 	MantlingTraceResponses.SetAllChannels(ECR_Ignore);
 
-	for (const auto ObjectType : MantlingTraceObjectTypes)
+	for (const auto CollisionChannel : MantlingTraceResponseChannels)
 	{
-		MantlingTraceResponses.SetResponse(UEngineTypes::ConvertToCollisionChannel(ObjectType), ECR_Block);
+		MantlingTraceResponses.SetResponse(CollisionChannel, ECR_Block);
 	}
 }
 #endif

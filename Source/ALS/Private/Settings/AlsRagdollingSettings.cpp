@@ -5,16 +5,16 @@
 #if WITH_EDITOR
 void FAlsRagdollingSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsRagdollingSettings, GroundTraceObjectTypes))
+	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsRagdollingSettings, GroundTraceResponseChannels))
 	{
 		return;
 	}
 
 	GroundTraceResponses.SetAllChannels(ECR_Ignore);
 
-	for (const auto ObjectType : GroundTraceObjectTypes)
+	for (const auto CollisionChannel : GroundTraceResponseChannels)
 	{
-		GroundTraceResponses.SetResponse(UEngineTypes::ConvertToCollisionChannel(ObjectType), ECR_Block);
+		GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
 	}
 }
 #endif
