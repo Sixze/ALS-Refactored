@@ -133,11 +133,11 @@ protected:
 	// Core
 
 protected:
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Animation Instance",
+	UFUNCTION(BlueprintPure, Category = "ALS|Animation Instance",
 		Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Setting"))
 	UAlsAnimationInstanceSettings* GetSettingsUnsafe() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Animation Instance",
+	UFUNCTION(BlueprintPure, Category = "ALS|Animation Instance",
 		Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Rig Input"))
 	FAlsControlRigInput GetControlRigInput() const;
 
@@ -166,10 +166,10 @@ private:
 	void RefreshSpineRotation(float DeltaTime);
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ReinitializeLook();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshLook();
 
 	// Locomotion
@@ -183,13 +183,13 @@ public:
 	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode);
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ActivatePivot();
 
 private:
@@ -223,7 +223,7 @@ public:
 	void Jump();
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetJumped();
 
 private:
@@ -257,22 +257,22 @@ private:
 	// Transitions
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
 	void PlayQuickStopAnimation();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
 	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f,
 	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
 	void PlayTransitionLeftAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                 float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
 	void PlayTransitionRightAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                  float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = 0.2f);
 
 private:
