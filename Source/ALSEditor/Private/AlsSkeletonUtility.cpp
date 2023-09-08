@@ -128,7 +128,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 		return;
 	}
 
-	if (!VirtualBoneString.StartsWith(TEXT("VB "), ESearchCase::CaseSensitive))
+	if (!VirtualBoneString.StartsWith(TEXTVIEW("VB "), ESearchCase::CaseSensitive))
 	{
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 
