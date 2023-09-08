@@ -847,7 +847,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Add([this, Hit, bGroundValid]
+			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
 				{
 					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 					                                         LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
@@ -1178,7 +1178,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Add([this, Hit, bGroundValid]
+			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
 				{
 					UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
 					                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});

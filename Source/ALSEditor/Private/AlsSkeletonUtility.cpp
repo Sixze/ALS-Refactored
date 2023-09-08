@@ -241,7 +241,7 @@ void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketNa
 	Socket->RelativeLocation = RelativeLocation;
 	Socket->RelativeRotation = RelativeRotation;
 
-	Skeleton->Sockets.Add(Socket);
+	Skeleton->Sockets.Emplace(Socket);
 }
 
 void UAlsSkeletonUtility::AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FName BlendProfileName,
