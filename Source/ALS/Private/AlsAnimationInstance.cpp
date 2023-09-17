@@ -13,11 +13,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
-UAlsAnimationInstance::UAlsAnimationInstance()
-{
-	RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
-}
-
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();

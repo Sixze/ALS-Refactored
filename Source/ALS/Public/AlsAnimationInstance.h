@@ -116,8 +116,6 @@ protected:
 	FAlsRagdollingAnimationState RagdollingState;
 
 public:
-	UAlsAnimationInstance();
-
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;
