@@ -51,6 +51,7 @@ protected:
 
 	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
@@ -257,22 +258,22 @@ private:
 	// Transitions
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void PlayQuickStopAnimation();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f,
 	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void PlayTransitionLeftAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                 float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void PlayTransitionRightAnimation(float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f, float PlayRate = 1.0f,
 	                                  float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = 0.2f);
 
 private:
@@ -280,7 +281,9 @@ private:
 
 	void RefreshDynamicTransition();
 
-	void PlayQueuedDynamicTransitionAnimation();
+	void PlayQueuedTransitionAnimation();
+
+	void StopQueuedTransitionAndTurnInPlaceAnimations();
 
 	// Rotate In Place
 
