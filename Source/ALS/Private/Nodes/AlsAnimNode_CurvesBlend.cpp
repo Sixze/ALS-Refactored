@@ -7,7 +7,7 @@
 
 void FAlsAnimNode_CurvesBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
-	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Initialize_AnyThread)
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	Super::Initialize_AnyThread(Context);
 
@@ -17,7 +17,7 @@ void FAlsAnimNode_CurvesBlend::Initialize_AnyThread(const FAnimationInitializeCo
 
 void FAlsAnimNode_CurvesBlend::CacheBones_AnyThread(const FAnimationCacheBonesContext& Context)
 {
-	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(CacheBones_AnyThread)
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	Super::CacheBones_AnyThread(Context);
 
@@ -27,7 +27,7 @@ void FAlsAnimNode_CurvesBlend::CacheBones_AnyThread(const FAnimationCacheBonesCo
 
 void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& Context)
 {
-	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	Super::Update_AnyThread(Context);
 
@@ -47,7 +47,8 @@ void FAlsAnimNode_CurvesBlend::Update_AnyThread(const FAnimationUpdateContext& C
 
 void FAlsAnimNode_CurvesBlend::Evaluate_AnyThread(FPoseContext& Output)
 {
-	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread)
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
+	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(CurvesBlend, !IsInGameThread());
 
 	Super::Evaluate_AnyThread(Output);
 
