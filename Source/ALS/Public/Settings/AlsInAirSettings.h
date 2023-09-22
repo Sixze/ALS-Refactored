@@ -20,7 +20,10 @@ public:
 	TObjectPtr<UCurveFloat> GroundPredictionAmountCurve{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TArray<TEnumAsByte<EObjectTypeQuery>> GroundPredictionSweepObjectTypes;
+	TEnumAsByte<ECollisionChannel> GroundPredictionSweepChannel{ECC_Visibility};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	TArray<TEnumAsByte<ECollisionChannel>> GroundPredictionResponseChannels;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
 	FCollisionResponseContainer GroundPredictionSweepResponses{ECR_Ignore};

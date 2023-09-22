@@ -171,7 +171,7 @@ private:
 	void ApplyPendingPenetrationAdjustment();
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Character Movement")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character Movement")
 	void SetMovementSettings(UAlsMovementSettings* NewMovementSettings);
 
 	const FAlsMovementGaitSettings& GetGaitSettings() const;

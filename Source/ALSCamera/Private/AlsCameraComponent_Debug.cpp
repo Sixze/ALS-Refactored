@@ -118,14 +118,7 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
-	static TArray<FName> CurveNames;
-	check(CurveNames.IsEmpty())
-
-	ON_SCOPE_EXIT
-	{
-		CurveNames.Reset();
-	};
-
+	TArray<FName> CurveNames;
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });

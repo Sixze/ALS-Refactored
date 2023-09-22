@@ -17,7 +17,6 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-// ReSharper disable once CppUnusedIncludeDirective
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_FootstepEffects)
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
@@ -71,8 +70,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	if (World->LineTraceSingleByChannel(Hit, FootTransform.GetLocation(),
 	                                    FootTransform.GetLocation() - FootZAxis *
 	                                    (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
-	                                    UEngineTypes::ConvertToCollisionChannel(FootstepEffectsSettings->SurfaceTraceChannel),
-	                                    QueryParameters))
+	                                    FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)

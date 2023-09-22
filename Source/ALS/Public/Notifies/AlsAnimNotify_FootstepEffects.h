@@ -2,9 +2,9 @@
 
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Engine/DataAsset.h"
+#include "Engine/EngineTypes.h"
 #include "AlsAnimNotify_FootstepEffects.generated.h"
 
-enum ETraceTypeQuery : int;
 enum EPhysicalSurface : int;
 class USoundBase;
 class UMaterialInterface;
@@ -104,7 +104,7 @@ class ALS_API UAlsFootstepEffectsSettings : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TEnumAsByte<ETraceTypeQuery> SurfaceTraceChannel;
+	TEnumAsByte<ECollisionChannel> SurfaceTraceChannel{ECC_Visibility};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float SurfaceTraceDistance{50.0f};

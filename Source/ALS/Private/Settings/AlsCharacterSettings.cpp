@@ -4,27 +4,27 @@
 
 UAlsCharacterSettings::UAlsCharacterSettings()
 {
-	Ragdolling.GroundTraceObjectTypes =
+	Ragdolling.GroundTraceResponseChannels =
 	{
-		UEngineTypes::ConvertToObjectType(ECC_WorldStatic),
-		UEngineTypes::ConvertToObjectType(ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECC_Destructible)
+		ECC_WorldStatic,
+		ECC_WorldDynamic,
+		ECC_Destructible
 	};
 
-	Ragdolling.GroundTraceResponses.SetResponse(ECC_WorldStatic, ECR_Block);
-	Ragdolling.GroundTraceResponses.SetResponse(ECC_WorldDynamic, ECR_Block);
-	Ragdolling.GroundTraceResponses.SetResponse(ECC_Destructible, ECR_Block);
+	Ragdolling.GroundTraceResponses.WorldStatic = ECR_Block;
+	Ragdolling.GroundTraceResponses.WorldDynamic = ECR_Block;
+	Ragdolling.GroundTraceResponses.Destructible = ECR_Block;
 
-	Mantling.MantlingTraceObjectTypes =
+	Mantling.MantlingTraceResponseChannels =
 	{
-		UEngineTypes::ConvertToObjectType(ECC_WorldStatic),
-		UEngineTypes::ConvertToObjectType(ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECC_Destructible)
+		ECC_WorldStatic,
+		ECC_WorldDynamic,
+		ECC_Destructible
 	};
 
-	Mantling.MantlingTraceResponses.SetResponse(ECC_WorldStatic, ECR_Block);
-	Mantling.MantlingTraceResponses.SetResponse(ECC_WorldDynamic, ECR_Block);
-	Mantling.MantlingTraceResponses.SetResponse(ECC_Destructible, ECR_Block);
+	Mantling.MantlingTraceResponses.WorldStatic = ECR_Block;
+	Mantling.MantlingTraceResponses.WorldDynamic = ECR_Block;
+	Mantling.MantlingTraceResponses.Destructible = ECR_Block;
 }
 
 #if WITH_EDITOR

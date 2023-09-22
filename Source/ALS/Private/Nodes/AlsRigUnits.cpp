@@ -184,7 +184,7 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 	if (CachedBonesToMove.Num() != BonesToMove.Num())
 	{
 		CachedBonesToMove.Reset();
-		CachedBonesToMove.SetNum(CachedBonesToMove.Num());
+		CachedBonesToMove.SetNum(BonesToMove.Num());
 	}
 
 	for (auto i{0}; i < BonesToMove.Num(); i++)

@@ -830,7 +830,8 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	};
 
 	FHitResult Hit;
-	GetWorld()->SweepSingleByChannel(Hit, SweepStartLocation, SweepStartLocation + SweepVector, FQuat::Identity, ECC_WorldStatic,
+	GetWorld()->SweepSingleByChannel(Hit, SweepStartLocation, SweepStartLocation + SweepVector,
+	                                 FQuat::Identity, Settings->InAir.GroundPredictionSweepChannel,
 	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
 	                                 {__FUNCTION__, false, Character}, Settings->InAir.GroundPredictionSweepResponses);
 
@@ -847,7 +848,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Add([this, Hit, bGroundValid]
+			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
 				{
 					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 					                                         LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
@@ -1163,8 +1164,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	                                     TraceLocation - FVector{
 		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
 	                                     },
-	                                     UEngineTypes::ConvertToCollisionChannel(Settings->Feet.IkTraceChannel),
-	                                     {__FUNCTION__, true, Character});
+	                                     Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
@@ -1178,7 +1178,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Add([this, Hit, bGroundValid]
+			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
 				{
 					UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
 					                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});

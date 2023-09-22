@@ -90,19 +90,19 @@ public:
 
 	bool IsRightShoulder() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Camera")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void SetRightShoulder(bool bNewRightShoulder);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Camera Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Pivot Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Pivot Location"))
 	FVector GetThirdPersonPivotLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Camera", Meta = (ReturnDisplayName = "Trace Start"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Als Camera")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
 
 private:

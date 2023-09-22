@@ -15,7 +15,7 @@
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
-void AAlsCharacter::TryStartRolling(const float PlayRate)
+void AAlsCharacter::StartRolling(const float PlayRate)
 {
 	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 	{
@@ -133,16 +133,16 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 }
 
-bool AAlsCharacter::TryStartMantlingGrounded()
+bool AAlsCharacter::StartMantlingGrounded()
 {
 	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	       TryStartMantling(Settings->Mantling.GroundedTrace);
+	       StartMantling(Settings->Mantling.GroundedTrace);
 }
 
-bool AAlsCharacter::TryStartMantlingInAir()
+bool AAlsCharacter::StartMantlingInAir()
 {
 	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
-	       TryStartMantling(Settings->Mantling.InAirTrace);
+	       StartMantling(Settings->Mantling.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
@@ -150,7 +150,7 @@ bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 	return !LocomotionAction.IsValid();
 }
 
-bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings)
+bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings)
 {
 	if (!Settings->Mantling.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
@@ -214,7 +214,8 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	const auto ForwardTraceCapsuleHalfHeight{LedgeHeightDelta * 0.5f};
 
 	FHitResult ForwardTraceHit;
-	GetWorld()->SweepSingleByChannel(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd, FQuat::Identity, ECC_WorldStatic,
+	GetWorld()->SweepSingleByChannel(ForwardTraceHit, ForwardTraceStart, ForwardTraceEnd,
+	                                 FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                 FCollisionShape::MakeCapsule(TraceCapsuleRadius, ForwardTraceCapsuleHalfHeight),
 	                                 {ForwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
@@ -261,7 +262,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	FHitResult DownwardTraceHit;
 	GetWorld()->SweepSingleByChannel(DownwardTraceHit, DownwardTraceStart, DownwardTraceEnd, FQuat::Identity,
-	                                 ECC_WorldStatic, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+	                                 Settings->Mantling.MantlingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
 	                                 {DownwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
 	if (!GetCharacterMovement()->IsWalkable(DownwardTraceHit))
@@ -295,7 +296,7 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 
 	const FVector TargetCapsuleLocation{TargetLocation.X, TargetLocation.Y, TargetLocation.Z + CapsuleHalfHeight};
 
-	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, ECC_WorldStatic,
+	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                             FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
 	                                             {FreeSpaceTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
 	{
@@ -409,8 +410,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		return;
 	}
 
-	const auto StartTime{MantlingSettings->GetStartTimeForHeight(Parameters.MantlingHeight)};
-	const auto PlayRate{MantlingSettings->GetPlayRateForHeight(Parameters.MantlingHeight)};
+	const auto StartTime{MantlingSettings->GetStartTimeByHeight(Parameters.MantlingHeight)};
+	const auto PlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
 
 	// Calculate mantling duration.
 
@@ -744,7 +745,8 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		                                     RagdollTargetLocation.X,
 		                                     RagdollTargetLocation.Y,
 		                                     RagdollTargetLocation.Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
-	                                     }, ECC_WorldStatic, {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
+	                                     }, Settings->Ragdolling.GroundTraceChannel, {__FUNCTION__, false, this},
+	                                     Settings->Ragdolling.GroundTraceResponses);
 
 	auto NewActorLocation{RagdollTargetLocation};
 
@@ -789,7 +791,7 @@ bool AAlsCharacter::IsRagdollingAllowedToStop() const
 	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
 }
 
-bool AAlsCharacter::TryStopRagdolling()
+bool AAlsCharacter::StopRagdolling()
 {
 	if (GetLocalRole() <= ROLE_SimulatedProxy || !IsRagdollingAllowedToStop())
 	{

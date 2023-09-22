@@ -128,7 +128,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 		return;
 	}
 
-	if (!VirtualBoneString.StartsWith(TEXT("VB "), ESearchCase::CaseSensitive))
+	if (!VirtualBoneString.StartsWith(TEXTVIEW("VB "), ESearchCase::CaseSensitive))
 	{
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 
@@ -173,16 +173,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 	{
 		ExistingVirtualBone = nullptr;
 
-		static TArray<FName> BoneNames;
-		check(BoneNames.IsEmpty())
-
-		ON_SCOPE_EXIT
-		{
-			BoneNames.Reset();
-		};
-
-		BoneNames.Add(VirtualBoneName);
-		Skeleton->RemoveVirtualBones(BoneNames);
+		Skeleton->RemoveVirtualBones({VirtualBoneName});
 	}
 
 	FName TempVirtualBoneName;
@@ -250,7 +241,7 @@ void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketNa
 	Socket->RelativeLocation = RelativeLocation;
 	Socket->RelativeRotation = RelativeRotation;
 
-	Skeleton->Sockets.Add(Socket);
+	Skeleton->Sockets.Emplace(Socket);
 }
 
 void UAlsSkeletonUtility::AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FName BlendProfileName,

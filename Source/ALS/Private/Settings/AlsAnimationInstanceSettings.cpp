@@ -4,16 +4,16 @@
 
 UAlsAnimationInstanceSettings::UAlsAnimationInstanceSettings()
 {
-	InAir.GroundPredictionSweepObjectTypes =
+	InAir.GroundPredictionResponseChannels =
 	{
-		UEngineTypes::ConvertToObjectType(ECC_WorldStatic),
-		UEngineTypes::ConvertToObjectType(ECC_WorldDynamic),
-		UEngineTypes::ConvertToObjectType(ECC_Destructible)
+		ECC_WorldStatic,
+		ECC_WorldDynamic,
+		ECC_Destructible
 	};
 
-	InAir.GroundPredictionSweepResponses.SetResponse(ECC_WorldStatic, ECR_Block);
-	InAir.GroundPredictionSweepResponses.SetResponse(ECC_WorldDynamic, ECR_Block);
-	InAir.GroundPredictionSweepResponses.SetResponse(ECC_Destructible, ECR_Block);
+	InAir.GroundPredictionSweepResponses.WorldStatic = ECR_Block;
+	InAir.GroundPredictionSweepResponses.WorldDynamic = ECR_Block;
+	InAir.GroundPredictionSweepResponses.Destructible = ECR_Block;
 }
 
 #if WITH_EDITOR

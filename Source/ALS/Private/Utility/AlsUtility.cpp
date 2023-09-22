@@ -196,7 +196,7 @@ void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FV
 #endif
 }
 
-void UAlsUtility::DrawDebugSweptSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
+void UAlsUtility::DrawDebugSweepSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
                                        const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -231,7 +231,7 @@ void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const 
 		return;
 	}
 
-	DrawDebugSweptSphere(World, Start, End, Radius, SweepColor.ToFColor(true), Duration, Thickness, DepthPriority);
+	DrawDebugSweepSphere(World, Start, End, Radius, SweepColor.ToFColor(true), Duration, Thickness, DepthPriority);
 
 	if (bHit && Hit.bBlockingHit)
 	{
