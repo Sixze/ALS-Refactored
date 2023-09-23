@@ -54,8 +54,7 @@ void UAlsSkeletonUtility::AddAnimationCurves(USkeleton* Skeleton, const TArray<F
 			continue;
 		}
 
-		FSmartName SmartName;
-		Skeleton->AddSmartNameAndModify(USkeleton::AnimCurveMappingName, CurveName, SmartName);
+		Skeleton->AddCurveMetaData(CurveName);
 	}
 }
 

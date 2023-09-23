@@ -13,11 +13,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
-UAlsAnimationInstance::UAlsAnimationInstance()
-{
-	RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
-}
-
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -144,8 +139,9 @@ void UAlsAnimationInstance::NativePostEvaluateAnimation()
 		return;
 	}
 
-	PlayQueuedDynamicTransitionAnimation();
+	PlayQueuedTransitionAnimation();
 	PlayQueuedTurnInPlaceAnimation();
+	StopQueuedTransitionAndTurnInPlaceAnimations();
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (!bPendingUpdate)
@@ -922,7 +918,7 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurveName()), -1.0f, 1.0f);
 	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurveName());
 
-	FeetState.MinMaxPelvisOffsetZ = FVector2D::ZeroVector;
+	FeetState.MinMaxPelvisOffsetZ = FVector2f::ZeroVector;
 
 	const auto ComponentTransformInverse{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().Inverse()};
 
@@ -932,11 +928,11 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurveName(),
 	            UAlsConstants::FootRightLockCurveName(), ComponentTransformInverse, DeltaTime);
 
-	FeetState.MinMaxPelvisOffsetZ.X = FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) /
-	                                  LocomotionState.Scale;
+	FeetState.MinMaxPelvisOffsetZ.X = UE_REAL_TO_FLOAT(
+		FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) / LocomotionState.Scale);
 
-	FeetState.MinMaxPelvisOffsetZ.Y = FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) /
-	                                  LocomotionState.Scale;
+	FeetState.MinMaxPelvisOffsetZ.Y = UE_REAL_TO_FLOAT(
+		FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) / LocomotionState.Scale);
 }
 
 void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
@@ -1238,6 +1234,11 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()
 {
+	if (!IsValid(Settings))
+	{
+		return;
+	}
+
 	if (RotationMode != AlsRotationModeTags::VelocityDirection)
 	{
 		PlayTransitionLeftAnimation(Settings->Transitions.QuickStopBlendInDuration, Settings->Transitions.QuickStopBlendOutDuration,
@@ -1275,20 +1276,23 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation, const float BlendInDuration, const float BlendOutDuration,
                                                     const float PlayRate, const float StartTime, const bool bFromStandingIdleOnly)
 {
-	check(IsInGameThread())
-
-	if (!IsValid(Character))
+	if (bFromStandingIdleOnly && (LocomotionState.bMoving || Stance != AlsStanceTags::Standing))
 	{
 		return;
 	}
 
-	if (bFromStandingIdleOnly && (Character->GetLocomotionState().bMoving || Character->GetStance() != AlsStanceTags::Standing))
-	{
-		return;
-	}
+	// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
-	PlaySlotAnimationAsDynamicMontage(Animation, UAlsConstants::TransitionSlotName(),
-	                                  BlendInDuration, BlendOutDuration, PlayRate, 1, 0.0f, StartTime);
+	TransitionsState.QueuedTransitionAnimation = Animation;
+	TransitionsState.QueuedTransitionBlendInDuration = BlendInDuration;
+	TransitionsState.QueuedTransitionBlendOutDuration = BlendOutDuration;
+	TransitionsState.QueuedTransitionPlayRate = PlayRate;
+	TransitionsState.QueuedTransitionStartTime = StartTime;
+
+	if (IsInGameThread())
+	{
+		PlayQueuedTransitionAnimation();
+	}
 }
 
 void UAlsAnimationInstance::PlayTransitionLeftAnimation(const float BlendInDuration, const float BlendOutDuration, const float PlayRate,
@@ -1321,11 +1325,13 @@ void UAlsAnimationInstance::PlayTransitionRightAnimation(const float BlendInDura
 
 void UAlsAnimationInstance::StopTransitionAndTurnInPlaceAnimations(const float BlendOutDuration)
 {
-	check(IsInGameThread())
+	TransitionsState.bStopTransitionsQueued = true;
+	TransitionsState.QueuedStopTransitionsBlendOutDuration = BlendOutDuration;
 
-	StopSlotAnimation(BlendOutDuration, UAlsConstants::TransitionSlotName());
-	StopSlotAnimation(BlendOutDuration, UAlsConstants::TurnInPlaceStandingSlotName());
-	StopSlotAnimation(BlendOutDuration, UAlsConstants::TurnInPlaceCrouchingSlotName());
+	if (IsInGameThread())
+	{
+		StopQueuedTransitionAndTurnInPlaceAnimations();
+	}
 }
 
 void UAlsAnimationInstance::RefreshTransitions()
@@ -1411,25 +1417,54 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
-		TransitionsState.QueuedDynamicTransitionAnimation = DynamicTransitionAnimation;
+		TransitionsState.QueuedTransitionAnimation = DynamicTransitionAnimation;
+		TransitionsState.QueuedTransitionBlendInDuration = Settings->Transitions.DynamicTransitionBlendDuration;
+		TransitionsState.QueuedTransitionBlendOutDuration = Settings->Transitions.DynamicTransitionBlendDuration;
+		TransitionsState.QueuedTransitionPlayRate = Settings->Transitions.DynamicTransitionPlayRate;
+		TransitionsState.QueuedTransitionStartTime = 0.0f;
 
 		if (IsInGameThread())
 		{
-			PlayQueuedDynamicTransitionAnimation();
+			PlayQueuedTransitionAnimation();
 		}
 	}
 }
 
-void UAlsAnimationInstance::PlayQueuedDynamicTransitionAnimation()
+void UAlsAnimationInstance::PlayQueuedTransitionAnimation()
 {
 	check(IsInGameThread())
 
-	PlaySlotAnimationAsDynamicMontage(TransitionsState.QueuedDynamicTransitionAnimation, UAlsConstants::TransitionSlotName(),
-	                                  Settings->Transitions.DynamicTransitionBlendDuration,
-	                                  Settings->Transitions.DynamicTransitionBlendDuration,
-	                                  Settings->Transitions.DynamicTransitionPlayRate, 1, 0.0f);
+	if (TransitionsState.bStopTransitionsQueued || !IsValid(TransitionsState.QueuedTransitionAnimation))
+	{
+		return;
+	}
 
-	TransitionsState.QueuedDynamicTransitionAnimation = nullptr;
+	PlaySlotAnimationAsDynamicMontage(TransitionsState.QueuedTransitionAnimation, UAlsConstants::TransitionSlotName(),
+	                                  TransitionsState.QueuedTransitionBlendInDuration, TransitionsState.QueuedTransitionBlendOutDuration,
+	                                  TransitionsState.QueuedTransitionPlayRate, 1, 0.0f, TransitionsState.QueuedTransitionStartTime);
+
+	TransitionsState.QueuedTransitionAnimation = nullptr;
+	TransitionsState.QueuedTransitionBlendInDuration = 0.0f;
+	TransitionsState.QueuedTransitionBlendOutDuration = 0.0f;
+	TransitionsState.QueuedTransitionPlayRate = 1.0f;
+	TransitionsState.QueuedTransitionStartTime = 0.0f;
+}
+
+void UAlsAnimationInstance::StopQueuedTransitionAndTurnInPlaceAnimations()
+{
+	check(IsInGameThread())
+
+	if (!TransitionsState.bStopTransitionsQueued)
+	{
+		return;
+	}
+
+	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TransitionSlotName());
+	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TurnInPlaceStandingSlotName());
+	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TurnInPlaceCrouchingSlotName());
+
+	TransitionsState.bStopTransitionsQueued = false;
+	TransitionsState.QueuedStopTransitionsBlendOutDuration = 0.0f;
 }
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
@@ -1617,7 +1652,7 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 {
 	check(IsInGameThread())
 
-	if (!IsValid(TurnInPlaceState.QueuedSettings))
+	if (TransitionsState.bStopTransitionsQueued || !IsValid(TurnInPlaceState.QueuedSettings))
 	{
 		return;
 	}

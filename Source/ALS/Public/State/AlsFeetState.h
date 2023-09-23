@@ -84,5 +84,5 @@ struct ALS_API FAlsFeetState
 	// Pelvis
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector2D MinMaxPelvisOffsetZ{ForceInit};
+	FVector2f MinMaxPelvisOffsetZ{ForceInit};
 };

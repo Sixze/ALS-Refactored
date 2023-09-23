@@ -11,6 +11,8 @@ void FAlsRigVMFunction_ExponentialDecayVector::Initialize()
 
 FAlsRigVMFunction_ExponentialDecayVector_Execute()
 {
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
+
 	if (!bInitialized)
 	{
 		Current = Target;

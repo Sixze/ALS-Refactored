@@ -28,12 +28,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bAllowAimingWhenInAir{true};
 
-	// If enabled, the character will rotate relative to the object it is standing on in the velocity
+	// If checked, the character will rotate relative to the object it is standing on in the velocity
 	// direction rotation mode, otherwise the character will ignore that object and keep its world rotation.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bInheritMovementBaseRotationInVelocityDirectionRotationMode;
 
-	// If enabled, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
+	// If checked, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode{true};
 

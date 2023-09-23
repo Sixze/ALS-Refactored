@@ -41,5 +41,5 @@ struct ALS_API FAlsControlRigInput
 	float FootRightIkAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector2D MinMaxPelvisOffsetZ{ForceInit};
+	FVector2f MinMaxPelvisOffsetZ{ForceInit};
 };

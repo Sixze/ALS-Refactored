@@ -9,7 +9,6 @@
 
 UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
 {
-	RootMotionMode = ERootMotionMode::IgnoreRootMotion;
 	bUseMainInstanceMontageEvaluationData = true;
 }
 
