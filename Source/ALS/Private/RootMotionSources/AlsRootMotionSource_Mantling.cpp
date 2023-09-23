@@ -38,7 +38,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
-	if (!ALS_ENSURE(Duration > UE_SMALL_NUMBER) || DeltaTime <= UE_SMALL_NUMBER)
+	if (!ALS_ENSURE(Duration > UE_SMALL_NUMBER) || DeltaTime <= UE_SMALL_NUMBER || !TargetPrimitive.IsValid())
 	{
 		RootMotionParams.Clear();
 		return;
@@ -49,7 +49,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	// Calculate target transform from the stored relative transform to follow along with moving objects.
 
 	auto TargetTransform{
-		TargetPrimitive.IsValid()
+		MovementBaseUtility::UseRelativeLocation(TargetPrimitive.Get())
 			? FTransform{TargetRelativeRotation, TargetRelativeLocation, TargetPrimitive->GetComponentScale()}
 			.GetRelativeTransformReverse(TargetPrimitive->GetComponentTransform())
 			: FTransform{TargetRelativeRotation, TargetRelativeLocation}

@@ -477,7 +477,7 @@ protected:
 private:
 	void RefreshMantling();
 
-	void StopMantling();
+	void StopMantling(bool bStopMontage = false);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")

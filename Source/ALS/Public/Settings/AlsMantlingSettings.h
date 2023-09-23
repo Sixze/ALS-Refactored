@@ -128,6 +128,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
 	FCollisionResponseContainer MantlingTraceResponses{ECR_Ignore};
 
+	// Used when the mantling was interrupted and we need to stop the animation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float BlendOutDuration{0.3f};
+
+	// If checked, ragdolling will start if the object the character is mantling on was destroyed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bStartRagdollingOnTargetPrimitiveDestruction{true};
+
 public:
 #if WITH_EDITOR
 	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
