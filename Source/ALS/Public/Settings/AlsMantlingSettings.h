@@ -48,8 +48,12 @@ public:
 	TObjectPtr<UAnimMontage> Montage;
 
 	// Mantling time to blend in amount curve.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bUseMontageBlendIn"))
 	TObjectPtr<UCurveFloat> BlendInCurve;
+
+	// If checked, mantling will use the blend in curve from the animation montage instead of from this asset.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
+	bool bUseMontageBlendIn{true};
 
 	// Mantling time to interpolation, horizontal and vertical correction amounts curve.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")

@@ -58,7 +58,24 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	FVector LocationOffset;
 	FRotator RotationOffset;
 
-	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(GetTime())};
+	auto BlendInAmount{1.0f};
+
+	if (MantlingSettings->bUseMontageBlendIn)
+	{
+		const auto& MontageBlendIn{MantlingSettings->Montage->BlendIn};
+		if (MontageBlendIn.GetBlendTime() > 0.0f)
+		{
+			BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
+			                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
+		}
+	}
+	else
+	{
+		if (IsValid(MantlingSettings->BlendInCurve))
+		{
+			BlendInAmount = MantlingSettings->BlendInCurve->GetFloatValue(GetTime());
+		}
+	}
 
 	if (!FAnimWeight::IsRelevant(BlendInAmount))
 	{

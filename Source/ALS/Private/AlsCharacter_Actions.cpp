@@ -5,7 +5,6 @@
 #include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
 #include "Engine/NetConnection.h"
 #include "Net/Core/PushModel/PushModel.h"
@@ -404,7 +403,6 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
 
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) ||
-	    !ALS_ENSURE(IsValid(MantlingSettings->BlendInCurve)) ||
 	    !ALS_ENSURE(IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve)))
 	{
 		return;
