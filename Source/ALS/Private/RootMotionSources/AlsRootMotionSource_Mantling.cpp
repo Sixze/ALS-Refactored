@@ -38,13 +38,13 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
-	if (!ALS_ENSURE(Duration > UE_SMALL_NUMBER) || DeltaTime <= UE_SMALL_NUMBER || !TargetPrimitive.IsValid())
+	if (!ALS_ENSURE(GetDuration() > UE_SMALL_NUMBER) || DeltaTime <= UE_SMALL_NUMBER || !TargetPrimitive.IsValid())
 	{
 		RootMotionParams.Clear();
 		return;
 	}
 
-	const auto MantlingTime{GetTime() * MantlingSettings->GetPlayRateByHeight(MantlingHeight)};
+	const auto MantlingTime{GetTime() * MantlingSettings->Montage->RateScale * MantlingSettings->GetPlayRateByHeight(MantlingHeight)};
 
 	// Calculate target transform from the stored relative transform to follow along with moving objects.
 
@@ -58,7 +58,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	FVector LocationOffset;
 	FRotator RotationOffset;
 
-	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(MantlingTime)};
+	const auto BlendInAmount{MantlingSettings->BlendInCurve->GetFloatValue(GetTime())};
 
 	if (!FAnimWeight::IsRelevant(BlendInAmount))
 	{

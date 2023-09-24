@@ -411,7 +411,9 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	}
 
 	const auto StartTime{MantlingSettings->GetStartTimeByHeight(Parameters.MantlingHeight)};
-	const auto PlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
+
+	const auto MontagePlayRate{MantlingSettings->Montage->RateScale};
+	const auto SettingsPlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
 
 	// Calculate mantling duration.
 
@@ -458,7 +460,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
 	RootMotionSource->InstanceName = __FUNCTION__;
-	RootMotionSource->Duration = Duration / PlayRate;
+	RootMotionSource->Duration = Duration / (MontagePlayRate * SettingsPlayRate);
 	RootMotionSource->MantlingSettings = MantlingSettings;
 	RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
 	RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
@@ -482,7 +484,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 				: StartTime
 		};
 
-		if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, PlayRate,
+		if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, SettingsPlayRate,
 		                                               EMontagePlayReturnType::MontageLength,
 		                                               MontageStartTime, false))
 		{
