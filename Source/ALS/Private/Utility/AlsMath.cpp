@@ -56,3 +56,34 @@ EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, co
 
 	return EAlsMovementDirection::Backward;
 }
+
+bool UAlsMath::TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
+                                      FVector& ProjectionLocation, FVector& Direction)
+{
+	const auto AbVector{BLocation - ALocation};
+	if (AbVector.IsNearlyZero())
+	{
+		// Can't do anything if A and B are equal.
+
+		ProjectionLocation = ALocation;
+		Direction = FVector::ZeroVector;
+
+		return false;
+	}
+
+	auto AcVector{CLocation - ALocation};
+	if (!AcVector.Normalize())
+	{
+		// Only A and C are equal.
+
+		ProjectionLocation = ALocation;
+		Direction = AbVector.GetUnsafeNormal(); // A and B are not equal, so normalization will be safe.
+
+		return true;
+	}
+
+	ProjectionLocation = ALocation + AbVector.ProjectOnToNormal(AcVector);
+	Direction = BLocation - ProjectionLocation;
+
+	return Direction.Normalize(); // Direction will be zero and cannot be normalized if A, B and C are collinear.
+}

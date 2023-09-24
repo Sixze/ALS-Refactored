@@ -140,6 +140,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Math|Input", Meta = (ReturnDisplayName = "Direction"))
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
+
+	// Calculates the projection location and direction of the perpendicular to AC through B.
+	UFUNCTION(BlueprintCallable, Category = "ALS|Math|Input",
+		Meta = (AutoCreateRefTerm = "ALocation, BLocation, CLocation", ExpandBoolAsExecs = "ReturnValue"))
+	static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
+	                                   FVector& ProjectionLocation, FVector& Direction);
 };
 
 inline void FAlsSpringFloatState::Reset()

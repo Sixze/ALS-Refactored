@@ -29,7 +29,7 @@ public:
 	virtual void Execute() override;
 };
 
-// Calculates the intersection location and direction of the perpendicular to AC through B.
+// Calculates the projection location and direction of the perpendicular to AC through B.
 USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS", NodeColor = "0.05 0.25 0.05"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FRigUnit
 {
@@ -51,11 +51,11 @@ public:
 	UPROPERTY(Transient, Meta = (Output))
 	bool bSuccess{false};
 
-	UPROPERTY(Transient, Meta = (Output))
-	FVector StartLocation{ForceInit};
+	UPROPERTY(Transient, DisplayName = "Item B Location", Meta = (Output))
+	FVector ItemBLocation{ForceInit};
 
-	UPROPERTY(Transient, Meta = (Output))
-	FVector EndLocation{ForceInit};
+	UPROPERTY(Transient, DisplayName = "Item B Projection Location", Meta = (Output))
+	FVector ItemBProjectionLocation{ForceInit};
 
 	UPROPERTY(Transient, Meta = (Output))
 	FVector Direction{FVector::ForwardVector};
