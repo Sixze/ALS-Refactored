@@ -65,8 +65,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
 	FVector2f ReferenceHeight{50.0f, 100.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
 	FVector2f StartTime{0.5f, 0.0f};
+
+	// If checked, mantling will automatically calculate the start time based on how much vertical
+	// distance the character needs to move to reach the object they are about to mantle.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
+	bool bAutoCalculateStartTime{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
 	FVector2f PlayRate{1.0f, 1.0f};

@@ -3,6 +3,7 @@
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Animation/AnimSequence.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
@@ -408,7 +409,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		return;
 	}
 
-	const auto StartTime{MantlingSettings->GetStartTimeByHeight(Parameters.MantlingHeight)};
+	const auto StartTime{CalculateMantlingStartTime(MantlingSettings, Parameters.MantlingHeight)};
 
 	const auto MontagePlayRate{MantlingSettings->Montage->RateScale};
 	const auto SettingsPlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
@@ -496,6 +497,68 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 UAlsMantlingSettings* AAlsCharacter::SelectMantlingSettings_Implementation(EAlsMantlingType MantlingType)
 {
 	return nullptr;
+}
+
+float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const
+{
+	if (!MantlingSettings->bAutoCalculateStartTime)
+	{
+		return MantlingSettings->GetStartTimeByHeight(MantlingHeight);
+	}
+
+	// https://landelare.github.io/2022/05/15/climbing-with-root-motion.html
+
+	if (!IsValid(MantlingSettings->Montage) || !ALS_ENSURE(MantlingSettings->Montage->CompositeSections.Num() > 0))
+	{
+		return 0.0f;
+	}
+
+	// We expect the mantling animation montage to consist of one section that spans the entire montage.
+
+	const auto& Section{MantlingSettings->Montage->GetAnimCompositeSection(0)};
+	const auto* Sequence{CastChecked<UAnimSequence>(Section.GetLinkedSequence())};
+
+	if (!ALS_ENSURE(IsValid(Sequence)))
+	{
+		return 0.0f;
+	}
+
+	const auto SequenceFrameRate{1.0f / Sequence->GetSamplingFrameRate().AsDecimal()};
+
+	auto SearchStartTime{0.0f};
+	auto SearchEndTime = Sequence->GetPlayLength();
+
+	// Find the vertical distance the character has already moved.
+
+	const auto TargetTransform{Sequence->ExtractRootTrackTransform(SearchEndTime, nullptr)};
+	const auto TargetLocationZ{FMath::Max(0.0f, TargetTransform.GetTranslation().Z - MantlingHeight)};
+
+	// Perform a binary search to find the time when the character is at the target vertical distance.
+
+	while (true)
+	{
+		const auto Time{(SearchStartTime + SearchEndTime) * 0.5f};
+
+		const auto Transform{Sequence->ExtractRootTrackTransform(Time, nullptr)};
+		const auto LocationZ{Transform.GetTranslation().Z};
+
+		// Stop the search if a close enough location has been found or if the search interval is less than the animation frame rate.
+
+		if (FMath::IsNearlyEqual(LocationZ, TargetLocationZ, UCharacterMovementComponent::MIN_FLOOR_DIST) ||
+		    SearchEndTime - SearchStartTime <= SequenceFrameRate)
+		{
+			return Time;
+		}
+
+		if (LocationZ < TargetLocationZ)
+		{
+			SearchStartTime = Time;
+		}
+		else
+		{
+			SearchEndTime = Time;
+		}
+	}
 }
 
 void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
