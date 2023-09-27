@@ -44,9 +44,9 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		return;
 	}
 
-	const auto MantlingTime{GetTime() * MantlingSettings->Montage->RateScale * MantlingSettings->GetPlayRateByHeight(MantlingHeight)};
+	const auto MontageTime{MontageStartTime + GetTime() * MontagePlayRate};
 
-	// Calculate target transform from the stored relative transform to follow along with moving objects.
+	// Calculate the target transform based on the stored relative transform to follow moving objects.
 
 	auto TargetTransform{
 		MovementBaseUtility::UseRelativeLocation(TargetPrimitive.Get())
@@ -85,8 +85,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	else
 	{
 		const FVector3f InterpolationAndCorrectionAmounts{
-			MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetVectorValue(
-				MantlingTime + MantlingSettings->GetStartTimeByHeight(MantlingHeight))
+			MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetVectorValue(MontageTime)
 		};
 
 		const auto InterpolationAmount{InterpolationAndCorrectionAmounts.X};
@@ -100,13 +99,13 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		}
 		else
 		{
-			// Calculate the animation offset. This would be the location the actual animation starts at relative to the target transform.
+			// Calculate the animation offset. This is the location at which the actual animation starts relative to the target transform.
 
 			auto AnimationLocationOffset{TargetTransform.GetUnitAxis(EAxis::X) * MantlingSettings->StartRelativeLocation.X};
 			AnimationLocationOffset.Z = MantlingSettings->StartRelativeLocation.Z;
 			AnimationLocationOffset *= Character.GetMesh()->GetComponentScale().Z;
 
-			// Blend into the animation offset and final offset at the same time.
+			// Blend into the animation offset and the final offset at the same time.
 			// Horizontal and vertical blends use different correction amounts.
 
 			LocationOffset.X = FMath::Lerp(ActorFeetLocationOffset.X, AnimationLocationOffset.X, HorizontalCorrectionAmount) *
@@ -116,7 +115,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 			LocationOffset.Z = FMath::Lerp(ActorFeetLocationOffset.Z, AnimationLocationOffset.Z, VerticalCorrectionAmount) *
 			                   InterpolationAmount;
 
-			// Actor rotation offset must be normalized for this block of code to work properly.
+			// The actor's rotation offset must be normalized for this code block to work properly.
 
 			RotationOffset = ActorRotationOffset * (1.0f - HorizontalCorrectionAmount) * InterpolationAmount;
 		}
@@ -136,7 +135,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	TargetTransform.AddToTranslation(LocationOffset);
 	TargetTransform.ConcatenateRotation(RotationOffset.Quaternion());
 
-	// Find the delta transform between the character and the target transform and divide by the delta time to get the velocity.
+	// Find the delta transform between the actor and the target transform and divide it by the time delta to get the velocity.
 
 	TargetTransform.AddToTranslation(-Movement.GetActorFeetLocation());
 	TargetTransform.ConcatenateRotation(Movement.UpdatedComponent->GetComponentQuat().Inverse());
@@ -171,7 +170,8 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	ActorRotationOffset.Normalize();
 	bSuccess &= bSuccessLocal;
 
-	Archive << MantlingHeight;
+	Archive << MontageStartTime;
+	Archive << MontagePlayRate;
 
 	return bSuccess;
 }

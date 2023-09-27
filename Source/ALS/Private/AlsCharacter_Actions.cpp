@@ -404,6 +404,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
 
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) ||
+	    !ALS_ENSURE(IsValid(MantlingSettings->Montage)) ||
 	    !ALS_ENSURE(IsValid(MantlingSettings->InterpolationAndCorrectionAmountsCurve)))
 	{
 		return;
@@ -466,7 +467,8 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;
 	RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
 	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
-	RootMotionSource->MantlingHeight = Parameters.MantlingHeight;
+	RootMotionSource->MontageStartTime = StartTime;
+	RootMotionSource->MontagePlayRate = MontagePlayRate * SettingsPlayRate;
 
 	MantlingRootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
 
