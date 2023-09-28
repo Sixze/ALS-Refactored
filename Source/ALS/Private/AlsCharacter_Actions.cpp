@@ -446,15 +446,12 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
 	AlsCharacterMovement->SetMovementModeLocked(true);
 
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
-		GetMesh()->SetRelativeLocationAndRotation(GetBaseTranslationOffset(),
-		                                          GetMesh()->IsUsingAbsoluteRotation()
-			                                          ? GetActorTransform().GetRotation() * GetBaseRotationOffset()
-			                                          : GetBaseRotationOffset());
-	}
+	GetMesh()->SetRelativeLocationAndRotation(GetBaseTranslationOffset(),
+	                                          GetMesh()->IsUsingAbsoluteRotation()
+		                                          ? GetActorTransform().GetRotation() * GetBaseRotationOffset()
+		                                          : GetBaseRotationOffset());
 
 	// Apply mantling root motion.
 
@@ -474,23 +471,11 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (ALS_ENSURE(IsValid(MantlingSettings->Montage)))
+	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, SettingsPlayRate,
+	                                               EMontagePlayReturnType::MontageLength,
+	                                               StartTime, false))
 	{
-		// TODO Magic. I can't explain why, but this code fixes animation and root motion source desynchronization.
-
-		const auto MontageStartTime{
-			Parameters.MantlingType == EAlsMantlingType::InAir && IsLocallyControlled()
-				? StartTime - FMath::GetMappedRangeValueClamped(
-					  FVector2f{MantlingSettings->ReferenceHeight}, {GetWorld()->GetDeltaSeconds(), 0.0f}, Parameters.MantlingHeight)
-				: StartTime
-		};
-
-		if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, SettingsPlayRate,
-		                                               EMontagePlayReturnType::MontageLength,
-		                                               MontageStartTime, false))
-		{
-			SetLocomotionAction(AlsLocomotionActionTags::Mantling);
-		}
+		SetLocomotionAction(AlsLocomotionActionTags::Mantling);
 	}
 
 	OnMantlingStarted(Parameters);
@@ -623,10 +608,7 @@ void AAlsCharacter::StopMantling(const bool bStopMontage)
 
 	MantlingRootMotionSourceId = 0;
 
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
-	}
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
 	if (bStopMontage)
 	{

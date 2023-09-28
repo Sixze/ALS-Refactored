@@ -1,5 +1,6 @@
 ﻿#include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 
+#include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
@@ -45,6 +46,11 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	}
 
 	const auto MontageTime{MontageStartTime + GetTime() * MontagePlayRate};
+
+	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
+	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
+
+	Character.GetMesh()->GetAnimInstance()->Montage_SetPosition(MantlingSettings->Montage, FMath::Max(0.0f, MontageTime - DeltaTime));
 
 	// Calculate the target transform based on the stored relative transform to follow moving objects.
 
@@ -141,7 +147,6 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	TargetTransform.ConcatenateRotation(Movement.UpdatedComponent->GetComponentQuat().Inverse());
 
 	RootMotionParams.Set(TargetTransform * ScalarRegister{1.0f / DeltaTime});
-	bSimulatedNeedsSmoothing = true;
 }
 
 bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap* Map, bool& bSuccess)
