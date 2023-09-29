@@ -3,6 +3,8 @@
 #include "DrawDebugHelpers.h"
 #include "GameplayTagsManager.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -74,6 +76,30 @@ bool UAlsUtility::TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& Base
 	RotationSpeed.Yaw = FMath::RadiansToDegrees(AngularVelocityVector.Z);
 
 	return true;
+}
+
+FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Montage, const float Time)
+{
+	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
+
+	if (!IsValid(Montage))
+	{
+		return FTransform::Identity;
+	}
+
+	const auto* Segment{Montage->SlotAnimTracks[0].AnimTrack.GetSegmentAtTime(Time)};
+	if (Segment == nullptr)
+	{
+		return FTransform::Identity;
+	}
+
+	const auto* Sequence{Cast<UAnimSequence>(Segment->GetAnimReference())};
+	if (!IsValid(Sequence))
+	{
+		return FTransform::Identity;
+	}
+
+	return Sequence->ExtractRootTrackTransform(Segment->ConvertTrackPosToAnimPos(Time), nullptr);
 }
 
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)

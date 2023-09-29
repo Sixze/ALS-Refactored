@@ -12,10 +12,10 @@ struct ALS_API FAlsRootMotionSource_Mantling : public FRootMotionSource
 
 public:
 	UPROPERTY()
-	TObjectPtr<UAlsMantlingSettings> MantlingSettings{nullptr};
+	TObjectPtr<const UAlsMantlingSettings> MantlingSettings{nullptr};
 
 	UPROPERTY()
-	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
+	TWeakObjectPtr<const UPrimitiveComponent> TargetPrimitive;
 
 	UPROPERTY()
 	FVector TargetRelativeLocation{ForceInit};

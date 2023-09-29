@@ -3,11 +3,11 @@
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
-#include "Curves/CurveVector.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionSource_Mantling)
 
@@ -45,12 +45,13 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		return;
 	}
 
+	const auto* Montage{MantlingSettings->Montage.Get()};
 	const auto MontageTime{MontageStartTime + GetTime() * MontagePlayRate};
 
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
 
-	Character.GetMesh()->GetAnimInstance()->Montage_SetPosition(MantlingSettings->Montage, FMath::Max(0.0f, MontageTime - DeltaTime));
+	Character.GetMesh()->GetAnimInstance()->Montage_SetPosition(Montage, FMath::Max(0.0f, MontageTime - DeltaTime));
 
 	// Calculate the target transform based on the stored relative transform to follow moving objects.
 
@@ -61,14 +62,11 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 			: FTransform{TargetRelativeRotation, TargetRelativeLocation}
 	};
 
-	FVector LocationOffset;
-	FRotator RotationOffset;
-
 	auto BlendInAmount{1.0f};
 
 	if (MantlingSettings->bUseMontageBlendIn)
 	{
-		const auto& MontageBlendIn{MantlingSettings->Montage->BlendIn};
+		const auto& MontageBlendIn{Montage->BlendIn};
 		if (MontageBlendIn.GetBlendTime() > 0.0f)
 		{
 			BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
@@ -83,63 +81,60 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		}
 	}
 
-	if (!FAnimWeight::IsRelevant(BlendInAmount))
+	const auto TargetAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, Montage->GetPlayLength()).GetLocation()};
+	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+
+	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
+
+	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
 	{
-		LocationOffset = ActorFeetLocationOffset;
-		RotationOffset = ActorRotationOffset;
+		// Calculate the target animation location offset. This is the offset to
+		// the location where the animation ends relative to the target transform.
+
+		auto TargetAnimationLocationOffset{TargetTransform.GetUnitAxis(EAxis::X) * -TargetAnimationLocation.Y};
+		TargetAnimationLocationOffset.Z = -TargetAnimationLocation.Z;
+		TargetAnimationLocationOffset *= Character.GetMesh()->GetComponentScale().Z;
+
+		// Blend into the animation offset and the final offset at the same time.
+		// Horizontal and vertical blends use different correction amounts.
+
+		auto HorizontalCorrectionAmount{1.0f};
+		auto VerticalCorrectionAmount{1.0f};
+
+		if (IsValid(MantlingSettings->HorizontalCorrectionCurve))
+		{
+			HorizontalCorrectionAmount = MantlingSettings->HorizontalCorrectionCurve->GetFloatValue(MontageTime);
+		}
+
+		if (IsValid(MantlingSettings->VerticalCorrectionCurve))
+		{
+			VerticalCorrectionAmount = MantlingSettings->VerticalCorrectionCurve->GetFloatValue(MontageTime);
+		}
+
+		FVector LocationOffset{
+			FMath::Lerp(ActorFeetLocationOffset.X, TargetAnimationLocationOffset.X, HorizontalCorrectionAmount),
+			FMath::Lerp(ActorFeetLocationOffset.Y, TargetAnimationLocationOffset.Y, HorizontalCorrectionAmount),
+			FMath::Lerp(ActorFeetLocationOffset.Z, TargetAnimationLocationOffset.Z, VerticalCorrectionAmount)
+		};
+
+		LocationOffset = FMath::Lerp(ActorFeetLocationOffset, LocationOffset * (1.0f - InterpolationAmount), BlendInAmount);
+
+		// The actor's rotation offset must be normalized for this code block to work properly.
+
+		const auto RotationOffset{
+			ActorRotationOffset *
+			FMath::Lerp(1.0f, (1.0f - HorizontalCorrectionAmount) * (1.0f - InterpolationAmount), BlendInAmount)
+		};
+
+		// Apply final offsets.
+
+		TargetTransform.AddToTranslation(LocationOffset);
+		TargetTransform.ConcatenateRotation(RotationOffset.Quaternion());
 	}
 	else
 	{
-		const FVector3f InterpolationAndCorrectionAmounts{
-			MantlingSettings->InterpolationAndCorrectionAmountsCurve->GetVectorValue(MontageTime)
-		};
-
-		const auto InterpolationAmount{InterpolationAndCorrectionAmounts.X};
-		const auto HorizontalCorrectionAmount{InterpolationAndCorrectionAmounts.Y};
-		const auto VerticalCorrectionAmount{InterpolationAndCorrectionAmounts.Z};
-
-		if (!FAnimWeight::IsRelevant(InterpolationAmount))
-		{
-			LocationOffset = FVector::ZeroVector;
-			RotationOffset = FRotator::ZeroRotator;
-		}
-		else
-		{
-			// Calculate the animation offset. This is the location at which the actual animation starts relative to the target transform.
-
-			auto AnimationLocationOffset{TargetTransform.GetUnitAxis(EAxis::X) * MantlingSettings->StartRelativeLocation.X};
-			AnimationLocationOffset.Z = MantlingSettings->StartRelativeLocation.Z;
-			AnimationLocationOffset *= Character.GetMesh()->GetComponentScale().Z;
-
-			// Blend into the animation offset and the final offset at the same time.
-			// Horizontal and vertical blends use different correction amounts.
-
-			LocationOffset.X = FMath::Lerp(ActorFeetLocationOffset.X, AnimationLocationOffset.X, HorizontalCorrectionAmount) *
-			                   InterpolationAmount;
-			LocationOffset.Y = FMath::Lerp(ActorFeetLocationOffset.Y, AnimationLocationOffset.Y, HorizontalCorrectionAmount) *
-			                   InterpolationAmount;
-			LocationOffset.Z = FMath::Lerp(ActorFeetLocationOffset.Z, AnimationLocationOffset.Z, VerticalCorrectionAmount) *
-			                   InterpolationAmount;
-
-			// The actor's rotation offset must be normalized for this code block to work properly.
-
-			RotationOffset = ActorRotationOffset * (1.0f - HorizontalCorrectionAmount) * InterpolationAmount;
-		}
-
-		// Initial blend in allows the actor to blend into the interpolation and correction curves at
-		// the midpoint. This prevents pops when mantling an object lower than the animated mantling.
-
-		if (!FAnimWeight::IsFullWeight(BlendInAmount))
-		{
-			LocationOffset = FMath::Lerp(ActorFeetLocationOffset, LocationOffset, BlendInAmount);
-			RotationOffset = FMath::Lerp(ActorRotationOffset, RotationOffset, BlendInAmount);
-		}
+		Status.SetFlag(ERootMotionSourceStatusFlags::Finished);
 	}
-
-	// Apply final offsets.
-
-	TargetTransform.AddToTranslation(LocationOffset);
-	TargetTransform.ConcatenateRotation(RotationOffset.Quaternion());
 
 	// Find the delta transform between the actor and the target transform and divide it by the time delta to get the velocity.
 

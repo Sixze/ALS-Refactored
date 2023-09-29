@@ -39,6 +39,9 @@ public:
 
 	static bool TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& BasedMovement, FRotator& RotationSpeed);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Utility", Meta = (ReturnDisplayName = "Transform"))
+	static FTransform ExtractRootTransformFromMontage(const UAnimMontage* Montage, float Time);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Utility",
 		Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName", ReturnDisplayName = "Value"))
 	static bool ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName);

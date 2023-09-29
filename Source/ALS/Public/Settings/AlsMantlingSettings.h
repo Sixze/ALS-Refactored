@@ -7,7 +7,6 @@
 
 class UAnimMontage;
 class UCurveFloat;
-class UCurveVector;
 
 UENUM(BlueprintType)
 enum class EAlsMantlingType : uint8
@@ -47,23 +46,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAnimMontage> Montage;
 
-	// Mantling time to blend in amount curve.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bUseMontageBlendIn"))
-	TObjectPtr<UCurveFloat> BlendInCurve;
-
-	// If checked, mantling will use the blend in curve from the animation montage instead of from this asset.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	bool bUseMontageBlendIn{true};
-
-	// Mantling time to interpolation, horizontal and vertical correction amounts curve.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UCurveVector> InterpolationAndCorrectionAmountsCurve;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FVector3f StartRelativeLocation{-65.0f, 0.0f, -100.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
 	FVector2f ReferenceHeight{50.0f, 100.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
+	FVector2f PlayRate{1.0f, 1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
 	FVector2f StartTime{0.5f, 0.0f};
@@ -73,8 +60,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
 	bool bAutoCalculateStartTime{false};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bUseMontageBlendIn"))
+	TObjectPtr<UCurveFloat> BlendInCurve;
+
+	// If checked, mantling will use the blend in curve from the animation montage instead of from this asset.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	FVector2f PlayRate{1.0f, 1.0f};
+	bool bUseMontageBlendIn{true};
+
+	// Optional mantling time to horizontal correction amount curve.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	TObjectPtr<UCurveFloat> HorizontalCorrectionCurve;
+
+	// Optional mantling time to vertical correction amount curve.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	TObjectPtr<UCurveFloat> VerticalCorrectionCurve;
 
 public:
 	float GetStartTimeByHeight(float MantlingHeight) const;

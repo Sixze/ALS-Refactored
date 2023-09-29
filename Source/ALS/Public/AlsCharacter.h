@@ -162,10 +162,8 @@ public:
 protected:
 	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
 
-private:
-	void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
+	virtual void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
-protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
@@ -304,10 +302,9 @@ public:
 
 	void SetLocomotionAction(const FGameplayTag& NewLocomotionAction);
 
-private:
-	void NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
-
 protected:
+	virtual void NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
 
