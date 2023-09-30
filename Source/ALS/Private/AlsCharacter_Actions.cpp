@@ -495,24 +495,31 @@ float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* Mant
 	auto SearchStartTime{0.0f};
 	auto SearchEndTime{Montage->GetPlayLength()};
 
+	const auto SearchStartLocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, SearchStartTime).GetTranslation().Z};
+	const auto SearchEndLocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, SearchEndTime).GetTranslation().Z};
+
 	// Find the vertical distance the character has already moved.
 
-	const auto TargetTransform{UAlsUtility::ExtractRootTransformFromMontage(Montage, SearchEndTime)};
-	const auto TargetLocationZ{FMath::Max(0.0f, TargetTransform.GetTranslation().Z - MantlingHeight)};
+	const auto TargetLocationZ{FMath::Max(0.0f, SearchEndLocationZ - MantlingHeight)};
 
 	// Perform a binary search to find the time when the character is at the target vertical distance.
+
+	static constexpr auto MaxLocationSearchTolerance{1.0f};
+
+	if (FMath::IsNearlyEqual(SearchStartLocationZ, TargetLocationZ, MaxLocationSearchTolerance))
+	{
+		return SearchStartTime;
+	}
 
 	while (true)
 	{
 		const auto Time{(SearchStartTime + SearchEndTime) * 0.5f};
-
-		const auto Transform{UAlsUtility::ExtractRootTransformFromMontage(Montage, Time)};
-		const auto LocationZ{Transform.GetTranslation().Z};
+		const auto LocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, Time).GetTranslation().Z};
 
 		// Stop the search if a close enough location has been found or if
 		// the search interval is less than the animation montage frame rate.
 
-		if (FMath::IsNearlyEqual(LocationZ, TargetLocationZ, 1.0f) ||
+		if (FMath::IsNearlyEqual(LocationZ, TargetLocationZ, MaxLocationSearchTolerance) ||
 		    SearchEndTime - SearchStartTime <= MontageFrameRate)
 		{
 			return Time;
