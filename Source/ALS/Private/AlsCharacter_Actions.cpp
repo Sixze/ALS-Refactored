@@ -408,9 +408,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	const auto StartTime{CalculateMantlingStartTime(MantlingSettings, Parameters.MantlingHeight)};
 	const auto Duration{MantlingSettings->Montage->GetPlayLength() - StartTime};
-
-	const auto MontagePlayRate{MantlingSettings->Montage->RateScale};
-	const auto SettingsPlayRate{MantlingSettings->GetPlayRateByHeight(Parameters.MantlingHeight)};
+	const auto PlayRate{MantlingSettings->Montage->RateScale};
 
 	// Calculate actor offsets (offsets between actor and target transform).
 
@@ -446,7 +444,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
 	RootMotionSource->InstanceName = __FUNCTION__;
-	RootMotionSource->Duration = Duration / (MontagePlayRate * SettingsPlayRate);
+	RootMotionSource->Duration = Duration / PlayRate;
 	RootMotionSource->MantlingSettings = MantlingSettings;
 	RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
 	RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
@@ -454,13 +452,12 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
 	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
 	RootMotionSource->MontageStartTime = StartTime;
-	RootMotionSource->MontagePlayRate = MontagePlayRate * SettingsPlayRate;
 
 	MantlingRootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
 
 	// Play the animation montage if valid.
 
-	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, SettingsPlayRate,
+	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, 1.0f,
 	                                               EMontagePlayReturnType::MontageLength,
 	                                               StartTime, false))
 	{
@@ -479,7 +476,7 @@ float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* Mant
 {
 	if (!MantlingSettings->bAutoCalculateStartTime)
 	{
-		return MantlingSettings->GetStartTimeByHeight(MantlingHeight);
+		return FMath::GetMappedRangeValueClamped(MantlingSettings->StartTimeReferenceHeight, MantlingSettings->StartTime, MantlingHeight);
 	}
 
 	// https://landelare.github.io/2022/05/15/climbing-with-root-motion.html
