@@ -388,22 +388,41 @@ void AAlsCharacter::RefreshMovementBase()
 
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 {
-	if (ViewMode != NewViewMode)
+	SetViewMode(NewViewMode, true);
+}
+
+void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode, const bool bSendRpc)
+{
+	if (ViewMode == NewViewMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
-		ViewMode = NewViewMode;
+		return;
+	}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
+	ViewMode = NewViewMode;
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetViewMode(ViewMode);
+		}
+		else
 		{
 			ServerSetViewMode(ViewMode);
 		}
 	}
 }
 
+void AAlsCharacter::ClientSetViewMode_Implementation(const FGameplayTag& NewViewMode)
+{
+	SetViewMode(NewViewMode, false);
+}
+
 void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag& NewViewMode)
 {
-	SetViewMode(NewViewMode);
+	SetViewMode(NewViewMode, false);
 }
 
 void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
@@ -502,19 +521,43 @@ void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& P
 
 void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
 {
-	if (bDesiredAiming != bNewDesiredAiming)
+	SetDesiredAiming(bNewDesiredAiming, true);
+}
+
+void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming, const bool bSendRpc)
+{
+	if (bDesiredAiming == bNewDesiredAiming || GetLocalRole() < ROLE_AutonomousProxy)
 	{
-		bDesiredAiming = bNewDesiredAiming;
+		return;
+	}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
+	bDesiredAiming = bNewDesiredAiming;
 
-		OnDesiredAimingChanged(!bDesiredAiming);
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	OnDesiredAimingChanged(!bDesiredAiming);
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredAiming(bDesiredAiming);
+		}
+		else
 		{
 			ServerSetDesiredAiming(bDesiredAiming);
 		}
 	}
+}
+
+void AAlsCharacter::ClientSetDesiredAiming_Implementation(const bool bNewDesiredAiming)
+{
+	SetDesiredAiming(bNewDesiredAiming, false);
+}
+
+void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewDesiredAiming)
+{
+	SetDesiredAiming(bNewDesiredAiming, false);
 }
 
 void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming)
@@ -524,29 +567,43 @@ void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming
 
 void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
 
-void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewAiming)
-{
-	SetDesiredAiming(bNewAiming);
-}
-
 void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
 {
-	if (DesiredRotationMode != NewDesiredRotationMode)
+	SetDesiredRotationMode(NewDesiredRotationMode, true);
+}
+
+void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode, const bool bSendRpc)
+{
+	if (DesiredRotationMode == NewDesiredRotationMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
-		DesiredRotationMode = NewDesiredRotationMode;
+		return;
+	}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
+	DesiredRotationMode = NewDesiredRotationMode;
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredRotationMode(DesiredRotationMode);
+		}
+		else
 		{
 			ServerSetDesiredRotationMode(DesiredRotationMode);
 		}
 	}
 }
 
+void AAlsCharacter::ClientSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
+{
+	SetDesiredRotationMode(NewDesiredRotationMode, false);
+}
+
 void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
 {
-	SetDesiredRotationMode(NewDesiredRotationMode);
+	SetDesiredRotationMode(NewDesiredRotationMode, false);
 }
 
 void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
@@ -656,24 +713,43 @@ void AAlsCharacter::RefreshRotationMode()
 
 void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance)
 {
-	if (DesiredStance != NewDesiredStance)
+	SetDesiredStance(NewDesiredStance, true);
+}
+
+void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance, const bool bSendRpc)
+{
+	if (DesiredStance == NewDesiredStance || GetLocalRole() < ROLE_AutonomousProxy)
 	{
-		DesiredStance = NewDesiredStance;
+		return;
+	}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this)
+	DesiredStance = NewDesiredStance;
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredStance(DesiredStance);
+		}
+		else
 		{
 			ServerSetDesiredStance(DesiredStance);
 		}
-
-		ApplyDesiredStance();
 	}
+
+	ApplyDesiredStance();
+}
+
+void AAlsCharacter::ClientSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
+{
+	SetDesiredStance(NewDesiredStance, false);
 }
 
 void AAlsCharacter::ServerSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
 {
-	SetDesiredStance(NewDesiredStance);
+	SetDesiredStance(NewDesiredStance, false);
 }
 
 void AAlsCharacter::ApplyDesiredStance()
@@ -768,22 +844,41 @@ void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag& PreviousS
 
 void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
 {
-	if (DesiredGait != NewDesiredGait)
+	SetDesiredGait(NewDesiredGait, true);
+}
+
+void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const bool bSendRpc)
+{
+	if (DesiredGait == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
 	{
-		DesiredGait = NewDesiredGait;
+		return;
+	}
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this)
+	DesiredGait = NewDesiredGait;
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredGait(DesiredGait);
+		}
+		else
 		{
 			ServerSetDesiredGait(DesiredGait);
 		}
 	}
 }
 
+void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
+{
+	SetDesiredGait(NewDesiredGait, false);
+}
+
 void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
 {
-	SetDesiredGait(NewDesiredGait);
+	SetDesiredGait(NewDesiredGait, false);
 }
 
 void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
@@ -885,26 +980,45 @@ bool AAlsCharacter::CanSprint() const
 
 void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
 {
-	if (OverlayMode != NewOverlayMode)
+	SetOverlayMode(NewOverlayMode, true);
+}
+
+void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode, const bool bSendRpc)
+{
+	if (OverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
-		const auto PreviousOverlayMode{OverlayMode};
+		return;
+	}
 
-		OverlayMode = NewOverlayMode;
+	const auto PreviousOverlayMode{OverlayMode};
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OverlayMode, this)
+	OverlayMode = NewOverlayMode;
 
-		OnOverlayModeChanged(PreviousOverlayMode);
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OverlayMode, this)
 
-		if (GetLocalRole() == ROLE_AutonomousProxy)
+	OnOverlayModeChanged(PreviousOverlayMode);
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetOverlayMode(OverlayMode);
+		}
+		else
 		{
 			ServerSetOverlayMode(OverlayMode);
 		}
 	}
 }
 
+void AAlsCharacter::ClientSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
+{
+	SetOverlayMode(NewOverlayMode, false);
+}
+
 void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
 {
-	SetOverlayMode(NewOverlayMode);
+	SetOverlayMode(NewOverlayMode, false);
 }
 
 void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode)
