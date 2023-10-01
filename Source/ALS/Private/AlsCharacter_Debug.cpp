@@ -3,10 +3,12 @@
 #include "DisplayDebugHelpers.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/Skeleton.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
@@ -167,7 +169,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	const auto ColumnOffset{145.0f * Scale};
 
 	TArray<FName> CurveNames;
-	GetMesh()->GetAnimInstance()->GetAllCurveNames(CurveNames);
+	GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetCurveMetaDataNames(CurveNames);
 
 	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
 
