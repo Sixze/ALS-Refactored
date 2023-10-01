@@ -4,6 +4,11 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRigUnits)
 
+FAlsRigVMFunction_Clamp01Float_Execute()
+{
+	Result = UAlsMath::Clamp01(Value);
+}
+
 void FAlsRigVMFunction_ExponentialDecayVector::Initialize()
 {
 	bInitialized = false;

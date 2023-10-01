@@ -1,8 +1,26 @@
 #pragma once
 
+#include "RigVMFunctions/Math/RigVMFunction_MathFloat.h"
 #include "RigVMFunctions/Simulation/RigVMFunction_SimBase.h"
 #include "Units/RigUnit.h"
 #include "AlsRigUnits.generated.h"
+
+USTRUCT(DisplayName="Clamp 01", Meta = (Category = "ALS"))
+struct ALS_API FAlsRigVMFunction_Clamp01Float : public FRigVMFunction_MathFloatBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(Meta = (Input))
+	float Value{0.0f};
+
+	UPROPERTY(Meta = (Output))
+	float Result{0.0f};
+
+public:
+	RIGVM_METHOD()
+	virtual void Execute() override;
+};
 
 USTRUCT(DisplayName = "Exponential Decay (Vector)", Meta = (Category = "ALS"))
 struct ALS_API FAlsRigVMFunction_ExponentialDecayVector : public FRigVMFunction_SimBase
