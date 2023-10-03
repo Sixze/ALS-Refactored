@@ -888,6 +888,11 @@ void UAlsAnimationInstance::RefreshInAirLeanAmount(const float DeltaTime)
 	}
 }
 
+bool UAlsAnimationInstance::IsFootLockInhibited() const
+{
+	return RotateInPlaceState.bFootLockInhibited || TurnInPlaceState.bFootLockInhibited;
+}
+
 void UAlsAnimationInstance::RefreshFeetOnGameThread()
 {
 	check(IsInGameThread())
@@ -1017,8 +1022,6 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 {
 	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
 
-	NewFootLockAmount *= 1.0f - RotateInPlaceState.FootLockBlockAmount;
-
 	if (LocomotionState.bMovingSmooth || LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
 		// Smoothly disable foot locking if the character is moving or in the air,
@@ -1074,6 +1077,9 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 				FootState.LockLocation = FinalLocation;
 				FootState.LockRotation = FinalRotation;
+
+				FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
+				FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
 			}
 
 			if (MovementBase.bHasRelativeLocation)
@@ -1097,14 +1103,35 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		FootState.LockAmount = NewFootLockAmount;
 	}
 
-	if (MovementBase.bHasRelativeLocation)
+	if (IsFootLockInhibited())
 	{
-		FootState.LockLocation = MovementBase.Location + MovementBase.Rotation.RotateVector(FootState.LockMovementBaseRelativeLocation);
-		FootState.LockRotation = MovementBase.Rotation * FootState.LockMovementBaseRelativeRotation;
-	}
+		// Inhibition is implemented by temporarily performing all calculations in component space rather
+		// than in world space. So, the feet will still remain locked, but this time relative to the character.
 
-	FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
-	FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
+		const auto& ComponentTransform{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform()};
+
+		FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockComponentRelativeLocation);
+		FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockComponentRelativeRotation);
+
+		if (MovementBase.bHasRelativeLocation)
+		{
+			const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
+
+			FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
+			FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
+		}
+	}
+	else
+	{
+		if (MovementBase.bHasRelativeLocation)
+		{
+			FootState.LockLocation = MovementBase.Location + MovementBase.Rotation.RotateVector(FootState.LockMovementBaseRelativeLocation);
+			FootState.LockRotation = MovementBase.Rotation * FootState.LockMovementBaseRelativeRotation;
+		}
+
+		FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
+		FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
+	}
 
 	FinalLocation = FMath::Lerp(FinalLocation, FootState.LockLocation, FootState.LockAmount);
 	FinalRotation = FQuat::Slerp(FinalRotation, FootState.LockRotation, FootState.LockAmount);
@@ -1488,7 +1515,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
-		RotateInPlaceState.FootLockBlockAmount = 0.0f;
+		RotateInPlaceState.bFootLockInhibited = false;
 		return;
 	}
 
@@ -1504,7 +1531,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
 			                                                 DeltaTime, PlayRateInterpolationSpeed);
 
-		RotateInPlaceState.FootLockBlockAmount = 0.0f;
+		RotateInPlaceState.bFootLockInhibited = false;
 		return;
 	}
 
@@ -1521,20 +1548,12 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 		                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, PlayRate,
 		                                                 DeltaTime, PlayRateInterpolationSpeed);
 
-	// Disable foot locking when rotating at a large angle or rotating too fast, otherwise the legs may twist in a spiral.
+	// Inhibit foot locking when rotating at a large angle or rotating too fast, otherwise the legs may twist into a spiral.
 
-	static constexpr auto BlockInterpolationSpeed{5.0f};
-
-	RotateInPlaceState.FootLockBlockAmount =
-		Settings->RotateInPlace.bDisableFootLock
-			? 1.0f
-			: FMath::Abs(ViewState.YawAngle) > Settings->RotateInPlace.FootLockBlockViewYawAngleThreshold
-			? 0.5f
-			: ViewState.YawSpeed <= Settings->RotateInPlace.FootLockBlockViewYawSpeedThreshold
-			? 0.0f
-			: bPendingUpdate
-			? 1.0f
-			: FMath::FInterpTo(RotateInPlaceState.FootLockBlockAmount, 1.0f, DeltaTime, BlockInterpolationSpeed);
+	RotateInPlaceState.bFootLockInhibited =
+		Settings->RotateInPlace.bDisableFootLock ||
+		FMath::Abs(ViewState.YawAngle) > Settings->RotateInPlace.FootLockInhibitionViewYawAngleThreshold ||
+		ViewState.YawSpeed > Settings->RotateInPlace.FootLockInhibitionViewYawSpeedThreshold;
 }
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
@@ -1550,7 +1569,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	if (LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded || !IsTurnInPlaceAllowed())
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
-		TurnInPlaceState.bFootLockDisabled = false;
+		TurnInPlaceState.bFootLockInhibited = false;
 		return;
 	}
 
@@ -1568,7 +1587,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	    FMath::Abs(ViewState.YawAngle) <= Settings->TurnInPlace.ViewYawAngleThreshold)
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
-		TurnInPlaceState.bFootLockDisabled = false;
+		TurnInPlaceState.bFootLockInhibited = false;
 		return;
 	}
 
@@ -1670,7 +1689,7 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 		                              FMath::Abs(TurnInPlaceState.QueuedTurnYawAngle / TurnInPlaceSettings->AnimatedTurnAngle)
 		                            : TurnInPlaceSettings->PlayRate;
 
-	TurnInPlaceState.bFootLockDisabled = Settings->TurnInPlace.bDisableFootLock;
+	TurnInPlaceState.bFootLockInhibited = Settings->TurnInPlace.bDisableFootLock;
 
 	TurnInPlaceState.QueuedSettings = nullptr;
 	TurnInPlaceState.QueuedSlotName = NAME_None;

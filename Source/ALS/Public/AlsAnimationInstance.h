@@ -236,6 +236,11 @@ private:
 
 	// Feet
 
+public:
+	// If true, the foot locking will be temporarily "paused". This is not the same as a
+	// complete shutdown because the internal state of the foot locking will continue to update.
+	virtual bool IsFootLockInhibited() const;
+
 private:
 	void RefreshFeetOnGameThread();
 

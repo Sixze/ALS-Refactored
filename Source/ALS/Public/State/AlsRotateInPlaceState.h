@@ -17,5 +17,5 @@ struct ALS_API FAlsRotateInPlaceState
 	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float FootLockBlockAmount{0.0f};
+	bool bFootLockInhibited{false};
 };
