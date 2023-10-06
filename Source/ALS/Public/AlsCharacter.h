@@ -417,14 +417,14 @@ protected:
 
 	virtual bool RefreshCustomGroundedNotMovingRotation(float DeltaTime);
 
-	void RefreshGroundedMovingAimingRotation(float DeltaTime);
+	float CalculateGroundedMovingRotationInterpolationSpeed() const;
 
-	void RefreshGroundedNotMovingAimingRotation(float DeltaTime);
+	void RefreshGroundedAimingRotation(float DeltaTime);
 
-	float CalculateRotationInterpolationSpeed() const;
+	bool RefreshConstrainedAimingRotation(float DeltaTime, bool bApplySecondaryConstraint = false);
 
 private:
-	void ApplyRotationYawSpeed(float DeltaTime);
+	void ApplyRotationYawSpeedAnimationCurve(float DeltaTime);
 
 	void RefreshInAirRotation(float DeltaTime);
 

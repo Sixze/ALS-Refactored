@@ -1278,10 +1278,7 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) - LocomotionState.Rotation.Yaw))
 	};
 
-	if (RotationYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
-	{
-		RotationYawAngle -= 360.0f;
-	}
+	RotationYawAngle = UAlsMath::RemapAngleForCounterClockwiseRotation(RotationYawAngle);
 
 	// Scale quick stop animation play rate based on how far the character
 	// is going to rotate. At 180 degrees, the play rate will be maximal.
