@@ -324,12 +324,10 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 	ViewState.LookAmount = ViewAmount * (1.0f - AimingAmount);
 
-	RefreshSpineRotation(DeltaTime);
-
-	ViewState.SpineRotation.YawAngle *= ViewAmount * AimingAmount;
+	RefreshSpineRotation(ViewAmount * AimingAmount, DeltaTime);
 }
 
-void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
+void UAlsAnimationInstance::RefreshSpineRotation(const float SpineBlendAmount, const float DeltaTime)
 {
 	auto& SpineRotation{ViewState.SpineRotation};
 
@@ -361,7 +359,7 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float DeltaTime)
 	SpineRotation.CurrentYawAngle = UAlsMath::LerpAngle(SpineRotation.StartYawAngle, SpineRotation.TargetYawAngle,
 	                                                    SpineRotation.SpineAmount);
 
-	SpineRotation.YawAngle = SpineRotation.CurrentYawAngle;
+	SpineRotation.YawAngle = UAlsMath::LerpAngle(0.0f, SpineRotation.CurrentYawAngle, SpineBlendAmount);
 }
 
 void UAlsAnimationInstance::ReinitializeLook()

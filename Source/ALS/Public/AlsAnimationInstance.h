@@ -162,7 +162,7 @@ private:
 
 	void RefreshView(float DeltaTime);
 
-	void RefreshSpineRotation(float DeltaTime);
+	void RefreshSpineRotation(float SpineBlendAmount, float DeltaTime);
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
