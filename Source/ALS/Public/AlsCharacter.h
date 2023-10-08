@@ -362,7 +362,7 @@ private:
 	void OnReplicated_ReplicatedViewRotation();
 
 public:
-	void CorrectViewNetworkSmoothing(const FRotator& NewViewRotation);
+	void CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation);
 
 public:
 	const FAlsViewState& GetViewState() const;

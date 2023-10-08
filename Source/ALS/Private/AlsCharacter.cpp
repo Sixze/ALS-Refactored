@@ -97,7 +97,9 @@ void AAlsCharacter::PreRegisterAllComponents()
 	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized());
 
 	ViewState.NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
-	ViewState.NetworkSmoothing.Rotation = ReplicatedViewRotation;
+	ViewState.NetworkSmoothing.TargetRotation = ReplicatedViewRotation;
+	ViewState.NetworkSmoothing.CurrentRotation = ReplicatedViewRotation;
+
 	ViewState.Rotation = ReplicatedViewRotation;
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ReplicatedViewRotation.Yaw);
 
@@ -1107,19 +1109,19 @@ void AAlsCharacter::OnReplicated_ReplicatedViewRotation()
 	CorrectViewNetworkSmoothing(ReplicatedViewRotation);
 }
 
-void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
+void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation)
 {
 	// Based on UCharacterMovementComponent::SmoothCorrection().
 
-	ReplicatedViewRotation = NewViewRotation;
-	ReplicatedViewRotation.Normalize();
-
 	auto& NetworkSmoothing{ViewState.NetworkSmoothing};
+
+	NetworkSmoothing.TargetRotation = NewTargetRotation;
+	NetworkSmoothing.TargetRotation.Normalize();
 
 	if (!NetworkSmoothing.bEnabled)
 	{
-		NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
-		NetworkSmoothing.Rotation = ReplicatedViewRotation;
+		NetworkSmoothing.InitialRotation = NetworkSmoothing.TargetRotation;
+		NetworkSmoothing.CurrentRotation = NetworkSmoothing.TargetRotation;
 		return;
 	}
 
@@ -1136,7 +1138,7 @@ void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
 		return;
 	}
 
-	NetworkSmoothing.InitialRotation = NetworkSmoothing.Rotation;
+	NetworkSmoothing.InitialRotation = NetworkSmoothing.CurrentRotation;
 
 	// Using server time lets us know how much time elapsed, regardless of packet lag variance.
 
@@ -1191,7 +1193,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	RefreshViewNetworkSmoothing(DeltaTime);
 
-	ViewState.Rotation = ViewState.NetworkSmoothing.Rotation;
+	ViewState.Rotation = ViewState.NetworkSmoothing.CurrentRotation;
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided by
 	// delta seconds. This represents the speed the camera is rotating from left to right.
@@ -1211,7 +1213,8 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 	    NetworkSmoothing.Duration <= UE_SMALL_NUMBER)
 	{
 		NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
-		NetworkSmoothing.Rotation = ReplicatedViewRotation;
+		NetworkSmoothing.TargetRotation = ReplicatedViewRotation;
+		NetworkSmoothing.CurrentRotation = ReplicatedViewRotation;
 		return;
 	}
 
@@ -1223,9 +1226,13 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 		NetworkSmoothing.InitialRotation.Yaw += MovementBase.DeltaRotation.Yaw;
 		NetworkSmoothing.InitialRotation.Normalize();
 
-		NetworkSmoothing.Rotation.Pitch += MovementBase.DeltaRotation.Pitch;
-		NetworkSmoothing.Rotation.Yaw += MovementBase.DeltaRotation.Yaw;
-		NetworkSmoothing.Rotation.Normalize();
+		NetworkSmoothing.TargetRotation.Pitch += MovementBase.DeltaRotation.Pitch;
+		NetworkSmoothing.TargetRotation.Yaw += MovementBase.DeltaRotation.Yaw;
+		NetworkSmoothing.TargetRotation.Normalize();
+
+		NetworkSmoothing.CurrentRotation.Pitch += MovementBase.DeltaRotation.Pitch;
+		NetworkSmoothing.CurrentRotation.Yaw += MovementBase.DeltaRotation.Yaw;
+		NetworkSmoothing.CurrentRotation.Normalize();
 	}
 
 	NetworkSmoothing.ClientTime += DeltaTime;
@@ -1236,12 +1243,14 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 	if (!FAnimWeight::IsFullWeight(InterpolationAmount))
 	{
-		NetworkSmoothing.Rotation = UAlsMath::LerpRotator(NetworkSmoothing.InitialRotation, ReplicatedViewRotation, InterpolationAmount);
+		NetworkSmoothing.CurrentRotation = UAlsMath::LerpRotator(NetworkSmoothing.InitialRotation,
+		                                                         NetworkSmoothing.TargetRotation,
+		                                                         InterpolationAmount);
 	}
 	else
 	{
 		NetworkSmoothing.ClientTime = NetworkSmoothing.ServerTime;
-		NetworkSmoothing.Rotation = ReplicatedViewRotation;
+		NetworkSmoothing.CurrentRotation = NetworkSmoothing.TargetRotation;
 	}
 }
 

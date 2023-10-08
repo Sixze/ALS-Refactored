@@ -26,7 +26,10 @@ struct ALS_API FAlsViewNetworkSmoothingState
 	FRotator InitialRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator Rotation{ForceInit};
+	FRotator TargetRotation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FRotator CurrentRotation{ForceInit};
 };
 
 USTRUCT(BlueprintType)
