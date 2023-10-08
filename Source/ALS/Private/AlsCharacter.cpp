@@ -159,8 +159,7 @@ void AAlsCharacter::BeginPlay()
 			});
 	}
 
-	RefreshUsingAbsoluteRotation();
-	RefreshVisibilityBasedAnimTickOption();
+	RefreshMeshProperties();
 
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) &&
 		Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
@@ -263,7 +262,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		return;
 	}
 
-	RefreshVisibilityBasedAnimTickOption();
+	RefreshMeshProperties();
+
 	RefreshMovementBase();
 	RefreshInput(DeltaTime);
 
@@ -285,20 +285,13 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	RefreshLocomotionLate(DeltaTime);
-
-	if (!GetMesh()->bRecentlyRendered &&
-	    GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
-	{
-		AnimationInstance->MarkPendingUpdate();
-	}
 }
 
 void AAlsCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	RefreshUsingAbsoluteRotation();
-	RefreshVisibilityBasedAnimTickOption();
+	RefreshMeshProperties();
 
 	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
 
@@ -313,8 +306,35 @@ void AAlsCharacter::Restart()
 	ApplyDesiredStance();
 }
 
-void AAlsCharacter::RefreshUsingAbsoluteRotation() const
+void AAlsCharacter::RefreshMeshProperties() const
 {
+	const auto bStandalone{IsNetMode(NM_Standalone)};
+	const auto bDedicatedServer{IsNetMode(NM_DedicatedServer)};
+	const auto bListenServer{IsNetMode(NM_ListenServer)};
+
+	const auto bAuthority{GetLocalRole() >= ROLE_Authority};
+	const auto bRemoteAutonomousProxy{GetRemoteRole() == ROLE_AutonomousProxy};
+	const auto bLocallyControlled{IsLocallyControlled()};
+
+	// Make sure that the pose is always ticked on the server when the character is controlled
+	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
+
+	const auto DefaultTickOption{GetClass()->GetDefaultObject<ThisClass>()->GetMesh()->VisibilityBasedAnimTickOption};
+
+	const auto TargetTickOption{
+		!bStandalone && bAuthority && bRemoteAutonomousProxy
+			? EVisibilityBasedAnimTickOption::AlwaysTickPose
+			: EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
+	};
+
+	// Keep the default tick option, at least if the target tick option is not required by the plugin to work properly.
+
+	GetMesh()->VisibilityBasedAnimTickOption = FMath::Min(TargetTickOption, DefaultTickOption);
+
+	const auto bMeshIsTicking{
+		GetMesh()->bRecentlyRendered || GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPose
+	};
+
 	// Use absolute mesh rotation to be able to precisely synchronize character rotation
 	// with animations by manually updating the mesh rotation from the animation instance.
 
@@ -322,34 +342,25 @@ void AAlsCharacter::RefreshUsingAbsoluteRotation() const
 	// at different frequencies, which leads to desynchronization of rotation animations
 	// with the character rotation, as well as foot sliding when the foot lock is active.
 
-	// To save performance, Use it only when it is really necessary, such as
+	// To save performance, use this only when really necessary, such as
 	// when URO is enabled, or for autonomous proxies on the listen server.
 
-	const auto bDedicatedServer{IsNetMode(NM_DedicatedServer)};
-	const auto bLocallyControlled{IsLocallyControlled()};
+	const auto bUROEnabled{GetMesh()->ShouldUseUpdateRateOptimizations()};
+	const auto bAutonomousProxyOnListenServer{bListenServer && bRemoteAutonomousProxy};
 
-	const auto bAutonomousProxyOnListenServer{IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy};
-	const auto bUROAllowed{GetMesh()->ShouldUseUpdateRateOptimizations()};
-
-	GetMesh()->SetUsingAbsoluteRotation(!bDedicatedServer && !bLocallyControlled && (bAutonomousProxyOnListenServer || bUROAllowed));
-}
-
-void AAlsCharacter::RefreshVisibilityBasedAnimTickOption() const
-{
-	const auto DefaultTickOption{GetClass()->GetDefaultObject<ThisClass>()->GetMesh()->VisibilityBasedAnimTickOption};
-
-	// Make sure that the pose is always ticked on the server when the character is controlled
-	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
-
-	const auto TargetTickOption{
-		IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy || GetRemoteRole() != ROLE_AutonomousProxy
-			? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered
-			: EVisibilityBasedAnimTickOption::AlwaysTickPose
+	const auto bUseAbsoluteRotation{
+		!bDedicatedServer && !bLocallyControlled && bMeshIsTicking && (bUROEnabled || bAutonomousProxyOnListenServer)
 	};
 
-	// Keep the default tick option, at least if the target tick option is not required by the plugin to work properly.
+	if (GetMesh()->IsUsingAbsoluteRotation() != bUseAbsoluteRotation)
+	{
+		GetMesh()->SetUsingAbsoluteRotation(bUseAbsoluteRotation);
+	}
 
-	GetMesh()->VisibilityBasedAnimTickOption = TargetTickOption <= DefaultTickOption ? TargetTickOption : DefaultTickOption;
+	if (!bMeshIsTicking)
+	{
+		AnimationInstance->MarkPendingUpdate();
+	}
 }
 
 void AAlsCharacter::RefreshMovementBase()

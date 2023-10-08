@@ -124,7 +124,7 @@ public:
 
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaTime) override;
 
-	virtual void NativePostEvaluateAnimation() override;
+	virtual void NativePostUpdateAnimation();
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

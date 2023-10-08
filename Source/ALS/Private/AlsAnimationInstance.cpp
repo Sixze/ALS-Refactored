@@ -127,12 +127,13 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 	RefreshTurnInPlace(DeltaTime);
 }
 
-void UAlsAnimationInstance::NativePostEvaluateAnimation()
+void UAlsAnimationInstance::NativePostUpdateAnimation()
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostEvaluateAnimation()"),
-	                            STAT_UAlsAnimationInstance_NativePostEvaluateAnimation, STATGROUP_Als)
+	// Can't use UAnimationInstance::NativePostEvaluateAnimation() instead this function, as it will not be called if
+	// USkinnedMeshComponent::VisibilityBasedAnimTickOption is set to EVisibilityBasedAnimTickOption::AlwaysTickPose.
 
-	Super::NativePostEvaluateAnimation();
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostUpdateAnimation()"),
+	                            STAT_UAlsAnimationInstance_NativePostUpdateAnimation, STATGROUP_Als)
 
 	if (!IsValid(Settings) || !IsValid(Character))
 	{

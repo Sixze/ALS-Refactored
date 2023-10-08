@@ -6,12 +6,12 @@
 class UAlsAnimationInstance;
 class UAlsLinkedAnimationInstance;
 
-// This class is only needed to grant UAlsAnimationInstance and UAlsLinkedAnimationInstance
-// access to some protected members in FAnimInstanceProxy.
 USTRUCT()
 struct ALS_API FAlsAnimationInstanceProxy : public FAnimInstanceProxy
 {
 	GENERATED_BODY()
+
+	// This allows UAlsAnimationInstance and UAlsLinkedAnimationInstance to access some protected members of FAnimInstanceProxy.
 
 	friend UAlsAnimationInstance;
 	friend UAlsLinkedAnimationInstance;
@@ -20,4 +20,7 @@ public:
 	FAlsAnimationInstanceProxy() = default;
 
 	explicit FAlsAnimationInstanceProxy(UAnimInstance* AnimationInstance);
+
+protected:
+	virtual void PostUpdate(UAnimInstance* AnimationInstance) const override;
 };

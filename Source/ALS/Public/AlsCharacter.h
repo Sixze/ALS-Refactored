@@ -133,9 +133,7 @@ public:
 	virtual void Restart() override;
 
 private:
-	void RefreshUsingAbsoluteRotation() const;
-
-	void RefreshVisibilityBasedAnimTickOption() const;
+	void RefreshMeshProperties() const;
 
 	void RefreshMovementBase();
 
