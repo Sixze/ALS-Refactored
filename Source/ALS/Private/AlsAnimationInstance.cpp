@@ -335,7 +335,7 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float SpineBlendAmount, c
 	if (SpineRotation.bSpineRotationAllowed != IsSpineRotationAllowed())
 	{
 		SpineRotation.bSpineRotationAllowed = !SpineRotation.bSpineRotationAllowed;
-		SpineRotation.StartYawAngle = SpineRotation.CurrentYawAngle;
+		SpineRotation.InitialYawAngle = SpineRotation.CurrentYawAngle;
 	}
 
 	if (SpineRotation.bSpineRotationAllowed)
@@ -357,7 +357,8 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float SpineBlendAmount, c
 			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 0.0f, DeltaTime, InterpolationSpeed);
 	}
 
-	SpineRotation.CurrentYawAngle = UAlsMath::LerpAngle(SpineRotation.StartYawAngle, SpineRotation.TargetYawAngle,
+	SpineRotation.CurrentYawAngle = UAlsMath::LerpAngle(SpineRotation.InitialYawAngle,
+	                                                    SpineRotation.TargetYawAngle,
 	                                                    SpineRotation.SpineAmount);
 
 	SpineRotation.YawAngle = UAlsMath::LerpAngle(0.0f, SpineRotation.CurrentYawAngle, SpineBlendAmount);

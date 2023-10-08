@@ -44,18 +44,18 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 		return;
 	}
 
-	const auto StartYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
+	const auto InitialYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
 
 	if (GetLocalRole() >= ROLE_Authority)
 	{
-		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+		MulticastStartRolling(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 	}
 	else
 	{
 		GetCharacterMovement()->FlushServerMoves();
 
-		StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
-		ServerStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+		StartRollingImplementation(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
+		ServerStartRolling(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 	}
 }
 
@@ -65,29 +65,29 @@ UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 }
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
-                                                      const float StartYawAngle, const float TargetYawAngle)
+                                                      const float InitialYawAngle, const float TargetYawAngle)
 {
 	if (IsRollingAllowedToStart(Montage))
 	{
-		MulticastStartRolling(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+		MulticastStartRolling(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 		ForceNetUpdate();
 	}
 }
 
 void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
-                                                         const float StartYawAngle, const float TargetYawAngle)
+                                                         const float InitialYawAngle, const float TargetYawAngle)
 {
-	StartRollingImplementation(Montage, PlayRate, StartYawAngle, TargetYawAngle);
+	StartRollingImplementation(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 }
 
 void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
-                                               const float StartYawAngle, const float TargetYawAngle)
+                                               const float InitialYawAngle, const float TargetYawAngle)
 {
 	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
 	{
 		RollingState.TargetYawAngle = TargetYawAngle;
 
-		RefreshRotationInstant(StartYawAngle);
+		RefreshRotationInstant(InitialYawAngle);
 
 		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
 	}
@@ -453,7 +453,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
 	RootMotionSource->MontageStartTime = StartTime;
 
-	MantlingRootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
+	MantlingState.RootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
 
 	// Play the animation montage if valid.
 
@@ -537,7 +537,7 @@ void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameter
 
 void AAlsCharacter::RefreshMantling()
 {
-	if (MantlingRootMotionSourceId <= 0)
+	if (MantlingState.RootMotionSourceId <= 0)
 	{
 		return;
 	}
@@ -556,7 +556,7 @@ void AAlsCharacter::RefreshMantling()
 
 	const auto* RootMotionSource{
 		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(GetCharacterMovement()
-			->GetRootMotionSourceByID(MantlingRootMotionSourceId)).Get()
+			->GetRootMotionSourceByID(MantlingState.RootMotionSourceId)).Get()
 	};
 
 	if (RootMotionSource != nullptr && !RootMotionSource->TargetPrimitive.IsValid())
@@ -572,14 +572,14 @@ void AAlsCharacter::RefreshMantling()
 
 void AAlsCharacter::StopMantling(const bool bStopMontage)
 {
-	if (MantlingRootMotionSourceId <= 0)
+	if (MantlingState.RootMotionSourceId <= 0)
 	{
 		return;
 	}
 
 	auto* RootMotionSource{
 		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(GetCharacterMovement()
-			->GetRootMotionSourceByID(MantlingRootMotionSourceId)).Get()
+			->GetRootMotionSourceByID(MantlingState.RootMotionSourceId)).Get()
 	};
 
 	if (RootMotionSource != nullptr)
@@ -587,7 +587,7 @@ void AAlsCharacter::StopMantling(const bool bStopMontage)
 		RootMotionSource->Status.SetFlag(ERootMotionSourceStatusFlags::MarkedForRemoval);
 	}
 
-	MantlingRootMotionSourceId = 0;
+	MantlingState.RootMotionSourceId = 0;
 
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
