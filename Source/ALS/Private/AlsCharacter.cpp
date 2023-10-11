@@ -94,7 +94,7 @@ void AAlsCharacter::PreRegisterAllComponents()
 	Stance = DesiredStance;
 	Gait = DesiredGait;
 
-	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized());
+	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), false);
 
 	ViewState.NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
 	ViewState.NetworkSmoothing.TargetRotation = ReplicatedViewRotation;
@@ -264,9 +264,10 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		return;
 	}
 
+	RefreshMovementBase();
+
 	RefreshMeshProperties();
 
-	RefreshMovementBase();
 	RefreshInput(DeltaTime);
 
 	RefreshLocomotionEarly();
@@ -347,11 +348,18 @@ void AAlsCharacter::RefreshMeshProperties() const
 	// To save performance, use this only when really necessary, such as
 	// when URO is enabled, or for autonomous proxies on the listen server.
 
-	const auto bUROEnabled{GetMesh()->ShouldUseUpdateRateOptimizations()};
+	const auto bUROActive{GetMesh()->AnimUpdateRateParams != nullptr && GetMesh()->AnimUpdateRateParams->UpdateRate > 1};
 	const auto bAutonomousProxyOnListenServer{bListenServer && bRemoteAutonomousProxy};
 
+	// Can't use absolute mesh rotation when the character is standing on a rotating object, as it
+	// causes constant rotation jitter. Be careful: although it eliminates jitter in this case, not
+	// using absolute mesh rotation can cause jitter when rotating in place or turning in place.
+
+	const auto bStandingOnRotatingObject{MovementBase.bHasRelativeRotation};
+
 	const auto bUseAbsoluteRotation{
-		!bDedicatedServer && !bLocallyControlled && bMeshIsTicking && (bUROEnabled || bAutonomousProxyOnListenServer)
+		!bDedicatedServer && !bLocallyControlled && bMeshIsTicking && !bStandingOnRotatingObject &&
+		(bUROActive || bAutonomousProxyOnListenServer)
 	};
 
 	if (GetMesh()->IsUsingAbsoluteRotation() != bUseAbsoluteRotation)
@@ -1081,18 +1089,15 @@ void AAlsCharacter::RefreshInput(const float DeltaTime)
 	}
 }
 
-void AAlsCharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation)
+void AAlsCharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation, const bool bSendRpc)
 {
-	if (ReplicatedViewRotation != NewViewRotation)
+	if (!ReplicatedViewRotation.Equals(NewViewRotation))
 	{
 		ReplicatedViewRotation = NewViewRotation;
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedViewRotation, this)
 
-		// The character movement component already sends the view rotation to the
-		// server if the movement is replicated, so we don't have to do it ourselves.
-
-		if (!IsReplicatingMovement() && GetLocalRole() == ROLE_AutonomousProxy)
+		if (bSendRpc && GetLocalRole() == ROLE_AutonomousProxy)
 		{
 			ServerSetReplicatedViewRotation(ReplicatedViewRotation);
 		}
@@ -1101,22 +1106,23 @@ void AAlsCharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation)
 
 void AAlsCharacter::ServerSetReplicatedViewRotation_Implementation(const FRotator& NewViewRotation)
 {
-	SetReplicatedViewRotation(NewViewRotation);
+	SetReplicatedViewRotation(NewViewRotation, false);
 }
 
 void AAlsCharacter::OnReplicated_ReplicatedViewRotation()
 {
-	CorrectViewNetworkSmoothing(ReplicatedViewRotation);
+	CorrectViewNetworkSmoothing(ReplicatedViewRotation, MovementBase.bHasRelativeRotation);
 }
 
-void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation)
+void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation, const bool bRelativeTargetRotation)
 {
 	// Based on UCharacterMovementComponent::SmoothCorrection().
 
 	auto& NetworkSmoothing{ViewState.NetworkSmoothing};
 
-	NetworkSmoothing.TargetRotation = NewTargetRotation;
-	NetworkSmoothing.TargetRotation.Normalize();
+	NetworkSmoothing.TargetRotation = bRelativeTargetRotation
+		                                  ? (MovementBase.Rotation * NewTargetRotation.Quaternion()).Rotator()
+		                                  : NewTargetRotation.GetNormalized();
 
 	if (!NetworkSmoothing.bEnabled)
 	{
@@ -1175,10 +1181,6 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	{
 		// Offset the rotations to keep them relative to the movement base.
 
-		ReplicatedViewRotation.Pitch += MovementBase.DeltaRotation.Pitch;
-		ReplicatedViewRotation.Yaw += MovementBase.DeltaRotation.Yaw;
-		ReplicatedViewRotation.Normalize();
-
 		ViewState.Rotation.Pitch += MovementBase.DeltaRotation.Pitch;
 		ViewState.Rotation.Yaw += MovementBase.DeltaRotation.Yaw;
 		ViewState.Rotation.Normalize();
@@ -1186,9 +1188,25 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw);
 
-	if ((IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy) || IsLocallyControlled())
+	if (MovementBase.bHasRelativeRotation)
 	{
-		SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized());
+		if (IsLocallyControlled())
+		{
+			// We can't depend on the view rotation sent by the character movement component
+			// since it's in world space, so in this case we always send it ourselves.
+
+			SetReplicatedViewRotation((MovementBase.Rotation.Inverse() * Super::GetViewRotation().Quaternion()).Rotator(), true);
+		}
+	}
+	else
+	{
+		if ((IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy) || IsLocallyControlled())
+		{
+			// The character movement component already sends the view rotation to the
+			// server if movement is replicated, so we don't have to do this ourselves.
+
+			SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), !IsReplicatingMovement());
+		}
 	}
 
 	RefreshViewNetworkSmoothing(DeltaTime);
@@ -1210,11 +1228,19 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 	if (!NetworkSmoothing.bEnabled ||
 	    NetworkSmoothing.ClientTime >= NetworkSmoothing.ServerTime ||
-	    NetworkSmoothing.Duration <= UE_SMALL_NUMBER)
+	    NetworkSmoothing.Duration <= UE_SMALL_NUMBER ||
+	    (MovementBase.bHasRelativeRotation && IsNetMode(NM_ListenServer)))
 	{
-		NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
-		NetworkSmoothing.TargetRotation = ReplicatedViewRotation;
-		NetworkSmoothing.CurrentRotation = ReplicatedViewRotation;
+		// Can't use network smoothing on the listen server when the character
+		// is standing on a rotating object, as it causes constant rotation jitter.
+
+		NetworkSmoothing.InitialRotation = MovementBase.bHasRelativeRotation
+			                                   ? (MovementBase.Rotation * ReplicatedViewRotation.Quaternion()).Rotator()
+			                                   : ReplicatedViewRotation;
+
+		NetworkSmoothing.TargetRotation = NetworkSmoothing.InitialRotation;
+		NetworkSmoothing.CurrentRotation = NetworkSmoothing.InitialRotation;
+
 		return;
 	}
 

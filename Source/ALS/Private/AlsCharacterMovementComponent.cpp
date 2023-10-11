@@ -833,7 +833,7 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 		auto* Character{Cast<AAlsCharacter>(CharacterOwner)};
 		if (IsValid(Character))
 		{
-			Character->CorrectViewNetworkSmoothing(NewControlRotation);
+			Character->CorrectViewNetworkSmoothing(NewControlRotation, false);
 		}
 
 		PreviousControlRotation = NewControlRotation;
