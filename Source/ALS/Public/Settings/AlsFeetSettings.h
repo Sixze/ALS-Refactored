@@ -4,6 +4,46 @@
 #include "AlsFeetSettings.generated.h"
 
 USTRUCT(BlueprintType)
+struct ALS_API FAlsFootLimitsSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FVector3f TwistAxis{1.0f, 0.0f, 0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	float TwistLimitAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FRotator3f SwingLimitOffset{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
+		DisplayName = "Swing 1 Limit Angle", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	float Swing1LimitAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
+		DisplayName = "Swing 2 Limit Angle", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	float Swing2LimitAngle{0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	float TwistLimit{0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f SwingLimitOffsetQuaternion{ForceInit};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 1 Limit", Meta = (ClampMin = 0, ClampMax = 1))
+	float Swing1Limit{0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 2 Limit", Meta = (ClampMin = 0, ClampMax = 1))
+	float Swing2Limit{0.0f};
+
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+#endif
+};
+
+USTRUCT(BlueprintType)
 struct ALS_API FAlsFeetSettings
 {
 	GENERATED_BODY()
@@ -22,4 +62,15 @@ struct ALS_API FAlsFeetSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float IkTraceDistanceDownward{45.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsFootLimitsSettings LeftFootLimits;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsFootLimitsSettings RightFootLimits;
+
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 };

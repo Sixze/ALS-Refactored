@@ -927,11 +927,11 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 
 	const auto ComponentTransformInverse{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().Inverse()};
 
-	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurveName(),
-	            UAlsConstants::FootLeftLockCurveName(), ComponentTransformInverse, DeltaTime);
+	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurveName(), UAlsConstants::FootLeftLockCurveName(),
+	            Settings->Feet.LeftFootLimits, ComponentTransformInverse, DeltaTime);
 
-	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurveName(),
-	            UAlsConstants::FootRightLockCurveName(), ComponentTransformInverse, DeltaTime);
+	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurveName(), UAlsConstants::FootRightLockCurveName(),
+	            Settings->Feet.RightFootLimits, ComponentTransformInverse, DeltaTime);
 
 	FeetState.MinMaxPelvisOffsetZ.X = UE_REAL_TO_FLOAT(
 		FMath::Min(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) / LocomotionState.Scale);
@@ -940,7 +940,8 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 		FMath::Max(FeetState.Left.OffsetTargetLocation.Z, FeetState.Right.OffsetTargetLocation.Z) / LocomotionState.Scale);
 }
 
-void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
+void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName,
+                                        const FName& FootLockCurveName, const FAlsFootLimitsSettings& LimitsSettings,
                                         const FTransform& ComponentTransformInverse, const float DeltaTime) const
 {
 	FootState.IkAmount = GetCurveValueClamped01(FootIkCurveName);
@@ -954,7 +955,13 @@ void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& F
 
 	RefreshFootLock(FootState, FootLockCurveName, ComponentTransformInverse, DeltaTime, FinalLocation, FinalRotation);
 
+	const auto PreviousFinalRotation{FinalRotation};
 	RefreshFootOffset(FootState, DeltaTime, FinalLocation, FinalRotation);
+
+	// Prevent the foot from assuming an unnatural pose when on a highly
+	// sloped surface by limiting its rotation after applying a foot offset.
+
+	LimitFootRotation(LimitsSettings, PreviousFinalRotation, FinalRotation);
 
 	FootState.IkLocation = ComponentTransformInverse.TransformPosition(FinalLocation);
 	FootState.IkRotation = ComponentTransformInverse.TransformRotation(FinalRotation);
@@ -1257,6 +1264,50 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	FinalLocation += FootState.OffsetLocation;
 	FinalRotation = FootState.OffsetRotation * FinalRotation;
+}
+
+void UAlsAnimationInstance::LimitFootRotation(const FAlsFootLimitsSettings& LimitsSettings,
+                                              const FQuat& ParentRotation, FQuat& Rotation) const
+{
+	const auto RelativeRotation{ParentRotation.Inverse() * Rotation};
+
+	FQuat Swing;
+	FQuat Twist;
+	RelativeRotation.ToSwingTwist(FVector{LimitsSettings.TwistAxis}, Swing, Twist);
+
+	// Limit swing.
+
+	const auto SwingLimitOffset{FQuat{LimitsSettings.SwingLimitOffsetQuaternion}};
+
+	Swing = SwingLimitOffset * Swing;
+
+	// Clamp a point with Swing.Y and Swing.Z coordinates to an ellipse with LimitsSettings.Swing2Limit
+	// and LimitsSettings.Swing1Limit dimensions. A simplified and not very accurate algorithm is used here,
+	// but it is enough for our needs. To get a more accurate result, you can use an algorithm similar
+	// to the one used in Chaos::NearPointOnEllipse() or FRigUnit_SphericalPoseReader::DistanceToEllipse().
+
+	FVector2D SwingLimit{Swing.Y, Swing.Z};
+	SwingLimit.Normalize();
+
+	SwingLimit.X = FMath::Abs(SwingLimit.X * LimitsSettings.Swing2Limit);
+	SwingLimit.Y = FMath::Abs(SwingLimit.Y * LimitsSettings.Swing1Limit);
+
+	const auto NewSwingY{FMath::Sign(Swing.Y) * FMath::Min(FMath::Abs(Swing.Y), SwingLimit.X)};
+	const auto NewSwingZ{FMath::Sign(Swing.Z) * FMath::Min(FMath::Abs(Swing.Z), SwingLimit.Y)};
+
+	FQuat NewSwing{
+		0.0f, NewSwingY, NewSwingZ, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewSwingY * NewSwingY - NewSwingZ * NewSwingZ))
+	};
+
+	NewSwing = SwingLimitOffset.Inverse() * NewSwing;
+
+	// Limit twist.
+
+	const auto NewTwistX{FMath::Sign(Twist.X) * FMath::Min(FMath::Abs(Twist.X), LimitsSettings.TwistLimit)};
+
+	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewTwistX * NewTwistX)));
+
+	Rotation = ParentRotation * (NewSwing * NewTwist);
 }
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()
