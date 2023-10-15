@@ -30,8 +30,14 @@ UAlsCharacterSettings::UAlsCharacterSettings()
 #if WITH_EDITOR
 void UAlsCharacterSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	Ragdolling.PostEditChangeProperty(PropertyChangedEvent);
-	Mantling.PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Ragdolling))
+	{
+		Ragdolling.PostEditChangeProperty(PropertyChangedEvent);
+	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Mantling))
+	{
+		Mantling.PostEditChangeProperty(PropertyChangedEvent);
+	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

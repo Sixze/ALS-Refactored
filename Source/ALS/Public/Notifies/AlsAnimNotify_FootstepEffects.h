@@ -51,6 +51,7 @@ struct ALS_API FAlsFootstepEffectSettings
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<USoundBase> Sound;
 
@@ -76,10 +77,16 @@ struct ALS_API FAlsFootstepEffectSettings
 	FVector3f DecalLocationOffset{0.0f, -10.0f, -1.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f DecalFootLeftRotationOffset{90.0f, -90.0f, 180.0f};
+	FRotator3f DecalFootLeftRotationOffset{90.0f, 0.0f, 90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f DecalFootRightRotationOffset{-90.0f, 90.0f, 0.0f};
+	FRotator3f DecalFootRightRotationOffset{-90.0f, 0.0f, -90.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f DecalFootLeftRotationOffsetQuaternion{ForceInit};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f DecalFootRightRotationOffsetQuaternion{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
@@ -95,6 +102,17 @@ struct ALS_API FAlsFootstepEffectSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator3f ParticleSystemFootRightRotationOffset{ForceInit};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f ParticleSystemFootLeftRotationOffsetQuaternion{ForceInit};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f ParticleSystemFootRightRotationOffsetQuaternion{ForceInit};
+
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 };
 
 UCLASS(Blueprintable, BlueprintType)
@@ -123,6 +141,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
 	TMap<TEnumAsByte<EPhysicalSurface>, FAlsFootstepEffectSettings> Effects;
+
+public:
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 };
 
 UCLASS(DisplayName = "Als Footstep Effects Animation Notify",

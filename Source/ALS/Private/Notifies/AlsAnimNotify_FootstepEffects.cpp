@@ -19,6 +19,29 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_FootstepEffects)
 
+#if WITH_EDITOR
+void FAlsFootstepEffectSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
+{
+	DecalFootLeftRotationOffsetQuaternion = DecalFootLeftRotationOffset.Quaternion();
+	DecalFootRightRotationOffsetQuaternion = DecalFootRightRotationOffset.Quaternion();
+	ParticleSystemFootLeftRotationOffsetQuaternion = ParticleSystemFootLeftRotationOffset.Quaternion();
+	ParticleSystemFootRightRotationOffsetQuaternion = ParticleSystemFootRightRotationOffset.Quaternion();
+}
+
+void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Effects))
+	{
+		for (auto& Tuple : Effects)
+		{
+			Tuple.Value.PostEditChangeProperty(PropertyChangedEvent);
+		}
+	}
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+#endif
+
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {
 	TStringBuilder<64> NotifyNameBuilder;
@@ -167,9 +190,9 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	{
 		const auto DecalRotation{
 			FootstepRotation * FQuat{
-				(FootBone == EAlsFootBone::Left
-					 ? EffectSettings->DecalFootLeftRotationOffset
-					 : EffectSettings->DecalFootRightRotationOffset).Quaternion()
+				FootBone == EAlsFootBone::Left
+					? EffectSettings->DecalFootLeftRotationOffsetQuaternion
+					: EffectSettings->DecalFootRightRotationOffsetQuaternion
 			}
 		};
 
@@ -207,9 +230,9 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 			{
 				const auto ParticleSystemRotation{
 					FootstepRotation * FQuat{
-						(FootBone == EAlsFootBone::Left
-							 ? EffectSettings->ParticleSystemFootLeftRotationOffset
-							 : EffectSettings->ParticleSystemFootRightRotationOffset).Quaternion()
+						FootBone == EAlsFootBone::Left
+							? EffectSettings->ParticleSystemFootLeftRotationOffsetQuaternion
+							: EffectSettings->ParticleSystemFootRightRotationOffsetQuaternion
 					}
 				};
 
