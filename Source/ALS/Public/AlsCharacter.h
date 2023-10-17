@@ -97,7 +97,7 @@ protected:
 	FAlsMantlingState MantlingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
-	FVector_NetQuantize100 RagdollTargetLocation;
+	FVector_NetQuantize RagdollTargetLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRagdollingState RagdollingState;
@@ -562,7 +562,7 @@ private:
 	void SetRagdollTargetLocation(const FVector& NewTargetLocation);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetRagdollTargetLocation(const FVector_NetQuantize100& NewTargetLocation);
+	void ServerSetRagdollTargetLocation(const FVector_NetQuantize& NewTargetLocation);
 
 	void RefreshRagdolling(float DeltaTime);
 

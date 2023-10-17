@@ -713,7 +713,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
 
-	if (GetLocalRole() >= ROLE_AutonomousProxy)
+	if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy))
 	{
 		SetRagdollTargetLocation(GetMesh()->GetSocketLocation(UAlsConstants::PelvisBoneName()));
 	}
@@ -738,7 +738,7 @@ void AAlsCharacter::SetRagdollTargetLocation(const FVector& NewTargetLocation)
 	}
 }
 
-void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_NetQuantize100& NewTargetLocation)
+void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_NetQuantize& NewTargetLocation)
 {
 	SetRagdollTargetLocation(NewTargetLocation);
 }
@@ -784,10 +784,13 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 {
-	const auto bLocallyControlled{IsLocallyControlled()};
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBoneName())};
 
-	if (bLocallyControlled)
+	const auto bShouldSendTargetLocation{
+		GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)
+	};
+
+	if (bShouldSendTargetLocation)
 	{
 		SetRagdollTargetLocation(PelvisTransform.GetLocation());
 	}
@@ -812,7 +815,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		NewActorLocation.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - FMath::Abs(Hit.ImpactPoint.Z - Hit.TraceStart.Z) + 1.0f;
 	}
 
-	if (!bLocallyControlled)
+	if (!bShouldSendTargetLocation)
 	{
 		static constexpr auto PullForce{750.0f};
 		static constexpr auto InterpolationSpeed{0.6f};
