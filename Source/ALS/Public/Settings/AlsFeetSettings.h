@@ -12,30 +12,30 @@ struct ALS_API FAlsFootLimitsSettings
 	FVector3f TwistAxis{1.0f, 0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float TwistLimitAngle{0.0f};
+	float TwistLimitAngle{180.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator3f SwingLimitOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
 		DisplayName = "Swing 1 Limit Angle", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float Swing1LimitAngle{0.0f};
+	float Swing1LimitAngle{180.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
 		DisplayName = "Swing 2 Limit Angle", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float Swing2LimitAngle{0.0f};
+	float Swing2LimitAngle{180.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float TwistLimit{0.0f};
+	float TwistLimit{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat4f SwingLimitOffsetQuaternion{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 1 Limit", Meta = (ClampMin = 0, ClampMax = 1))
-	float Swing1Limit{0.0f};
+	float Swing1Limit{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 2 Limit", Meta = (ClampMin = 0, ClampMax = 1))
-	float Swing2Limit{0.0f};
+	float Swing2Limit{1.0f};
 
 public:
 #if WITH_EDITOR

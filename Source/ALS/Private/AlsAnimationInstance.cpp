@@ -1220,13 +1220,16 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	if (bGroundValid)
 	{
+		const auto SlopeCos{UE_REAL_TO_FLOAT(FMath::Abs(Hit.ImpactNormal.Z))};
+
 		const auto FootHeight{Settings->Feet.FootHeight * LocomotionState.Scale};
+		const auto FootHeightOffset{SlopeCos > UE_SMALL_NUMBER ? FootHeight / SlopeCos - FootHeight : 0.0f};
 
-		// Find the difference in location between the impact location and the expected (flat) floor location. These
-		// values are offset by the impact normal multiplied by the foot height to get better behavior on angled surfaces.
+		// Find the difference between the impact location and the expected (flat) floor location.
+		// These values are offset by the foot height to get better behavior on sloped surfaces.
 
-		FootState.OffsetTargetLocation = Hit.ImpactPoint - TraceLocation + Hit.ImpactNormal * FootHeight;
-		FootState.OffsetTargetLocation.Z -= FootHeight;
+		FootState.OffsetTargetLocation = Hit.ImpactPoint - TraceLocation;
+		FootState.OffsetTargetLocation.Z += FootHeightOffset;
 
 		// Calculate the rotation offset.
 
