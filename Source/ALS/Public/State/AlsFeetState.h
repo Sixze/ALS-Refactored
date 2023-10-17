@@ -39,16 +39,16 @@ struct ALS_API FAlsFootState
 	FQuat LockMovementBaseRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector OffsetTargetLocation{ForceInit};
+	float OffsetTargetLocationZ{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat OffsetTargetRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsSpringVectorState OffsetSpringState;
+	FAlsSpringFloatState OffsetSpringState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector OffsetLocation{ForceInit};
+	float OffsetLocationZ{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat OffsetRotation{ForceInit};

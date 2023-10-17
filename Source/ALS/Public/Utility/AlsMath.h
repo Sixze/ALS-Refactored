@@ -323,7 +323,7 @@ ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target
 
 	ValueType Result{Current};
 	FMath::SpringDamper(Result, SpringState.Velocity, Target,
-	                    (Target - SpringState.PreviousTarget) * (Clamp01(TargetVelocityAmount) / DeltaTime),
+	                    (Target - SpringState.PreviousTarget) * Clamp01(TargetVelocityAmount) / DeltaTime,
 	                    DeltaTime, Frequency, DampingRatio);
 
 	SpringState.PreviousTarget = Target;
