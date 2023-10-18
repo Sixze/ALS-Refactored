@@ -317,7 +317,7 @@ void AAlsCharacter::RefreshMeshProperties() const
 
 	const auto bAuthority{GetLocalRole() >= ROLE_Authority};
 	const auto bRemoteAutonomousProxy{GetRemoteRole() == ROLE_AutonomousProxy};
-	const auto bLocallyControlled{IsLocallyControlled()};
+	const auto bLocallyControlled{GetLocalRole() == ROLE_AutonomousProxy || (bAuthority && !bRemoteAutonomousProxy)};
 
 	// Make sure that the pose is always ticked on the server when the character is controlled
 	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
@@ -1190,7 +1190,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	if (MovementBase.bHasRelativeRotation)
 	{
-		if (IsLocallyControlled())
+		if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy))
 		{
 			// We can't depend on the view rotation sent by the character movement component
 			// since it's in world space, so in this case we always send it ourselves.
@@ -1200,7 +1200,8 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	}
 	else
 	{
-		if ((IsReplicatingMovement() && GetLocalRole() >= ROLE_AutonomousProxy) || IsLocallyControlled())
+		if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority &&
+		                                               (GetRemoteRole() != ROLE_AutonomousProxy || IsReplicatingMovement())))
 		{
 			// The character movement component already sends the view rotation to the
 			// server if movement is replicated, so we don't have to do this ourselves.
@@ -1419,12 +1420,11 @@ void AAlsCharacter::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
 
-	if (IsLocallyControlled())
+	if (GetLocalRole() == ROLE_AutonomousProxy)
 	{
 		OnJumpedNetworked();
 	}
-
-	if (GetLocalRole() >= ROLE_Authority)
+	else if (GetLocalRole() >= ROLE_Authority)
 	{
 		MulticastOnJumpedNetworked();
 	}
@@ -1432,7 +1432,7 @@ void AAlsCharacter::OnJumped_Implementation()
 
 void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 {
-	if (!IsLocallyControlled())
+	if (GetLocalRole() != ROLE_AutonomousProxy)
 	{
 		OnJumpedNetworked();
 	}

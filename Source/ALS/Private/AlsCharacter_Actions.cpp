@@ -139,7 +139,8 @@ bool AAlsCharacter::StartMantlingGrounded()
 
 bool AAlsCharacter::StartMantlingInAir()
 {
-	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
+	return LocomotionMode == AlsLocomotionModeTags::InAir &&
+	       (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)) &&
 	       StartMantling(Settings->Mantling.InAirTrace);
 }
 
