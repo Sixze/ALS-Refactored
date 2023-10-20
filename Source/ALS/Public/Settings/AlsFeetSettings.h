@@ -25,16 +25,18 @@ struct ALS_API FAlsFootLimitsSettings
 		DisplayName = "Swing 2 Limit Angle", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float Swing2LimitAngle{180.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay, Meta = (ClampMin = 0, ClampMax = 1))
 	float TwistLimit{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FQuat4f SwingLimitOffsetQuaternion{ForceInit};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 1 Limit", Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS",
+		DisplayName = "Swing 1 Limit", AdvancedDisplay, Meta = (ClampMin = 0, ClampMax = 1))
 	float Swing1Limit{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", DisplayName = "Swing 2 Limit", Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS",
+		DisplayName = "Swing 2 Limit", AdvancedDisplay, Meta = (ClampMin = 0, ClampMax = 1))
 	float Swing2Limit{1.0f};
 
 public:

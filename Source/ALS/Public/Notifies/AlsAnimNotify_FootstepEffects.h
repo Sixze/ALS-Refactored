@@ -6,6 +6,7 @@
 #include "AlsAnimNotify_FootstepEffects.generated.h"
 
 enum EPhysicalSurface : int;
+struct FHitResult;
 class USoundBase;
 class UMaterialInterface;
 class UNiagaraSystem;
@@ -82,10 +83,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator3f DecalFootRightRotationOffset{-90.0f, 0.0f, -90.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FQuat4f DecalFootLeftRotationOffsetQuaternion{ForceInit};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FQuat4f DecalFootRightRotationOffsetQuaternion{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
@@ -103,10 +104,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator3f ParticleSystemFootRightRotationOffset{ForceInit};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FQuat4f ParticleSystemFootLeftRotationOffsetQuaternion{ForceInit};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FQuat4f ParticleSystemFootRightRotationOffsetQuaternion{ForceInit};
 
 public:
@@ -190,4 +191,14 @@ public:
 
 	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
 	                    const FAnimNotifyEventReference& EventReference) override;
+
+private:
+	void SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	                const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
+
+	void SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	                const FVector& FootstepLocation, const FQuat& FootstepRotation, const FHitResult& FootstepHit) const;
+
+	void SpawnParticleSystem(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	                         const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
 };

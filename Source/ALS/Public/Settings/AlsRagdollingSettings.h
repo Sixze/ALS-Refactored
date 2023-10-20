@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

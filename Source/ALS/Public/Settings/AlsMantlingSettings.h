@@ -118,7 +118,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TArray<TEnumAsByte<ECollisionChannel>> MantlingTraceResponseChannels;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
 	FCollisionResponseContainer MantlingTraceResponses{ECR_Ignore};
 
 	// Used when the mantling was interrupted and we need to stop the animation.
