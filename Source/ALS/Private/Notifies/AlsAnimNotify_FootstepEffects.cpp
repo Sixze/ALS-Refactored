@@ -30,7 +30,11 @@ void FAlsFootstepEffectSettings::PostEditChangeProperty(const FPropertyChangedEv
 
 void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Effects))
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, DecalSpawnAngleThreshold))
+	{
+		DecalSpawnAngleThresholdCos = FMath::Cos(FMath::DegreesToRadians(DecalSpawnAngleThreshold));
+	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Effects))
 	{
 		for (auto& Tuple : Effects)
 		{
@@ -88,23 +92,30 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	QueryParameters.bReturnPhysicalMaterial = true;
 
 	FHitResult FootstepHit;
-	if (World->LineTraceSingleByChannel(FootstepHit, FootTransform.GetLocation(),
-	                                    FootTransform.GetLocation() - FootZAxis *
-	                                    (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
-	                                    FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters))
+	if (!World->LineTraceSingleByChannel(FootstepHit, FootTransform.GetLocation(),
+	                                     FootTransform.GetLocation() - FootZAxis *
+	                                     (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
+	                                     FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters))
 	{
-#if ENABLE_DRAW_DEBUG
-		if (bDisplayDebug)
-		{
-			UAlsUtility::DrawDebugLineTraceSingle(World, FootstepHit.TraceStart, FootstepHit.TraceEnd, FootstepHit.bBlockingHit,
-			                                      FootstepHit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
-		}
-#endif
+		// As a fallback, trace down the world Z axis if the first trace didn't hit anything.
+
+		World->LineTraceSingleByChannel(FootstepHit, FootTransform.GetLocation(),
+		                                FootTransform.GetLocation() - FVector{
+			                                0.0f, 0.0f, FootstepEffectsSettings->SurfaceTraceDistance * MeshScale
+		                                }, FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters);
 	}
-	else
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebug)
 	{
-		FootstepHit.ImpactPoint = FootTransform.GetLocation();
-		FootstepHit.ImpactNormal = FVector::UpVector;
+		UAlsUtility::DrawDebugLineTraceSingle(World, FootstepHit.TraceStart, FootstepHit.TraceEnd, FootstepHit.bBlockingHit,
+		                                      FootstepHit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
+	}
+#endif
+
+	if (!FootstepHit.bBlockingHit)
+	{
+		return;
 	}
 
 	const auto SurfaceType{FootstepHit.PhysMaterial.IsValid() ? FootstepHit.PhysMaterial->SurfaceType.GetValue() : SurfaceType_Default};
@@ -148,7 +159,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	if (bSpawnDecal)
 	{
-		SpawnDecal(Mesh, *EffectSettings, FootstepLocation, FootstepRotation, FootstepHit);
+		SpawnDecal(Mesh, *EffectSettings, FootstepLocation, FootstepRotation, FootstepHit, FootZAxis);
 	}
 
 	if (bSpawnParticleSystem)
@@ -209,8 +220,13 @@ void UAlsAnimNotify_FootstepEffects::SpawnSound(USkeletalMeshComponent* Mesh, co
 
 void UAlsAnimNotify_FootstepEffects::SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
                                                 const FVector& FootstepLocation, const FQuat& FootstepRotation,
-                                                const FHitResult& FootstepHit) const
+                                                const FHitResult& FootstepHit, const FVector& FootZAxis) const
 {
+	if ((FootstepHit.ImpactNormal | FootZAxis) < FootstepEffectsSettings->DecalSpawnAngleThresholdCos)
+	{
+		return;
+	}
+
 	if (!IsValid(EffectSettings.DecalMaterial.LoadSynchronous()))
 	{
 		return;
