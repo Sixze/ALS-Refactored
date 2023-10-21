@@ -37,7 +37,10 @@ void AAlsCharacterExample::NotifyControllerChanged()
 		auto* InputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(NewPlayer->GetLocalPlayer())};
 		if (IsValid(InputSubsystem))
 		{
-			InputSubsystem->AddMappingContext(InputMappingContext, 0);
+			FModifyContextOptions Options;
+			Options.bNotifyUserSettings = true;
+
+			InputSubsystem->AddMappingContext(InputMappingContext, 0, Options);
 		}
 	}
 
