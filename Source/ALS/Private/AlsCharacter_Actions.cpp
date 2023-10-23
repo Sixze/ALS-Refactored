@@ -264,7 +264,20 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 	                                 Settings->Mantling.MantlingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
 	                                 {DownwardTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses);
 
-	if (!GetCharacterMovement()->IsWalkable(DownwardTraceHit))
+	const auto SlopeAngleCos{UE_REAL_TO_FLOAT(DownwardTraceHit.ImpactNormal.Z)};
+
+	// The approximate slope angle is used in situations where the normal slope angle cannot convey
+	// the true nature of the surface slope, for example, for a 45 degree staircase the slope
+	// angle will always be 90 degrees, while the approximate slope angle will be ~45 degrees.
+
+	auto ApproximateSlopeNormal{DownwardTraceHit.Location - DownwardTraceHit.ImpactPoint};
+	ApproximateSlopeNormal.Normalize();
+
+	const auto ApproximateSlopeAngleCos{UE_REAL_TO_FLOAT(ApproximateSlopeNormal.Z)};
+
+	if (SlopeAngleCos < Settings->Mantling.SlopeAngleThresholdCos ||
+	    ApproximateSlopeAngleCos < Settings->Mantling.SlopeAngleThresholdCos ||
+	    !GetCharacterMovement()->IsWalkable(DownwardTraceHit))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
