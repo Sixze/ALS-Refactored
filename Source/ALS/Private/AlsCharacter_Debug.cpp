@@ -609,11 +609,20 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	VerticalLocation += RowOffset;
 
-	static const auto FailedFreeSpaceOverlapText{LOCTEXT("FailedFreeSpaceOverlap", "Failed Free Space Overlap")};
+	static const auto FailedTargetLocationOverlapText{LOCTEXT("FailedTargetocationOverlap", "Failed Target Location Overlap")};
 
 	Text.SetColor(FLinearColor::Red);
 
-	Text.Text = FailedFreeSpaceOverlapText;
+	Text.Text = FailedTargetLocationOverlapText;
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	VerticalLocation += RowOffset;
+
+	static const auto FailedStartLocationOverlapText{LOCTEXT("FailedStartLocationOverlap", "Failed Start Location Overlap")};
+
+	Text.SetColor({1.0f, 0.5f, 0.0f});
+
+	Text.Text = FailedStartLocationOverlapText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 	VerticalLocation += RowOffset;
