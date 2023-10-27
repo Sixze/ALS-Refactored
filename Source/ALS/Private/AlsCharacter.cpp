@@ -85,8 +85,10 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
-void AAlsCharacter::PreRegisterAllComponents()
+void AAlsCharacter::PostRegisterAllComponents()
 {
+	Super::PostRegisterAllComponents();
+
 	// Set some default values here to ensure that the animation instance and the
 	// camera component can read the most up-to-date values during their initialization.
 
@@ -114,8 +116,6 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
-
-	Super::PreRegisterAllComponents();
 }
 
 void AAlsCharacter::PostInitializeComponents()
@@ -317,7 +317,7 @@ void AAlsCharacter::RefreshMeshProperties() const
 
 	const auto bAuthority{GetLocalRole() >= ROLE_Authority};
 	const auto bRemoteAutonomousProxy{GetRemoteRole() == ROLE_AutonomousProxy};
-	const auto bLocallyControlled{GetLocalRole() == ROLE_AutonomousProxy || (bAuthority && !bRemoteAutonomousProxy)};
+	const auto bLocallyControlled{IsLocallyControlled()};
 
 	// Make sure that the pose is always ticked on the server when the character is controlled
 	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
@@ -358,7 +358,7 @@ void AAlsCharacter::RefreshMeshProperties() const
 	const auto bStandingOnRotatingObject{MovementBase.bHasRelativeRotation};
 
 	const auto bUseAbsoluteRotation{
-		!bDedicatedServer && !bLocallyControlled && bMeshIsTicking && !bStandingOnRotatingObject &&
+		bMeshIsTicking && !bDedicatedServer && !bLocallyControlled && !bStandingOnRotatingObject &&
 		(bUROActive || bAutonomousProxyOnListenServer)
 	};
 
@@ -1190,7 +1190,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	if (MovementBase.bHasRelativeRotation)
 	{
-		if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy))
+		if (IsLocallyControlled())
 		{
 			// We can't depend on the view rotation sent by the character movement component
 			// since it's in world space, so in this case we always send it ourselves.
@@ -1200,8 +1200,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	}
 	else
 	{
-		if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority &&
-		                                               (GetRemoteRole() != ROLE_AutonomousProxy || IsReplicatingMovement())))
+		if (IsLocallyControlled() || (IsReplicatingMovement() && GetLocalRole() >= ROLE_Authority && IsValid(GetController())))
 		{
 			// The character movement component already sends the view rotation to the
 			// server if movement is replicated, so we don't have to do this ourselves.

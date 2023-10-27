@@ -139,8 +139,7 @@ bool AAlsCharacter::StartMantlingGrounded()
 
 bool AAlsCharacter::StartMantlingInAir()
 {
-	return LocomotionMode == AlsLocomotionModeTags::InAir &&
-	       (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)) &&
+	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
 	       StartMantling(Settings->Mantling.InAirTrace);
 }
 
@@ -765,7 +764,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
 
-	if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy))
+	if (IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController())))
 	{
 		SetRagdollTargetLocation(GetMesh()->GetSocketLocation(UAlsConstants::PelvisBoneName()));
 	}
@@ -839,7 +838,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBoneName())};
 
 	const auto bShouldSendTargetLocation{
-		GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)
+		IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController()))
 	};
 
 	if (bShouldSendTargetLocation)
