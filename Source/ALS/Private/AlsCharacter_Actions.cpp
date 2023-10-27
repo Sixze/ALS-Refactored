@@ -846,6 +846,12 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		SetRagdollTargetLocation(PelvisTransform.GetLocation());
 	}
 
+	if (RagdollTargetLocation.IsZero())
+	{
+		// Zero target location means that it has not yet replicated, so we can't apply any corrections yet.
+		return;
+	}
+
 	// Trace downward from the target location to offset the target location, preventing the lower
 	// half of the capsule from going through the floor when the ragdoll is laying on the ground.
 
@@ -939,6 +945,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 	{
 		return;
 	}
+
+	SetRagdollTargetLocation(FVector::ZeroVector);
 
 	AnimationInstance->StopRagdolling();
 
