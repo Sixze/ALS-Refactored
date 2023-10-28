@@ -102,6 +102,30 @@ FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Mont
 	return Sequence->ExtractRootTrackTransform(Segment->ConvertTrackPosToAnimPos(Time), nullptr);
 }
 
+FTransform UAlsUtility::ExtractLastRootTransformFromMontage(const UAnimMontage* Montage)
+{
+	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
+
+	if (!IsValid(Montage))
+	{
+		return FTransform::Identity;
+	}
+
+	const auto* Segment{Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Num() > 0 ? &Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Last() : nullptr};
+	if (Segment == nullptr)
+	{
+		return FTransform::Identity;
+	}
+
+	const auto* Sequence{Cast<UAnimSequence>(Segment->GetAnimReference())};
+	if (!IsValid(Sequence))
+	{
+		return FTransform::Identity;
+	}
+
+	return Sequence->ExtractRootTrackTransform(Segment->GetEndPos(), nullptr);
+}
+
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
 {
 	const auto* World{IsValid(Actor) ? Actor->GetWorld() : nullptr};
