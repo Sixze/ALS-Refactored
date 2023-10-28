@@ -10,6 +10,7 @@
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
@@ -461,6 +462,15 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	const auto Duration{MantlingSettings->Montage->GetPlayLength() - StartTime};
 	const auto PlayRate{MantlingSettings->Montage->RateScale};
 
+	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(MantlingSettings->Montage).GetLocation()};
+
+	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
+	{
+		UE_LOG(LogAls, Warning, TEXT("Can't start mantling! The %s animation montage has incorrect root motion,")
+		       TEXT(" the final vertical location of the character must be non-zero!"), *MantlingSettings->Montage->GetName());
+		return;
+	}
+
 	// Calculate actor offsets (offsets between actor and target transform).
 
 	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
@@ -502,6 +512,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;
 	RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
 	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
+	RootMotionSource->TargetAnimationLocation = TargetAnimationLocation;
 	RootMotionSource->MontageStartTime = StartTime;
 
 	MantlingState.RootMotionSourceId = GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);

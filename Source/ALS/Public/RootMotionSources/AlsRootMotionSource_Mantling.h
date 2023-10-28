@@ -29,6 +29,9 @@ public:
 	UPROPERTY()
 	FRotator ActorRotationOffset{ForceInit};
 
+	UPROPERTY()
+	FVector TargetAnimationLocation{ForceInit};
+
 	UPROPERTY(Meta = (ClampMin = 0, ForceUnits = "s"))
 	float MontageStartTime{0.0f};
 

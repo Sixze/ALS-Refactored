@@ -47,16 +47,6 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	const auto* Montage{MantlingSettings->Montage.Get()};
 	const auto MontageTime{MontageStartTime + GetTime() * Montage->RateScale};
-		
-	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(Montage).GetLocation()};
-	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
-
-	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
-	{
-		UE_LOG(LogRootMotion, Warning, TEXT("FAlsRootMotionSource_Mantling::PrepareRootMotion fail : %s"), *Montage->GetFName().ToString());
-		RootMotionParams.Clear();
-		return;
-	}
 
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
@@ -80,6 +70,10 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
 		                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
+
+	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+
+	// The target animation location is expected to be non-zero, so it's safe to divide by it here.
 
 	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
 
@@ -166,6 +160,8 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
 	ActorRotationOffset.Normalize();
 	bSuccess &= bSuccessLocal;
+
+	bSuccess &= SerializePackedVector<100, 30>(TargetAnimationLocation, Archive);
 
 	Archive << MontageStartTime;
 
