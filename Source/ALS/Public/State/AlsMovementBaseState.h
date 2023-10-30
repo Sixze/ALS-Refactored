@@ -7,7 +7,7 @@ struct ALS_API FAlsMovementBaseState
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UPrimitiveComponent> Primitive{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

@@ -488,18 +488,21 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	const auto ActorFeetLocationOffset{GetCharacterMovement()->GetActorFeetLocation() - TargetTransform.GetLocation()};
 	const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * GetActorQuat()};
 
-	// Clear the character movement mode and set the locomotion action to mantling.
-
-	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
-	GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
-	AlsCharacterMovement->SetMovementModeLocked(true);
+	// Reset network smoothing.
 
 	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
 	GetMesh()->SetRelativeLocationAndRotation(GetBaseTranslationOffset(),
 	                                          GetMesh()->IsUsingAbsoluteRotation()
-		                                          ? GetActorTransform().GetRotation() * GetBaseRotationOffset()
-		                                          : GetBaseRotationOffset());
+		                                          ? GetActorQuat() * GetBaseRotationOffset()
+		                                          : GetBaseRotationOffset(), false, nullptr, ETeleportType::TeleportPhysics);
+
+	// Clear the character movement mode and set the locomotion action to mantling.
+
+	GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+	AlsCharacterMovement->SetMovementModeLocked(true);
+
+	GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
 
 	// Apply mantling root motion.
 
@@ -651,12 +654,12 @@ void AAlsCharacter::StopMantling(const bool bStopMontage)
 
 	MantlingState.RootMotionSourceId = 0;
 
-	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
-
 	if (bStopMontage && RootMotionSource != nullptr)
 	{
 		GetMesh()->GetAnimInstance()->Montage_Stop(Settings->Mantling.BlendOutDuration, RootMotionSource->MantlingSettings->Montage);
 	}
+
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
 	AlsCharacterMovement->SetMovementModeLocked(false);
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);

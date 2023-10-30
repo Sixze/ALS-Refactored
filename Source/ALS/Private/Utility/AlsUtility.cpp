@@ -57,14 +57,14 @@ bool UAlsUtility::TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& Base
 		return false;
 	}
 
-	const auto* BodyInstance{BasedMovement.MovementBase->GetBodyInstance(BasedMovement.BoneName)};
-	if (BodyInstance == nullptr)
+	const auto* Body{BasedMovement.MovementBase->GetBodyInstance(BasedMovement.BoneName)};
+	if (Body == nullptr)
 	{
 		RotationSpeed = FRotator::ZeroRotator;
 		return false;
 	}
 
-	const auto AngularVelocityVector{BodyInstance->GetUnrealWorldAngularVelocityInRadians()};
+	const auto AngularVelocityVector{Body->GetUnrealWorldAngularVelocityInRadians()};
 	if (AngularVelocityVector.IsNearlyZero())
 	{
 		RotationSpeed = FRotator::ZeroRotator;
