@@ -315,7 +315,7 @@ private:
 	void RefreshRagdollingOnGameThread();
 
 public:
-	void StopRagdolling();
+	FPoseSnapshot& SnapshotFinalRagdollPose();
 
 	// Utility
 

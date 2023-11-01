@@ -103,8 +103,23 @@ FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 
 FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
 {
-	return (Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName) +
-	        Character->GetMesh()->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
+	const auto* Mesh{Character->GetMesh()};
+
+	FVector FirstPivotLocation;
+
+	if (!IsValid(Mesh->GetAttachParent()) && Settings->ThirdPerson.FirstPivotSocketName == UAlsConstants::RootBoneName())
+	{
+		// The root bone location usually remains fixed when the mesh is detached, so use the capsule's bottom location here as a fallback.
+
+		FirstPivotLocation = Character->GetRootComponent()->GetComponentLocation();
+		FirstPivotLocation.Z -= Character->GetRootComponent()->Bounds.BoxExtent.Z;
+	}
+	else
+	{
+		FirstPivotLocation = Mesh->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName);
+	}
+
+	return (FirstPivotLocation + Mesh->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
 }
 
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
