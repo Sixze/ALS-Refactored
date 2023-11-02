@@ -1004,6 +1004,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
 	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
 	{
+		AlsCharacterMovement->SetInputBlocked(true);
+
 		SetLocomotionAction(AlsLocomotionActionTags::GettingUp);
 	}
 }

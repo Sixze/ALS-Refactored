@@ -1068,6 +1068,11 @@ void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
 
 void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction)
 {
+	if (!LocomotionAction.IsValid())
+	{
+		AlsCharacterMovement->SetInputBlocked(false);
+	}
+
 	ApplyDesiredStance();
 
 	OnLocomotionActionChanged(PreviousLocomotionAction);
