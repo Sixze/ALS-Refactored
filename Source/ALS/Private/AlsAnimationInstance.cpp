@@ -54,22 +54,23 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	Character->FinalizeRagdolling();
 
-	if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
+	auto* Mesh{GetSkelMeshComponent()};
+
+	if (Mesh->IsUsingAbsoluteRotation() && IsValid(Mesh->GetAttachParent()))
 	{
-		const auto& ActorTransform{Character->GetActorTransform()};
+		const auto& ParentTransform{Mesh->GetAttachParent()->GetComponentTransform()};
 
 		// Manually synchronize mesh rotation with character rotation.
 
-		GetSkelMeshComponent()->MoveComponent(
-			FVector::ZeroVector, ActorTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
+		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
 
 		// Re-cache proxy transforms to match the modified mesh transform.
 
 		const auto& Proxy{GetProxyOnGameThread<FAnimInstanceProxy>()};
 
-		const_cast<FTransform&>(Proxy.GetComponentTransform()) = GetSkelMeshComponent()->GetComponentTransform();
-		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = GetSkelMeshComponent()->GetRelativeTransform();
-		const_cast<FTransform&>(Proxy.GetActorTransform()) = ActorTransform;
+		const_cast<FTransform&>(Proxy.GetComponentTransform()) = Mesh->GetComponentTransform();
+		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = Mesh->GetRelativeTransform();
+		const_cast<FTransform&>(Proxy.GetActorTransform()) = Character->GetActorTransform();
 	}
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
