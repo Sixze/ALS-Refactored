@@ -116,6 +116,8 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void PreRegisterAllComponents() override;
+
 	virtual void PostRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;

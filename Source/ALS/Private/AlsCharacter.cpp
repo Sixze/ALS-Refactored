@@ -85,16 +85,21 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
 }
 
-void AAlsCharacter::PostRegisterAllComponents()
+void AAlsCharacter::PreRegisterAllComponents()
 {
-	Super::PostRegisterAllComponents();
-
-	// Set some default values here to ensure that the animation instance and the
-	// camera component can read the most up-to-date values during their initialization.
+	// Set some default values here so that the animation instance and the
+	// camera component can read the most up-to-date values during initialization.
 
 	RotationMode = bDesiredAiming ? AlsRotationModeTags::Aiming : DesiredRotationMode;
 	Stance = DesiredStance;
 	Gait = DesiredGait;
+
+	Super::PreRegisterAllComponents();
+}
+
+void AAlsCharacter::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
 
 	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), false);
 
