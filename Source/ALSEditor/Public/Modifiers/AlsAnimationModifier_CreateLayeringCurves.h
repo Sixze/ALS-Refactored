@@ -11,10 +11,10 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimati
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bOverrideExistingCurves;
+	uint8 bOverrideExistingCurves : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bAddKeyOnEachFrame;
+	uint8 bAddKeyOnEachFrame : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float CurveValue;
@@ -47,7 +47,7 @@ protected:
 	};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bAddSlotCurves;
+	uint8 bAddSlotCurves : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float SlotCurveValue{1.0f};

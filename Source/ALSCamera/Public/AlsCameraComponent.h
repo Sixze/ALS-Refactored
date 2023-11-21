@@ -64,7 +64,7 @@ protected:
 	float CameraFov{90.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bRightShoulder{true};
+	uint8 bRightShoulder : 1 {true};
 
 public:
 	UAlsCameraComponent();

@@ -51,7 +51,7 @@ struct ALS_API FAlsFeetSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bDisableFootLock{false};
+	uint8 bDisableFootLock : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FootHeight{13.5f};

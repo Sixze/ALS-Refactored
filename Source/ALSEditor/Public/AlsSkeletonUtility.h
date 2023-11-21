@@ -15,7 +15,7 @@ struct ALSEDITOR_API FAlsBlendProfileEntry
 	float BlendScale{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bIncludeDescendants{false};
+	uint8 bIncludeDescendants : 1 {false};
 };
 
 UCLASS()

@@ -14,13 +14,13 @@ struct ALS_API FAlsMovementBaseState
 	FName BoneName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bBaseChanged{false};
+	uint8 bBaseChanged : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bHasRelativeLocation{false};
+	uint8 bHasRelativeLocation : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bHasRelativeRotation{false};
+	uint8 bHasRelativeRotation : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector Location{ForceInit};

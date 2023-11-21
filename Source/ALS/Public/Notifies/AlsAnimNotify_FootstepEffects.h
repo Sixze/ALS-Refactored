@@ -170,10 +170,10 @@ protected:
 	EAlsFootBone FootBone{EAlsFootBone::Left};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
-	bool bSkipEffectsWhenInAir;
+	uint8 bSkipEffectsWhenInAir : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
-	bool bSpawnSound{true};
+	uint8 bSpawnSound : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float SoundVolumeMultiplier{1.0f};
@@ -185,13 +185,13 @@ protected:
 	EAlsFootstepSoundType SoundType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
-	bool bIgnoreFootstepSoundBlockCurve;
+	uint8 bIgnoreFootstepSoundBlockCurve : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal")
-	bool bSpawnDecal{true};
+	uint8 bSpawnDecal : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Particle System")
-	bool bSpawnParticleSystem{true};
+	uint8 bSpawnParticleSystem : 1 {true};
 
 public:
 	virtual FString GetNotifyName_Implementation() const override;

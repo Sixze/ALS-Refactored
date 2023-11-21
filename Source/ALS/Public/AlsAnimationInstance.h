@@ -40,7 +40,7 @@ protected:
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may not be correct (such as foot location used in foot locking).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bPendingUpdate{true};
+	uint8 bPendingUpdate : 1 {true};
 
 	// Time of the last teleportation event.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0))
@@ -48,7 +48,7 @@ protected:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bDisplayDebugTraces;
+	uint8 bDisplayDebugTraces : 1;
 
 	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif

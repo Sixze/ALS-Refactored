@@ -8,8 +8,8 @@ struct ALS_API FAlsViewSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
-	bool bEnableNetworkSmoothing{true};
+	uint8 bEnableNetworkSmoothing : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
-	bool bEnableListenServerNetworkSmoothing{true};
+	uint8 bEnableListenServerNetworkSmoothing : 1 {true};
 };

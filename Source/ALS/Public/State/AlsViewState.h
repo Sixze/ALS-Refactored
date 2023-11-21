@@ -8,7 +8,7 @@ struct ALS_API FAlsViewNetworkSmoothingState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bEnabled{false};
+	uint8 bEnabled : 1 {false};
 
 	// Used to track the time of the last server move.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))

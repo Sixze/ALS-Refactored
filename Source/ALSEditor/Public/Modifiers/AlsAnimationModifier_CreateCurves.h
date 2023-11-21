@@ -25,7 +25,7 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bAddKeyOnEachFrame{false};
+	uint8 bAddKeyOnEachFrame : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TArray<FAlsAnimationCurveKey> Keys
@@ -41,7 +41,7 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateCurves : public UAnimationModifi
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bOverrideExistingCurves;
+	uint8 bOverrideExistingCurves : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FAlsAnimationCurve> Curves

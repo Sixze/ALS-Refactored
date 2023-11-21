@@ -21,16 +21,16 @@ private:
 	EAlsMovementDirection MovementDirection{EAlsMovementDirection::Forward};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
-	bool bForward{true};
+	uint8 bForward : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
-	bool bBackward{false};
+	uint8 bBackward : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
-	bool bLeft{false};
+	uint8 bLeft : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
-	bool bRight{false};
+	uint8 bRight : 1 {false};
 
 public:
 	constexpr FAlsMovementDirectionCache() = default;

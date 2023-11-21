@@ -8,7 +8,7 @@ struct ALS_API FAlsLocomotionAnimationState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bHasInput{false};
+	uint8 bHasInput : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float InputYawAngle{0.0f};
@@ -35,10 +35,10 @@ struct ALS_API FAlsLocomotionAnimationState
 	float WalkableFloorZ{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bMoving{false};
+	uint8 bMoving : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bMovingSmooth{false};
+	uint8 bMovingSmooth : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float TargetYawAngle{0.0f};

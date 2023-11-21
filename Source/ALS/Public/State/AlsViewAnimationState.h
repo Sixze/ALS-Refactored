@@ -8,7 +8,7 @@ struct ALS_API FAlsLookState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bReinitializationRequired{true};
+	uint8 bReinitializationRequired : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float WorldYawAngle{0.0f};
@@ -35,7 +35,7 @@ struct ALS_API FAlsSpineRotationState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bSpineRotationAllowed{false};
+	uint8 bSpineRotationAllowed : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float SpineAmount{0.0f};

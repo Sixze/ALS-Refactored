@@ -25,5 +25,5 @@ struct ALS_API FAlsTurnInPlaceState
 	float PlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFootLockInhibited{false};
+	uint8 bFootLockInhibited : 1 {false};
 };

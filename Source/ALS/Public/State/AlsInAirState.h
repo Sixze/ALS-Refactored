@@ -11,10 +11,10 @@ struct ALS_API FAlsInAirState
 	float VerticalVelocity{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bJumpRequested{false};
+	uint8 bJumpRequested : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bJumped{false};
+	uint8 bJumped : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float JumpPlayRate{1.0f};

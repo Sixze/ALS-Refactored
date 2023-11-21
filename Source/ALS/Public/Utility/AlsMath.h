@@ -15,7 +15,7 @@ struct ALS_API FAlsSpringFloatState
 	float PreviousTarget{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bStateValid{false};
+	uint8 bStateValid : 1 {false};
 
 	void Reset();
 };
@@ -32,7 +32,7 @@ struct ALS_API FAlsSpringVectorState
 	FVector PreviousTarget{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bStateValid{false};
+	uint8 bStateValid : 1 {false};
 
 	void Reset();
 };

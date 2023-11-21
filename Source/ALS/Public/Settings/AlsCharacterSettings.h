@@ -17,25 +17,25 @@ public:
 	float MovingSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bSprintHasPriorityOverAiming;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bRotateToVelocityWhenSprinting;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	EAlsInAirRotationMode InAirRotationMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bAllowAimingWhenInAir{true};
+	uint8 bAllowAimingWhenInAir : 1 {true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	uint8 bSprintHasPriorityOverAiming : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	uint8 bRotateToVelocityWhenSprinting : 1;
 
 	// If checked, the character will rotate relative to the object it is standing on in the velocity
 	// direction rotation mode, otherwise the character will ignore that object and keep its world rotation.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bInheritMovementBaseRotationInVelocityDirectionRotationMode;
+	uint8 bInheritMovementBaseRotationInVelocityDirectionRotationMode : 1;
 
 	// If checked, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode{true};
+	uint8 bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;

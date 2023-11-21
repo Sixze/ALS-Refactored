@@ -49,7 +49,7 @@ public:
 	// If checked, mantling will automatically calculate the start time based on how much vertical
 	// distance the character needs to move to reach the object they are about to mantle.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	bool bAutoCalculateStartTime{false};
+	uint8 bAutoCalculateStartTime : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
 	FVector2f StartTimeReferenceHeight{50.0f, 100.0f};
@@ -84,7 +84,7 @@ struct ALS_API FAlsMantlingTraceSettings
 	float StartLocationOffset{55.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	bool bDrawFailedTraces{false};
+	uint8 bDrawFailedTraces : 1 {false};
 };
 
 USTRUCT(BlueprintType)
@@ -94,7 +94,7 @@ struct ALS_API FAlsGeneralMantlingSettings
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bAllowMantling{true};
+	uint8 bAllowMantling : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float TraceAngleThreshold{110.0f};
@@ -137,7 +137,7 @@ public:
 
 	// If checked, ragdolling will start if the object the character is mantling on was destroyed.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bStartRagdollingOnTargetPrimitiveDestruction{true};
+	uint8 bStartRagdollingOnTargetPrimitiveDestruction : 1 {true};
 
 public:
 #if WITH_EDITOR

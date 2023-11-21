@@ -96,11 +96,11 @@ protected:
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bMovementModeLocked;
+	uint8 bMovementModeLocked : 1;
 
 	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bInputBlocked;
+	uint8 bInputBlocked : 1;
 
 	// Valid only on locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -113,7 +113,7 @@ protected:
 	FVector PrePenetrationAdjustmentVelocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bPrePenetrationAdjustmentVelocityValid;
+	uint8 bPrePenetrationAdjustmentVelocityValid : 1;
 
 public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;

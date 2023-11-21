@@ -20,7 +20,7 @@ struct ALS_API FAlsVelocityBlendState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bReinitializationRequired{true};
+	uint8 bReinitializationRequired : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float ForwardAmount{0.0f};
@@ -65,10 +65,10 @@ struct ALS_API FAlsGroundedState
 	float HipsDirectionLockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bPivotActivationRequested{false};
+	uint8 bPivotActivationRequested : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bPivotActive{false};
+	uint8 bPivotActive : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsMovementDirectionCache MovementDirection;
