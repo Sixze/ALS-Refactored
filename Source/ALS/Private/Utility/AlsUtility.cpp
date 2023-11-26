@@ -42,7 +42,7 @@ FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
 
 float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 {
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
 	const auto* PlayerState{IsValid(PlayerController) ? PlayerController->PlayerState.Get() : nullptr};
 
@@ -137,7 +137,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Loc
                                  const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -169,7 +169,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
                                     const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -201,7 +201,7 @@ void UAlsUtility::DrawDebugSphereAlternative(const UObject* WorldContext, const 
                                              const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -226,7 +226,7 @@ void UAlsUtility::DrawDebugLineTraceSingle(const UObject* WorldContext, const FV
                                            const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -247,7 +247,7 @@ void UAlsUtility::DrawDebugSweepSphere(const UObject* WorldContext, const FVecto
                                        const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -272,7 +272,7 @@ void UAlsUtility::DrawDebugSweepSingleSphere(const UObject* WorldContext, const 
                                              const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -298,7 +298,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsule(const UObject* WorldContext, const
                                               const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
@@ -332,7 +332,7 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
                                                          const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
-	const auto* World{WorldContext->GetWorld()};
+	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
 	if (!ALS_ENSURE(IsValid(World)))
 	{
 		return;
