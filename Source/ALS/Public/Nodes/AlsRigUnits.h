@@ -5,7 +5,7 @@
 #include "Units/RigUnit.h"
 #include "AlsRigUnits.generated.h"
 
-USTRUCT(DisplayName="Clamp 01", Meta = (Category = "ALS"))
+USTRUCT(DisplayName = "Clamp 01", Meta = (Category = "ALS"))
 struct ALS_API FAlsRigVMFunction_Clamp01Float : public FRigVMFunction_MathFloatBase
 {
 	GENERATED_BODY()
