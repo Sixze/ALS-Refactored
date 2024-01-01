@@ -16,9 +16,7 @@ UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
 
 FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 {
-	TStringBuilder<256> NotifyNameBuilder;
-
-	NotifyNameBuilder << TEXTVIEW("Als Camera Shake: ");
+	TStringBuilder<256> NotifyNameBuilder{InPlace, TEXTVIEW("Als Camera Shake: ")};
 
 	if (IsValid(CameraShakeClass))
 	{

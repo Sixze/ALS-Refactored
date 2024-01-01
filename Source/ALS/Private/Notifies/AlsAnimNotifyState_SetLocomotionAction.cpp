@@ -13,10 +13,10 @@ UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction
 
 FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() const
 {
-	TStringBuilder<256> NotifyNameBuilder;
-
-	NotifyNameBuilder << TEXTVIEW("Als Set Locomotion Action: ")
-		<< FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false);
+	TStringBuilder<256> NotifyNameBuilder{
+		InPlace, TEXTVIEW("Als Set Locomotion Action: "),
+		FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false)
+	};
 
 	return FString{NotifyNameBuilder};
 }

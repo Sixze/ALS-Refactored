@@ -17,9 +17,8 @@ UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 
 FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() const
 {
-	TStringBuilder<64> NotifyNameBuilder;
+	TStringBuilder<64> NotifyNameBuilder{InPlace, TEXTVIEW("Als Set Root Motion Scale: ")};
 
-	NotifyNameBuilder << TEXTVIEW("Als Set Root Motion Scale: ");
 	NotifyNameBuilder.Appendf(TEXT("%.2f"), TranslationScale);
 
 	return FString{NotifyNameBuilder};

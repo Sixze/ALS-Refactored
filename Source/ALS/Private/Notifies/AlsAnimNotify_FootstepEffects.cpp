@@ -48,9 +48,7 @@ void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& 
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {
-	TStringBuilder<64> NotifyNameBuilder;
-
-	NotifyNameBuilder << TEXTVIEW("Als Footstep Effects: ") << AlsEnumUtility::GetNameStringByValue(FootBone);
+	TStringBuilder<64> NotifyNameBuilder{InPlace, TEXTVIEW("Als Footstep Effects: "), AlsEnumUtility::GetNameStringByValue(FootBone)};
 
 	return FString{NotifyNameBuilder};
 }
