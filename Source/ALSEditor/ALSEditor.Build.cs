@@ -9,16 +9,21 @@ public class ALSEditor : ModuleRules
 
 		bEnableNonInlinedGenCppWarnings = true;
 
-		PrivateDependencyModuleNames.AddRange(new[]
+		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core", "CoreUObject", "Engine", "AnimationModifiers", "AnimationBlueprintLibrary", "ALS"
 		});
 
 		if (Target.bBuildEditor)
 		{
+			PublicDependencyModuleNames.AddRange(new[]
+			{
+				"AnimGraph"
+			});
+
 			PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"AnimGraph", "AnimGraphRuntime", "BlueprintGraph"
+				"BlueprintGraph"
 			});
 		}
 	}

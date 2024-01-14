@@ -9,10 +9,14 @@ public class ALS : ModuleRules
 
 		bEnableNonInlinedGenCppWarnings = true;
 
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core", "CoreUObject", "Engine", "GameplayTags", "AnimGraphRuntime", "RigVM", "ControlRig"
+		});
+
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "EngineSettings", "NetCore", "PhysicsCore",
-			"GameplayTags", "AnimGraphRuntime", "RigVM", "ControlRig", "Niagara"
+			"EngineSettings", "NetCore", "PhysicsCore", "Niagara"
 		});
 
 		if (Target.Type == TargetRules.TargetType.Editor)
