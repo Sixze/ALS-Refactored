@@ -577,8 +577,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	auto AdjustmentDirection{Adjustment};
 
 	if (!AdjustmentDirection.Normalize() ||
-	    UAlsMath::AngleBetweenSkipNormalization((GetOwner()->GetActorLocation() - Location).GetSafeNormal(),
-	                                            AdjustmentDirection) > 90.0f + 1.0f)
+	    ((GetOwner()->GetActorLocation() - Location).GetSafeNormal() | AdjustmentDirection) < -UE_KINDA_SMALL_NUMBER)
 	{
 		return false;
 	}

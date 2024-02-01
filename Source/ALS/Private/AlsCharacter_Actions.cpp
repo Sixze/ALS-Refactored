@@ -1039,7 +1039,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 		GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
 		{
-			ensure(!GetMesh()->bEnableUpdateRateOptimizations);
+			ALS_ENSURE(!GetMesh()->bEnableUpdateRateOptimizations);
 			GetMesh()->bEnableUpdateRateOptimizations = true;
 		}));
 	}

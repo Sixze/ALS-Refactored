@@ -1,8 +1,8 @@
 @echo off
 
-set EngineVesion=5.3
+set EngineVersion=5.3
 
-for /f "skip=2 tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\EpicGames\Unreal Engine\%EngineVesion%" /v "InstalledDirectory"') do set "EngineDirectory=%%b"
+for /f "skip=2 tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\EpicGames\Unreal Engine\%EngineVersion%" /v "InstalledDirectory"') do set "EngineDirectory=%%b"
 
 set AutomationToolPath="%EngineDirectory%\Engine\Build\BatchFiles\RunUAT.bat"
 set PluginPath="%cd%\ALS.uplugin"
