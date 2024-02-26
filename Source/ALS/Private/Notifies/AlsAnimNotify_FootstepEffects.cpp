@@ -166,6 +166,13 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	}
 }
 
+#if WITH_EDITOR
+void UAlsAnimNotify_FootstepEffects::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+{
+	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+}
+#endif
+
 void UAlsAnimNotify_FootstepEffects::SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
                                                 const FVector& FootstepLocation, const FQuat& FootstepRotation) const
 {

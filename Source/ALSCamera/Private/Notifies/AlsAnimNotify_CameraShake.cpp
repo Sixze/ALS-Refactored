@@ -40,3 +40,10 @@ void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSeque
 		CameraManager->StartCameraShake(CameraShakeClass, CameraShakeScale);
 	}
 }
+
+#if WITH_EDITOR
+void UAlsAnimNotify_CameraShake::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+{
+	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+}
+#endif
