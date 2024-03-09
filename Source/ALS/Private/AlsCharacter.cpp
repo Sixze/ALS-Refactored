@@ -186,6 +186,19 @@ void AAlsCharacter::BeginPlay()
 	OnOverlayModeChanged(OverlayMode);
 }
 
+void AAlsCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo)
+{
+	if(!OnCalcCamera(DeltaTime,ViewInfo))
+	{
+		Super::CalcCamera(DeltaTime, ViewInfo);
+	}
+}
+
+bool AAlsCharacter::OnCalcCamera_Implementation(float DeltaTime, FMinimalViewInfo& ViewInfo)
+{
+	return false;
+}
+
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
 	// AActor::PostNetReceiveLocationAndRotation() function is only called on simulated proxies, so there is no need to check roles here.
