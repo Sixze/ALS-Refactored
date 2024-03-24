@@ -1,27 +1,23 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AlsPhysicalAnimationComponent.h"
 
-#include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
+#include "AlsCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "PhysicsEngine/PhysicalAnimationComponent.h"
-#include "PhysicsEngine/PhysicsAsset.h"
-#include "Curves/CurveFloat.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
-#include "Utility/AlsGameplayTags.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsGameplayTags.h"
+#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
-#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsPhysicalAnimationComponent)
 
 void FAlsPhysicalAnimationCurveValues::Refresh(const AAlsCharacter* Character)
 {
-	auto AnimInstance{Cast<UAlsAnimationInstance>(Character->GetMesh()->GetAnimInstance())};
+	const auto AnimInstance{Cast<UAlsAnimationInstance>(Character->GetMesh()->GetAnimInstance())};
 	LockLeftArm = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockArmLeftCurveName());
 	LockRightArm = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockArmRightCurveName());
 	LockLeftHand = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
@@ -71,9 +67,9 @@ float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) co
 
 bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) const
 {
-	for (auto Body : GetSkeletalMesh()->Bodies)
+	for (const auto Body : GetSkeletalMesh()->Bodies)
 	{
-		if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
+		if (auto BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 		{
 			if (BodySetup->FindPhysicalAnimationProfile(ProfileName))
 			{
@@ -88,7 +84,7 @@ bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* Bod
 {
 	if (CurrentProfileNames.IsEmpty())
 	{
-		return bRagdolling && BodySetup->PhysicsType != EPhysicsType::PhysType_Kinematic;
+		return bRagdolling && BodySetup->PhysicsType != PhysType_Kinematic;
 	}
 
 	for (const auto& ProfileName : CurrentProfileNames)
@@ -104,7 +100,7 @@ bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* Bod
 
 bool UAlsPhysicalAnimationComponent::NeedsProfileChange()
 {
-	bool bRetVal = false;
+	auto bRetVal = false;
 	if (LocomotionAction != PreviousLocomotionAction)
 	{
 		bRetVal = true;
@@ -154,15 +150,15 @@ void UAlsPhysicalAnimationComponent::ClearGameplayTags()
 
 void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 {
-	USkeletalMeshComponent* Mesh{GetSkeletalMesh()};
+	auto Mesh{GetSkeletalMesh()};
 
 	bool bNeedUpdate = bActive;
 
 	if (!bActive && (!CurrentProfileNames.IsEmpty() || bRagdolling))
 	{
-		for (auto Body : Mesh->Bodies)
+		for (const auto Body : Mesh->Bodies)
 		{
-			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
+			if (const auto BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 			{
 				if (CurveValues.GetLockedValue(BodySetup->BoneName) <= 0.0f && HasAnyProfile(BodySetup))
 				{
@@ -173,22 +169,23 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		}
 	}
 
-	bool bActiveAny = false;
+	auto bActiveAny = false;
 
 	if (bNeedUpdate)
 	{
-		for (auto Body : Mesh->Bodies)
+		for (const auto Body : Mesh->Bodies)
 		{
-			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
+			if (const auto BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 			{
-				float LockedValue{CurveValues.GetLockedValue(BodySetup->BoneName)};
+				const auto LockedValue{CurveValues.GetLockedValue(BodySetup->BoneName)};
 				if (!FAnimWeight::IsRelevant(LockedValue) && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
 					if (Body->IsInstanceSimulatingPhysics())
 					{
-						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnActivate);
-						Body->PhysicsBlendWeight = FMath::Min(1.0f, FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f, DeltaTime, Speed));
+						const auto Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnActivate);
+						Body->PhysicsBlendWeight = FMath::Min(
+							1.0f, FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f, DeltaTime, Speed));
 					}
 					else
 					{
@@ -202,7 +199,8 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 					{
 						if (Body->IsInstanceSimulatingPhysics())
 						{
-							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime,
+							                                                    15.0f);
 						}
 						else
 						{
@@ -215,7 +213,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 					}
 					else
 					{
-						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnDeactivate);
+						const auto Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnDeactivate);
 						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
 					}
 					if (Body->PhysicsBlendWeight == 0.0f)
@@ -236,7 +234,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		// Trick. Calling a no effect method To call skeletal mesh's private method "UpdateEndPhysicsTickRegisteredState" and "UpdateClothTickRegisteredState".
 		Mesh->AccumulateAllBodiesBelowPhysicsBlendWeight(NAME_None, 0.0f);
 	}
-	
+
 	if (bActiveAny && !bActive)
 	{
 		PrevCollisionObjectType = TEnumAsByte(Mesh->GetCollisionObjectType());
@@ -263,14 +261,21 @@ namespace AlsPhysicalAnimationTagCombination
 		TArray<int> Indices;
 
 		const TArray<FName>& operator*() const { return CurrentNames; }
+
 		FIterator& operator++();
-		bool operator!=(const FIterator& lhs) const { return Container != Container || Indices != lhs.Indices || CurrentNames != lhs.CurrentNames; }
+
+		bool operator!=(const FIterator& lhs) const
+		{
+			return Container != Container || Indices != lhs.Indices || CurrentNames != lhs.CurrentNames;
+		}
 	};
 
 	struct FContainer
 	{
 		TArray<FName> SourceNames;
+
 		FIterator begin() const { return {this, SourceNames}; }
+
 		FIterator end() const { return {nullptr}; }
 	};
 
@@ -283,7 +288,7 @@ namespace AlsPhysicalAnimationTagCombination
 			return *this;
 		}
 
-		auto SourceNum{Container->SourceNames.Num()};
+		const auto SourceNum{Container->SourceNames.Num()};
 
 		// ex. SourceNum = 5
 		// SourceNum - IndicesNum(1) = 4
@@ -292,7 +297,7 @@ namespace AlsPhysicalAnimationTagCombination
 		// 11011 2
 		// 10111 3
 		// 01111 4
-		// 
+		//
 		// SourceNum - IndicesNum(2) = 3
 		// 11100 0 0
 		// 11010 0 1
@@ -304,7 +309,7 @@ namespace AlsPhysicalAnimationTagCombination
 		// 01101 1 3
 		// 01011 2 3
 		// 00111 3 3
-		// 
+		//
 		// SourceNum - IndicesNum(3) = 2
 		// 11000 0 0 0
 		// 10100 0 0 1
@@ -316,7 +321,7 @@ namespace AlsPhysicalAnimationTagCombination
 		// 00110 0 2 2
 		// 00101 1 2 2
 		// 00011 2 2 2
-		// 
+		//
 		// SourceNum - IndicesNum(4) = 1
 		// 10000 0 0 0 0
 		// 01000 0 0 0 1
@@ -330,9 +335,9 @@ namespace AlsPhysicalAnimationTagCombination
 		}
 		else
 		{
-			bool bNextDepth = false;
-			auto IndicesNum{Indices.Num()};
-			for (int Index = 0; Index < IndicesNum; ++Index)
+			auto bNextDepth = false;
+			const auto IndicesNum{Indices.Num()};
+			for (auto Index = 0; Index < IndicesNum; ++Index)
 			{
 				if (Index + 1 < IndicesNum)
 				{
@@ -341,10 +346,7 @@ namespace AlsPhysicalAnimationTagCombination
 						Indices[Index]++;
 						break;
 					}
-					else
-					{
-						Indices[Index] = 0;
-					}
+					Indices[Index] = 0;
 				}
 				else
 				{
@@ -361,7 +363,7 @@ namespace AlsPhysicalAnimationTagCombination
 			}
 			if (bNextDepth)
 			{
-				if(IndicesNum + 1 < SourceNum)
+				if (IndicesNum + 1 < SourceNum)
 				{
 					Indices.Push(0);
 				}
@@ -379,7 +381,7 @@ namespace AlsPhysicalAnimationTagCombination
 
 		if (SourceNum > 1)
 		{
-			for (auto Index : Indices)
+			for (const auto Index : Indices)
 			{
 				CurrentNames.RemoveAt(CurrentNames.Num() - 1 - Index);
 			}
@@ -404,7 +406,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	auto GaitName{UAlsUtility::GetSimpleTagName(Gait)};
 	auto OverlayModeName{UAlsUtility::GetSimpleTagName(OverlayMode)};
 
-	FName RagdollingModeName{UAlsUtility::GetSimpleTagName(AlsLocomotionActionTags::Ragdolling)};
+	auto RagdollingModeName{UAlsUtility::GetSimpleTagName(AlsLocomotionActionTags::Ragdolling)};
 
 	AlsPhysicalAnimationTagCombination::FContainer Container;
 
@@ -431,12 +433,12 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 
 	for (auto& Names : Container)
 	{
-		if(bRagdolling && !Names.Contains(RagdollingModeName))
+		if (bRagdolling && !Names.Contains(RagdollingModeName))
 		{
 			continue;
 		}
 
-		for(auto& Name : Names)
+		for (auto& Name : Names)
 		{
 			if (StringBuilder.Len() > 0)
 			{
@@ -506,7 +508,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 
 	if (NextProfileNames != CurrentProfileNames || NextMultiplyProfileNames != CurrentMultiplyProfileNames)
 	{
-		bool bFirst = true;
+		auto bFirst = true;
 		for (const auto& NextProfileName : NextProfileNames)
 		{
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NextProfileName);
@@ -569,7 +571,7 @@ void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 	CurveValues.Refresh(Character);
 }
 
-void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	// Choose Physical Animation Profile
 
@@ -577,7 +579,7 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 	{
 		if (CurrentProfileNames != OverrideProfileNames || CurrentMultiplyProfileNames != MultiplyProfileNames)
 		{
-			bool bFirst = true;
+			auto bFirst = true;
 			for (const auto& CurrentProfileName : OverrideProfileNames)
 			{
 				ApplyPhysicalAnimationProfileBelow(NAME_None, CurrentProfileName);
@@ -595,7 +597,7 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 			CurrentMultiplyProfileNames = MultiplyProfileNames;
 		}
 	}
-	else if(NeedsProfileChange())
+	else if (NeedsProfileChange())
 	{
 		SelectProfile();
 	}
@@ -610,7 +612,8 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& HorizontalLocation, float& VerticalLocation)
+void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& HorizontalLocation,
+                                                  float& VerticalLocation)
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -628,7 +631,7 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
-	
+
 	TStringBuilder<256> DebugStringBuilder;
 
 	for (const auto& ProfileName : CurrentProfileNames)
@@ -646,13 +649,13 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 
 	VerticalLocation += RowOffset;
 
-	for (auto Body : GetSkeletalMesh()->Bodies)
+	for (const auto Body : GetSkeletalMesh()->Bodies)
 	{
 		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::Red, UAlsMath::Clamp01(Body->PhysicsBlendWeight)));
 
 		Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%s %s %1.2f"), *Body->GetBodySetup()->BoneName.ToString(),
-			Body->IsInstanceSimulatingPhysics() ? TEXT("ON") : TEXT("OFF"),
-			Body->PhysicsBlendWeight));
+		                                                      Body->IsInstanceSimulatingPhysics() ? TEXT("ON") : TEXT("OFF"),
+		                                                      Body->PhysicsBlendWeight));
 		Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 		VerticalLocation += RowOffset;

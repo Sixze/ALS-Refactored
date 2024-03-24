@@ -1756,7 +1756,8 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 
 	static constexpr auto ReferenceSpeed{1000.0f};
 
-	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetCharacterMovement()->Velocity.Size() / ReferenceSpeed));
+	RagdollingState.FlailPlayRate =
+		UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetCharacterMovement()->Velocity.Size() / ReferenceSpeed));
 }
 
 FPoseSnapshot& UAlsAnimationInstance::GetFinalRagdollPoseSnapshot()

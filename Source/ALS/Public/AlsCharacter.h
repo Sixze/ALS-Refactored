@@ -135,6 +135,7 @@ public:
 	{
 		return CastChecked<T>(PhysicalAnimation, ECastCheckedType::NullAllowed);
 	}
+
 	FORCEINLINE UAlsPhysicalAnimationComponent* GetPhysicalAnimation() const { return PhysicalAnimation; }
 
 protected:
@@ -586,7 +587,6 @@ private:
 
 	bool IsRagdollingGroundedAndAged() const;
 
-
 	// Debug
 
 public:
@@ -681,4 +681,3 @@ inline const FAlsRagdollingState& AAlsCharacter::GetRagdollingState() const
 {
 	return RagdollingState;
 }
-

@@ -722,7 +722,8 @@ void AAlsCharacter::StartRagdollingImplementation()
 	if (Direction.SizeSquared2D() > 0.0)
 	{
 		RagdollingState.bFacingUpward = GetActorForwardVector().Dot(Direction) < -0.25f;
-		RagdollingState.LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(RagdollingState.bFacingUpward ? -Direction : Direction) - GetActorRotation().Yaw;
+		RagdollingState.LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(RagdollingState.bFacingUpward ? -Direction : Direction) -
+		                                         GetActorRotation().Yaw;
 	}
 	else
 	{
@@ -808,7 +809,9 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	}
 
 	// Just for info.
-	AlsCharacterMovement->Velocity = DeltaTime > 0.0f ? (GetActorLocation() - RagdollingState.PrevActorLocation) / DeltaTime : FVector::Zero();
+	AlsCharacterMovement->Velocity = DeltaTime > 0.0f
+		                                 ? (GetActorLocation() - RagdollingState.PrevActorLocation) / DeltaTime
+		                                 : FVector::Zero();
 	RagdollingState.PrevActorLocation = GetActorLocation();
 
 	// Prevent the capsule from going through the ground when the ragdoll is lying on the ground.
@@ -818,7 +821,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	// capsule's bottom location, so its removal will cause the camera to behave erratically.
 
 	bool bGrounded;
-	auto NewActorLocation{RagdollTraceGround(bGrounded)};
+	const auto NewActorLocation{RagdollTraceGround(bGrounded)};
 	RagdollingState.bGrounded = bGrounded;
 	SetActorLocation(NewActorLocation, true);
 
@@ -828,15 +831,15 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	{
 		// Apply ragdoll location corrections.
 
-		auto PelvisLocation{GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName())};
+		const auto PelvisLocation{GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName())};
 
-		auto NewPelvisLocation{
+		const auto NewPelvisLocation{
 			FMath::VInterpTo(PelvisLocation, RagdollTargetLocation, DeltaTime, Settings->Ragdolling.SimulatedProxyMeshInterpolationSpeed)
 		};
 
-		auto Diff{NewPelvisLocation - PelvisLocation};
+		const auto Diff{NewPelvisLocation - PelvisLocation};
 
-		for (auto& Body : GetMesh()->Bodies)
+		for (const auto& Body : GetMesh()->Bodies)
 		{
 			auto Transform{Body->GetUnrealWorldTransform()};
 			Transform.SetLocation(Transform.GetLocation() + Diff);
@@ -881,7 +884,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			RagdollingState.TimeAfterGrounded += DeltaTime;
 
 			if (Settings->Ragdolling.TimeAfterGroundedForForceFreezing > 0.0f &&
-				RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
+			    RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
 			{
 				RagdollingState.bFreezing = true;
 			}
@@ -890,7 +893,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 				RagdollingState.TimeAfterGroundedAndStopped += DeltaTime;
 
 				if (Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing > 0.0f &&
-					RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
+				    RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
 				{
 					RagdollingState.bFreezing = true;
 				}
@@ -898,14 +901,21 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 				{
 					RagdollingState.MaxBoneSpeed = 0.0f;
 					RagdollingState.MaxBoneAngularSpeed = 0.0f;
-					GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [&](FBodyInstance *Body) {
+					GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [&](FBodyInstance* Body)
+					{
 						float v = Body->GetUnrealWorldVelocity().Size();
-						if(v > RagdollingState.MaxBoneSpeed) RagdollingState.MaxBoneSpeed = v;
+						if (v > RagdollingState.MaxBoneSpeed)
+						{
+							RagdollingState.MaxBoneSpeed = v;
+						}
 						v = FMath::RadiansToDegrees(Body->GetUnrealWorldAngularVelocityInRadians().Size());
-						if(v > RagdollingState.MaxBoneAngularSpeed) RagdollingState.MaxBoneAngularSpeed = v;
+						if (v > RagdollingState.MaxBoneAngularSpeed)
+						{
+							RagdollingState.MaxBoneAngularSpeed = v;
+						}
 					});
 					RagdollingState.bFreezing = RagdollingState.MaxBoneSpeed < Settings->Ragdolling.SpeedThresholdToFreeze &&
-						RagdollingState.MaxBoneAngularSpeed < Settings->Ragdolling.AngularSpeedThresholdToFreeze;
+					                            RagdollingState.MaxBoneAngularSpeed < Settings->Ragdolling.AngularSpeedThresholdToFreeze;
 				}
 			}
 			else
@@ -926,7 +936,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	}
 
 	if (RagdollingState.ElapsedTime <= AnimationInstance->GetRagdollingStartBlendTime() &&
-		RagdollingState.ElapsedTime + DeltaTime > AnimationInstance->GetRagdollingStartBlendTime())
+	    RagdollingState.ElapsedTime + DeltaTime > AnimationInstance->GetRagdollingStartBlendTime())
 	{
 		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 		RagdollingState.bFacingUpward = GetActorForwardVector().Dot(AlsCharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
@@ -944,7 +954,7 @@ FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Settings->Ragdolling.GroundTraceChannel,
-		                                 {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
+	                                     {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
 
 	bGrounded = AlsCharacterMovement->IsWalkable(Hit);
 
@@ -1009,9 +1019,11 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 		auto NewActorRotation{GetActorRotation()};
 		NewActorRotation.Yaw = UAlsMath::DirectionToAngleXY(PelvisRotation.RotateVector(
-			FMath::Abs(PelvisRotation.RotateVector(FVector::ForwardVector).GetSafeNormal2D().Dot(FVector::UpVector)) > 0.5f ?
-			(RagdollingState.bFacingUpward ? FVector::RightVector : FVector::LeftVector) :
-			(RagdollingState.bFacingUpward ? FVector::BackwardVector : FVector::ForwardVector)).GetSafeNormal2D());
+			FMath::Abs(PelvisRotation.RotateVector(FVector::ForwardVector).GetSafeNormal2D().Dot(FVector::UpVector)) > 0.5f
+				? (RagdollingState.bFacingUpward ? FVector::RightVector : FVector::LeftVector)
+				: RagdollingState.bFacingUpward
+				? FVector::BackwardVector
+				: FVector::ForwardVector).GetSafeNormal2D());
 		SetActorRotation(NewActorRotation, ETeleportType::TeleportPhysics);
 
 		// Restore the pelvis transform to the state it was in before we changed

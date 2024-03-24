@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -53,7 +51,7 @@ UCLASS()
 class ALS_API UAlsPhysicalAnimationComponent : public UPhysicalAnimationComponent
 {
 	GENERATED_BODY()
-	
+
 protected:
 	// The blend time Of physics blend Weight on activate physics body.
 	// Not used when ragdolling activate. Ragdolling start with weight 1.0 immediately.
@@ -137,7 +135,7 @@ protected:
 public:
 	virtual void Refresh(const AAlsCharacter* Character);
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
@@ -148,7 +146,7 @@ private:
 
 	bool IsProfileExist(const FName& ProfileName) const;
 
-	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup) const;
+	bool HasAnyProfile(const USkeletalBodySetup* BodySetup) const;
 
 	bool NeedsProfileChange();
 
