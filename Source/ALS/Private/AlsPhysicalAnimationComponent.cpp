@@ -10,6 +10,7 @@
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/Canvas.h"
+#include "Engine/Engine.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"

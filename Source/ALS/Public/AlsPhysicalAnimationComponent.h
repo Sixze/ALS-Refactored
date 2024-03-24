@@ -8,6 +8,8 @@
 #include "AlsPhysicalAnimationComponent.generated.h"
 
 class AAlsCharacter;
+class UCanvas;
+class FDebugDisplayInfo;
 class USkeletalBodySetup;
 
 USTRUCT(BlueprintType)
