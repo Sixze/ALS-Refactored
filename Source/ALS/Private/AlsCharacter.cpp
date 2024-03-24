@@ -2,6 +2,7 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsPhysicalAnimationComponent.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -21,6 +22,8 @@ namespace AlsCharacterConstants
 {
 	constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
+
+FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
@@ -43,6 +46,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	}
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
+
+	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
@@ -136,6 +141,8 @@ void AAlsCharacter::PostInitializeComponents()
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	Super::PostInitializeComponents();
 }
@@ -289,6 +296,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
+	PhysicalAnimation->Refresh(this);
 
 	Super::Tick(DeltaTime);
 
