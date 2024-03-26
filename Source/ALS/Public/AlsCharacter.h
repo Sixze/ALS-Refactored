@@ -124,7 +124,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo) override;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UPARAM(DisplayName = "Handled") bool OnCalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo);
+	
 public:
 	virtual void PostNetReceiveLocationAndRotation() override;
 
