@@ -7,11 +7,13 @@ struct ALS_API FAlsControlRigInput
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bUseHandIkBones : 1 {false};
+	// TODO Replace bool with uint8 in future engine versions.
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bUseFootIkBones : 1 {false};
+	bool bUseHandIkBones{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bUseFootIkBones{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float VelocityBlendForwardAmount{0.0f};
