@@ -303,7 +303,7 @@ void UAlsAnimationInstance::RefreshViewOnGameThread()
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
-	return RotationMode == AlsRotationModeTags::Aiming;
+	return RotationMode != AlsRotationModeTags::VelocityDirection;
 }
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
