@@ -19,12 +19,6 @@ public:
 		Meta = (ClampMin = 0, EditCondition = "bStartRagdollingOnLand", ForceUnits = "cm/s"))
 	float RagdollingOnLandSpeedThreshold{1000.0f};
 
-	// If checked, the ragdoll's speed will be limited by the character's last speed for a few frames
-	// after activation. This hack is used to prevent the ragdoll from getting a very high initial speed
-	// at unstable FPS, which can be reproduced by jumping and activating the ragdoll at the same time.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bLimitInitialRagdollSpeed : 1 {true};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
 
@@ -39,6 +33,33 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimMontage> GetUpBackMontage{nullptr};
+
+	// for correction in multiplayer
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float SimulatedProxyMeshInterpolationSpeed{10.0f};
+
+	// If checked, it stops the physical simulation and returns control of the bone to kinematic
+	// when the conditions mentioned later are met.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bAllowFreeze : 1 {false};
+
+	// The time until it freezes forcibly after landing.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	float TimeAfterGroundedForForceFreezing{5.0f};
+
+	// The time until it forcibly freezes after the root bone is considered to have stopped when landing.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	float TimeAfterGroundedAndStoppedForForceFreezing{1.0f};
+
+	// When the speed is below this value, the root bone is considered to be stopped.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	float RootBoneSpeedConsideredAsStopped{5.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	float SpeedThresholdToFreeze{5.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
+	float AngularSpeedThresholdToFreeze{45.0f};
 
 public:
 #if WITH_EDITOR

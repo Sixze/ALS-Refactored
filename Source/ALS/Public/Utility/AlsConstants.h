@@ -195,6 +195,37 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& FootstepSoundBlockCurveName();
 
+	// Physical Animation Curves
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockArmLeftCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockArmRightCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockHandLeftCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockHandRightCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockLegLeftCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockLegRightCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockFootLeftCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PALockFootRightCurveName();
+
+	// Physical Animation Profile Names
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
+	static const FName& DefaultPAProfileName();
+
 	// Debug
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
@@ -558,6 +589,60 @@ inline const FName& UAlsConstants::GroundPredictionBlockCurveName()
 inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 {
 	static const FName Name{TEXTVIEW("FootstepSoundBlock")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockArmLeftCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockArmLeft")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockArmRightCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockArmRight")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockHandLeftCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockHandLeft")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockHandRightCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockHandRight")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockLegLeftCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockLegLeft")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockLegRightCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockLegRight")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockFootLeftCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockFootLeft")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PALockFootRightCurveName()
+{
+	static const FName Name{TEXTVIEW("PALockFootRight")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::DefaultPAProfileName()
+{
+	static const FName Name{TEXTVIEW("Default")};
 	return Name;
 }
 
