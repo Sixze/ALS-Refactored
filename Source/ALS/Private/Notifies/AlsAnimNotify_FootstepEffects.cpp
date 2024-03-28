@@ -53,6 +53,15 @@ FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 	return FString{NotifyNameBuilder};
 }
 
+#if WITH_EDITOR
+void UAlsAnimNotify_FootstepEffects::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+{
+	Super::OnAnimNotifyCreatedInEditor(ContainingAnimNotifyEvent);
+
+	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+}
+#endif
+
 void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
                                             const FAnimNotifyEventReference& EventReference)
 {

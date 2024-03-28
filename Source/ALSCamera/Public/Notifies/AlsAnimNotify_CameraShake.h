@@ -23,6 +23,10 @@ public:
 
 	virtual FString GetNotifyName_Implementation() const override;
 
+#if WITH_EDITOR
+	virtual void OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent) override;
+#endif
+
 	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
 	                    const FAnimNotifyEventReference& EventReference) override;
 };

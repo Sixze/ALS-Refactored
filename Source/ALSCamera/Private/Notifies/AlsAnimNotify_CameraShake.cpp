@@ -26,6 +26,15 @@ FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 	return FString{NotifyNameBuilder};
 }
 
+#if WITH_EDITOR
+void UAlsAnimNotify_CameraShake::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+{
+	Super::OnAnimNotifyCreatedInEditor(ContainingAnimNotifyEvent);
+
+	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+}
+#endif
+
 void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
                                         const FAnimNotifyEventReference& EventReference)
 {
