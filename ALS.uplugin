@@ -40,6 +40,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "ACLPlugin",
+			"Enabled": true
+		},
+		{
 			"Name": "ControlRig",
 			"Enabled": true
 		},
