@@ -17,6 +17,7 @@ class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
+class UAlsPhysicalAnimationComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter
@@ -26,6 +27,9 @@ class ALS_API AAlsCharacter : public ACharacter
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
+	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
@@ -121,6 +125,17 @@ public:
 	virtual void PostRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;
+
+	/** Name of the PhysicalAnimationComponent. */
+	static FName PhysicalAnimationComponentName;
+
+	/** Returns PhysicalAnimation subobject **/
+	template <class T>
+	FORCEINLINE_DEBUGGABLE T* GetPhysicalAnimation() const
+	{
+		return CastChecked<T>(PhysicalAnimation, ECastCheckedType::NullAllowed);
+	}
+	FORCEINLINE UAlsPhysicalAnimationComponent* GetPhysicalAnimation() const { return PhysicalAnimation; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -569,7 +584,8 @@ private:
 
 	FVector RagdollTraceGround(bool& bGrounded) const;
 
-	void LimitRagdollSpeed() const;
+	bool IsRagdollingGroundedAndAged() const;
+
 
 	// Debug
 

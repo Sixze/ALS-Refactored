@@ -41,6 +41,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralTurnInPlaceSettings TurnInPlace;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Ragdolling")
+	float RagdollingStartBlendTime{0.25f};
+
 public:
 	UAlsAnimationInstanceSettings();
 
