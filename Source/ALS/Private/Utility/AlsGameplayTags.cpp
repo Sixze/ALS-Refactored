@@ -39,7 +39,7 @@ namespace AlsOverlayModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Feminine, FName{TEXTVIEW("Als.OverlayMode.Feminine")})
 	UE_DEFINE_GAMEPLAY_TAG(Injured, FName{TEXTVIEW("Als.OverlayMode.Injured")})
 	UE_DEFINE_GAMEPLAY_TAG(HandsTied, FName{TEXTVIEW("Als.OverlayMode.HandsTied")})
-	UE_DEFINE_GAMEPLAY_TAG(M4, FName{TEXTVIEW("Als.OverlayMode.M4")})
+	UE_DEFINE_GAMEPLAY_TAG(Rifle, FName{TEXTVIEW("Als.OverlayMode.Rifle")})
 	UE_DEFINE_GAMEPLAY_TAG(PistolOneHanded, FName{TEXTVIEW("Als.OverlayMode.PistolOneHanded")})
 	UE_DEFINE_GAMEPLAY_TAG(PistolTwoHanded, FName{TEXTVIEW("Als.OverlayMode.PistolTwoHanded")})
 	UE_DEFINE_GAMEPLAY_TAG(Bow, FName{TEXTVIEW("Als.OverlayMode.Bow")})
