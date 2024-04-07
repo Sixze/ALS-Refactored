@@ -21,7 +21,7 @@ public:
 	static const FName& CameraOffsetZCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& FOVOffsetCurveName();
+	static const FName& FovOffsetCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PivotOffsetXCurveName();
@@ -80,9 +80,9 @@ inline const FName& UAlsCameraConstants::CameraOffsetZCurveName()
 	return Name;
 }
 
-inline const FName& UAlsCameraConstants::FOVOffsetCurveName()
+inline const FName& UAlsCameraConstants::FovOffsetCurveName()
 {
-	static const FName Name{TEXTVIEW("FOVOffset")};
+	static const FName Name{TEXTVIEW("FovOffset")};
 	return Name;
 }
 

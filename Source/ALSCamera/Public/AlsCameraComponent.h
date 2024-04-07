@@ -116,7 +116,7 @@ private:
 
 	FVector CalculateCameraOffset() const;
 
-	float CalculateFOVOffset() const;
+	float CalculateFovOffset() const;
 
 	FVector CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
 	                             float DeltaTime, bool bAllowLag, float& NewTraceDistanceRatio) const;

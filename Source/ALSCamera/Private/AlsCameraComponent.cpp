@@ -312,7 +312,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		CameraFov = FMath::Lerp(Settings->ThirdPerson.Fov, Settings->FirstPerson.Fov, FirstPersonOverride);
 	}
 
-	CameraFov += CalculateFOVOffset();
+	CameraFov += CalculateFovOffset();
 }
 
 FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,
@@ -438,9 +438,9 @@ FVector UAlsCameraComponent::CalculateCameraOffset() const
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
-float UAlsCameraComponent::CalculateFOVOffset() const
+float UAlsCameraComponent::CalculateFovOffset() const
 {
-	return GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FOVOffsetCurveName());
+	return GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FovOffsetCurveName());
 }
 
 FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
