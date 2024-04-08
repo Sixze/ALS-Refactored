@@ -907,18 +907,39 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 {
+	auto RagdollLocation{!RagdollTargetLocation.IsZero() ? FVector{RagdollTargetLocation} : GetActorLocation()};
+
+	// We use a sphere sweep instead of a simple line trace to keep capsule
+	// movement consistent between ragdolling and regular character movement.
+
+	const auto CapsuleRadius{GetCapsuleComponent()->GetScaledCapsuleRadius()};
 	const auto CapsuleHalfHeight{GetCapsuleComponent()->GetScaledCapsuleHalfHeight()};
 
-	const auto TraceStart{!RagdollTargetLocation.IsZero() ? FVector{RagdollTargetLocation} : GetActorLocation()};
-	const FVector TraceEnd{TraceStart.X, TraceStart.Y, TraceStart.Z - CapsuleHalfHeight};
+	const FVector TraceStart{RagdollLocation.X, RagdollLocation.Y, RagdollLocation.Z + 2.0f * CapsuleRadius};
+	const FVector TraceEnd{RagdollLocation.X, RagdollLocation.Y, RagdollLocation.Z - CapsuleHalfHeight + CapsuleRadius};
+
+	const auto CollisionChannel{GetCharacterMovement()->UpdatedComponent->GetCollisionObjectType()};
+
+	FCollisionQueryParams QueryParameters{__FUNCTION__, false, this};
+	FCollisionResponseParams ResponseParameters;
+	GetCharacterMovement()->InitCollisionParams(QueryParameters, ResponseParameters);
 
 	FHitResult Hit;
-	bGrounded = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Settings->Ragdolling.GroundTraceChannel,
-	                                                 {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
+	bGrounded = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity,
+	                                             CollisionChannel, FCollisionShape::MakeSphere(CapsuleRadius),
+	                                             QueryParameters, ResponseParameters);
 
-	return {
-		TraceStart.X, TraceStart.Y,
-		bGrounded ? Hit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST : TraceStart.Z
+	// #if ENABLE_DRAW_DEBUG
+	// 	UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), TraceStart, TraceEnd, CapsuleRadius,
+	// 	                                        bGrounded, Hit, {0.0f, 0.25f, 1.0f},
+	// 	                                        {0.0f, 0.75f, 1.0f}, 0.0f);
+	// #endif
+
+	return FVector{
+		RagdollLocation.X, RagdollLocation.Y,
+		bGrounded
+			? Hit.Location.Z + CapsuleHalfHeight - CapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST
+			: RagdollLocation.Z
 	};
 }
 

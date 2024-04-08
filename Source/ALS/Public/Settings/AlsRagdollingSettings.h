@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Engine/EngineTypes.h"
 #include "AlsRagdollingSettings.generated.h"
 
 class UAnimMontage;
@@ -26,22 +25,8 @@ public:
 	uint8 bLimitInitialRagdollSpeed : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
-	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimMontage> GetUpFrontMontage{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimMontage> GetUpBackMontage{nullptr};
-
-public:
-#if WITH_EDITOR
-	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
-#endif
 };
