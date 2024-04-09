@@ -186,6 +186,14 @@ void AAlsCharacter::BeginPlay()
 	OnOverlayModeChanged(OverlayMode);
 }
 
+void AAlsCharacter::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
+{
+	if (!OnCalculateCamera(DeltaTime, ViewInfo))
+	{
+		Super::CalcCamera(DeltaTime, ViewInfo);
+	}
+}
+
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
 {
 	// AActor::PostNetReceiveLocationAndRotation() function is only called on simulated proxies, so there is no need to check roles here.
@@ -312,6 +320,11 @@ void AAlsCharacter::Restart()
 	Super::Restart();
 
 	ApplyDesiredStance();
+}
+
+bool AAlsCharacter::OnCalculateCamera_Implementation(float DeltaTime, FMinimalViewInfo& ViewInfo)
+{
+	return false;
 }
 
 void AAlsCharacter::RefreshMeshProperties() const
