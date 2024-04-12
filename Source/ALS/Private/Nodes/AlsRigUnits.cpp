@@ -25,7 +25,7 @@ FAlsRigVMFunction_ExponentialDecayVector_Execute()
 		bInitialized = true;
 	}
 
-	Current = UAlsMath::ExponentialDecay(Current, Target, ExecuteContext.GetDeltaTime(), Lambda);
+	Current = UAlsMath::ExponentialDecay(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), Lambda);
 }
 
 void FAlsRigUnit_CalculatePoleVector::Initialize()

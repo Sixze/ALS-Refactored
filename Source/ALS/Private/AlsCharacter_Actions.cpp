@@ -345,7 +345,7 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 		(DownwardTraceHit.Location.Z + DownwardTraceEnd.Z) * 0.5f
 	};
 
-	const auto StartLocationTraceCapsuleHalfHeight{(DownwardTraceHit.Location.Z - DownwardTraceEnd.Z) * 0.5f + TraceCapsuleRadius};
+	const auto StartLocationTraceCapsuleHalfHeight{UE_REAL_TO_FLOAT((DownwardTraceHit.Location.Z - DownwardTraceEnd.Z) * 0.5f + TraceCapsuleRadius)};
 
 	if (GetWorld()->OverlapBlockingTestByChannel(StartLocation, FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                             FCollisionShape::MakeCapsule(TraceCapsuleRadius, StartLocationTraceCapsuleHalfHeight),
@@ -623,7 +623,7 @@ void AAlsCharacter::RefreshMantling()
 
 	const auto* RootMotionSource{
 		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(GetCharacterMovement()
-			->GetRootMotionSourceByID(MantlingState.RootMotionSourceId)).Get()
+			->GetRootMotionSourceByID(static_cast<uint16>(MantlingState.RootMotionSourceId))).Get()
 	};
 
 	if (RootMotionSource != nullptr && !RootMotionSource->TargetPrimitive.IsValid())
@@ -646,7 +646,7 @@ void AAlsCharacter::StopMantling(const bool bStopMontage)
 
 	auto* RootMotionSource{
 		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(GetCharacterMovement()
-			->GetRootMotionSourceByID(MantlingState.RootMotionSourceId)).Get()
+			->GetRootMotionSourceByID(static_cast<uint16>(MantlingState.RootMotionSourceId))).Get()
 	};
 
 	if (RootMotionSource != nullptr)
@@ -768,7 +768,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 		static constexpr auto MinSpeedLimit{200.0f};
 
 		RagdollingState.SpeedLimitFrameTimeRemaining = 8;
-		RagdollingState.SpeedLimit = FMath::Max(MinSpeedLimit, LocomotionState.Velocity.Size());
+		RagdollingState.SpeedLimit = FMath::Max(MinSpeedLimit, UE_REAL_TO_FLOAT(LocomotionState.Velocity.Size()));
 
 		LimitRagdollSpeed();
 	}

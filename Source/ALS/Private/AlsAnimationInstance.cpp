@@ -384,7 +384,7 @@ void UAlsAnimationInstance::RefreshLook()
 	{
 		// Offset the angle to keep it relative to the movement base.
 
-		Look.WorldYawAngle = FRotator3f::NormalizeAxis(Look.WorldYawAngle + MovementBase.DeltaRotation.Yaw);
+		Look.WorldYawAngle = FRotator3f::NormalizeAxis(Look.WorldYawAngle + UE_REAL_TO_FLOAT(MovementBase.DeltaRotation.Yaw));
 	}
 
 	float TargetYawAngle;
@@ -1224,7 +1224,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		// Find the difference between the impact location and the expected (flat) floor location.
 		// These values are offset by the foot height to get better behavior on sloped surfaces.
 
-		FootState.OffsetTargetLocationZ = Hit.ImpactPoint.Z - TraceLocation.Z + FootHeightOffset;
+		FootState.OffsetTargetLocationZ = UE_REAL_TO_FLOAT(Hit.ImpactPoint.Z - TraceLocation.Z) + FootHeightOffset;
 
 		// Calculate the rotation offset.
 
