@@ -100,7 +100,7 @@ public:
 	// Remaps the angle from the [175, 180] range to [-185, -180]. Used to
 	// make the character rotate counterclockwise during a 180 degree turn.
 	template <typename ValueType> requires std::is_floating_point_v<ValueType>
-	static constexpr float RemapAngleForCounterClockwiseRotation(ValueType Angle);
+	static constexpr ValueType RemapAngleForCounterClockwiseRotation(ValueType Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math|Vector", Meta = (AutoCreateRefTerm = "Vector", ReturnDisplayName = "Vector"))
 	static FVector ClampMagnitude01(const FVector& Vector);
@@ -154,7 +154,7 @@ public:
 };
 
 template <typename ValueType> requires std::is_floating_point_v<ValueType>
-constexpr float UAlsMath::RemapAngleForCounterClockwiseRotation(const ValueType Angle)
+constexpr ValueType UAlsMath::RemapAngleForCounterClockwiseRotation(const ValueType Angle)
 {
 	if (Angle > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{

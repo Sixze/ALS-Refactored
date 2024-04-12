@@ -394,10 +394,10 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			if ( IsFalling() )
 			{
 				// pawn decided to jump up
-				const float DesiredDist = Delta.Size();
+				const float DesiredDist = UE_REAL_TO_FLOAT(Delta.Size());
 				if (DesiredDist > UE_KINDA_SMALL_NUMBER)
 				{
-					const float ActualDist = (UpdatedComponent->GetComponentLocation() - OldLocation).Size2D();
+					const float ActualDist = UE_REAL_TO_FLOAT((UpdatedComponent->GetComponentLocation() - OldLocation).Size2D());
 					remainingTime += timeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
 				}
 				StartNewPhysics(remainingTime,Iterations);
@@ -641,7 +641,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 				bSkipSweep = true;
 
 				const bool bIsWalkable = IsWalkable(*DownwardSweepResult);
-				const float FloorDist = RotateWorldToGravity(CapsuleLocation - DownwardSweepResult->Location).Z;
+				const float FloorDist = UE_REAL_TO_FLOAT(RotateWorldToGravity(CapsuleLocation - DownwardSweepResult->Location).Z);
 				OutFloorResult.SetFromSweep(*DownwardSweepResult, FloorDist, bIsWalkable);
 
 				if (bIsWalkable)
@@ -783,11 +783,11 @@ void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
 	{
 		if (CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
 		{
-			ServerLastTransformUpdateTimeStamp = GetPredictionData_Server_Character()->ServerAccumulatedClientTimeStamp;
+			ServerLastTransformUpdateTimeStamp = UE_REAL_TO_FLOAT(GetPredictionData_Server_Character()->ServerAccumulatedClientTimeStamp);
 		}
 		else
 		{
-			ServerLastTransformUpdateTimeStamp = GetWorld()->GetTimeSeconds();
+			ServerLastTransformUpdateTimeStamp = UE_REAL_TO_FLOAT(GetWorld()->GetTimeSeconds());
 		}
 	}
 }

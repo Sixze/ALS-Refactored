@@ -75,7 +75,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	// The target animation location is expected to be non-zero, so it's safe to divide by it here.
 
-	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
+	const auto InterpolationAmount{UE_REAL_TO_FLOAT(CurrentAnimationLocation.Z / TargetAnimationLocation.Z)};
 
 	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
 	{
