@@ -103,8 +103,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "ALS|Camera")
-	void GetViewInfo(UPARAM(ref) FMinimalViewInfo& ViewInfo) const;
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
+	void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);

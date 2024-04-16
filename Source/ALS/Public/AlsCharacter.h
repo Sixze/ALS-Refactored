@@ -140,7 +140,7 @@ public:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character", Meta = (ReturnDisplayName = "Handled"))
-	bool OnCalculateCamera(float DeltaTime, UPARAM(ref) FMinimalViewInfo& ViewInfo);
+	bool OnCalculateCamera(float DeltaTime, FMinimalViewInfo& ViewInfo);
 
 private:
 	void RefreshMeshProperties() const;
