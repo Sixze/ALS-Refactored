@@ -153,7 +153,7 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Loc
 		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
+		FMath::SinCos(&Sin, &Cos, DeltaAngle * static_cast<float>(i));
 
 		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
@@ -185,7 +185,7 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, DeltaAngle * i);
+		FMath::SinCos(&Sin, &Cos, DeltaAngle * static_cast<float>(i));
 
 		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 

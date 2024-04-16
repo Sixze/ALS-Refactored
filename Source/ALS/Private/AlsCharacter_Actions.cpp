@@ -86,7 +86,7 @@ void AAlsCharacter::MulticastStartRolling_Implementation(UAnimMontage* Montage, 
 void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const float PlayRate,
                                                const float InitialYawAngle, const float TargetYawAngle)
 {
-	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate))
+	if (IsRollingAllowedToStart(Montage) && GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate) > 0.0f)
 	{
 		RollingState.TargetYawAngle = TargetYawAngle;
 
@@ -528,7 +528,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, 1.0f,
 	                                               EMontagePlayReturnType::MontageLength,
-	                                               StartTime, false))
+	                                               StartTime, false) > 0.0f)
 	{
 		SetLocomotionAction(AlsLocomotionActionTags::Mantling);
 	}
@@ -1102,7 +1102,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	if (bGrounded &&
 	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(bRagdollFacingUpward), 1.0f,
-	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	                                               EMontagePlayReturnType::MontageLength, 0.0f, true) > 0.0f)
 	{
 		AlsCharacterMovement->SetInputBlocked(true);
 
