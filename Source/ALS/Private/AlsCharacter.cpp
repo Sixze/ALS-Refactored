@@ -1698,9 +1698,10 @@ float AAlsCharacter::CalculateGroundedMovingRotationInterpolationSpeed() const
 	};
 
 	static constexpr auto MaxInterpolationSpeedMultiplier{3.0f};
-	static constexpr auto ReferenceViewYawSpeed{300.0f};
+	static constexpr auto ReferenceViewYawSpeedInverse{1.0f / 300.0f};
 
-	return InterpolationSpeed * UAlsMath::LerpClamped(1.0f, MaxInterpolationSpeedMultiplier, ViewState.YawSpeed / ReferenceViewYawSpeed);
+	return InterpolationSpeed * UAlsMath::LerpClamped(1.0f, MaxInterpolationSpeedMultiplier,
+	                                                  ViewState.YawSpeed * ReferenceViewYawSpeedInverse);
 }
 
 void AAlsCharacter::ApplyRotationYawSpeedAnimationCurve(const float DeltaTime)
