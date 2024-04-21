@@ -7,8 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/NetConnection.h"
-#include "Engine/SkeletalMesh.h"
 #include "Net/Core/PushModel/PushModel.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
@@ -677,7 +677,7 @@ void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
 bool AAlsCharacter::IsRagdollingAllowedToStart() const
 {
-	return LocomotionAction != AlsLocomotionActionTags::Ragdolling;
+	return LocomotionAction != AlsLocomotionActionTags::Ragdolling && IsValid(GetMesh()->GetPhysicsAsset());
 }
 
 void AAlsCharacter::StartRagdolling()
