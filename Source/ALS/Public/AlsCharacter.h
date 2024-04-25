@@ -229,6 +229,8 @@ public:
 protected:
 	void SetRotationMode(const FGameplayTag& NewRotationMode);
 
+	virtual void NotifyRotationModeChanged(const FGameplayTag& PreviousRotationMode);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRotationModeChanged(const FGameplayTag& PreviousRotationMode);
 

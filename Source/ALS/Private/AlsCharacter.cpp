@@ -20,6 +20,7 @@
 namespace AlsCharacterConstants
 {
 	constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
+	constexpr auto MinAimingYawAngleLimit{70.0f};
 }
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
@@ -660,8 +661,18 @@ void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
 
 		RotationMode = NewRotationMode;
 
-		OnRotationModeChanged(PreviousRotationMode);
+		NotifyRotationModeChanged(PreviousRotationMode);
 	}
+}
+
+void AAlsCharacter::NotifyRotationModeChanged(const FGameplayTag& PreviousRotationMode)
+{
+	if (RotationMode == AlsRotationModeTags::Aiming)
+	{
+		LocomotionState.AimingYawAngleLimit = 180.0f;
+	}
+
+	OnRotationModeChanged(PreviousRotationMode);
 }
 
 void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
@@ -1633,52 +1644,65 @@ void AAlsCharacter::RefreshGroundedAimingRotation(const float DeltaTime)
 
 bool AAlsCharacter::RefreshConstrainedAimingRotation(const float DeltaTime, const bool bApplySecondaryConstraint)
 {
-	// Limit the character's rotation when aiming to prevent situations where the lower body noticeably
+	// Limit the actor's rotation when aiming to prevent situations where the lower body noticeably
 	// fails to keep up with the rotation of the upper body when the camera is rotating very fast.
 
-	static constexpr auto ViewYawSpeedThreshold{620.0f};
+	auto Angle{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw))};
 
-	const auto bApplyPrimaryConstraint{ViewState.YawSpeed > ViewYawSpeedThreshold};
-
-	if (!bApplyPrimaryConstraint && !bApplySecondaryConstraint)
+	if (FMath::Abs(Angle) <= AlsCharacterConstants::MinAimingYawAngleLimit + UE_KINDA_SMALL_NUMBER)
 	{
+		LocomotionState.AimingYawAngleLimit = AlsCharacterConstants::MinAimingYawAngleLimit;
 		return false;
 	}
 
-	auto ViewRelativeYawAngle{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw))};
-	static constexpr auto ViewRelativeYawAngleThreshold{70.0f};
+	Angle = UAlsMath::RemapAngleForCounterClockwiseRotation(Angle);
 
-	if (FMath::Abs(ViewRelativeYawAngle) <= ViewRelativeYawAngleThreshold + UE_KINDA_SMALL_NUMBER)
-	{
-		return false;
-	}
+	auto bAnyConstraintApplied{false};
 
-	ViewRelativeYawAngle = UAlsMath::RemapAngleForCounterClockwiseRotation(ViewRelativeYawAngle);
-
-	const auto TargetYawAngle{
-		UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw +
-			(ViewRelativeYawAngle >= 0.0f ? -ViewRelativeYawAngleThreshold : ViewRelativeYawAngleThreshold))
-	};
-
-	// Primary constraint. Prevents the character from rotating past a certain angle when the camera rotation speed is very high.
-
-	if (bApplyPrimaryConstraint)
-	{
-		RefreshRotationInstant(TargetYawAngle);
-		return true;
-	}
-
-	// Secondary constraint. Simply increases the character's rotation speed. Typically only used when the character is standing still.
+	// Secondary constraint. Simply increases the actor's rotation speed. Typically only used when the actor is standing still.
 
 	if (bApplySecondaryConstraint)
 	{
 		static constexpr auto RotationInterpolationSpeed{20.0f};
 
-		RefreshRotation(TargetYawAngle, DeltaTime, RotationInterpolationSpeed);
-		return true;
+		// Interpolate the angle only to the point where the constraints no longer apply to ensure a smoother completion of the rotation.
+
+		const auto TargetAngle{
+			FMath::Clamp(Angle, -AlsCharacterConstants::MinAimingYawAngleLimit, AlsCharacterConstants::MinAimingYawAngleLimit)
+		};
+
+		const auto DeltaAngle{FRotator3f::NormalizeAxis(TargetAngle - Angle)};
+		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, RotationInterpolationSpeed)};
+
+		Angle = FRotator3f::NormalizeAxis(Angle + DeltaAngle * InterpolationAmount);
+		bAnyConstraintApplied = true;
 	}
 
-	return false;
+	// Primary constraint. Prevents the actor from rotating beyond a certain angle relative to the camera.
+
+	if (FMath::Abs(Angle) > LocomotionState.AimingYawAngleLimit + UE_KINDA_SMALL_NUMBER)
+	{
+		Angle = FMath::Clamp(Angle, -LocomotionState.AimingYawAngleLimit, LocomotionState.AimingYawAngleLimit);
+		bAnyConstraintApplied = true;
+	}
+	else
+	{
+		LocomotionState.AimingYawAngleLimit = FMath::Max(FMath::Abs(Angle), AlsCharacterConstants::MinAimingYawAngleLimit);
+	}
+
+	if (bAnyConstraintApplied)
+	{
+		RefreshTargetYawAngle(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw));
+
+		auto NewRotation{GetActorRotation()};
+		NewRotation.Yaw = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - Angle));
+
+		SetActorRotation(NewRotation);
+
+		RefreshLocomotionLocationAndRotation();
+	}
+
+	return bAnyConstraintApplied;
 }
 
 float AAlsCharacter::CalculateGroundedMovingRotationInterpolationSpeed() const
