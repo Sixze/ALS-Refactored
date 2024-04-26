@@ -779,6 +779,11 @@ void AAlsCharacter::StartRagdollingImplementation()
 		LimitRagdollSpeed();
 	}
 
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		SetRagdollTargetLocation(FVector::ZeroVector);
+	}
+
 	if (IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController())))
 	{
 		SetRagdollTargetLocation(PelvisLocation);
@@ -1082,8 +1087,6 @@ void AAlsCharacter::StopRagdollingImplementation()
 		// We expect the pelvis bone to be the root bone or attached to it, so we can safely use the mesh transform here.
 		FinalRagdollPose.LocalTransforms[PelvisBoneIndex] = PelvisTransform.GetRelativeTransform(GetMesh()->GetComponentTransform());
 	}
-
-	SetRagdollTargetLocation(FVector::ZeroVector);
 
 	// If the ragdoll is on the ground, set the movement mode to walking and play a get up montage. If not, set
 	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.

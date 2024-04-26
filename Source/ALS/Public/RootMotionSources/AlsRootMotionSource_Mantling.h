@@ -60,6 +60,5 @@ struct TStructOpsTypeTraits<FAlsRootMotionSource_Mantling> : public TStructOpsTy
 	enum
 	{
 		WithNetSerializer = true,
-		WithCopy = true
 	};
 };

@@ -24,5 +24,7 @@ public class ALS : ModuleRules
 		{
 			PrivateDependencyModuleNames.AddRange(new[] {"MessageLog"});
 		}
+
+		SetupIrisSupport(Target);
 	}
 }
