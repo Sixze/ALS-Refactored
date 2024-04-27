@@ -19,7 +19,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAlsCameraSettings> Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
+	uint8 bOverrideFieldOfView : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		Meta = (ClampMin = 5, ClampMax = 175, EditCondition = "bOverrideFieldOfView", ForceUnits = "deg"))
+	float FieldOfViewOverride{90.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -61,8 +68,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float CameraFov{90.0f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 175, ForceUnits = "deg"))
+	float CameraFieldOfView{90.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};
@@ -85,8 +92,19 @@ public:
 	virtual void CompleteParallelAnimationEvaluation(bool bDoPostAnimationEvaluation) override;
 
 public:
+	bool IsFieldOfViewOverriden() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	void SetFieldOfViewOverriden(bool bNewOverriden);
+
+	float GetFieldOfViewOverride() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	void SetFieldOfViewOverride(float NewFieldOfView);
+
 	float GetPostProcessWeight() const;
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void SetPostProcessWeight(float NewPostProcessWeight);
 
 	bool IsRightShoulder() const;
@@ -139,6 +157,26 @@ private:
 
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
+
+inline bool UAlsCameraComponent::IsFieldOfViewOverriden() const
+{
+	return bOverrideFieldOfView;
+}
+
+inline void UAlsCameraComponent::SetFieldOfViewOverriden(const bool bNewOverriden)
+{
+	bOverrideFieldOfView = bNewOverriden;
+}
+
+inline float UAlsCameraComponent::GetFieldOfViewOverride() const
+{
+	return FieldOfViewOverride;
+}
+
+inline void UAlsCameraComponent::SetFieldOfViewOverride(const float NewFieldOfView)
+{
+	FieldOfViewOverride = FMath::Clamp(NewFieldOfView, 5.0f, 175.0f);
+}
 
 inline float UAlsCameraComponent::GetPostProcessWeight() const
 {

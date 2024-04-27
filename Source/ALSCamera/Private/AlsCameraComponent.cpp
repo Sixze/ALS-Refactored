@@ -133,7 +133,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 {
 	ViewInfo.Location = CameraLocation;
 	ViewInfo.Rotation = CameraRotation;
-	ViewInfo.FOV = CameraFov;
+	ViewInfo.FOV = CameraFieldOfView;
 
 	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
 
@@ -217,7 +217,8 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 		CameraLocation = GetFirstPersonCameraLocation();
 		CameraRotation = CameraTargetRotation;
-		CameraFov = Settings->FirstPerson.Fov;
+
+		CameraFieldOfView = bOverrideFieldOfView ? FieldOfViewOverride : Settings->FirstPerson.FieldOfView;
 		return;
 	}
 
@@ -304,15 +305,20 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
 		CameraLocation = CameraResultLocation;
-		CameraFov = Settings->ThirdPerson.Fov;
+		CameraFieldOfView = Settings->ThirdPerson.FieldOfView;
 	}
 	else
 	{
 		CameraLocation = FMath::Lerp(CameraResultLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
-		CameraFov = FMath::Lerp(Settings->ThirdPerson.Fov, Settings->FirstPerson.Fov, FirstPersonOverride);
+		CameraFieldOfView = FMath::Lerp(Settings->ThirdPerson.FieldOfView, Settings->FirstPerson.FieldOfView, FirstPersonOverride);
 	}
 
-	CameraFov += CalculateFovOffset();
+	if (bOverrideFieldOfView)
+	{
+		CameraFieldOfView = FieldOfViewOverride;
+	}
+
+	CameraFieldOfView = FMath::Clamp(CameraFieldOfView + CalculateFovOffset(), 5.0f, 175.0f);
 }
 
 FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,

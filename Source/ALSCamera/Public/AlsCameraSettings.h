@@ -10,8 +10,8 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float Fov{90.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 175, ForceUnits = "deg"))
+	float FieldOfView{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
@@ -31,8 +31,8 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float Fov{90.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 175, ForceUnits = "deg"))
+	float FieldOfView{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName FirstPivotSocketName{UAlsConstants::RootBoneName()};
