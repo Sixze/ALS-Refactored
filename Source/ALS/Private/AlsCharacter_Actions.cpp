@@ -14,6 +14,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsMontageUtility.h"
 #include "Utility/AlsUtility.h"
 
 void AAlsCharacter::StartRolling(const float PlayRate)
@@ -466,7 +467,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	const auto Duration{MantlingSettings->Montage->GetPlayLength() - StartTime};
 	const auto PlayRate{MantlingSettings->Montage->RateScale};
 
-	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(MantlingSettings->Montage).GetLocation()};
+	const auto TargetAnimationLocation{UAlsMontageUtility::ExtractLastRootTransformFromMontage(MantlingSettings->Montage).GetLocation()};
 
 	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
 	{
@@ -526,9 +527,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 
 	// Play the animation montage if valid.
 
-	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, 1.0f,
-	                                               EMontagePlayReturnType::MontageLength,
-	                                               StartTime, false) > 0.0f)
+	if (GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage) > 0.0f)
 	{
 		SetLocomotionAction(AlsLocomotionActionTags::Mantling);
 	}
@@ -561,8 +560,8 @@ float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* Mant
 	auto SearchStartTime{0.0f};
 	auto SearchEndTime{Montage->GetPlayLength()};
 
-	const auto SearchStartLocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, SearchStartTime).GetTranslation().Z};
-	const auto SearchEndLocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, SearchEndTime).GetTranslation().Z};
+	const auto SearchStartLocationZ{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, SearchStartTime).GetTranslation().Z};
+	const auto SearchEndLocationZ{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, SearchEndTime).GetTranslation().Z};
 
 	// Find the vertical distance the character has already moved.
 
@@ -580,7 +579,7 @@ float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* Mant
 	while (true)
 	{
 		const auto Time{(SearchStartTime + SearchEndTime) * 0.5f};
-		const auto LocationZ{UAlsUtility::ExtractRootTransformFromMontage(Montage, Time).GetTranslation().Z};
+		const auto LocationZ{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, Time).GetTranslation().Z};
 
 		// Stop the search if a close enough location has been found or if
 		// the search interval is less than the animation montage frame rate.
@@ -1107,9 +1106,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	OnRagdollingEnded();
 
-	if (bGrounded &&
-	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(bRagdollFacingUpward), 1.0f,
-	                                               EMontagePlayReturnType::MontageLength, 0.0f, true) > 0.0f)
+	if (bGrounded && GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(bRagdollFacingUpward)) > 0.0f)
 	{
 		AlsCharacterMovement->SetInputBlocked(true);
 

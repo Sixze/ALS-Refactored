@@ -3,14 +3,11 @@
 #include "DrawDebugHelpers.h"
 #include "GameplayTagsManager.h"
 #include "Animation/AnimInstance.h"
-#include "Animation/AnimMontage.h"
-#include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerState.h"
-#include "Kismet/GameplayStatics.h"
 #include "Utility/AlsMacros.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsUtility)
@@ -76,51 +73,6 @@ bool UAlsUtility::TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& Base
 	RotationSpeed.Yaw = FMath::RadiansToDegrees(AngularVelocityVector.Z);
 
 	return true;
-}
-
-FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Montage, const float Time)
-{
-	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
-
-	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(Montage->SlotAnimTracks.Num() > 0))
-	{
-		return FTransform::Identity;
-	}
-
-	const auto* Segment{Montage->SlotAnimTracks[0].AnimTrack.GetSegmentAtTime(Time)};
-	if (!ALS_ENSURE(Segment != nullptr))
-	{
-		return FTransform::Identity;
-	}
-
-	const auto* Sequence{Cast<UAnimSequence>(Segment->GetAnimReference())};
-	if (!ALS_ENSURE(IsValid(Sequence)))
-	{
-		return FTransform::Identity;
-	}
-
-	return Sequence->ExtractRootTrackTransform(Segment->ConvertTrackPosToAnimPos(Time), nullptr);
-}
-
-FTransform UAlsUtility::ExtractLastRootTransformFromMontage(const UAnimMontage* Montage)
-{
-	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
-
-	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(Montage->SlotAnimTracks.Num() > 0) ||
-	    !ALS_ENSURE(Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Num() > 0))
-	{
-		return FTransform::Identity;
-	}
-
-	const auto& Segment{Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Last()};
-	const auto* Sequence{Cast<UAnimSequence>(Segment.GetAnimReference())};
-
-	if (!ALS_ENSURE(IsValid(Sequence)))
-	{
-		return FTransform::Identity;
-	}
-
-	return Sequence->ExtractRootTrackTransform(Segment.GetEndPos(), nullptr);
 }
 
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)

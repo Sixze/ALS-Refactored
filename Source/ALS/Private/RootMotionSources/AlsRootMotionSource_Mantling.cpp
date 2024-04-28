@@ -7,7 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacros.h"
-#include "Utility/AlsUtility.h"
+#include "Utility/AlsMontageUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionSource_Mantling)
 
@@ -71,7 +71,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
 
-	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+	const auto CurrentAnimationLocation{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
 
 	// The target animation location is expected to be non-zero, so it's safe to divide by it here.
 
