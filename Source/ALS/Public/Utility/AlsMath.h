@@ -37,7 +37,7 @@ struct ALS_API FAlsSpringVectorState
 	void Reset();
 };
 
-UCLASS()
+UCLASS(Meta = (BlueprintThreadSafe))
 class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

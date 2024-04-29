@@ -127,6 +127,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual FVector ConsumeInputVector() override;
+
 	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode = 0) override;
 
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
@@ -156,8 +158,6 @@ protected:
 	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
 
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
-
-	virtual FVector ConsumeInputVector() override;
 
 public:
 	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,

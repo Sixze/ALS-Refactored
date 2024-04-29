@@ -852,7 +852,7 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 		// function because they literally break network smoothing when crouching while the root motion montage is playing, causing the
 		// mesh to take an incorrect location for a while.
 
-		// TODO Check the need for this fix in future engine versions.
+		// TODO Check the need for this hack in future engine versions.
 
 		PredictionData->MeshTranslationOffset.Z += ScaledHalfHeightAdjust;
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;

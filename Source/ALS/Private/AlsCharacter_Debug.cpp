@@ -171,7 +171,10 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	TArray<FName> CurveNames;
 	GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetCurveMetaDataNames(CurveNames);
 
-	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
+	CurveNames.Sort([](const FName& A, const FName& B)
+	{
+		return A.LexicalLess(B);
+	});
 
 	TStringBuilder<32> CurveValueBuilder;
 

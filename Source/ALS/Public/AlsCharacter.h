@@ -673,4 +673,3 @@ inline const FAlsRagdollingState& AAlsCharacter::GetRagdollingState() const
 {
 	return RagdollingState;
 }
-

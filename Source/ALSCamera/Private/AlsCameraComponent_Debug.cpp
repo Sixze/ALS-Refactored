@@ -121,7 +121,10 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	TArray<FName> CurveNames;
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
-	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
+	CurveNames.Sort([](const FName& A, const FName& B)
+	{
+		return A.LexicalLess(B);
+	});
 
 	TStringBuilder<32> CurveValueBuilder;
 

@@ -86,13 +86,15 @@ void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, AChara
 
 	const auto* UpdatedComponent{Character->GetCharacterMovement()->UpdatedComponent.Get()};
 
-	const_cast<FSavedMove_Character*>(PreviousMove)->StartRotation = UpdatedComponent->GetComponentRotation();
-	const_cast<FSavedMove_Character*>(PreviousMove)->StartAttachRelativeRotation = UpdatedComponent->GetRelativeRotation();
+	auto* MutablePreviousMove{const_cast<FSavedMove_Character*>(PreviousMove)};
+
+	MutablePreviousMove->StartRotation = UpdatedComponent->GetComponentRotation();
+	MutablePreviousMove->StartAttachRelativeRotation = UpdatedComponent->GetRelativeRotation();
 
 	Super::CombineWith(PreviousMove, Character, Player, PreviousStartLocation);
 
-	const_cast<FSavedMove_Character*>(PreviousMove)->StartRotation = OriginalRotation;
-	const_cast<FSavedMove_Character*>(PreviousMove)->StartAttachRelativeRotation = OriginalRelativeRotation;
+	MutablePreviousMove->StartRotation = OriginalRotation;
+	MutablePreviousMove->StartAttachRelativeRotation = OriginalRelativeRotation;
 }
 
 void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
@@ -185,6 +187,25 @@ void UAlsCharacterMovementComponent::BeginPlay()
 	                   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
+}
+
+FVector UAlsCharacterMovementComponent::ConsumeInputVector()
+{
+	auto InputVector{Super::ConsumeInputVector()};
+
+	if (bInputBlocked)
+	{
+		return FVector::ZeroVector;
+	}
+
+	FRotator BaseRotationSpeed;
+	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
+	{
+		// Offset the input vector to keep it relative to the movement base.
+		InputVector = (BaseRotationSpeed * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
+	}
+
+	return InputVector;
 }
 
 void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
@@ -590,25 +611,6 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
 	Super::PhysCustom(DeltaTime, Iterations);
-}
-
-FVector UAlsCharacterMovementComponent::ConsumeInputVector()
-{
-	auto InputVector{Super::ConsumeInputVector()};
-
-	if (bInputBlocked)
-	{
-		return FVector::ZeroVector;
-	}
-
-	FRotator BaseRotationSpeed;
-	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
-	{
-		// Offset the input vector to keep it relative to the movement base.
-		InputVector = (BaseRotationSpeed * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
-	}
-
-	return InputVector;
 }
 
 void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance,

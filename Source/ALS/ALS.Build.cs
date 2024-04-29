@@ -22,7 +22,10 @@ public class ALS : ModuleRules
 
 		if (Target.Type == TargetRules.TargetType.Editor)
 		{
-			PrivateDependencyModuleNames.AddRange(new[] {"MessageLog"});
+			PrivateDependencyModuleNames.AddRange(new[]
+			{
+				"MessageLog"
+			});
 		}
 
 		SetupIrisSupport(Target);
