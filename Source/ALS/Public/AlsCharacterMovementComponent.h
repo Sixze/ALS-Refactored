@@ -203,6 +203,9 @@ public:
 	
 	void SetRelativeVelocityDirection(const FVector& Direction);
 
+	float GetWalkSpeed() const;
+	float GetRunSpeed() const;
+
 private:
 	void RefreshMaxWalkSpeed();
 
