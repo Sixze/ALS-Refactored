@@ -52,11 +52,11 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
-void UAlsLinkedAnimationInstance::ReinitializeLook()
+void UAlsLinkedAnimationInstance::InitializeLook()
 {
 	if (Parent.IsValid())
 	{
-		Parent->ReinitializeLook();
+		Parent->InitializeLook();
 	}
 }
 
@@ -68,11 +68,43 @@ void UAlsLinkedAnimationInstance::RefreshLook()
 	}
 }
 
+void UAlsLinkedAnimationInstance::InitializeLean()
+{
+	if (Parent.IsValid())
+	{
+		Parent->InitializeLean();
+	}
+}
+
+void UAlsLinkedAnimationInstance::InitializeGrounded()
+{
+	if (Parent.IsValid())
+	{
+		Parent->InitializeGrounded();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshGrounded()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshGrounded();
+	}
+}
+
 void UAlsLinkedAnimationInstance::ResetGroundedEntryMode()
 {
 	if (Parent.IsValid())
 	{
 		Parent->ResetGroundedEntryMode();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshGroundedMovement()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshGroundedMovement();
 	}
 }
 
@@ -84,18 +116,74 @@ void UAlsLinkedAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewHi
 	}
 }
 
-void UAlsLinkedAnimationInstance::ActivatePivot()
+void UAlsLinkedAnimationInstance::InitializeStandingMovement()
 {
 	if (Parent.IsValid())
 	{
-		Parent->ActivatePivot();
+		Parent->InitializeStandingMovement();
 	}
 }
 
-void UAlsLinkedAnimationInstance::ResetJumped()
+void UAlsLinkedAnimationInstance::RefreshStandingMovement()
 {
 	if (Parent.IsValid())
 	{
-		Parent->ResetJumped();
+		Parent->RefreshStandingMovement();
+	}
+}
+
+void UAlsLinkedAnimationInstance::ResetPivot()
+{
+	if (Parent.IsValid())
+	{
+		Parent->ResetPivot();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshCrouchingMovement()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshCrouchingMovement();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshInAir()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshInAir();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshDynamicTransitions()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshDynamicTransitions();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshRotateInPlace()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshRotateInPlace();
+	}
+}
+
+void UAlsLinkedAnimationInstance::InitializeTurnInPlace()
+{
+	if (Parent.IsValid())
+	{
+		Parent->InitializeTurnInPlace();
+	}
+}
+
+void UAlsLinkedAnimationInstance::RefreshTurnInPlace()
+{
+	if (Parent.IsValid())
+	{
+		Parent->RefreshTurnInPlace();
 	}
 }

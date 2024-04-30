@@ -18,9 +18,6 @@ struct ALS_API FAlsMovementDirectionCache
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
-	EAlsMovementDirection MovementDirection{EAlsMovementDirection::Forward};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
 	uint8 bForward : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPrivateAccess))
@@ -36,10 +33,8 @@ public:
 	constexpr FAlsMovementDirectionCache() = default;
 
 	// ReSharper disable once CppNonExplicitConvertingConstructor
-	constexpr FAlsMovementDirectionCache(const EAlsMovementDirection NewMovementDirection)
+	constexpr FAlsMovementDirectionCache(const EAlsMovementDirection MovementDirection)
 	{
-		MovementDirection = NewMovementDirection;
-
 		bForward = MovementDirection == EAlsMovementDirection::Forward;
 		bBackward = MovementDirection == EAlsMovementDirection::Backward;
 		bLeft = MovementDirection == EAlsMovementDirection::Left;
@@ -64,11 +59,5 @@ public:
 	constexpr bool IsRight() const
 	{
 		return bRight;
-	}
-
-	// ReSharper disable once CppNonExplicitConversionOperator
-	constexpr operator EAlsMovementDirection() const
-	{
-		return MovementDirection;
 	}
 };

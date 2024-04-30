@@ -44,9 +44,6 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendDuration{0.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bDisableFootLock : 1 {false};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Standing Turn 90 Left")
 	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn90Left{nullptr};
 

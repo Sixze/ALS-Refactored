@@ -13,9 +13,6 @@ struct ALS_API FAlsTransitionsState
 	uint8 bTransitionsAllowed : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	int32 DynamicTransitionsFrameDelay{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UAnimSequenceBase> QueuedTransitionAnimation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))

@@ -20,7 +20,7 @@ struct ALS_API FAlsVelocityBlendState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bReinitializationRequired : 1 {true};
+	uint8 bInitializationRequired : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float ForwardAmount{0.0f};
@@ -58,45 +58,18 @@ struct ALS_API FAlsGroundedState
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsHipsDirection HipsDirection{EAlsHipsDirection::Forward};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -1, ClampMax = 1))
 	float HipsDirectionLockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bPivotActivationRequested : 1 {false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bPivotActive : 1 {false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsMovementDirectionCache MovementDirection;
+	EAlsHipsDirection HipsDirection{EAlsHipsDirection::Forward};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsVelocityBlendState VelocityBlend;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsMovementDirectionCache MovementDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsRotationYawOffsetsState RotationYawOffsets;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float SprintTime{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -1, ClampMax = 1))
-	float SprintAccelerationAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float SprintBlockAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float WalkRunBlendAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float StrideBlendAmount{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
-	float StandingPlayRate{1.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
-	float CrouchingPlayRate{1.0f};
 };

@@ -76,6 +76,9 @@ struct ALS_API FAlsFeetState
 	float FeetCrossingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bInhibitFootLockForOneFrame : 1 {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsFootState Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

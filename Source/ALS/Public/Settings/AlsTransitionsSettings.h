@@ -22,35 +22,14 @@ struct ALS_API FAlsTransitionsSettings
 	float QuickStopStartTime{0.3f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingTransitionLeftAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> StandingLeftAnimation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingTransitionRightAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> StandingRightAnimation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingTransitionLeftAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> CrouchingLeftAnimation{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingTransitionRightAnimation{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float DynamicTransitionFootLockDistanceThreshold{8.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float DynamicTransitionBlendDuration{0.2f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
-	float DynamicTransitionPlayRate{1.5f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingDynamicTransitionLeftAnimation{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingDynamicTransitionRightAnimation{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingDynamicTransitionLeftAnimation{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingDynamicTransitionRightAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> CrouchingRightAnimation{nullptr};
 };

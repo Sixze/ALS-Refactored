@@ -39,22 +39,55 @@ protected:
 	UAlsAnimationInstance* GetParentUnsafe() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLook();
+	void InitializeLook();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshLook();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeLean();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeGrounded();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshGrounded();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshGroundedMovement();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ActivatePivot();
+	void InitializeStandingMovement();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ResetJumped();
+	void RefreshStandingMovement();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ResetPivot();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshCrouchingMovement();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshInAir();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshDynamicTransitions();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshRotateInPlace();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeTurnInPlace();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshTurnInPlace();
 };
 
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const

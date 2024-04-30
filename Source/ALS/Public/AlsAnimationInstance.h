@@ -3,16 +3,21 @@
 #include "Animation/AnimInstance.h"
 #include "Engine/World.h"
 #include "State/AlsControlRigInput.h"
+#include "State/AlsCrouchingState.h"
+#include "State/AlsDynamicTransitionsState.h"
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
 #include "State/AlsInAirState.h"
 #include "State/AlsLayeringState.h"
 #include "State/AlsLeanState.h"
 #include "State/AlsLocomotionAnimationState.h"
+#include "State/AlsLookState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsPoseState.h"
 #include "State/AlsRagdollingAnimationState.h"
 #include "State/AlsRotateInPlaceState.h"
+#include "State/AlsSpineState.h"
+#include "State/AlsStandingState.h"
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
 #include "State/AlsViewAnimationState.h"
@@ -90,13 +95,25 @@ protected:
 	FAlsViewAnimationState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsLeanState LeanState;
+	FAlsSpineState SpineState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsLookState LookState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsLocomotionAnimationState LocomotionState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsLeanState LeanState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsGroundedState GroundedState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsStandingState StandingState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsCrouchingState CrouchingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsInAirState InAirState;
@@ -106,6 +123,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsTransitionsState TransitionsState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsDynamicTransitionsState DynamicTransitionsState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsRotateInPlaceState RotateInPlaceState;
@@ -163,16 +183,20 @@ private:
 
 	void RefreshView(float DeltaTime);
 
-	void RefreshSpineRotation(float SpineBlendAmount, float DeltaTime);
+	void RefreshSpine(float SpineBlendAmount, float DeltaTime);
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLook();
+	void InitializeLook();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshLook();
 
 	// Locomotion
+
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeLean();
 
 private:
 	void RefreshLocomotionOnGameThread();
@@ -184,38 +208,47 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeGrounded();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshGrounded();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshGroundedMovement();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeStandingMovement();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshStandingMovement();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ActivatePivot();
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ResetPivot();
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshCrouchingMovement();
+
 private:
-	void RefreshGroundedOnGameThread();
+	FVector2f GetRelativeAccelerationAmount() const;
 
-	void RefreshGrounded(float DeltaTime);
+	FVector3f GetRelativeVelocity() const;
 
-	void RefreshMovementDirection();
+	void RefreshVelocityBlend();
 
-	void RefreshVelocityBlend(float DeltaTime);
+	void RefreshMovementDirection(float ViewRelativeVelocityYawAngle);
 
-	void RefreshRotationYawOffsets();
+	void RefreshRotationYawOffsets(float ViewRelativeVelocityYawAngle);
 
-	void RefreshSprint(const FVector3f& RelativeAccelerationAmount, float DeltaTime);
-
-	void RefreshStrideBlendAmount();
-
-	void RefreshWalkRunBlendAmount();
-
-	void RefreshStandingPlayRate();
-
-	void RefreshCrouchingPlayRate();
-
-	void RefreshGroundedLeanAmount(const FVector3f& RelativeAccelerationAmount, float DeltaTime);
-
-	void ResetGroundedLeanAmount(float DeltaTime);
+	void RefreshGroundedLean();
 
 	// In Air
 
@@ -224,23 +257,21 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ResetJumped();
+	void RefreshInAir();
 
 private:
 	void RefreshInAirOnGameThread();
 
-	void RefreshInAir(float DeltaTime);
+	void RefreshGroundPrediction();
 
-	void RefreshGroundPredictionAmount();
-
-	void RefreshInAirLeanAmount(float DeltaTime);
+	void RefreshInAirLean();
 
 	// Feet
 
 public:
-	// If true, the foot locking will be temporarily "paused". This is not the same as a
-	// complete shutdown because the internal state of the foot locking will continue to update.
-	virtual bool IsFootLockInhibited() const;
+	// Temporarily "pauses" foot locking for one frame. This is not the same as a complete
+	// shutdown because the internal state of the foot locking will continue to update.
+	void InhibitFootLockForOneFrame();
 
 private:
 	void RefreshFeetOnGameThread();
@@ -282,10 +313,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
 	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = 0.2f);
 
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshDynamicTransitions();
+
 private:
 	void RefreshTransitions();
-
-	void RefreshDynamicTransition();
 
 	void PlayQueuedTransitionAnimation();
 
@@ -296,17 +329,23 @@ private:
 public:
 	virtual bool IsRotateInPlaceAllowed();
 
-private:
-	void RefreshRotateInPlace(float DeltaTime);
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshRotateInPlace();
 
 	// Turn In Place
 
 public:
 	virtual bool IsTurnInPlaceAllowed();
 
-private:
-	void RefreshTurnInPlace(float DeltaTime);
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void InitializeTurnInPlace();
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void RefreshTurnInPlace();
+
+private:
 	void PlayQueuedTurnInPlaceAnimation();
 
 	// Ragdolling
@@ -353,17 +392,12 @@ inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewH
 	GroundedState.HipsDirection = NewHipsDirection;
 }
 
-inline void UAlsAnimationInstance::ActivatePivot()
+inline void UAlsAnimationInstance::ResetPivot()
 {
-	GroundedState.bPivotActivationRequested = true;
+	StandingState.bPivotActive = false;
 }
 
 inline void UAlsAnimationInstance::Jump()
 {
 	InAirState.bJumpRequested = true;
-}
-
-inline void UAlsAnimationInstance::ResetJumped()
-{
-	InAirState.bJumped = false;
 }
