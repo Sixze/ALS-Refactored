@@ -14,10 +14,16 @@ struct ALS_API FAlsMovementGaitSettings
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
-	float WalkSpeed{175.0f};
+	float WalkForwardSpeed{175.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
-	float RunSpeed{375.0f};
+	float WalkBackwardSpeed{100.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	float RunForwardSpeed{375.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	float RunBackwardSpeed{275.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float SprintSpeed{650.0f};
@@ -33,7 +39,7 @@ public:
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve;
 
 public:
-	float GetSpeedByGait(const FGameplayTag& Gait) const;
+	float GetSpeedByGait(const FGameplayTag& Gait, const FVector& LocalInputVector) const;
 };
 
 USTRUCT(BlueprintType)
@@ -64,16 +70,18 @@ public:
 	};
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait) const
+inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait, const FVector& LocalInputVector) const
 {
 	if (Gait == AlsGaitTags::Walking)
 	{
-		return WalkSpeed;
+		return FMath::GetMappedRangeValueClamped(FVector2d(-1, 0),
+			FVector2d(WalkBackwardSpeed, WalkForwardSpeed), LocalInputVector.X);
 	}
 
 	if (Gait == AlsGaitTags::Running)
 	{
-		return RunSpeed;
+		return FMath::GetMappedRangeValueClamped(FVector2d(-1, 0),
+			FVector2d(RunBackwardSpeed, RunForwardSpeed), LocalInputVector.X);
 	}
 
 	if (Gait == AlsGaitTags::Sprinting)

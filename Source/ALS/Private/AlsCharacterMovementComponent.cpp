@@ -937,9 +937,18 @@ void UAlsCharacterMovementComponent::SetMaxAllowedGait(const FGameplayTag& NewMa
 	}
 }
 
+void UAlsCharacterMovementComponent::SetRelativeVelocityDirection(const FVector& Direction)
+{
+	if (RelativeVelocityDirection != Direction)
+	{
+		RelativeVelocityDirection = Direction;
+		RefreshMaxWalkSpeed();
+	}
+}
+
 void UAlsCharacterMovementComponent::RefreshMaxWalkSpeed()
 {
-	MaxWalkSpeed = GaitSettings.GetSpeedByGait(MaxAllowedGait);
+	MaxWalkSpeed = GaitSettings.GetSpeedByGait(MaxAllowedGait, RelativeVelocityDirection);
 	MaxWalkSpeedCrouched = MaxWalkSpeed;
 }
 
@@ -951,23 +960,23 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 
 	const auto Speed{UE_REAL_TO_FLOAT(Velocity.Size2D())};
 
-	if (Speed <= GaitSettings.WalkSpeed)
+	if (Speed <= GaitSettings.WalkForwardSpeed)
 	{
 		static const FVector2f GaitAmount{0.0f, 1.0f};
 
-		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, GaitAmount, Speed);
+		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkForwardSpeed}, GaitAmount, Speed);
 	}
 
-	if (Speed <= GaitSettings.RunSpeed)
+	if (Speed <= GaitSettings.RunForwardSpeed)
 	{
 		static const FVector2f GaitAmount{1.0f, 2.0f};
 
-		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, GaitAmount, Speed);
+		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkForwardSpeed, GaitSettings.RunForwardSpeed}, GaitAmount, Speed);
 	}
 
 	static const FVector2f GaitAmount{2.0f, 3.0f};
 
-	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, GaitAmount, Speed);
+	return FMath::GetMappedRangeValueClamped({GaitSettings.RunForwardSpeed, GaitSettings.SprintSpeed}, GaitAmount, Speed);
 }
 
 void UAlsCharacterMovementComponent::SetMovementModeLocked(const bool bNewMovementModeLocked)
