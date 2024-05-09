@@ -527,7 +527,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 #if ENABLE_DRAW_DEBUG
 	DrawDebugCapsule(GetWorld(), LocomotionState.Location, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), LocomotionState.RotationQuaternion,
+	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), LocomotionState.Rotation.Quaternion(),
 	                 FColor::Green, false, -1.0f, SDPG_World, 1.0f);
 #endif
 }

@@ -521,6 +521,9 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 {
 	check(IsInGameThread())
 
+	const auto* World{GetWorld()};
+	const auto ActorDeltaTime{IsValid(World) ? World->DeltaTimeSeconds * Character->CustomTimeDilation : 0.0f};
+
 	const auto& Locomotion{Character->GetLocomotionState()};
 
 	LocomotionState.bHasInput = Locomotion.bHasInput;
@@ -529,7 +532,10 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.Speed = Locomotion.Speed;
 	LocomotionState.Velocity = Locomotion.Velocity;
 	LocomotionState.VelocityYawAngle = Locomotion.VelocityYawAngle;
-	LocomotionState.Acceleration = Locomotion.Acceleration;
+
+	LocomotionState.Acceleration = ActorDeltaTime > UE_SMALL_NUMBER
+		                               ? (Locomotion.Velocity - Locomotion.PreviousVelocity) / ActorDeltaTime
+		                               : FVector::ZeroVector;
 
 	const auto* Movement{Character->GetCharacterMovement()};
 
@@ -545,8 +551,12 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
 	LocomotionState.Location = Locomotion.Location;
 	LocomotionState.Rotation = Locomotion.Rotation;
-	LocomotionState.RotationQuaternion = Locomotion.RotationQuaternion;
-	LocomotionState.YawSpeed = Locomotion.YawSpeed;
+	LocomotionState.RotationQuaternion = Locomotion.Rotation.Quaternion();
+
+	LocomotionState.YawSpeed = ActorDeltaTime > UE_SMALL_NUMBER
+		                           ? FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+			                             Locomotion.Rotation.Yaw - Locomotion.PreviousYawAngle)) / ActorDeltaTime
+		                           : 0.0f;
 
 	LocomotionState.Scale = UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetComponentScale().Z);
 

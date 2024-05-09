@@ -395,9 +395,9 @@ private:
 
 	void RefreshLocomotionEarly();
 
-	void RefreshLocomotion(float DeltaTime);
+	void RefreshLocomotion();
 
-	void RefreshLocomotionLate(float DeltaTime);
+	void RefreshLocomotionLate();
 
 	// Jumping
 

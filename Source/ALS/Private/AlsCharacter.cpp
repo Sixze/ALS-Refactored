@@ -114,7 +114,6 @@ void AAlsCharacter::PostRegisterAllComponents()
 	const auto& ActorTransform{GetActorTransform()};
 
 	LocomotionState.Location = ActorTransform.GetLocation();
-	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 	LocomotionState.Rotation = GetActorRotation();
 	LocomotionState.PreviousYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 
@@ -288,7 +287,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	RefreshView(DeltaTime);
 	RefreshRotationMode();
-	RefreshLocomotion(DeltaTime);
+	RefreshLocomotion();
 	RefreshGait();
 
 	RefreshGroundedRotation(DeltaTime);
@@ -301,7 +300,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	RefreshLocomotionLate(DeltaTime);
+	RefreshLocomotionLate();
 }
 
 void AAlsCharacter::PossessedBy(AController* NewController)
@@ -1344,13 +1343,11 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 	if (GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled)
 	{
 		LocomotionState.Location = ActorTransform.GetLocation();
-		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 		LocomotionState.Rotation = GetActorRotation();
 	}
 	else if (GetMesh()->IsUsingAbsoluteRotation())
 	{
 		LocomotionState.Location = ActorTransform.TransformPosition(GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset());
-		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 		LocomotionState.Rotation = GetActorRotation();
 	}
 	else
@@ -1364,8 +1361,7 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 		};
 
 		LocomotionState.Location = SmoothTransform.GetLocation();
-		LocomotionState.RotationQuaternion = SmoothTransform.GetRotation();
-		LocomotionState.Rotation = LocomotionState.RotationQuaternion.Rotator();
+		LocomotionState.Rotation = SmoothTransform.Rotator();
 	}
 }
 
@@ -1398,7 +1394,7 @@ void AAlsCharacter::RefreshLocomotionEarly()
 	LocomotionState.PreviousYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
 }
 
-void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
+void AAlsCharacter::RefreshLocomotion()
 {
 	LocomotionState.Velocity = GetVelocity();
 
@@ -1428,29 +1424,18 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 			                           : LocomotionState.VelocityYawAngle);
 	}
 
-	if (DeltaTime > UE_SMALL_NUMBER)
-	{
-		LocomotionState.Acceleration = (LocomotionState.Velocity - LocomotionState.PreviousVelocity) / DeltaTime;
-	}
-
 	// Character is moving if has speed and current acceleration, or if the speed is greater than the moving speed threshold.
 
 	LocomotionState.bMoving = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||
 	                          LocomotionState.Speed > Settings->MovingSpeedThreshold;
 }
 
-void AAlsCharacter::RefreshLocomotionLate(const float DeltaTime)
+void AAlsCharacter::RefreshLocomotionLate()
 {
 	if (!LocomotionMode.IsValid() || LocomotionAction.IsValid())
 	{
 		RefreshLocomotionLocationAndRotation();
 		RefreshTargetYawAngleUsingLocomotionRotation();
-	}
-
-	if (DeltaTime > UE_SMALL_NUMBER)
-	{
-		LocomotionState.YawSpeed = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
-			                           LocomotionState.Rotation.Yaw - LocomotionState.PreviousYawAngle)) / DeltaTime;
 	}
 }
 
