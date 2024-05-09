@@ -431,7 +431,7 @@ protected:
 
 	void RefreshGroundedAimingRotation(float DeltaTime);
 
-	bool RefreshConstrainedAimingRotation(float DeltaTime, bool bApplySecondaryConstraint = false);
+	bool ConstrainAimingRotation(FRotator& ActorRotation, float DeltaTime, bool bApplySecondaryConstraint = false);
 
 private:
 	void ApplyRotationYawSpeedAnimationCurve(float DeltaTime);
@@ -443,7 +443,7 @@ protected:
 
 	void RefreshInAirAimingRotation(float DeltaTime);
 
-	void RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
+	void RefreshRotationSmooth(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
 
 	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
 	                                float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed);
@@ -453,6 +453,8 @@ protected:
 	void RefreshTargetYawAngleUsingLocomotionRotation();
 
 	void RefreshTargetYawAngle(float TargetYawAngle);
+
+	void RefreshTargetYawAngleSmooth(float TargetYawAngle, float DeltaTime, float TargetYawAngleRotationSpeed);
 
 	void RefreshViewRelativeTargetYawAngle();
 
