@@ -173,15 +173,15 @@ void AAlsCharacter::BeginPlay()
 
 	// Update states to use the initial desired values.
 
-	RefreshRotationMode();
-
-	AlsCharacterMovement->SetRotationMode(RotationMode);
-
 	ApplyDesiredStance();
 
 	AlsCharacterMovement->SetStance(Stance);
 
 	RefreshGait();
+
+	RefreshRotationMode();
+
+	AlsCharacterMovement->SetRotationMode(RotationMode);
 
 	OnOverlayModeChanged(OverlayMode);
 }
@@ -286,9 +286,9 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshLocomotionEarly();
 
 	RefreshView(DeltaTime);
-	RefreshRotationMode();
 	RefreshLocomotion();
 	RefreshGait();
+	RefreshRotationMode();
 
 	RefreshGroundedRotation(DeltaTime);
 	RefreshInAirRotation(DeltaTime);
@@ -678,8 +678,8 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 
 void AAlsCharacter::RefreshRotationMode()
 {
-	const auto bSprinting{Gait == AlsGaitTags::Sprinting};
 	const auto bAiming{bDesiredAiming || DesiredRotationMode == AlsRotationModeTags::Aiming};
+	const auto bSprinting{AlsCharacterMovement->GetMaxAllowedGait() == AlsGaitTags::Sprinting};
 
 	if (ViewMode == AlsViewModeTags::FirstPerson)
 	{
@@ -742,10 +742,6 @@ void AAlsCharacter::RefreshRotationMode()
 		else if (Settings->bRotateToVelocityWhenSprinting)
 		{
 			SetRotationMode(AlsRotationModeTags::VelocityDirection);
-		}
-		else if (bAiming)
-		{
-			SetRotationMode(AlsRotationModeTags::ViewDirection);
 		}
 		else
 		{
@@ -962,7 +958,9 @@ void AAlsCharacter::RefreshGait()
 
 	AlsCharacterMovement->SetMaxAllowedGait(MaxAllowedGait);
 
-	SetGait(CalculateActualGait(MaxAllowedGait));
+	const auto ActualGait{CalculateActualGait(MaxAllowedGait)};
+
+	SetGait(ActualGait);
 }
 
 FGameplayTag AAlsCharacter::CalculateMaxAllowedGait() const
@@ -1010,7 +1008,7 @@ bool AAlsCharacter::CanSprint() const
 	// input and if the input direction is aligned with the view direction within 50 degrees.
 
 	if (!LocomotionState.bHasInput || Stance != AlsStanceTags::Standing ||
-	    (RotationMode == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming))
+	    ((bDesiredAiming || DesiredRotationMode == AlsRotationModeTags::Aiming) && !Settings->bSprintHasPriorityOverAiming))
 	{
 		return false;
 	}
@@ -1569,12 +1567,17 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 
 	if (RotationMode == AlsRotationModeTags::ViewDirection)
 	{
-		const auto TargetYawAngle{
-			Gait == AlsGaitTags::Sprinting
-				? LocomotionState.VelocityYawAngle
-				: UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw +
-					GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName()))
-		};
+		float TargetYawAngle;
+
+		if (Gait == AlsGaitTags::Sprinting)
+		{
+			TargetYawAngle = LocomotionState.VelocityYawAngle;
+		}
+		else
+		{
+			TargetYawAngle = UE_REAL_TO_FLOAT(
+				ViewState.Rotation.Yaw + GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName()));
+		}
 
 		static constexpr auto TargetYawAngleRotationSpeed{500.0f};
 
