@@ -674,7 +674,12 @@ void UAlsAnimationInstance::RefreshStandingMovement()
 		            PoseState.UnweightedGaitSprintingAmount)
 	};
 
-	StandingState.PlayRate = FMath::Clamp(WalkRunSprintSpeedAmount / StandingState.StrideBlendAmount, 0.0f, 3.0f);
+	// Do not let the play rate be exactly zero, otherwise animation notifies
+	// may start to be triggered every frame until the play rate is changed.
+
+	// TODO Check the need for this hack in future engine versions.
+
+	StandingState.PlayRate = FMath::Clamp(WalkRunSprintSpeedAmount / StandingState.StrideBlendAmount, UE_KINDA_SMALL_NUMBER, 3.0f);
 
 	StandingState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurveName());
 
@@ -728,7 +733,7 @@ void UAlsAnimationInstance::RefreshCrouchingMovement()
 
 	CrouchingState.PlayRate = FMath::Clamp(
 		Speed / (Settings->Crouching.AnimatedCrouchSpeed * CrouchingState.StrideBlendAmount),
-		0.0f, 2.0f);
+		UE_KINDA_SMALL_NUMBER, 2.0f);
 }
 
 FVector2f UAlsAnimationInstance::GetRelativeAccelerationAmount() const
@@ -1153,11 +1158,10 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		NewFootLockAmount = bPendingUpdate
 			                    ? 0.0f
-			                    : FMath::Max(0.0f, FMath::Min(NewFootLockAmount,
-			                                                  FootState.LockAmount - DeltaTime *
-			                                                  (LocomotionState.bMovingSmooth
-				                                                   ? MovingDecreaseSpeed
-				                                                   : NotGroundedDecreaseSpeed)));
+			                    : FMath::Max(0.0f, FMath::Min(
+				                                 NewFootLockAmount,
+				                                 FootState.LockAmount - DeltaTime *
+				                                 (LocomotionState.bMovingSmooth ? MovingDecreaseSpeed : NotGroundedDecreaseSpeed)));
 	}
 
 	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(FootState.IkAmount * NewFootLockAmount))
@@ -1876,10 +1880,12 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 
 	// Scale the rotation yaw delta (gets scaled in animation graph) to compensate for play rate and turn angle (if allowed).
 
-	TurnInPlaceState.PlayRate = TurnInPlaceSettings->bScalePlayRateByAnimatedTurnAngle
-		                            ? TurnInPlaceSettings->PlayRate *
-		                              FMath::Abs(TurnInPlaceState.QueuedTurnYawAngle / TurnInPlaceSettings->AnimatedTurnAngle)
-		                            : TurnInPlaceSettings->PlayRate;
+	TurnInPlaceState.PlayRate = TurnInPlaceSettings->PlayRate;
+
+	if (TurnInPlaceSettings->bScalePlayRateByAnimatedTurnAngle)
+	{
+		TurnInPlaceState.PlayRate *= FMath::Abs(TurnInPlaceState.QueuedTurnYawAngle / TurnInPlaceSettings->AnimatedTurnAngle);
+	}
 
 	TurnInPlaceState.QueuedSettings = nullptr;
 	TurnInPlaceState.QueuedSlotName = NAME_None;
