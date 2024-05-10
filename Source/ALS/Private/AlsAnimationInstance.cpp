@@ -273,7 +273,7 @@ void UAlsAnimationInstance::RefreshPose()
 	// Use the grounded pose curve value to "unweight" the gait pose curve. This is used to
 	// instantly get the full gait value from the very beginning of transitions to grounded states.
 
-	PoseState.UnweightedGaitAmount = PoseState.GroundedAmount > 0.0f
+	PoseState.UnweightedGaitAmount = PoseState.GroundedAmount > UE_SMALL_NUMBER
 		                                 ? PoseState.GaitAmount / PoseState.GroundedAmount
 		                                 : PoseState.GaitAmount;
 
