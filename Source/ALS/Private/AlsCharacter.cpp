@@ -976,7 +976,7 @@ void AAlsCharacter::RefreshGait()
 	SetGait(ActualGait);
 
 	const auto RelativeVelocityDirection{
-		LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity).GetSafeNormal()
+		LocomotionState.Rotation.UnrotateVector(LocomotionState.Velocity).GetSafeNormal()
 	};
 	AlsCharacterMovement->SetRelativeVelocityDirection(RelativeVelocityDirection);
 }
