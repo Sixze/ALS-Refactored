@@ -292,11 +292,6 @@ void UAlsAnimationInstance::RefreshViewOnGameThread()
 	ViewState.YawSpeed = View.YawSpeed;
 }
 
-bool UAlsAnimationInstance::IsSpineRotationAllowed()
-{
-	return RotationMode == AlsRotationModeTags::Aiming;
-}
-
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
 	if (!LocomotionAction.IsValid())
@@ -313,6 +308,11 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	ViewState.LookAmount = ViewAmount * (1.0f - AimingAmount);
 
 	RefreshSpine(ViewAmount * AimingAmount, DeltaTime);
+}
+
+bool UAlsAnimationInstance::IsSpineRotationAllowed()
+{
+	return RotationMode == AlsRotationModeTags::Aiming;
 }
 
 void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const float DeltaTime)
@@ -511,12 +511,6 @@ void UAlsAnimationInstance::RefreshLook()
 	LookState.YawRightAmount = 0.5f + FMath::Abs(LookState.YawForwardAmount - 0.5f);
 }
 
-void UAlsAnimationInstance::InitializeLean()
-{
-	LeanState.RightAmount = 0.0f;
-	LeanState.ForwardAmount = 0.0f;
-}
-
 void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 {
 	check(IsInGameThread())
@@ -566,6 +560,12 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
 }
 
+void UAlsAnimationInstance::InitializeLean()
+{
+	LeanState.RightAmount = 0.0f;
+	LeanState.ForwardAmount = 0.0f;
+}
+
 void UAlsAnimationInstance::InitializeGrounded()
 {
 	GroundedState.VelocityBlend.bInitializationRequired = true;
@@ -592,6 +592,95 @@ void UAlsAnimationInstance::RefreshGrounded()
 	RefreshGroundedLean();
 }
 
+FVector3f UAlsAnimationInstance::GetRelativeVelocity() const
+{
+	return FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)};
+}
+
+FVector2f UAlsAnimationInstance::GetRelativeAccelerationAmount() const
+{
+	// This value represents the current amount of acceleration / deceleration relative to the
+	// character rotation. It is normalized to a range of -1 to 1 so that -1 equals the max
+	// braking deceleration and 1 equals the max acceleration of the character movement component.
+
+	const FVector3f RelativeAcceleration{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Acceleration)};
+
+	const auto MaxAcceleration{
+		(LocomotionState.Acceleration | LocomotionState.Velocity) >= 0.0f
+			? LocomotionState.MaxAcceleration
+			: LocomotionState.MaxBrakingDeceleration
+	};
+
+	return FVector2f{UAlsMath::ClampMagnitude01(RelativeAcceleration / MaxAcceleration)};
+}
+
+void UAlsAnimationInstance::RefreshVelocityBlend()
+{
+	// Calculate and interpolate the velocity blend amounts. This value represents the velocity amount of
+	// the character in each direction (normalized so that diagonals equal 0.5 for each direction) and is
+	// used in a blend multi node to produce better directional blending than a standard blend space.
+
+	auto& VelocityBlend{GroundedState.VelocityBlend};
+
+	const auto RelativeVelocityDirection{GetRelativeVelocity().GetSafeNormal()};
+
+	const auto TargetVelocityBlend{
+		RelativeVelocityDirection /
+		(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z))
+	};
+
+	if (VelocityBlend.bInitializationRequired)
+	{
+		VelocityBlend.bInitializationRequired = false;
+
+		VelocityBlend.ForwardAmount = UAlsMath::Clamp01(TargetVelocityBlend.X);
+		VelocityBlend.BackwardAmount = FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f));
+		VelocityBlend.LeftAmount = FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f));
+		VelocityBlend.RightAmount = UAlsMath::Clamp01(TargetVelocityBlend.Y);
+	}
+	else
+	{
+		const auto DeltaTime{GetDeltaSeconds()};
+
+		VelocityBlend.ForwardAmount = FMath::FInterpTo(VelocityBlend.ForwardAmount,
+		                                               UAlsMath::Clamp01(TargetVelocityBlend.X),
+		                                               DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+
+		VelocityBlend.BackwardAmount = FMath::FInterpTo(VelocityBlend.BackwardAmount,
+		                                                FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f)),
+		                                                DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+
+		VelocityBlend.LeftAmount = FMath::FInterpTo(VelocityBlend.LeftAmount,
+		                                            FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f)),
+		                                            DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+
+		VelocityBlend.RightAmount = FMath::FInterpTo(VelocityBlend.RightAmount,
+		                                             UAlsMath::Clamp01(TargetVelocityBlend.Y),
+		                                             DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+	}
+}
+
+void UAlsAnimationInstance::RefreshGroundedLean()
+{
+	const auto TargetLeanAmount{GetRelativeAccelerationAmount()};
+
+	if (bPendingUpdate)
+	{
+		LeanState.RightAmount = TargetLeanAmount.Y;
+		LeanState.ForwardAmount = TargetLeanAmount.X;
+	}
+	else
+	{
+		const auto DeltaTime{GetDeltaSeconds()};
+
+		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, TargetLeanAmount.Y,
+		                                         DeltaTime, Settings->General.LeanInterpolationSpeed);
+
+		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, TargetLeanAmount.X,
+		                                           DeltaTime, Settings->General.LeanInterpolationSpeed);
+	}
+}
+
 void UAlsAnimationInstance::RefreshGroundedMovement()
 {
 #if WITH_EDITOR
@@ -601,8 +690,8 @@ void UAlsAnimationInstance::RefreshGroundedMovement()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGroundedMoving()"),
-	                            STAT_UAlsAnimationInstance_RefreshGroundedMoving, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGroundedMovement()"),
+	                            STAT_UAlsAnimationInstance_RefreshGroundedMovement, STATGROUP_Als)
 
 	if (!IsValid(Settings))
 	{
@@ -617,6 +706,38 @@ void UAlsAnimationInstance::RefreshGroundedMovement()
 
 	RefreshMovementDirection(ViewRelativeVelocityYawAngle);
 	RefreshRotationYawOffsets(ViewRelativeVelocityYawAngle);
+}
+
+void UAlsAnimationInstance::RefreshMovementDirection(const float ViewRelativeVelocityYawAngle)
+{
+	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
+	// the view direction and aiming rotation modes and is used in the cycle blending to blend to the appropriate directional states.
+
+	if (RotationMode == AlsRotationModeTags::VelocityDirection || Gait == AlsGaitTags::Sprinting)
+	{
+		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
+		return;
+	}
+
+	static constexpr auto ForwardHalfAngle{70.0f};
+	static constexpr auto AngleThreshold{5.0f};
+
+	GroundedState.MovementDirection = UAlsMath::CalculateMovementDirection(
+		ViewRelativeVelocityYawAngle, ForwardHalfAngle, AngleThreshold);
+}
+
+void UAlsAnimationInstance::RefreshRotationYawOffsets(const float ViewRelativeVelocityYawAngle)
+{
+	// Rotation yaw offsets influence the rotation yaw offset curve in the animation
+	// graph and is used to offset the character's rotation for more natural movement.
+	// The curves allow us to precisely control the offset for each movement direction.
+
+	auto& RotationYawOffsets{GroundedState.RotationYawOffsets};
+
+	RotationYawOffsets.ForwardAngle = Settings->Grounded.RotationYawOffsetForwardCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
+	RotationYawOffsets.BackwardAngle = Settings->Grounded.RotationYawOffsetBackwardCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
+	RotationYawOffsets.LeftAngle = Settings->Grounded.RotationYawOffsetLeftCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
+	RotationYawOffsets.RightAngle = Settings->Grounded.RotationYawOffsetRightCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
 }
 
 void UAlsAnimationInstance::InitializeStandingMovement()
@@ -736,125 +857,12 @@ void UAlsAnimationInstance::RefreshCrouchingMovement()
 		UE_KINDA_SMALL_NUMBER, 2.0f);
 }
 
-FVector2f UAlsAnimationInstance::GetRelativeAccelerationAmount() const
+void UAlsAnimationInstance::RefreshInAirOnGameThread()
 {
-	// This value represents the current amount of acceleration / deceleration relative to the
-	// character rotation. It is normalized to a range of -1 to 1 so that -1 equals the max
-	// braking deceleration and 1 equals the max acceleration of the character movement component.
+	check(IsInGameThread())
 
-	const FVector3f RelativeAcceleration{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Acceleration)};
-
-	const auto MaxAcceleration{
-		(LocomotionState.Acceleration | LocomotionState.Velocity) >= 0.0f
-			? LocomotionState.MaxAcceleration
-			: LocomotionState.MaxBrakingDeceleration
-	};
-
-	return FVector2f{UAlsMath::ClampMagnitude01(RelativeAcceleration / MaxAcceleration)};
-}
-
-FVector3f UAlsAnimationInstance::GetRelativeVelocity() const
-{
-	return FVector3f{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Velocity)};
-}
-
-void UAlsAnimationInstance::RefreshVelocityBlend()
-{
-	// Calculate and interpolate the velocity blend amounts. This value represents the velocity amount of
-	// the character in each direction (normalized so that diagonals equal 0.5 for each direction) and is
-	// used in a blend multi node to produce better directional blending than a standard blend space.
-
-	auto& VelocityBlend{GroundedState.VelocityBlend};
-
-	const auto RelativeVelocityDirection{GetRelativeVelocity().GetSafeNormal()};
-
-	const auto TargetVelocityBlend{
-		RelativeVelocityDirection /
-		(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z))
-	};
-
-	if (VelocityBlend.bInitializationRequired)
-	{
-		VelocityBlend.bInitializationRequired = false;
-
-		VelocityBlend.ForwardAmount = UAlsMath::Clamp01(TargetVelocityBlend.X);
-		VelocityBlend.BackwardAmount = FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f));
-		VelocityBlend.LeftAmount = FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f));
-		VelocityBlend.RightAmount = UAlsMath::Clamp01(TargetVelocityBlend.Y);
-	}
-	else
-	{
-		const auto DeltaTime{GetDeltaSeconds()};
-
-		VelocityBlend.ForwardAmount = FMath::FInterpTo(VelocityBlend.ForwardAmount,
-		                                               UAlsMath::Clamp01(TargetVelocityBlend.X),
-		                                               DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		VelocityBlend.BackwardAmount = FMath::FInterpTo(VelocityBlend.BackwardAmount,
-		                                                FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f)),
-		                                                DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		VelocityBlend.LeftAmount = FMath::FInterpTo(VelocityBlend.LeftAmount,
-		                                            FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f)),
-		                                            DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
-
-		VelocityBlend.RightAmount = FMath::FInterpTo(VelocityBlend.RightAmount,
-		                                             UAlsMath::Clamp01(TargetVelocityBlend.Y),
-		                                             DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
-	}
-}
-
-void UAlsAnimationInstance::RefreshMovementDirection(const float ViewRelativeVelocityYawAngle)
-{
-	// Calculate the movement direction. This value represents the direction the character is moving relative to the camera during
-	// the view direction and aiming rotation modes and is used in the cycle blending to blend to the appropriate directional states.
-
-	if (RotationMode == AlsRotationModeTags::VelocityDirection || Gait == AlsGaitTags::Sprinting)
-	{
-		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
-		return;
-	}
-
-	static constexpr auto ForwardHalfAngle{70.0f};
-	static constexpr auto AngleThreshold{5.0f};
-
-	GroundedState.MovementDirection = UAlsMath::CalculateMovementDirection(
-		ViewRelativeVelocityYawAngle, ForwardHalfAngle, AngleThreshold);
-}
-
-void UAlsAnimationInstance::RefreshRotationYawOffsets(const float ViewRelativeVelocityYawAngle)
-{
-	// Rotation yaw offsets influence the rotation yaw offset curve in the animation
-	// graph and is used to offset the character's rotation for more natural movement.
-	// The curves allow us to precisely control the offset for each movement direction.
-
-	auto& RotationYawOffsets{GroundedState.RotationYawOffsets};
-
-	RotationYawOffsets.ForwardAngle = Settings->Grounded.RotationYawOffsetForwardCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
-	RotationYawOffsets.BackwardAngle = Settings->Grounded.RotationYawOffsetBackwardCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
-	RotationYawOffsets.LeftAngle = Settings->Grounded.RotationYawOffsetLeftCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
-	RotationYawOffsets.RightAngle = Settings->Grounded.RotationYawOffsetRightCurve->GetFloatValue(ViewRelativeVelocityYawAngle);
-}
-
-void UAlsAnimationInstance::RefreshGroundedLean()
-{
-	const auto TargetLeanAmount{GetRelativeAccelerationAmount()};
-
-	if (bPendingUpdate)
-	{
-		LeanState.RightAmount = TargetLeanAmount.Y;
-		LeanState.ForwardAmount = TargetLeanAmount.X;
-	}
-	else
-	{
-		const auto DeltaTime{GetDeltaSeconds()};
-
-		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, TargetLeanAmount.Y,
-		                                         DeltaTime, Settings->General.LeanInterpolationSpeed);
-
-		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, TargetLeanAmount.X,
-		                                           DeltaTime, Settings->General.LeanInterpolationSpeed);
-	}
+	InAirState.bJumped = !bPendingUpdate && (InAirState.bJumped || InAirState.bJumpRequested);
+	InAirState.bJumpRequested = false;
 }
 
 void UAlsAnimationInstance::RefreshInAir()
@@ -889,14 +897,6 @@ void UAlsAnimationInstance::RefreshInAir()
 
 	RefreshGroundPrediction();
 	RefreshInAirLean();
-}
-
-void UAlsAnimationInstance::RefreshInAirOnGameThread()
-{
-	check(IsInGameThread())
-
-	InAirState.bJumped = !bPendingUpdate && (InAirState.bJumped || InAirState.bJumpRequested);
-	InAirState.bJumpRequested = false;
 }
 
 void UAlsAnimationInstance::RefreshGroundPrediction()

@@ -175,14 +175,15 @@ private:
 
 	// View
 
-public:
-	virtual bool IsSpineRotationAllowed();
-
 private:
 	void RefreshViewOnGameThread();
 
 	void RefreshView(float DeltaTime);
 
+public:
+	virtual bool IsSpineRotationAllowed();
+
+private:
 	void RefreshSpine(float SpineBlendAmount, float DeltaTime);
 
 protected:
@@ -194,12 +195,12 @@ protected:
 
 	// Locomotion
 
+private:
+	void RefreshLocomotionOnGameThread();
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void InitializeLean();
-
-private:
-	void RefreshLocomotionOnGameThread();
 
 	// Grounded
 
@@ -208,20 +209,37 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+	void ResetGroundedEntryMode();
+
+protected:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void InitializeGrounded();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshGrounded();
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ResetGroundedEntryMode();
+private:
+	FVector3f GetRelativeVelocity() const;
 
+	FVector2f GetRelativeAccelerationAmount() const;
+
+	void RefreshVelocityBlend();
+
+	void RefreshGroundedLean();
+
+protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshGroundedMovement();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
+private:
+	void RefreshMovementDirection(float ViewRelativeVelocityYawAngle);
+
+	void RefreshRotationYawOffsets(float ViewRelativeVelocityYawAngle);
+
+protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void InitializeStandingMovement();
 
@@ -237,30 +255,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshCrouchingMovement();
 
-private:
-	FVector2f GetRelativeAccelerationAmount() const;
-
-	FVector3f GetRelativeVelocity() const;
-
-	void RefreshVelocityBlend();
-
-	void RefreshMovementDirection(float ViewRelativeVelocityYawAngle);
-
-	void RefreshRotationYawOffsets(float ViewRelativeVelocityYawAngle);
-
-	void RefreshGroundedLean();
-
 	// In Air
 
 public:
 	void Jump();
 
+private:
+	void RefreshInAirOnGameThread();
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void RefreshInAir();
-
-private:
-	void RefreshInAirOnGameThread();
 
 	void RefreshGroundPrediction();
 
