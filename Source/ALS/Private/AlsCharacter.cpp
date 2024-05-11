@@ -1006,12 +1006,16 @@ FGameplayTag AAlsCharacter::CalculateActualGait(const FGameplayTag& MaxAllowedGa
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 
-	if (LocomotionState.Speed < AlsCharacterMovement->GetWalkSpeed() + 10.0f)
+	const FAlsMovementGaitSettings& GaitSettings = AlsCharacterMovement->GetGaitSettings();
+	const auto RelativeVelocityDirection = AlsCharacterMovement->GetRelativeVelocityDirection();
+	const auto WalkMaxSpeed = RelativeVelocityDirection.X < 0 ? GaitSettings.WalkBackwardSpeed : GaitSettings.WalkForwardSpeed;
+	if (LocomotionState.Speed < WalkMaxSpeed + 10.0f)
 	{
 		return AlsGaitTags::Walking;
 	}
 
-	if (LocomotionState.Speed < AlsCharacterMovement->GetRunSpeed() + 10.0f || MaxAllowedGait != AlsGaitTags::Sprinting)
+	const auto RunMaxSpeed = RelativeVelocityDirection.X < 0 ? GaitSettings.RunBackwardSpeed : GaitSettings.RunForwardSpeed;
+	if (LocomotionState.Speed < RunMaxSpeed + 10.0f || MaxAllowedGait != AlsGaitTags::Sprinting)
 	{
 		return AlsGaitTags::Running;
 	}

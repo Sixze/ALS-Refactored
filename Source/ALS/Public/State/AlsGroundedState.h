@@ -23,9 +23,6 @@ struct ALS_API FAlsVelocityBlendState
 	uint8 bInitializationRequired : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	FVector2D RelativeDirection{FVector2D::ZeroVector};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float ForwardAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))

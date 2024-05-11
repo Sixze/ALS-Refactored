@@ -202,6 +202,7 @@ public:
 	void SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait);
 	
 	void SetRelativeVelocityDirection(const FVector& Direction);
+	FVector GetRelativeVelocityDirection() const;
 
 	float GetWalkSpeed() const;
 	float GetRunSpeed() const;

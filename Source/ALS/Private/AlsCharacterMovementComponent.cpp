@@ -946,6 +946,11 @@ void UAlsCharacterMovementComponent::SetRelativeVelocityDirection(const FVector&
 	}
 }
 
+FVector UAlsCharacterMovementComponent::GetRelativeVelocityDirection() const
+{
+	return RelativeVelocityDirection;
+}
+
 float UAlsCharacterMovementComponent::GetWalkSpeed() const
 {
 	return FMath::GetMappedRangeValueClamped(FVector2d(-1, 0),
@@ -984,8 +989,8 @@ float UAlsCharacterMovementComponent::CalculateGaitAmount() const
 	{
 		static const FVector2f GaitAmount{1.0f, 2.0f};
 
-		const float WalkSpeed = GetWalkSpeed();
-		const float RunSpeed = GetRunSpeed();
+		const float WalkSpeed{GetWalkSpeed()};
+		const float RunSpeed{GetRunSpeed()};
 		return FMath::GetMappedRangeValueClamped({WalkSpeed, RunSpeed}, GaitAmount, Speed);
 	}
 

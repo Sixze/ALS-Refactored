@@ -74,13 +74,13 @@ inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait, 
 {
 	if (Gait == AlsGaitTags::Walking)
 	{
-		return FMath::GetMappedRangeValueClamped(FVector2d(-1, 0),
+		return FMath::GetMappedRangeValueClamped(FVector2d(-1.0f, 0.0f),
 			FVector2d(WalkBackwardSpeed, WalkForwardSpeed), LocalInputVector.X);
 	}
 
 	if (Gait == AlsGaitTags::Running)
 	{
-		return FMath::GetMappedRangeValueClamped(FVector2d(-1, 0),
+		return FMath::GetMappedRangeValueClamped(FVector2d(-1.0f, 0.0f),
 			FVector2d(RunBackwardSpeed, RunForwardSpeed), LocalInputVector.X);
 	}
 
