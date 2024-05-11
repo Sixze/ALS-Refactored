@@ -143,6 +143,9 @@ public:
 		DisplayName = "Slerp (Skip Normalization)", Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Direction"))
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Math|Rotation", Meta = (AutoCreateRefTerm = "TwistAxis", ReturnDisplayName = "Twist"))
+	static FQuat GetTwist(const FQuat& Quaternion, const FVector& TwistAxis = FVector::UpVector);
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|Math|Input", Meta = (ReturnDisplayName = "Direction"))
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
 

@@ -37,6 +37,15 @@ FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To,
 	return From * Cos + FromPerpendicular * Sin;
 }
 
+FQuat UAlsMath::GetTwist(const FQuat& Quaternion, const FVector& TwistAxis)
+{
+	// Based on TQuat<T>::ToSwingTwist().
+
+	const auto Projection{(TwistAxis | FVector{Quaternion.X, Quaternion.Y, Quaternion.Z}) * TwistAxis};
+
+	return FQuat{Projection.X, Projection.Y, Projection.Z, Quaternion.W}.GetNormalized();
+}
+
 EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleThreshold)
 {
 	if (Angle >= -ForwardHalfAngle - AngleThreshold && Angle <= ForwardHalfAngle + AngleThreshold)
