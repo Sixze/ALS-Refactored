@@ -1,75 +1,84 @@
 {
-	"FileVersion": 3,
-	"Version": 14,
-	"VersionName": "4.13",
-	"FriendlyName": "Advanced Locomotion System Refactored",
-	"Description": "Completely reworked and improved С++ version of Advanced Locomotion System V4.",
-	"Category": "Animation",
-	"CreatedBy": "Sixze",
-	"CreatedByURL": "https://github.com/Sixze",
-	"DocsURL": "https://github.com/Sixze/ALS-Refactored",
-	"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/advanced-locomotion-system-v1",
-	"SupportURL": "https://github.com/Sixze/ALS-Refactored/discussions",
-	"EngineVersion": "5.3.0",
-	"EnabledByDefault": true,
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "ALS",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSCamera",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSExtras",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSEditor",
-			"Type": "UncookedOnly",
-			"LoadingPhase": "PreDefault"
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "ACLPlugin",
-			"Enabled": true
-		},
-		{
-			"Name": "ControlRig",
-			"Enabled": true
-		},
-		{
-			"Name": "EnhancedInput",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayCameras",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayTagsEditor",
-			"Enabled": true
-		},
-		{
-			"Name": "Metasound",
-			"Enabled": true
-		},
-		{
-			"Name": "Niagara",
-			"Enabled": true
-		},
-		{
-			"Name": "PropertyAccessNode",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "Version": 14,
+  "VersionName": "1.0",
+  "FriendlyName": "Combat System",
+  "Description": "Core combat system including ALS, camera system, and other combat related",
+  "Category": "Gameplay",
+  "CreatedBy": "Lubin",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "EngineVersion": "5.4.0",
+  "EnabledByDefault": true,
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "ALS",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "ALSCamera",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "ALSExtras",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "ALSEditor",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "PreDefault"
+    },
+    {
+      "Name": "Character",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "ACLPlugin",
+      "Enabled": true
+    },
+    {
+      "Name": "ControlRig",
+      "Enabled": true
+    },
+    {
+      "Name": "EnhancedInput",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayCameras",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayTagsEditor",
+      "Enabled": true
+    },
+    {
+      "Name": "Metasound",
+      "Enabled": true
+    },
+    {
+      "Name": "Niagara",
+      "Enabled": true
+    },
+    {
+      "Name": "PropertyAccessNode",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true
+    }
+  ]
 }

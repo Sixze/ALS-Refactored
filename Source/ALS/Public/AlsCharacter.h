@@ -18,11 +18,72 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 
+/**
+ * 包含了ALS动画相关功能的基础角色类
+ */
+
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	// Lubin: Combat 战斗相关
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_AttackState")
+	FGameplayTag AttackState{AlsAttackStateTags::None};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State|Als Character|Hit State", Transient)
+	uint8 bCanHit : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State|Als Character|Hit State", Transient)
+	uint8 bHitting : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State|Als Character|Hit State", Transient)
+	uint8 bHitReflected : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State|Als Character|Misc", Transient)
+	uint8 bInteracting : 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Misc", Transient)
+	FVector WeaponTraceStart{0.0f, 0.0f, 0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Misc", Transient)
+	FVector WeaponTraceEnd{0.0f, 0.0f, 0.0f};
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnAttackStateChanged(const FGameplayTag& PreviousAttackState);
+
+public:
+	const FGameplayTag& GetAttackState() const;
+
+	void SetAttackState(const FGameplayTag& NewAttackState);
+
+	bool IsAbleToHit() const;
+	bool IsHitting() const;
+	bool IsHitReflected() const;
+	bool IsInteracting() const;
+
+	// UFUNCTION(BlueprintCallable, Category = "CustomFunctions", Meta = (ReturnDisplayName = "SweepTraceParameters"))
+	UFUNCTION(BlueprintPure, Category = "CustomFunctions", Meta = (ReturnDisplayName = "SweepTraceParameters"))
+	FSweepTraceParameters CalculateSweepTraceParameters(const UMeshComponent* ComponentMesh, const FName StartSocketName, const FName EndSocketName);
+
+	UFUNCTION(BlueprintCallable, Category = "CustomFunctions")
+	void ResetWeaponTraceData();
+
+private:
+	void SetAttackState(const FGameplayTag& NewAttackState, const bool bSendRpc);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetAttackState(const FGameplayTag& NewAttackState);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetAttackState(const FGameplayTag& NewAttackState);
+
+	UFUNCTION()
+	void OnReplicated_AttackState(const FGameplayTag& PreviousAttackState);
+
+	// ALS Basic
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
@@ -674,4 +735,31 @@ inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 inline const FAlsRagdollingState& AAlsCharacter::GetRagdollingState() const
 {
 	return RagdollingState;
+}
+
+// Lubin: Combat 战斗相关
+
+inline const FGameplayTag& AAlsCharacter::GetAttackState() const
+{
+	return AttackState;
+}
+
+inline bool AAlsCharacter::IsAbleToHit() const
+{
+	return bCanHit;
+}
+
+inline bool AAlsCharacter::IsHitting() const
+{
+	return bHitting;
+}
+
+inline bool AAlsCharacter::IsHitReflected() const
+{
+	return bHitReflected;
+}
+
+inline bool AAlsCharacter::IsInteracting() const
+{
+	return bInteracting;
 }

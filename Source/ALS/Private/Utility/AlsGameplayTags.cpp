@@ -47,6 +47,7 @@ namespace AlsOverlayModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Binoculars, FName{TEXTVIEW("Als.OverlayMode.Binoculars")})
 	UE_DEFINE_GAMEPLAY_TAG(Box, FName{TEXTVIEW("Als.OverlayMode.Box")})
 	UE_DEFINE_GAMEPLAY_TAG(Barrel, FName{TEXTVIEW("Als.OverlayMode.Barrel")})
+	UE_DEFINE_GAMEPLAY_TAG(MeleeOneHanded, FName{TEXTVIEW("Als.OverlayMode.MeleeOneHanded")})
 }
 
 namespace AlsLocomotionActionTags
@@ -60,4 +61,10 @@ namespace AlsLocomotionActionTags
 namespace AlsGroundedEntryModeTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(FromRoll, FName{TEXTVIEW("Als.GroundedEntryMode.FromRoll")})
+}
+
+namespace AlsAttackStateTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(None, FName{TEXTVIEW("Als.AttackState.None")})
+	UE_DEFINE_GAMEPLAY_TAG(AttackReady, FName{TEXTVIEW("Als.AttackState.AttackReady")})
 }

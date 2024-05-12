@@ -49,6 +49,7 @@ namespace AlsOverlayModeTags
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Binoculars)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Box)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Barrel)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MeleeOneHanded)
 }
 
 namespace AlsLocomotionActionTags
@@ -62,4 +63,10 @@ namespace AlsLocomotionActionTags
 namespace AlsGroundedEntryModeTags
 {
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(FromRoll)
+}
+
+namespace AlsAttackStateTags
+{
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(None)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(AttackReady)
 }

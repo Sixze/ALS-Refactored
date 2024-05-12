@@ -21,6 +21,7 @@
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
 #include "State/AlsViewAnimationState.h"
+#include "State/AlsCombatStats.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
@@ -365,6 +366,16 @@ public:
 
 public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
+
+	// Lubin: Combat 战斗相关
+
+protected:
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FAlsCombatStats CombatStats;
+
+public:
+	void RefreshCombatStats();
 };
 
 inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe() const
