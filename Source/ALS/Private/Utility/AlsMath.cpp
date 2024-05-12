@@ -18,7 +18,7 @@ FVector UAlsMath::SpringDampVector(const FVector& Current, const FVector& Target
 
 FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To, const float Alpha)
 {
-	// http://allenchou.net/2018/05/game-math-deriving-the-slerp-formula/
+	// https://allenchou.net/2018/05/game-math-deriving-the-slerp-formula/
 
 	const auto Dot{From | To};
 
