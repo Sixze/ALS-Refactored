@@ -613,9 +613,9 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 	Super::PhysCustom(DeltaTime, Iterations);
 }
 
-void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance,
-                                                      FFindFloorResult& OutFloorResult, float SweepRadius,
-                                                      const FHitResult* DownwardSweepResult) const
+void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance,
+                                                      float SweepDistance, FFindFloorResult& OutFloorResult,
+                                                      float SweepRadius, const FHitResult* DownwardSweepResult) const
 {
 	// TODO Copied with modifications from UCharacterMovementComponent::ComputeFloorDist().
 	// TODO After the release of a new engine version, this code should be updated to match the source code.

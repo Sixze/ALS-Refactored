@@ -141,10 +141,10 @@ public:
 	FVector3f FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
 	// Prevents footstep decals from spawning if the angle between the foot's Z axis and the surface normal exceeds this value.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
 	float DecalSpawnAngleThreshold{35.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings", AdvancedDisplay, Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Settings", AdvancedDisplay, Meta = (ClampMin = 0, ClampMax = 1))
 	float DecalSpawnAngleThresholdCos{FMath::Cos(FMath::DegreesToRadians(35.0f))};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
@@ -169,7 +169,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	EAlsFootBone FootBone{EAlsFootBone::Left};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bSkipEffectsWhenInAir : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")

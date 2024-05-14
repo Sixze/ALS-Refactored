@@ -17,7 +17,6 @@ public:
 
 	// Stops all active animation montages that share at least one slot with the reference montage.
 	UFUNCTION(BlueprintCallable, Category = "ALS|Montage Utility")
-	static void StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance,
-	                                           const UAnimMontage* ReferenceMontage,
+	static void StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance, const UAnimMontage* ReferenceMontage,
 	                                           float BlendOutDuration = -1.0f);
 };

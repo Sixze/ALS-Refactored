@@ -95,8 +95,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
 	uint8 bEnableCameraLagSubstepping : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Enable Camera Lag Substepping",
-		Meta = (EditCondition = "bEnableCameraLagSubstepping"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		DisplayName = "Enable Camera Lag Substepping", Meta = (EditCondition = "bEnableCameraLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")

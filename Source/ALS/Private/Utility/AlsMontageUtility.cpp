@@ -52,8 +52,7 @@ FTransform UAlsMontageUtility::ExtractLastRootTransformFromMontage(const UAnimMo
 	return Sequence->ExtractRootTrackTransform(Segment.GetEndPos(), nullptr);
 }
 
-void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance,
-                                                        const UAnimMontage* ReferenceMontage,
+void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance, const UAnimMontage* ReferenceMontage,
                                                         const float BlendOutDuration)
 {
 	if (!ALS_ENSURE(IsValid(AnimationInstance)) || !ALS_ENSURE(IsValid(ReferenceMontage)))
