@@ -44,6 +44,7 @@ public:
 	virtual void Initialize() override;
 
 	RIGVM_METHOD()
+	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
 };
 
@@ -94,6 +95,7 @@ public:
 	virtual void Initialize() override;
 
 	RIGVM_METHOD()
+	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
 };
 
@@ -150,5 +152,6 @@ public:
 	virtual void Initialize() override;
 
 	RIGVM_METHOD()
+	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
 };

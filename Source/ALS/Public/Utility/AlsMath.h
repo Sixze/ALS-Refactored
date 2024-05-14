@@ -86,15 +86,15 @@ public:
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
 
 	template <typename ValueType, typename StateType>
-	static ValueType SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState,
+	static ValueType SpringDamp(StateType& SpringState, const ValueType& Current, const ValueType& Target,
 	                            float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Math", Meta = (ReturnDisplayName = "Value"))
-	static float SpringDampFloat(float Current, float Target, UPARAM(ref) FAlsSpringFloatState& SpringState,
+	UFUNCTION(BlueprintPure, Category = "ALS|Math", Meta = (ReturnDisplayName = "Value"))
+	static float SpringDampFloat(UPARAM(ref) FAlsSpringFloatState& SpringState, float Current, float Target,
 	                             float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Math", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Vector"))
-	static FVector SpringDampVector(const FVector& Current, const FVector& Target, UPARAM(ref) FAlsSpringVectorState& SpringState,
+	UFUNCTION(BlueprintPure, Category = "ALS|Math", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Vector"))
+	static FVector SpringDampVector(UPARAM(ref) FAlsSpringVectorState& SpringState, const FVector& Current, const FVector& Target,
 	                                float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 
 	// Remaps the angle from the [175, 180] range to [-185, -180]. Used to
@@ -146,7 +146,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Math|Rotation", Meta = (AutoCreateRefTerm = "TwistAxis", ReturnDisplayName = "Twist"))
 	static FQuat GetTwist(const FQuat& Quaternion, const FVector& TwistAxis = FVector::UpVector);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Math|Input", Meta = (ReturnDisplayName = "Direction"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Math|Input", Meta = (ReturnDisplayName = "Direction"))
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
 
 	// Calculates the projection location and direction of the perpendicular to AC through B.
@@ -307,7 +307,7 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 }
 
 template <typename ValueType, typename StateType>
-ValueType UAlsMath::SpringDamp(const ValueType& Current, const ValueType& Target, StateType& SpringState, const float DeltaTime,
+ValueType UAlsMath::SpringDamp(StateType& SpringState, const ValueType& Current, const ValueType& Target, const float DeltaTime,
                                const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
 	if (DeltaTime <= UE_SMALL_NUMBER)

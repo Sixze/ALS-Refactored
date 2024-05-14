@@ -4,16 +4,16 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsMath)
 
-float UAlsMath::SpringDampFloat(const float Current, const float Target, FAlsSpringFloatState& SpringState, const float DeltaTime,
+float UAlsMath::SpringDampFloat(FAlsSpringFloatState& SpringState, const float Current, const float Target, const float DeltaTime,
                                 const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	return SpringDamp(Current, Target, SpringState, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
+	return SpringDamp(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }
 
-FVector UAlsMath::SpringDampVector(const FVector& Current, const FVector& Target, FAlsSpringVectorState& SpringState, const float DeltaTime,
+FVector UAlsMath::SpringDampVector(FAlsSpringVectorState& SpringState, const FVector& Current, const FVector& Target, const float DeltaTime,
                                    const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	return SpringDamp(Current, Target, SpringState, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
+	return SpringDamp(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }
 
 FVector UAlsMath::SlerpSkipNormalization(const FVector& From, const FVector& To, const float Alpha)

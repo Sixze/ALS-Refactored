@@ -1368,8 +1368,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		static constexpr auto LocationInterpolationDampingRatio{4.0f};
 		static constexpr auto LocationInterpolationTargetVelocityAmount{1.0f};
 
-		FootState.OffsetLocationZ = UAlsMath::SpringDampFloat(FootState.OffsetLocationZ, FootState.OffsetTargetLocationZ,
-		                                                      FootState.OffsetSpringState, DeltaTime, LocationInterpolationFrequency,
+		FootState.OffsetLocationZ = UAlsMath::SpringDampFloat(FootState.OffsetSpringState, FootState.OffsetLocationZ,
+		                                                      FootState.OffsetTargetLocationZ, DeltaTime, LocationInterpolationFrequency,
 		                                                      LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
 
 		static constexpr auto RotationInterpolationSpeed{30.0f};
