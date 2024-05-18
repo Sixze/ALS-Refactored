@@ -50,13 +50,13 @@ public:
 	static float Clamp01(float Value);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Value"))
-	static float LerpClamped(float From, float To, float Alpha);
+	static float LerpClamped(float From, float To, float Ratio);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Angle"))
-	static float LerpAngle(float From, float To, float Alpha);
+	static float LerpAngle(float From, float To, float Ratio);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Rotator"))
-	static FRotator LerpRotator(const FRotator& From, const FRotator& To, float Alpha);
+	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Rotation"))
+	static FRotator LerpRotation(const FRotator& From, const FRotator& To, float Ratio);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Interpolation Amount"))
 	static float Damp(float DeltaTime, float Smoothing);
@@ -76,14 +76,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Angle"))
 	static float ExponentialDecayAngle(float Current, float Target, float DeltaTime, float Lambda);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotator"))
-	static FRotator DampRotator(const FRotator& Current, const FRotator& Target, float DeltaTime, float Smoothing);
+	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotation"))
+	static FRotator DampRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float Smoothing);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotator"))
-	static FRotator ExponentialDecayRotator(const FRotator& Current, const FRotator& Target, float DeltaTime, float Lambda);
+	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotation"))
+	static FRotator ExponentialDecayRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float Lambda);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Angle"))
-	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float InterpolationSpeed);
+	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float Speed);
 
 	template <typename ValueType, typename StateType>
 	static ValueType SpringDamp(StateType& SpringState, const ValueType& Current, const ValueType& Target,
@@ -141,7 +141,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility|Vector", DisplayName = "Slerp (Skip Normalization)",
 		Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Direction"))
-	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Alpha);
+	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Ratio);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (AutoCreateRefTerm = "TwistAxis", ReturnDisplayName = "Twist"))
 	static FQuat GetTwist(const FQuat& Quaternion, const FVector& TwistAxis = FVector::UpVector);
@@ -153,7 +153,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Math Utility",
 		Meta = (AutoCreateRefTerm = "ALocation, BLocation, CLocation", ExpandBoolAsExecs = "ReturnValue"))
 	static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
-	                                   FVector& ProjectionLocation, FVector& Direction);
+	                                   FVector& ProjectionLocation, FVector& PoleDirection);
 };
 
 template <typename ValueType> requires std::is_floating_point_v<ValueType>
@@ -190,20 +190,20 @@ inline float UAlsMath::Clamp01(const float Value)
 		       : Value;
 }
 
-inline float UAlsMath::LerpClamped(const float From, const float To, const float Alpha)
+inline float UAlsMath::LerpClamped(const float From, const float To, const float Ratio)
 {
-	return From + (To - From) * Clamp01(Alpha);
+	return From + (To - From) * Clamp01(Ratio);
 }
 
-inline float UAlsMath::LerpAngle(const float From, const float To, const float Alpha)
+inline float UAlsMath::LerpAngle(const float From, const float To, const float Ratio)
 {
 	auto Delta{FRotator3f::NormalizeAxis(To - From)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
-	return FRotator3f::NormalizeAxis(From + Delta * Alpha);
+	return FRotator3f::NormalizeAxis(From + Delta * Ratio);
 }
 
-inline FRotator UAlsMath::LerpRotator(const FRotator& From, const FRotator& To, const float Alpha)
+inline FRotator UAlsMath::LerpRotation(const FRotator& From, const FRotator& To, const float Ratio)
 {
 	auto Result{To - From};
 	Result.Normalize();
@@ -212,7 +212,7 @@ inline FRotator UAlsMath::LerpRotator(const FRotator& From, const FRotator& To, 
 	Result.Yaw = RemapAngleForCounterClockwiseRotation(Result.Yaw);
 	Result.Roll = RemapAngleForCounterClockwiseRotation(Result.Roll);
 
-	Result *= Alpha;
+	Result *= Ratio;
 	Result += From;
 	Result.Normalize();
 
@@ -253,7 +253,7 @@ template <>
 inline FRotator UAlsMath::Damp(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
 {
 	return Smoothing > 0.0f
-		       ? LerpRotator(Current, Target, Damp(DeltaTime, Smoothing))
+		       ? LerpRotation(Current, Target, Damp(DeltaTime, Smoothing))
 		       : Target;
 }
 
@@ -261,7 +261,7 @@ template <>
 inline FRotator UAlsMath::ExponentialDecay(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Lambda)
 {
 	return Lambda > 0.0f
-		       ? LerpRotator(Current, Target, ExponentialDecay(DeltaTime, Lambda))
+		       ? LerpRotation(Current, Target, ExponentialDecay(DeltaTime, Lambda))
 		       : Target;
 }
 
@@ -279,21 +279,20 @@ inline float UAlsMath::ExponentialDecayAngle(const float Current, const float Ta
 		       : Target;
 }
 
-inline FRotator UAlsMath::DampRotator(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
+inline FRotator UAlsMath::DampRotation(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
 {
 	return Damp(Current, Target, DeltaTime, Smoothing);
 }
 
-inline FRotator UAlsMath::ExponentialDecayRotator(const FRotator& Current, const FRotator& Target,
-                                                  const float DeltaTime, const float Lambda)
+inline FRotator UAlsMath::ExponentialDecayRotation(const FRotator& Current, const FRotator& Target,
+                                                   const float DeltaTime, const float Lambda)
 {
 	return ExponentialDecay(Current, Target, DeltaTime, Lambda);
 }
 
-inline float UAlsMath::InterpolateAngleConstant(const float Current, const float Target,
-                                                const float DeltaTime, const float InterpolationSpeed)
+inline float UAlsMath::InterpolateAngleConstant(const float Current, const float Target, const float DeltaTime, const float Speed)
 {
-	if (InterpolationSpeed <= 0.0f || Current == Target)
+	if (Speed <= 0.0f || Current == Target)
 	{
 		return Target;
 	}
@@ -301,9 +300,9 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
-	const auto Alpha{InterpolationSpeed * DeltaTime};
+	const auto MaxDelta{Speed * DeltaTime};
 
-	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -Alpha, Alpha));
+	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -MaxDelta, MaxDelta));
 }
 
 template <typename ValueType, typename StateType>

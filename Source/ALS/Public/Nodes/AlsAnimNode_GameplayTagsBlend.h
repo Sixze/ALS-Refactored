@@ -30,6 +30,6 @@ public:
 	const TArray<FGameplayTag>& GetTags() const;
 
 #if WITH_EDITOR
-	void RefreshPoses();
+	void RefreshPosePins();
 #endif
 };

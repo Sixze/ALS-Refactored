@@ -24,7 +24,7 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
-struct FAlsFootLimitsSettings;
+struct FAlsFootConstraintsSettings;
 class UAlsLinkedAnimationInstance;
 class AAlsCharacter;
 
@@ -281,19 +281,20 @@ private:
 
 	void RefreshFeet(float DeltaTime);
 
-	void RefreshFoot(FAlsFootState& FootState, const FName& FootIkCurveName, const FName& FootLockCurveName,
-	                 const FAlsFootLimitsSettings& LimitsSettings, const FTransform& ComponentTransformInverse, float DeltaTime) const;
+	void RefreshFoot(FAlsFootState& FootState, const FName& IkCurveName, const FName& LockCurveName,
+	                 const FAlsFootConstraintsSettings& ConstraintsSettings, const FTransform& ComponentTransformInverse,
+	                 float DeltaTime) const;
 
 	void ProcessFootLockTeleport(FAlsFootState& FootState) const;
 
 	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const;
 
-	void RefreshFootLock(FAlsFootState& FootState, const FName& FootLockCurveName, const FTransform& ComponentTransformInverse,
+	void RefreshFootLock(FAlsFootState& FootState, const FName& LockCurveName, const FTransform& ComponentTransformInverse,
 	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
 	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
 
-	void LimitFootRotation(const FAlsFootLimitsSettings& LimitsSettings, const FQuat& ParentRotation, FQuat& Rotation) const;
+	void ConstraintFootRotation(const FAlsFootConstraintsSettings& ConstraintsSettings, const FQuat& ParentRotation, FQuat& Rotation) const;
 
 	// Transitions
 
@@ -302,7 +303,7 @@ public:
 	void PlayQuickStopAnimation();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
-	void PlayTransitionAnimation(UAnimSequenceBase* Animation, float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f,
+	void PlayTransitionAnimation(UAnimSequenceBase* Sequence, float BlendInDuration = 0.2f, float BlendOutDuration = 0.2f,
 	                             float PlayRate = 1.0f, float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))

@@ -64,14 +64,14 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 	}
 }
 
-bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDelta) const
+bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDeltaTime) const
 {
 	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
 
 	return RotationMode == NewMove->RotationMode &&
 	       Stance == NewMove->Stance &&
 	       MaxAllowedGait == NewMove->MaxAllowedGait &&
-	       Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
+	       Super::CanCombineWith(NewMovePtr, Character, MaxDeltaTime);
 }
 
 void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
@@ -817,11 +817,11 @@ void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
 		// absolute mesh rotation since we're manually updating the mesh's rotation from the animation instance. So,
 		// to keep the rotation unchanged, we simply override the predicted rotations with the mesh's current rotation.
 
-		const auto Rotation{Mesh->GetComponentQuat() * CharacterOwner->GetBaseRotationOffset().Inverse()};
+		const auto NewRotation{Mesh->GetComponentQuat() * CharacterOwner->GetBaseRotationOffset().Inverse()};
 
-		PredictionData->OriginalMeshRotationOffset = Rotation;
-		PredictionData->MeshRotationOffset = Rotation;
-		PredictionData->MeshRotationTarget = Rotation;
+		PredictionData->OriginalMeshRotationOffset = NewRotation;
+		PredictionData->MeshRotationOffset = NewRotation;
+		PredictionData->MeshRotationTarget = NewRotation;
 	}
 
 	Super::SmoothClientPosition(DeltaTime);

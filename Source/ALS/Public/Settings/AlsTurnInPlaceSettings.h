@@ -11,7 +11,7 @@ class ALS_API UAlsTurnInPlaceSettings : public UObject
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UAnimSequenceBase> Animation;
+	TObjectPtr<UAnimSequenceBase> Sequence;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float PlayRate{1.2f};

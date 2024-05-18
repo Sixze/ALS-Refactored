@@ -3,9 +3,9 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsInAirSettings)
 
 #if WITH_EDITOR
-void FAlsInAirSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
+void FAlsInAirSettings::PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsInAirSettings, GroundPredictionResponseChannels))
+	if (ChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsInAirSettings, GroundPredictionResponseChannels))
 	{
 		return;
 	}

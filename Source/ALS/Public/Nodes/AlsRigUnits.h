@@ -77,7 +77,7 @@ public:
 	FVector ItemBProjectionLocation{ForceInit};
 
 	UPROPERTY(Transient, Meta = (Output))
-	FVector Direction{FVector::ForwardVector};
+	FVector PoleDirection{FVector::XAxisVector};
 
 	UPROPERTY(Transient)
 	bool bInitialized{false};

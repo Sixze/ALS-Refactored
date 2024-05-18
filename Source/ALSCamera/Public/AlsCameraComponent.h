@@ -95,7 +95,7 @@ public:
 	bool IsFieldOfViewOverriden() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
-	void SetFieldOfViewOverriden(bool bNewOverriden);
+	void SetFieldOfViewOverriden(bool bNewFieldOfViewOverriden);
 
 	float GetFieldOfViewOverride() const;
 
@@ -163,9 +163,9 @@ inline bool UAlsCameraComponent::IsFieldOfViewOverriden() const
 	return bOverrideFieldOfView;
 }
 
-inline void UAlsCameraComponent::SetFieldOfViewOverriden(const bool bNewOverriden)
+inline void UAlsCameraComponent::SetFieldOfViewOverriden(const bool bNewFieldOfViewOverriden)
 {
-	bOverrideFieldOfView = bNewOverriden;
+	bOverrideFieldOfView = bNewFieldOfViewOverriden;
 }
 
 inline float UAlsCameraComponent::GetFieldOfViewOverride() const

@@ -22,7 +22,7 @@ const TArray<FGameplayTag>& FAlsAnimNode_GameplayTagsBlend::GetTags() const
 }
 
 #if WITH_EDITOR
-void FAlsAnimNode_GameplayTagsBlend::RefreshPoses()
+void FAlsAnimNode_GameplayTagsBlend::RefreshPosePins()
 {
 	const auto Difference{BlendPose.Num() - GetTags().Num() - 1};
 	if (Difference == 0)

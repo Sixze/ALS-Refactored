@@ -3,7 +3,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsFeetSettings)
 
 #if WITH_EDITOR
-void FAlsFootLimitsSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
+void FAlsFootConstraintsSettings::PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent)
 {
 	TwistAxis.Normalize();
 	TwistLimit = FMath::Sin(FMath::DegreesToRadians(TwistLimitAngle) * 0.5f);
@@ -13,9 +13,9 @@ void FAlsFootLimitsSettings::PostEditChangeProperty(const FPropertyChangedEvent&
 	Swing2Limit = FMath::Sin(FMath::DegreesToRadians(Swing2LimitAngle) * 0.5f);
 }
 
-void FAlsFeetSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
+void FAlsFeetSettings::PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent)
 {
-	LeftFootLimits.PostEditChangeProperty(PropertyChangedEvent);
-	RightFootLimits.PostEditChangeProperty(PropertyChangedEvent);
+	LeftFootConstraints.PostEditChangeProperty(ChangedEvent);
+	RightFootConstraints.PostEditChangeProperty(ChangedEvent);
 }
 #endif

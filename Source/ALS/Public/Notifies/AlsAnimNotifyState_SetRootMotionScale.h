@@ -17,9 +17,9 @@ public:
 
 	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-	                         float Duration, const FAnimNotifyEventReference& EventReference) override;
+	virtual void NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+	                         float Duration, const FAnimNotifyEventReference& NotifyEventReference) override;
 
-	virtual void NotifyEnd(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-	                       const FAnimNotifyEventReference& EventReference) override;
+	virtual void NotifyEnd(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+	                       const FAnimNotifyEventReference& NotifyEventReference) override;
 };

@@ -4,7 +4,7 @@
 #include "AlsFeetSettings.generated.h"
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsFootLimitsSettings
+struct ALS_API FAlsFootConstraintsSettings
 {
 	GENERATED_BODY()
 
@@ -41,7 +41,7 @@ struct ALS_API FAlsFootLimitsSettings
 
 public:
 #if WITH_EDITOR
-	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+	void PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent);
 #endif
 };
 
@@ -66,13 +66,13 @@ struct ALS_API FAlsFeetSettings
 	float IkTraceDistanceDownward{45.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsFootLimitsSettings LeftFootLimits;
+	FAlsFootConstraintsSettings LeftFootConstraints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsFootLimitsSettings RightFootLimits;
+	FAlsFootConstraintsSettings RightFootConstraints;
 
 public:
 #if WITH_EDITOR
-	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+	void PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent);
 #endif
 };

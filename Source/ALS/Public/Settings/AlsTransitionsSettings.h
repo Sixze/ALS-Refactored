@@ -22,14 +22,14 @@ struct ALS_API FAlsTransitionsSettings
 	float QuickStopStartTime{0.3f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingLeftAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> StandingLeftSequence{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> StandingRightAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> StandingRightSequence{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingLeftAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> CrouchingLeftSequence{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimSequenceBase> CrouchingRightAnimation{nullptr};
+	TObjectPtr<UAnimSequenceBase> CrouchingRightSequence{nullptr};
 };

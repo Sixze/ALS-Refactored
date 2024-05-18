@@ -373,7 +373,7 @@ private:
 	void OnReplicated_ReplicatedViewRotation();
 
 public:
-	void CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation, bool bRelativeTargetRotation);
+	void CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation, bool bRotationIsBaseRelative);
 
 public:
 	const FAlsViewState& GetViewState() const;
@@ -389,7 +389,7 @@ public:
 	const FAlsLocomotionState& GetLocomotionState() const;
 
 private:
-	void SetDesiredVelocityYawAngle(float NewDesiredVelocityYawAngle);
+	void SetDesiredVelocityYawAngle(float NewVelocityYawAngle);
 
 	void RefreshLocomotionLocationAndRotation();
 
@@ -443,18 +443,17 @@ protected:
 
 	void RefreshInAirAimingRotation(float DeltaTime);
 
-	void RefreshRotationSmooth(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
+	void SetRotationSmooth(float TargetYawAngle, float DeltaTime, float InterpolationSpeed);
 
-	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
-	                                float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed);
+	void SetRotationExtraSmooth(float TargetYawAngle, float DeltaTime, float InterpolationSpeed, float TargetYawAngleRotationSpeed);
 
-	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
+	void SetRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
 	void RefreshTargetYawAngleUsingLocomotionRotation();
 
-	void RefreshTargetYawAngle(float TargetYawAngle);
+	void SetTargetYawAngle(float TargetYawAngle);
 
-	void RefreshTargetYawAngleSmooth(float TargetYawAngle, float DeltaTime, float TargetYawAngleRotationSpeed);
+	void SetTargetYawAngleSmooth(float TargetYawAngle, float DeltaTime, float RotationSpeed);
 
 	void RefreshViewRelativeTargetYawAngle();
 
@@ -579,7 +578,7 @@ private:
 
 	FVector RagdollTraceGround(bool& bGrounded) const;
 
-	void LimitRagdollSpeed() const;
+	void ConstraintRagdollSpeed() const;
 
 	// Debug
 

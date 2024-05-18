@@ -20,7 +20,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_FootstepEffects)
 
 #if WITH_EDITOR
-void FAlsFootstepEffectSettings::PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent)
+void FAlsFootstepEffectSettings::PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent)
 {
 	DecalFootLeftRotationOffsetQuaternion = DecalFootLeftRotationOffset.Quaternion();
 	DecalFootRightRotationOffsetQuaternion = DecalFootRightRotationOffset.Quaternion();
@@ -28,21 +28,21 @@ void FAlsFootstepEffectSettings::PostEditChangeProperty(const FPropertyChangedEv
 	ParticleSystemFootRightRotationOffsetQuaternion = ParticleSystemFootRightRotationOffset.Quaternion();
 }
 
-void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, DecalSpawnAngleThreshold))
+	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, DecalSpawnAngleThreshold))
 	{
 		DecalSpawnAngleThresholdCos = FMath::Cos(FMath::DegreesToRadians(DecalSpawnAngleThreshold));
 	}
-	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Effects))
+	else if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Effects))
 	{
 		for (auto& Tuple : Effects)
 		{
-			Tuple.Value.PostEditChangeProperty(PropertyChangedEvent);
+			Tuple.Value.PostEditChangeProperty(ChangedEvent);
 		}
 	}
 
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	Super::PostEditChangeProperty(ChangedEvent);
 }
 #endif
 
@@ -54,18 +54,18 @@ FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 }
 
 #if WITH_EDITOR
-void UAlsAnimNotify_FootstepEffects::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+void UAlsAnimNotify_FootstepEffects::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& NotifyEvent)
 {
-	Super::OnAnimNotifyCreatedInEditor(ContainingAnimNotifyEvent);
+	Super::OnAnimNotifyCreatedInEditor(NotifyEvent);
 
-	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+	NotifyEvent.bTriggerOnDedicatedServer = false;
 }
 #endif
 
-void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                            const FAnimNotifyEventReference& EventReference)
+void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+                                            const FAnimNotifyEventReference& NotifyEventReference)
 {
-	Super::Notify(Mesh, Animation, EventReference);
+	Super::Notify(Mesh, Sequence, NotifyEventReference);
 
 	if (!IsValid(Mesh) || !ALS_ENSURE(IsValid(FootstepEffectsSettings)))
 	{

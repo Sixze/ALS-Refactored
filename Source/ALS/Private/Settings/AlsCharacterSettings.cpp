@@ -17,13 +17,13 @@ UAlsCharacterSettings::UAlsCharacterSettings()
 }
 
 #if WITH_EDITOR
-void UAlsCharacterSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UAlsCharacterSettings::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Mantling))
+	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Mantling))
 	{
-		Mantling.PostEditChangeProperty(PropertyChangedEvent);
+		Mantling.PostEditChangeProperty(ChangedEvent);
 	}
 
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	Super::PostEditChangeProperty(ChangedEvent);
 }
 #endif

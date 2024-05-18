@@ -51,7 +51,7 @@ public:
 	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration,
 	                        FNetworkPredictionData_Client_Character& PredictionData) override;
 
-	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDelta) const override;
+	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDeltaTime) const override;
 
 	virtual void CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
 	                         APlayerController* Player, const FVector& PreviousStartLocation) override;

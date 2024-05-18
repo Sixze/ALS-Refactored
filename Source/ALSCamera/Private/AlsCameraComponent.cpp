@@ -300,16 +300,16 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	// Trace for an object between the camera and character to apply a corrective offset.
 
-	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag, TraceDistanceRatio)};
+	const auto CameraFinalLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag, TraceDistanceRatio)};
 
 	if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
-		CameraLocation = CameraResultLocation;
+		CameraLocation = CameraFinalLocation;
 		CameraFieldOfView = Settings->ThirdPerson.FieldOfView;
 	}
 	else
 	{
-		CameraLocation = FMath::Lerp(CameraResultLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
+		CameraLocation = FMath::Lerp(CameraFinalLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
 		CameraFieldOfView = FMath::Lerp(Settings->ThirdPerson.FieldOfView, Settings->FirstPerson.FieldOfView, FirstPersonOverride);
 	}
 

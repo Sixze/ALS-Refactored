@@ -30,6 +30,6 @@ public:
 
 public:
 #if WITH_EDITOR
-	void PostEditChangeProperty(const FPropertyChangedEvent& PropertyChangedEvent);
+	void PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent);
 #endif
 };

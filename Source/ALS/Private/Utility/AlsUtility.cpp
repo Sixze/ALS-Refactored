@@ -40,8 +40,8 @@ FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
 float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 {
 	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
-	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
-	const auto* PlayerState{IsValid(PlayerController) ? PlayerController->PlayerState.Get() : nullptr};
+	const auto* Player{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
+	const auto* PlayerState{IsValid(Player) ? Player->PlayerState.Get() : nullptr};
 
 	return IsValid(PlayerState) ? PlayerState->GetPingInMilliseconds() * 0.001f : 0.0f;
 }
@@ -78,8 +78,8 @@ bool UAlsUtility::TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& Base
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
 {
 	const auto* World{IsValid(Actor) ? Actor->GetWorld() : nullptr};
-	const auto* PlayerController{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
-	auto* Hud{IsValid(PlayerController) ? PlayerController->GetHUD() : nullptr};
+	const auto* Player{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
+	auto* Hud{IsValid(Player) ? Player->GetHUD() : nullptr};
 
 	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
 }
@@ -102,10 +102,10 @@ void UAlsUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Loc
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
-		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaRadian{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, DeltaAngle * static_cast<float>(i));
+		FMath::SinCos(&Sin, &Cos, DeltaRadian * static_cast<float>(i));
 
 		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
@@ -134,10 +134,10 @@ void UAlsUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& 
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
-		static constexpr auto DeltaAngle{UE_TWO_PI / DrawCircleSidesCount};
+		static constexpr auto DeltaRadian{UE_TWO_PI / DrawCircleSidesCount};
 
 		float Sin, Cos;
-		FMath::SinCos(&Sin, &Cos, DeltaAngle * static_cast<float>(i));
+		FMath::SinCos(&Sin, &Cos, DeltaRadian * static_cast<float>(i));
 
 		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
 
@@ -208,10 +208,10 @@ void UAlsUtility::DrawDebugSweepSphere(const UObject* WorldContext, const FVecto
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	const auto AxisVector{End - Start};
+	const auto SweepVector{End - Start};
 
-	DrawDebugCapsule(World, Start + AxisVector * 0.5f, UE_REAL_TO_FLOAT(AxisVector.Size()) * 0.5f + Radius,
-	                 Radius, FRotationMatrix::MakeFromZ(AxisVector).ToQuat(),
+	DrawDebugCapsule(World, Start + SweepVector * 0.5f, UE_REAL_TO_FLOAT(SweepVector.Size()) * 0.5f + Radius,
+	                 Radius, FRotationMatrix::MakeFromZ(SweepVector).ToQuat(),
 	                 FColor, bPersistent, Duration, DepthPriority, Thickness);
 
 	DrawDebugDirectionalArrow(World, Start, End, DrawArrowSize, FColor, bPersistent, Duration, DepthPriority, Thickness);
@@ -299,8 +299,8 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
 	FVector XAxis, YAxis, ZAxis;
 	RotationMatrix.GetScaledAxes(XAxis, YAxis, ZAxis);
 
-	const auto NegatedXAxis{-XAxis};
-	const auto NegatedZAxis{-ZAxis};
+	const auto XAxisInverse{-XAxis};
+	const auto ZAxisInverse{-ZAxis};
 
 	const auto DistanceToHemisphere{FMath::Max(1.0f, HalfHeight - Radius)};
 
@@ -310,15 +310,15 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
 	const auto EndTop{End + DistanceToHemisphere * ZAxis};
 	const auto EndBottom{End - DistanceToHemisphere * ZAxis};
 
-	DrawHalfCircle(World, StartTop, YAxis, NegatedXAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, StartTop, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 	DrawHalfCircle(World, StartTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawQuarterCircle(World, StartTop, NegatedXAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, StartTop, XAxisInverse, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, StartBottom, YAxis, NegatedXAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, StartBottom, YAxis, NegatedZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, StartBottom, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, StartBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawQuarterCircle(World, StartBottom, NegatedXAxis, NegatedZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, StartBottom, XAxisInverse, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
 	DrawHalfCircle(World, EndTop, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 	DrawHalfCircle(World, EndTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
@@ -326,9 +326,9 @@ void UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(const UObject* WorldCon
 	DrawQuarterCircle(World, EndTop, XAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
 	DrawHalfCircle(World, EndBottom, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, EndBottom, YAxis, NegatedZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, EndBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawQuarterCircle(World, EndBottom, XAxis, NegatedZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, EndBottom, XAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
 	DrawDebugLine(World, StartTop - Radius * XAxis, StartBottom - Radius * XAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);

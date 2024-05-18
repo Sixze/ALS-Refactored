@@ -91,7 +91,7 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	{
 		RollingState.TargetYawAngle = TargetYawAngle;
 
-		RefreshRotationInstant(InitialYawAngle);
+		SetRotationInstant(InitialYawAngle);
 
 		SetLocomotionAction(AlsLocomotionActionTags::Rolling);
 	}
@@ -775,7 +775,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 		RagdollingState.SpeedLimitFrameTimeRemaining = 8;
 		RagdollingState.SpeedLimit = FMath::Max(MinSpeedLimit, UE_REAL_TO_FLOAT(LocomotionState.Velocity.Size()));
 
-		LimitRagdollSpeed();
+		ConstraintRagdollSpeed();
 	}
 
 	if (GetLocalRole() >= ROLE_Authority)
@@ -911,7 +911,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	{
 		RagdollingState.SpeedLimitFrameTimeRemaining -= 1;
 
-		LimitRagdollSpeed();
+		ConstraintRagdollSpeed();
 	}
 }
 
@@ -953,7 +953,7 @@ FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 	};
 }
 
-void AAlsCharacter::LimitRagdollSpeed() const
+void AAlsCharacter::ConstraintRagdollSpeed() const
 {
 	GetMesh()->ForEachBodyBelow(NAME_None, true, false, [this](FBodyInstance* Body)
 	{

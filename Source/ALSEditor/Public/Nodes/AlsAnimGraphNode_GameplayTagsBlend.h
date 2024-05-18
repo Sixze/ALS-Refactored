@@ -16,7 +16,7 @@ protected:
 public:
 	UAlsAnimGraphNode_GameplayTagsBlend();
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent) override;
 
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 

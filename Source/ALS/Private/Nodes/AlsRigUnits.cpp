@@ -61,11 +61,11 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 
 	const auto NewItemBLocation{Hierarchy->GetGlobalTransformByIndex(CachedItemB, bInitial).GetLocation()};
 	FVector NewItemBProjectionLocation;
-	FVector NewDirection;
+	FVector NewPoleDirection;
 
 	if (!UAlsMath::TryCalculatePoleVector(Hierarchy->GetGlobalTransformByIndex(CachedItemA, bInitial).GetLocation(), NewItemBLocation,
 	                                      Hierarchy->GetGlobalTransformByIndex(CachedItemC, bInitial).GetLocation(),
-	                                      NewItemBProjectionLocation, NewDirection))
+	                                      NewItemBProjectionLocation, NewPoleDirection))
 	{
 		// Reuse the last successful result if a new pole vector can't be calculated.
 		bSuccess = false;
@@ -74,7 +74,7 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 
 	ItemBLocation = NewItemBLocation;
 	ItemBProjectionLocation = NewItemBProjectionLocation;
-	Direction = NewDirection;
+	PoleDirection = NewPoleDirection;
 	bSuccess = true;
 }
 

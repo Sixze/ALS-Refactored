@@ -11,14 +11,14 @@ UAlsAnimGraphNode_GameplayTagsBlend::UAlsAnimGraphNode_GameplayTagsBlend()
 	Node.AddPose();
 }
 
-void UAlsAnimGraphNode_GameplayTagsBlend::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UAlsAnimGraphNode_GameplayTagsBlend::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsAnimNode_GameplayTagsBlend, Tags))
+	if (ChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsAnimNode_GameplayTagsBlend, Tags))
 	{
 		ReconstructNode();
 	}
 
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	Super::PostEditChangeProperty(ChangedEvent);
 }
 
 FText UAlsAnimGraphNode_GameplayTagsBlend::GetNodeTitle(const ENodeTitleType::Type TitleType) const
@@ -33,7 +33,7 @@ FText UAlsAnimGraphNode_GameplayTagsBlend::GetTooltipText() const
 
 void UAlsAnimGraphNode_GameplayTagsBlend::ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& PreviousPins)
 {
-	Node.RefreshPoses();
+	Node.RefreshPosePins();
 
 	Super::ReallocatePinsDuringReconstruction(PreviousPins);
 }

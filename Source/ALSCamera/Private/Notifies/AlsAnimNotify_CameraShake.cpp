@@ -27,18 +27,18 @@ FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 }
 
 #if WITH_EDITOR
-void UAlsAnimNotify_CameraShake::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
+void UAlsAnimNotify_CameraShake::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& NotifyEvent)
 {
-	Super::OnAnimNotifyCreatedInEditor(ContainingAnimNotifyEvent);
+	Super::OnAnimNotifyCreatedInEditor(NotifyEvent);
 
-	ContainingAnimNotifyEvent.bTriggerOnDedicatedServer = false;
+	NotifyEvent.bTriggerOnDedicatedServer = false;
 }
 #endif
 
-void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                        const FAnimNotifyEventReference& EventReference)
+void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+                                        const FAnimNotifyEventReference& NotifyEventReference)
 {
-	Super::Notify(Mesh, Animation, EventReference);
+	Super::Notify(Mesh, Sequence, NotifyEventReference);
 
 	const auto* Pawn{Cast<APawn>(Mesh->GetOwner())};
 	const auto* Player{IsValid(Pawn) ? Cast<APlayerController>(Pawn->GetController()) : nullptr};
