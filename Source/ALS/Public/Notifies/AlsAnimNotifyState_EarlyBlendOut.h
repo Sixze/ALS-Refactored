@@ -39,6 +39,9 @@ public:
 
 	virtual FString GetNotifyName_Implementation() const override;
 
-	virtual void NotifyTick(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
-	                        float DeltaTime, const FAnimNotifyEventReference& NotifyEventReference) override;
+#if WITH_EDITOR
+	virtual bool CanBePlaced(UAnimSequenceBase* Sequence) const override;
+#endif
+
+	virtual void BranchingPointNotifyTick(FBranchingPointNotifyPayload& NotifyPayload, float DeltaTime) override;
 };
