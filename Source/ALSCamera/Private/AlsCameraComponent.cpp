@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
 #include "Utility/AlsCameraConstants.h"
+#include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
@@ -159,7 +160,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{
-		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraShapesDebugDisplayName())
+		UAlsDebugUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraShapesDebugDisplayName())
 	};
 #else
 	const auto bDisplayDebugCameraShapes{false};
@@ -247,7 +248,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraShapes)
 	{
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotTargetLocation, CameraYawRotation.Rotator(), 16.0f, FLinearColor::Green);
+		UAlsDebugUtility::DrawSphereAlternative(GetWorld(), PivotTargetLocation, CameraYawRotation.Rotator(), 16.0f, FLinearColor::Green);
 	}
 #endif
 
@@ -271,9 +272,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	{
 		DrawDebugLine(GetWorld(), PivotLagLocation, PivotTargetLocation,
 		              FLinearColor{1.0f, 0.5f, 0.0f}.ToFColor(true),
-		              false, 0.0f, 0, UAlsUtility::DrawLineThickness);
+		              false, 0.0f, 0, UAlsDebugUtility::DrawLineThickness);
 
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLagLocation, CameraYawRotation.Rotator(), 16.0f, {1.0f, 0.5f, 0.0f});
+		UAlsDebugUtility::DrawSphereAlternative(GetWorld(), PivotLagLocation, CameraYawRotation.Rotator(), 16.0f, {1.0f, 0.5f, 0.0f});
 	}
 #endif
 
@@ -288,9 +289,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	{
 		DrawDebugLine(GetWorld(), PivotLocation, PivotLagLocation,
 		              FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
-		              false, 0.0f, 0, UAlsUtility::DrawLineThickness);
+		              false, 0.0f, 0, UAlsDebugUtility::DrawLineThickness);
 
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLocation, CameraYawRotation.Rotator(), 16.0f, {0.0f, 0.75f, 1.0f});
+		UAlsDebugUtility::DrawSphereAlternative(GetWorld(), PivotLocation, CameraYawRotation.Rotator(), 16.0f, {0.0f, 0.75f, 1.0f});
 	}
 #endif
 
@@ -454,7 +455,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 {
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraTraces{
-		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraTracesDebugDisplayName())
+		UAlsDebugUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraTracesDebugDisplayName())
 	};
 #else
 	const auto bDisplayDebugCameraTraces{false};
@@ -500,7 +501,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraTraces)
 	{
-		UAlsUtility::DrawDebugSweepSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * MeshScale,
+		UAlsDebugUtility::DrawSweepSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * MeshScale,
 		                                  Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
 	}
 #endif
@@ -600,7 +601,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	{
 		DrawDebugLine(GetWorld(), Location, Location + Adjustment,
 		              FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
-		              false, 5.0f, 0, UAlsUtility::DrawLineThickness);
+		              false, 5.0f, 0, UAlsDebugUtility::DrawLineThickness);
 	}
 #endif
 

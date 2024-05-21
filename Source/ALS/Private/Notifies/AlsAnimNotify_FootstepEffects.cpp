@@ -12,10 +12,10 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Sound/SoundBase.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsEnumUtility.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"
-#include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_FootstepEffects)
 
@@ -90,7 +90,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	}
 
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebugForActor(Mesh->GetOwner(), UAlsConstants::TracesDebugDisplayName())};
+	const auto bDisplayDebug{UAlsDebugUtility::ShouldDisplayDebugForActor(Mesh->GetOwner(), UAlsConstants::TracesDebugDisplayName())};
 #endif
 
 	const auto* World{Mesh->GetWorld()};
@@ -125,7 +125,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebug)
 	{
-		UAlsUtility::DrawDebugLineTraceSingle(World, FootstepHit.TraceStart, FootstepHit.TraceEnd, FootstepHit.bBlockingHit,
+		UAlsDebugUtility::DrawLineTraceSingle(World, FootstepHit.TraceStart, FootstepHit.TraceEnd, FootstepHit.bBlockingHit,
 		                                      FootstepHit, {0.333333f, 0.0f, 0.0f}, FLinearColor::Red, 10.0f);
 	}
 #endif
@@ -165,7 +165,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	if (bDisplayDebug)
 	{
 		DrawDebugCoordinateSystem(World, FootstepLocation, FootstepRotation.Rotator(),
-		                          25.0f, false, 10.0f, 0, UAlsUtility::DrawLineThickness);
+		                          25.0f, false, 10.0f, 0, UAlsDebugUtility::DrawLineThickness);
 	}
 #endif
 
