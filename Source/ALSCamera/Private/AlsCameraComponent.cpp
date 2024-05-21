@@ -8,6 +8,7 @@
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
@@ -336,7 +337,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
 	    RotationLag <= 0.0f)
 	{
-		return UAlsMath::ExponentialDecay(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
+		return UAlsRotation::ExponentialDecayRotation(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
 	}
 
 	const auto CameraInitialRotation{CameraRotation};

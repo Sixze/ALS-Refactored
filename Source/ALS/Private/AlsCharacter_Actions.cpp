@@ -16,6 +16,8 @@
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMontageUtility.h"
+#include "Utility/AlsRotation.h"
+#include "Utility/AlsVector.h"
 
 void AAlsCharacter::StartRolling(const float PlayRate)
 {
@@ -127,9 +129,9 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 	else
 	{
-		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
-		                                                     RollingState.TargetYawAngle, DeltaTime,
-		                                                     Settings->Rolling.RotationInterpolationSpeed);
+		TargetRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
+		                                                         RollingState.TargetYawAngle, DeltaTime,
+		                                                         Settings->Rolling.RotationInterpolationSpeed);
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
 	}
@@ -183,7 +185,7 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 	}
 
 	const auto ForwardTraceDirection{
-		UAlsMath::AngleToDirectionXY(
+		UAlsVector::AngleToDirectionXY(
 			ActorYawAngle + FMath::ClampAngle(ForwardTraceDeltaAngle, -Settings->Mantling.MaxReachAngle, Settings->Mantling.MaxReachAngle))
 	};
 

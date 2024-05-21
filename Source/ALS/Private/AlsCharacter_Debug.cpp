@@ -13,6 +13,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsVector.h"
 
 #define LOCTEXT_NAMESPACE "AlsCharacterDebug"
 
@@ -424,7 +425,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f},
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f} +
-	                          UAlsMath::AngleToDirectionXY(LocomotionState.InputYawAngle) * 50.0f,
+	                          UAlsVector::AngleToDirectionXY(LocomotionState.InputYawAngle) * 50.0f,
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 
@@ -489,7 +490,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation,
 	                          FeetLocation +
-	                          UAlsMath::AngleToDirectionXY(LocomotionState.VelocityYawAngle) *
+	                          UAlsVector::AngleToDirectionXY(LocomotionState.VelocityYawAngle) *
 	                          FMath::GetMappedRangeValueClamped(FVector2f{0.0f, GetCharacterMovement()->GetMaxSpeed()},
 	                                                            {50.0f, 75.0f}, LocomotionState.Speed),
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
@@ -519,7 +520,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 6.0f},
 	                          FeetLocation + FVector{0.0f, 0.0f, 6.0f} +
-	                          UAlsMath::AngleToDirectionXY(LocomotionState.SmoothTargetYawAngle) * 50.0f,
+	                          UAlsVector::AngleToDirectionXY(LocomotionState.SmoothTargetYawAngle) * 50.0f,
 	                          50.0f, Color.ToFColor(true), false, -1.0f, SDPG_World, 3.0f);
 #endif
 

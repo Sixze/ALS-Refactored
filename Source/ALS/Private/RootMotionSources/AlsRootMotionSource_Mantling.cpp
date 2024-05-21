@@ -7,8 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
 #include "Utility/AlsMacros.h"
-#include "Utility/AlsMath.h"
 #include "Utility/AlsMontageUtility.h"
+#include "Utility/AlsRotation.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionSource_Mantling)
 
@@ -65,7 +65,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	// Remove the pitch and roll components of the rotation so that the actor's Z axis is always aligned with the gravity direction.
 
-	const auto Twist{UAlsMath::GetTwist(TargetTransform.GetRotation(), -Character.GetGravityDirection())};
+	const auto Twist{UAlsRotation::GetTwist(TargetTransform.GetRotation(), -Character.GetGravityDirection())};
 	TargetTransform.SetRotation(Twist);
 
 	auto BlendInAmount{1.0f};

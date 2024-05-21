@@ -10,7 +10,9 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsVector.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
@@ -367,9 +369,9 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 
 			SpineState.SpineAmount = UAlsMath::ExponentialDecay(SpineState.SpineAmount, 1.0f, DeltaTime, InterpolationSpeed);
 
-			SpineState.CurrentYawAngle = UAlsMath::LerpAngle(SpineState.LastYawAngle, ViewState.YawAngle,
-			                                                 SpineState.SpineAmount * SpineState.SpineAmountScale +
-			                                                 SpineState.SpineAmountBias);
+			SpineState.CurrentYawAngle = UAlsRotation::LerpAngle(SpineState.LastYawAngle, ViewState.YawAngle,
+			                                                     SpineState.SpineAmount * SpineState.SpineAmountScale +
+			                                                     SpineState.SpineAmountBias);
 		}
 	}
 	else
@@ -410,13 +412,13 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 
 			SpineState.LastActorYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(YawAngleOffset + LocomotionState.Rotation.Yaw));
 
-			SpineState.CurrentYawAngle = UAlsMath::LerpAngle(0.0f, SpineState.LastYawAngle + YawAngleOffset,
-			                                                 SpineState.SpineAmount * SpineState.SpineAmountScale +
-			                                                 SpineState.SpineAmountBias);
+			SpineState.CurrentYawAngle = UAlsRotation::LerpAngle(0.0f, SpineState.LastYawAngle + YawAngleOffset,
+			                                                     SpineState.SpineAmount * SpineState.SpineAmountScale +
+			                                                     SpineState.SpineAmountBias);
 		}
 	}
 
-	SpineState.YawAngle = UAlsMath::LerpAngle(0.0f, SpineState.CurrentYawAngle, SpineBlendAmount);
+	SpineState.YawAngle = UAlsRotation::LerpAngle(0.0f, SpineState.CurrentYawAngle, SpineBlendAmount);
 }
 
 void UAlsAnimationInstance::InitializeLook()
@@ -483,7 +485,7 @@ void UAlsAnimationInstance::RefreshLook()
 		const auto YawAngle{FRotator3f::NormalizeAxis(LookState.WorldYawAngle - ActorYawAngle)};
 		auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
 
-		if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
+		if (DeltaYawAngle > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold)
 		{
 			DeltaYawAngle -= 360.0f;
 		}
@@ -498,7 +500,7 @@ void UAlsAnimationInstance::RefreshLook()
 		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), InterpolationSpeed)};
 
 		LookState.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
-		LookState.PitchAngle = UAlsMath::LerpAngle(LookState.PitchAngle, TargetPitchAngle, InterpolationAmount);
+		LookState.PitchAngle = UAlsRotation::LerpAngle(LookState.PitchAngle, TargetPitchAngle, InterpolationAmount);
 	}
 
 	LookState.WorldYawAngle = FRotator3f::NormalizeAxis(ActorYawAngle + LookState.YawAngle);
@@ -612,7 +614,7 @@ FVector2f UAlsAnimationInstance::GetRelativeAccelerationAmount() const
 			: LocomotionState.MaxBrakingDeceleration
 	};
 
-	return FVector2f{UAlsMath::ClampMagnitude01(RelativeAcceleration / MaxAcceleration)};
+	return FVector2f{UAlsVector::ClampMagnitude01(RelativeAcceleration / MaxAcceleration)};
 }
 
 void UAlsAnimationInstance::RefreshVelocityBlend()
@@ -1446,7 +1448,7 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) - LocomotionState.Rotation.Yaw))
 	};
 
-	RemainingYawAngle = UAlsMath::RemapAngleForCounterClockwiseRotation(RemainingYawAngle);
+	RemainingYawAngle = UAlsRotation::RemapAngleForCounterClockwiseRotation(RemainingYawAngle);
 
 	// Scale quick stop animation play rate based on how far the character
 	// is going to rotate. At 180 degrees, the play rate will be maximal.
@@ -1808,7 +1810,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace()
 
 	const auto bTurnLeft{
 		ViewState.YawAngle <= 0.0f ||
-		ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+		ViewState.YawAngle > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold
 	};
 
 	UAlsTurnInPlaceSettings* TurnInPlaceSettings{nullptr};
