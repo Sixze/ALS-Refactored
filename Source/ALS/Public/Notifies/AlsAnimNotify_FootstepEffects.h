@@ -48,7 +48,7 @@ enum class EAlsFootstepParticleEffectSpawnMode : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ALS_API FAlsFootstepEffectSettings
+struct ALS_API FAlsFootstepSoundSettings
 {
 	GENERATED_BODY()
 
@@ -57,58 +57,98 @@ public:
 	TSoftObjectPtr<USoundBase> Sound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsFootstepSoundSpawnMode SoundSpawnMode{EAlsFootstepSoundSpawnMode::SpawnAtTraceHitLocation};
+	EAlsFootstepSoundSpawnMode SpawnMode{EAlsFootstepSoundSpawnMode::SpawnAtTraceHitLocation};
+};
 
+USTRUCT(BlueprintType)
+struct ALS_API FAlsFootstepDecalSettings
+{
+	GENERATED_BODY()
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UMaterialInterface> DecalMaterial;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	EAlsFootstepDecalSpawnMode SpawnMode{EAlsFootstepDecalSpawnMode::SpawnAttachedToTraceHitComponent};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (AllowPreserveRatio))
-	FVector3f DecalSize{10.0f, 20.0f, 20.0f};
+	FVector3f Size{10.0f, 20.0f, 20.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float DecalDuration{4.0f};
+	float Duration{4.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float DecalFadeOutDuration{2.0f};
+	float FadeOutDuration{2.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsFootstepDecalSpawnMode DecalSpawnMode{EAlsFootstepDecalSpawnMode::SpawnAttachedToTraceHitComponent};
+	FVector3f LocationOffset{0.0f, -10.0f, -1.75f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f DecalLocationOffset{0.0f, -10.0f, -1.75f};
+	FRotator3f FootLeftRotationOffset{90.0f, 0.0f, -90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f DecalFootLeftRotationOffset{90.0f, 0.0f, 90.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f DecalFootRightRotationOffset{-90.0f, 0.0f, -90.0f};
+	FRotator3f FootRightRotationOffset{-90.0f, 0.0f, 90.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
-	FQuat4f DecalFootLeftRotationOffsetQuaternion{ForceInit};
+	FQuat4f FootLeftRotationOffsetQuaternion{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
-	FQuat4f DecalFootRightRotationOffsetQuaternion{ForceInit};
+	FQuat4f FootRightRotationOffsetQuaternion{ForceInit};
 
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent);
+#endif
+};
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsFootstepParticleSystemSettings
+{
+	GENERATED_BODY()
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TSoftObjectPtr<UNiagaraSystem> ParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsFootstepParticleEffectSpawnMode ParticleSystemSpawnMode{EAlsFootstepParticleEffectSpawnMode::SpawnAtTraceHitLocation};
+	EAlsFootstepParticleEffectSpawnMode SpawnMode{EAlsFootstepParticleEffectSpawnMode::SpawnAtTraceHitLocation};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f ParticleSystemLocationOffset{ForceInit};
+	FVector3f LocationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f ParticleSystemFootLeftRotationOffset{ForceInit};
+	FRotator3f FootLeftRotationOffset{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator3f ParticleSystemFootRightRotationOffset{ForceInit};
+	FRotator3f FootRightRotationOffset{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
-	FQuat4f ParticleSystemFootLeftRotationOffsetQuaternion{ForceInit};
+	FQuat4f FootLeftRotationOffsetQuaternion{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", AdvancedDisplay)
-	FQuat4f ParticleSystemFootRightRotationOffsetQuaternion{ForceInit};
+	FQuat4f FootRightRotationOffsetQuaternion{ForceInit};
+
+public:
+#if WITH_EDITOR
+	void PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent);
+#endif
+};
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsFootstepEffectSettings
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsFootstepSoundSettings Sound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsFootstepDecalSettings Decal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FAlsFootstepParticleSystemSettings ParticleSystem;
 
 public:
 #if WITH_EDITOR
@@ -204,13 +244,13 @@ public:
 	                    const FAnimNotifyEventReference& NotifyEventReference) override;
 
 private:
-	void SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	void SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepSoundSettings& SoundSettings,
 	                const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
 
-	void SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	void SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,
 	                const FVector& FootstepLocation, const FQuat& FootstepRotation,
 	                const FHitResult& FootstepHit, const FVector& FootZAxis) const;
 
-	void SpawnParticleSystem(USkeletalMeshComponent* Mesh, const FAlsFootstepEffectSettings& EffectSettings,
+	void SpawnParticleSystem(USkeletalMeshComponent* Mesh, const FAlsFootstepParticleSystemSettings& ParticleSystemSettings,
 	                         const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
 };
