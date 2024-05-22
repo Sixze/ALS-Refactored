@@ -210,7 +210,7 @@ protected:
 	EAlsFootBone FootBone{EAlsFootBone::Left};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bSkipEffectsWhenInAir : 1;
+	uint8 bSkipEffectsWhenInAir : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
 	uint8 bSpawnSound : 1 {true};
@@ -222,10 +222,10 @@ protected:
 	float SoundPitchMultiplier{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
-	EAlsFootstepSoundType SoundType;
+	EAlsFootstepSoundType SoundType{EAlsFootstepSoundType::Step};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Sound")
-	uint8 bIgnoreFootstepSoundBlockCurve : 1;
+	uint8 bIgnoreFootstepSoundBlockCurve : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Decal")
 	uint8 bSpawnDecal : 1 {true};

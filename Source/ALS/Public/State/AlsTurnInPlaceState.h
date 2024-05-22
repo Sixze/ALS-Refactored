@@ -16,7 +16,7 @@ struct ALS_API FAlsTurnInPlaceState
 	float ActivationDelay{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAlsTurnInPlaceSettings> QueuedSettings{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> QueuedSettings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName QueuedSlotName;

@@ -14,5 +14,5 @@ struct ALS_API FAlsCrouchingSettings
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> StrideBlendAmountCurve{nullptr};
+	TObjectPtr<UCurveFloat> StrideBlendAmountCurve;
 };

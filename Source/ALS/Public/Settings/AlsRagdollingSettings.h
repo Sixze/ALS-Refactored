@@ -25,8 +25,8 @@ public:
 	uint8 bLimitInitialRagdollSpeed : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimMontage> GetUpFrontMontage{nullptr};
+	TObjectPtr<UAnimMontage> GetUpFrontMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimMontage> GetUpBackMontage{nullptr};
+	TObjectPtr<UAnimMontage> GetUpBackMontage;
 };

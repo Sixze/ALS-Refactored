@@ -20,7 +20,7 @@ public:
 	uint8 bScalePlayRateByAnimatedTurnAngle : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0.0001, ClampMax = 180, ForceUnits = "deg"))
-	float AnimatedTurnAngle;
+	float AnimatedTurnAngle{0.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -45,26 +45,26 @@ struct ALS_API FAlsGeneralTurnInPlaceSettings
 	float BlendDuration{0.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Standing Turn 90 Left")
-	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn90Left{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn90Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Standing Turn 90 Right")
-	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn90Right{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn90Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Standing Turn 180 Left")
-	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn180Left{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn180Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Standing Turn 180 Right")
-	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn180Right{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> StandingTurn180Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Crouching Turn 90 Left")
-	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn90Left{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn90Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Crouching Turn 90 Right")
-	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn90Right{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn90Right;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Crouching Turn 180 Left")
-	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn180Left{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn180Left;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Instanced, DisplayName = "Crouching Turn 180 Right")
-	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn180Right{nullptr};
+	TObjectPtr<UAlsTurnInPlaceSettings> CrouchingTurn180Right;
 };

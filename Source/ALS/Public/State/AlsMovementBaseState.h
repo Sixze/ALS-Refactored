@@ -8,7 +8,7 @@ struct ALS_API FAlsMovementBaseState
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UPrimitiveComponent> Primitive{nullptr};
+	TObjectPtr<UPrimitiveComponent> Primitive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName BoneName;

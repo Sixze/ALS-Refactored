@@ -49,7 +49,7 @@ public:
 	// If checked, mantling will automatically calculate the start time based on how much vertical
 	// distance the character needs to move to reach the object they are about to mantle.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	uint8 bAutoCalculateStartTime : 1;
+	uint8 bAutoCalculateStartTime : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
 	FVector2f StartTimeReferenceHeight{50.0f, 100.0f};

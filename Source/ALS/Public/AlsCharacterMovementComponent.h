@@ -27,7 +27,7 @@ public:
 class ALS_API FAlsCharacterNetworkMoveDataContainer : public FCharacterNetworkMoveDataContainer
 {
 public:
-	FAlsCharacterNetworkMoveData MoveData[3];
+	FAlsCharacterNetworkMoveData MoveData[3]{};
 
 public:
 	FAlsCharacterNetworkMoveDataContainer();
@@ -96,24 +96,24 @@ protected:
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bMovementModeLocked : 1;
+	uint8 bMovementModeLocked : 1 {false};
 
 	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bInputBlocked : 1;
+	uint8 bInputBlocked : 1 {false};
 
 	// Valid only on locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FRotator PreviousControlRotation;
+	FRotator PreviousControlRotation{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FVector PendingPenetrationAdjustment;
+	FVector PendingPenetrationAdjustment{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FVector PrePenetrationAdjustmentVelocity;
+	FVector PrePenetrationAdjustmentVelocity{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bPrePenetrationAdjustmentVelocityValid : 1;
+	uint8 bPrePenetrationAdjustmentVelocityValid : 1 {false};
 
 public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;

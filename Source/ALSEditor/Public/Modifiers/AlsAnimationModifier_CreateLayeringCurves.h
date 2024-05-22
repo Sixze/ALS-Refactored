@@ -11,13 +11,13 @@ class ALSEDITOR_API UAlsAnimationModifier_CreateLayeringCurves : public UAnimati
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bOverrideExistingCurves : 1;
+	uint8 bOverrideExistingCurves : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bAddKeyOnEachFrame : 1;
+	uint8 bAddKeyOnEachFrame : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	float CurveValue;
+	float CurveValue{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FName> CurveNames
@@ -47,7 +47,7 @@ protected:
 	};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bAddSlotCurves : 1;
+	uint8 bAddSlotCurves : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	float SlotCurveValue{1.0f};

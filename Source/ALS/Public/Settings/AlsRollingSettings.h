@@ -10,7 +10,7 @@ struct ALS_API FAlsRollingSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UAnimMontage> Montage{nullptr};
+	TObjectPtr<UAnimMontage> Montage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bCrouchOnStart : 1 {true};

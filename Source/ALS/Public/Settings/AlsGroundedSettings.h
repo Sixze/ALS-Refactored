@@ -10,16 +10,16 @@ struct ALS_API FAlsGroundedSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> RotationYawOffsetForwardCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetForwardCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> RotationYawOffsetBackwardCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetBackwardCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> RotationYawOffsetLeftCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetLeftCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> RotationYawOffsetRightCurve{nullptr};
+	TObjectPtr<UCurveFloat> RotationYawOffsetRightCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
 	float VelocityBlendInterpolationSpeed{12.0f};

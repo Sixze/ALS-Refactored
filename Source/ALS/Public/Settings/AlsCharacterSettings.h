@@ -17,21 +17,21 @@ public:
 	float MovingSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	EAlsInAirRotationMode InAirRotationMode;
+	EAlsInAirRotationMode InAirRotationMode{EAlsInAirRotationMode::RotateToVelocityOnJump};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bAllowAimingWhenInAir : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bSprintHasPriorityOverAiming : 1;
+	uint8 bSprintHasPriorityOverAiming : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bRotateToVelocityWhenSprinting : 1;
+	uint8 bRotateToVelocityWhenSprinting : 1 {false};
 
 	// If checked, the character will rotate relative to the object it is standing on in the velocity
 	// direction rotation mode, otherwise the character will ignore that object and keep its world rotation.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bInheritMovementBaseRotationInVelocityDirectionRotationMode : 1;
+	uint8 bInheritMovementBaseRotationInVelocityDirectionRotationMode : 1 {false};
 
 	// If checked, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")

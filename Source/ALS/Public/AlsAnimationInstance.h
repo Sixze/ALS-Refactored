@@ -49,11 +49,11 @@ protected:
 
 	// Time of the last teleportation event.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0))
-	double TeleportedTime;
+	double TeleportedTime{0.0f};
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bDisplayDebugTraces : 1;
+	uint8 bDisplayDebugTraces : 1 {false};
 
 	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif

@@ -13,11 +13,11 @@ struct ALS_API FAlsInAirSettings
 public:
 	// Vertical velocity to lean amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> LeanAmountCurve{nullptr};
+	TObjectPtr<UCurveFloat> LeanAmountCurve;
 
 	// Ground prediction sweep hit time to ground prediction amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> GroundPredictionAmountCurve{nullptr};
+	TObjectPtr<UCurveFloat> GroundPredictionAmountCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionChannel> GroundPredictionSweepChannel{ECC_Visibility};

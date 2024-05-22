@@ -20,11 +20,11 @@ struct ALS_API FAlsStandingSettings
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> StrideBlendAmountWalkCurve{nullptr};
+	TObjectPtr<UCurveFloat> StrideBlendAmountWalkCurve;
 
 	// Movement speed to stride blend amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TObjectPtr<UCurveFloat> StrideBlendAmountRunCurve{nullptr};
+	TObjectPtr<UCurveFloat> StrideBlendAmountRunCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float PivotActivationSpeedThreshold{200.0f};
