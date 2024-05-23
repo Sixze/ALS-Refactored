@@ -8,7 +8,7 @@ public class ALS : ModuleRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_3;
 
 		bEnableNonInlinedGenCppWarnings = true;
-		UnsafeTypeCastWarningLevel = WarningLevel.Warning;
+		// UnsafeTypeCastWarningLevel = WarningLevel.Warning;
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{

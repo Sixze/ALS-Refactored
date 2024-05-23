@@ -84,7 +84,7 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
 
 void AAlsCharacterExample::Input_OnLookMouse(const FInputActionValue& ActionValue)
 {
-	const auto Value{ActionValue.Get<FVector2D>()};
+	const FVector2f Value{ActionValue.Get<FVector2D>()};
 
 	AddControllerPitchInput(Value.Y * LookUpMouseSensitivity);
 	AddControllerYawInput(Value.X * LookRightMouseSensitivity);
@@ -92,7 +92,7 @@ void AAlsCharacterExample::Input_OnLookMouse(const FInputActionValue& ActionValu
 
 void AAlsCharacterExample::Input_OnLook(const FInputActionValue& ActionValue)
 {
-	const auto Value{ActionValue.Get<FVector2D>()};
+	const FVector2f Value{ActionValue.Get<FVector2D>()};
 
 	AddControllerPitchInput(Value.Y * LookUpRate);
 	AddControllerYawInput(Value.X * LookRightRate);
