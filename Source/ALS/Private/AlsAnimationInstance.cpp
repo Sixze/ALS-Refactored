@@ -41,8 +41,9 @@ void UAlsAnimationInstance::NativeBeginPlay()
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeUpdateAnimation()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativeUpdateAnimation, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativeUpdateAnimation);
 
 	Super::NativeUpdateAnimation(DeltaTime);
 
@@ -96,8 +97,9 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeThreadSafeUpdateAnimation()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeThreadSafeUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativeThreadSafeUpdateAnimation, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativeThreadSafeUpdateAnimation);
 
 	Super::NativeThreadSafeUpdateAnimation(DeltaTime);
 
@@ -122,8 +124,9 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	// Can't use UAnimationInstance::NativePostEvaluateAnimation() instead this function, as it will not be called if
 	// USkinnedMeshComponent::VisibilityBasedAnimTickOption is set to EVisibilityBasedAnimTickOption::AlwaysTickPose.
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostUpdateAnimation()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativePostUpdateAnimation, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativePostUpdateAnimation);
 
 	if (!IsValid(Settings) || !IsValid(Character))
 	{
@@ -435,7 +438,8 @@ void UAlsAnimationInstance::RefreshLook()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook()"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshLook);
 
 	if (!IsValid(Settings))
 	{
@@ -583,8 +587,8 @@ void UAlsAnimationInstance::RefreshGrounded()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGrounded()"),
-	                            STAT_UAlsAnimationInstance_RefreshGrounded, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGrounded"), STAT_UAlsAnimationInstance_RefreshGrounded, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshGrounded);
 
 	if (!IsValid(Settings))
 	{
@@ -693,8 +697,9 @@ void UAlsAnimationInstance::RefreshGroundedMovement()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGroundedMovement()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGroundedMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshGroundedMovement, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshGroundedMovement);
 
 	if (!IsValid(Settings))
 	{
@@ -758,8 +763,9 @@ void UAlsAnimationInstance::RefreshStandingMovement()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshStandingMovement()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshStandingMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshStandingMovement, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshStandingMovement);
 
 	if (!IsValid(Settings))
 	{
@@ -843,8 +849,9 @@ void UAlsAnimationInstance::RefreshCrouchingMovement()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshCrouchingMovement()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshCrouchingMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshCrouchingMovement, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshCrouchingMovement);
 
 	if (!IsValid(Settings))
 	{
@@ -877,7 +884,8 @@ void UAlsAnimationInstance::RefreshInAir()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshInAir()"), STAT_UAlsAnimationInstance_RefreshInAir, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshInAir"), STAT_UAlsAnimationInstance_RefreshInAir, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshInAir);
 
 	if (!IsValid(Settings))
 	{
@@ -1548,8 +1556,9 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshDynamicTransitions()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshDynamicTransitions"),
 	                            STAT_UAlsAnimationInstance_RefreshDynamicTransitions, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshDynamicTransitions);
 
 	if (DynamicTransitionsState.bUpdatedThisFrame || !IsValid(Settings))
 	{
@@ -1694,8 +1703,9 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshRotateInPlace()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshRotateInPlace"),
 	                            STAT_UAlsAnimationInstance_RefreshRotateInPlace, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshRotateInPlace);
 
 	if (RotateInPlaceState.bUpdatedThisFrame || !IsValid(Settings))
 	{
@@ -1768,8 +1778,9 @@ void UAlsAnimationInstance::RefreshTurnInPlace()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshTurnInPlace()"),
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshTurnInPlace"),
 	                            STAT_UAlsAnimationInstance_RefreshTurnInPlace, STATGROUP_Als)
+	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshTurnInPlace);
 
 	if (TurnInPlaceState.bUpdatedThisFrame || !IsValid(Settings))
 	{
