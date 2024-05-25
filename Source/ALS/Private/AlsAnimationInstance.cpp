@@ -610,13 +610,18 @@ FVector2f UAlsAnimationInstance::GetRelativeAccelerationAmount() const
 	// character rotation. It is normalized to a range of -1 to 1 so that -1 equals the max
 	// braking deceleration and 1 equals the max acceleration of the character movement component.
 
-	const FVector3f RelativeAcceleration{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Acceleration)};
-
 	const auto MaxAcceleration{
 		(LocomotionState.Acceleration | LocomotionState.Velocity) >= 0.0f
 			? LocomotionState.MaxAcceleration
 			: LocomotionState.MaxBrakingDeceleration
 	};
+
+	if (MaxAcceleration <= UE_KINDA_SMALL_NUMBER)
+	{
+		return FVector2f::ZeroVector;
+	}
+
+	const FVector3f RelativeAcceleration{LocomotionState.RotationQuaternion.UnrotateVector(LocomotionState.Acceleration)};
 
 	return FVector2f{UAlsVector::ClampMagnitude01(RelativeAcceleration / MaxAcceleration)};
 }
