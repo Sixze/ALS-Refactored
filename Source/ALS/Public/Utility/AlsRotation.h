@@ -3,7 +3,7 @@
 #include "AlsMath.h"
 #include "AlsRotation.generated.h"
 
-UCLASS()
+UCLASS(Meta = (BlueprintThreadSafe))
 class ALS_API UAlsRotation : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -39,6 +39,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility",
 		Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotation"))
 	static FRotator ExponentialDecayRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float Lambda);
+
+	// Same as FMath::QInterpTo(), but uses FQuat::FastLerp() instead of FQuat::Slerp().
+	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Quaternion"))
+	static FQuat InterpolateQuaternionFast(const FQuat& Current, const FQuat& Target, float DeltaTime, float Speed);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (AutoCreateRefTerm = "TwistAxis", ReturnDisplayName = "Twist"))
 	static FQuat GetTwist(const FQuat& Quaternion, const FVector& TwistAxis = FVector::UpVector);
@@ -81,7 +85,7 @@ inline FRotator UAlsRotation::LerpRotation(const FRotator& From, const FRotator&
 
 inline float UAlsRotation::InterpolateAngleConstant(const float Current, const float Target, const float DeltaTime, const float Speed)
 {
-	if (Speed <= 0.0f || Current == Target)
+	if (Speed <= 0.0f || FMath::IsNearlyEqual(Current, Target))
 	{
 		return Target;
 	}
@@ -121,6 +125,16 @@ inline FRotator UAlsRotation::ExponentialDecayRotation(const FRotator& Current, 
 	return Lambda > 0.0f
 		       ? LerpRotation(Current, Target, UAlsMath::ExponentialDecay(DeltaTime, Lambda))
 		       : Target;
+}
+
+inline FQuat UAlsRotation::InterpolateQuaternionFast(const FQuat& Current, const FQuat& Target, const float DeltaTime, const float Speed)
+{
+	if (Speed <= 0.0f || Current.Equals(Target))
+	{
+		return Target;
+	}
+
+	return FQuat::FastLerp(Current, Target, UAlsMath::Clamp01(Speed * DeltaTime)).GetNormalized();
 }
 
 inline FQuat UAlsRotation::GetTwist(const FQuat& Quaternion, const FVector& TwistAxis)

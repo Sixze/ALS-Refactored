@@ -1262,7 +1262,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 	}
 
 	FinalLocation = FMath::Lerp(FinalLocation, FootState.LockLocation, FootState.LockAmount);
-	FinalRotation = FQuat::Slerp(FinalRotation, FootState.LockRotation, FootState.LockAmount);
+	FinalRotation = FQuat::FastLerp(FinalRotation, FootState.LockRotation, FootState.LockAmount);
+	FinalRotation.Normalize();
 }
 
 void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const float DeltaTime,
@@ -1291,8 +1292,10 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		{
 			static constexpr auto InterpolationSpeed{15.0f};
 
-			FootState.OffsetLocationZ = FMath::FInterpTo(FootState.OffsetLocationZ, 0.0f, DeltaTime, InterpolationSpeed);
-			FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FQuat::Identity, DeltaTime, InterpolationSpeed);
+			FootState.OffsetLocationZ *= 1.0f - UAlsMath::Clamp01(DeltaTime * InterpolationSpeed);
+
+			FootState.OffsetRotation = UAlsRotation::InterpolateQuaternionFast(FootState.OffsetRotation, FQuat::Identity,
+			                                                                   DeltaTime, InterpolationSpeed);
 
 			FinalLocation.Z += FootState.OffsetLocationZ;
 			FinalRotation = FootState.OffsetRotation * FinalRotation;
@@ -1377,8 +1380,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 		static constexpr auto RotationInterpolationSpeed{30.0f};
 
-		FootState.OffsetRotation = FMath::QInterpTo(FootState.OffsetRotation, FootState.OffsetTargetRotation,
-		                                            DeltaTime, RotationInterpolationSpeed);
+		FootState.OffsetRotation = UAlsRotation::InterpolateQuaternionFast(FootState.OffsetRotation, FootState.OffsetTargetRotation,
+		                                                                   DeltaTime, RotationInterpolationSpeed);
 	}
 
 	FinalLocation.Z += FootState.OffsetLocationZ;
@@ -1427,6 +1430,7 @@ void UAlsAnimationInstance::ConstraintFootRotation(const FAlsFootConstraintsSett
 	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewTwistX * NewTwistX)));
 
 	Rotation = ParentRotation * (NewSwing * NewTwist);
+	Rotation.Normalize();
 }
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()

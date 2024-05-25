@@ -60,7 +60,7 @@ void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* Animation
 		return;
 	}
 
-	TSet<FName> SlotNames;
+	TSet<FName, DefaultKeyFuncs<FName>, TInlineSetAllocator<4>> SlotNames;
 	SlotNames.Reserve(ReferenceMontage->SlotAnimTracks.Num());
 
 	for (const auto& SlotTrack : ReferenceMontage->SlotAnimTracks)
