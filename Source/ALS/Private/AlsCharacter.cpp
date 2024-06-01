@@ -43,6 +43,13 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 		GetMesh()->bEnableUpdateRateOptimizations = false;
+
+		// Improves performance, but velocities of kinematic physical bodies will not be
+		// calculated, so the ragdoll will not inherit the actor's velocity when activated.
+
+		// TODO Wait until the FPhys Scene_Chaos::UpdateKinematicsOnDeferredSkelMeshes() function will be fixed in future engine versions.
+
+		// GetMesh()->bDeferKinematicBoneUpdate = true;
 	}
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
@@ -834,6 +841,7 @@ void AAlsCharacter::ApplyDesiredStance()
 bool AAlsCharacter::CanCrouch() const
 {
 	// This allows the ACharacter::Crouch() function to execute properly when bIsCrouched is true.
+
 	// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/9558 to be merged into the engine.
 
 	return bIsCrouched || Super::CanCrouch();
@@ -846,9 +854,9 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
 	    ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
 	{
-		// The code below essentially undoes the changes that will be made later at the end of the UCharacterMovementComponent::Crouch()
-		// function because they literally break network smoothing when crouching while the root motion montage is playing, causing the
-		// mesh to take an incorrect location for a while.
+		// The code below essentially undoes the changes that will be made later at the end of the
+		// UCharacterMovementComponent::Crouch() function because they literally break network smoothing when crouching
+		// while the root motion montage is playing, causing the  mesh to take an incorrect location for a while.
 
 		// TODO Check the need for this hack in future engine versions.
 

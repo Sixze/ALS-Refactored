@@ -770,6 +770,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	{
 		// Limit the ragdoll's speed for a few frames, because for some unclear reason,
 		// it can get a much higher initial speed than the character's last speed.
+
 		// TODO Find a better solution or wait for a fix in future engine versions.
 
 		static constexpr auto MinSpeedLimit{200.0f};
