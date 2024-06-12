@@ -47,7 +47,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 		// Improves performance, but velocities of kinematic physical bodies will not be
 		// calculated, so the ragdoll will not inherit the actor's velocity when activated.
 
-		// TODO Wait until the FPhys Scene_Chaos::UpdateKinematicsOnDeferredSkelMeshes() function will be fixed in future engine versions.
+		// TODO Wait until the FPhysScene_Chaos::UpdateKinematicsOnDeferredSkelMeshes() function will be fixed in future engine versions.
 
 		// GetMesh()->bDeferKinematicBoneUpdate = true;
 	}

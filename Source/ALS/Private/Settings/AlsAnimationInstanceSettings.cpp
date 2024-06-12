@@ -23,10 +23,6 @@ void UAlsAnimationInstanceSettings::PostEditChangeProperty(FPropertyChangedEvent
 	{
 		InAir.PostEditChangeProperty(ChangedEvent);
 	}
-	else if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Feet))
-	{
-		Feet.PostEditChangeProperty(ChangedEvent);
-	}
 
 	Super::PostEditChangeProperty(ChangedEvent);
 }

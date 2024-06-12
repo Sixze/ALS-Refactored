@@ -12,8 +12,8 @@ public:
 	static constexpr auto ClockwiseRotationAngleThreshold{5.0f};
 
 public:
-	// Remaps the angle from the [-175, -180] range to [185, 180]. Used to
-	// make the character rotate counterclockwise during a 180 degree turn.
+	// Remaps the angle from the [-175, -180] range to [185, 180]. Used
+	// to make the character rotate clockwise during a 180 degree turn.
 	template <typename ValueType> requires std::is_floating_point_v<ValueType>
 	static constexpr ValueType RemapAngleForClockwiseRotation(ValueType Angle);
 

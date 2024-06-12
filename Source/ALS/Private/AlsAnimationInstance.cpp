@@ -160,18 +160,16 @@ FAnimInstanceProxy* UAlsAnimationInstance::CreateAnimInstanceProxy()
 FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 {
 	return {
-		!IsValid(Settings) || Settings->General.bUseHandIkBones,
-		!IsValid(Settings) || Settings->General.bUseFootIkBones,
-		GroundedState.VelocityBlend.ForwardAmount,
-		GroundedState.VelocityBlend.BackwardAmount,
-		SpineState.YawAngle,
-		FeetState.Left.IkRotation,
-		FeetState.Left.IkLocation,
-		FeetState.Left.IkAmount,
-		FeetState.Right.IkRotation,
-		FeetState.Right.IkLocation,
-		FeetState.Right.IkAmount,
-		FeetState.MinMaxPelvisOffsetZ,
+		.bUseHandIkBones = !IsValid(Settings) || Settings->General.bUseHandIkBones,
+		.bUseFootIkBones = !IsValid(Settings) || Settings->General.bUseFootIkBones,
+		.bFootOffsetAllowed = LocomotionMode != AlsLocomotionModeTags::InAir,
+		.VelocityBlendForwardAmount = GroundedState.VelocityBlend.ForwardAmount,
+		.VelocityBlendBackwardAmount = GroundedState.VelocityBlend.BackwardAmount,
+		.FootLeftLocation{FVector{FeetState.Left.FinalLocation}},
+		.FootLeftRotation{FQuat{FeetState.Left.FinalRotation}},
+		.FootRightLocation{FVector{FeetState.Right.FinalLocation}},
+		.FootRightRotation{FQuat{FeetState.Right.FinalRotation}},
+		.SpineYawAngle = SpineState.YawAngle
 	};
 }
 
@@ -1053,84 +1051,58 @@ void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurveName()), -1.0f, 1.0f);
 	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurveName());
 
-	FeetState.MinMaxPelvisOffsetZ = FVector2f::ZeroVector;
-
 	const auto ComponentTransformInverse{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().Inverse()};
 
-	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurveName(), UAlsConstants::FootLeftLockCurveName(),
-	            Settings->Feet.LeftFootConstraints, ComponentTransformInverse, DeltaTime);
+	RefreshFoot(FeetState.Left, UAlsConstants::FootLeftIkCurveName(),
+	            UAlsConstants::FootLeftLockCurveName(), ComponentTransformInverse, DeltaTime);
 
-	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurveName(), UAlsConstants::FootRightLockCurveName(),
-	            Settings->Feet.RightFootConstraints, ComponentTransformInverse, DeltaTime);
-
-	const auto ScaleInverse{1.0f / LocomotionState.Scale};
-
-	FeetState.MinMaxPelvisOffsetZ.X = UE_REAL_TO_FLOAT(
-		FMath::Min(FeetState.Left.OffsetTargetLocationZ, FeetState.Right.OffsetTargetLocationZ) * ScaleInverse);
-
-	FeetState.MinMaxPelvisOffsetZ.Y = UE_REAL_TO_FLOAT(
-		FMath::Max(FeetState.Left.OffsetTargetLocationZ, FeetState.Right.OffsetTargetLocationZ) * ScaleInverse);
+	RefreshFoot(FeetState.Right, UAlsConstants::FootRightIkCurveName(),
+	            UAlsConstants::FootRightLockCurveName(), ComponentTransformInverse, DeltaTime);
 
 	FeetState.bInhibitFootLockForOneFrame = false;
 }
 
-void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& IkCurveName,
-                                        const FName& LockCurveName, const FAlsFootConstraintsSettings& ConstraintsSettings,
+void UAlsAnimationInstance::RefreshFoot(FAlsFootState& FootState, const FName& IkCurveName, const FName& LockCurveName,
                                         const FTransform& ComponentTransformInverse, const float DeltaTime) const
 {
-	FootState.IkAmount = GetCurveValueClamped01(IkCurveName);
+	const auto IkAmount{GetCurveValueClamped01(IkCurveName)};
 
-	ProcessFootLockTeleport(FootState);
-
-	ProcessFootLockBaseChange(FootState, ComponentTransformInverse);
-
-	auto FinalLocation{FootState.TargetLocation};
-	auto FinalRotation{FootState.TargetRotation};
-
-	RefreshFootLock(FootState, LockCurveName, ComponentTransformInverse, DeltaTime, FinalLocation, FinalRotation);
-
-	const auto PreviousFinalRotation{FinalRotation};
-	RefreshFootOffset(FootState, DeltaTime, FinalLocation, FinalRotation);
-
-	// Prevent the foot from assuming an unnatural pose when on a highly
-	// sloped surface by limiting its rotation after applying a foot offset.
-
-	ConstraintFootRotation(ConstraintsSettings, PreviousFinalRotation, FinalRotation);
-
-	FootState.IkLocation = ComponentTransformInverse.TransformPosition(FinalLocation);
-	FootState.IkRotation = ComponentTransformInverse.TransformRotation(FinalRotation);
+	ProcessFootLockTeleport(IkAmount, FootState);
+	ProcessFootLockBaseChange(IkAmount, FootState, ComponentTransformInverse);
+	RefreshFootLock(IkAmount, FootState, LockCurveName, ComponentTransformInverse, DeltaTime);
 }
 
-void UAlsAnimationInstance::ProcessFootLockTeleport(FAlsFootState& FootState) const
+void UAlsAnimationInstance::ProcessFootLockTeleport(const float IkAmount, FAlsFootState& FootState) const
 {
 	// Due to network smoothing, we assume that teleportation occurs over a short period of time, not
 	// in one frame, since after accepting the teleportation event, the character can still be moved for
 	// some indefinite time, and this must be taken into account in order to avoid foot locking glitches.
 
-	if (bPendingUpdate || GetWorld()->TimeSince(TeleportedTime) > 0.2f ||
-	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
+	if (bPendingUpdate || GetWorld()->TimeSince(TeleportedTime) > 0.2f || !FAnimWeight::IsRelevant(IkAmount * FootState.LockAmount))
 	{
 		return;
 	}
 
 	const auto& ComponentTransform{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform()};
 
-	FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockComponentRelativeLocation);
-	FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockComponentRelativeRotation);
+	FootState.LockLocation = ComponentTransform.TransformPosition(FVector{FootState.LockComponentRelativeLocation});
+	FootState.LockRotation = ComponentTransform.TransformRotation(FQuat{FootState.LockComponentRelativeRotation});
 
 	if (MovementBase.bHasRelativeLocation)
 	{
 		const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
-		FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
+		FootState.LockMovementBaseRelativeLocation =
+			FVector3f{BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location)};
+
+		FootState.LockMovementBaseRelativeRotation = FQuat4f{BaseRotationInverse * FootState.LockRotation};
 	}
 }
 
-void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const
+void UAlsAnimationInstance::ProcessFootLockBaseChange(const float IkAmount, FAlsFootState& FootState,
+                                                      const FTransform& ComponentTransformInverse) const
 {
-	if ((!bPendingUpdate && !MovementBase.bBaseChanged) ||
-	    !FAnimWeight::IsRelevant(FootState.IkAmount * FootState.LockAmount))
+	if ((!bPendingUpdate && !MovementBase.bBaseChanged) || !FAnimWeight::IsRelevant(IkAmount * FootState.LockAmount))
 	{
 		return;
 	}
@@ -1141,26 +1113,27 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(FAlsFootState& FootState, 
 		FootState.LockRotation = FootState.TargetRotation;
 	}
 
-	FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
-	FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
+	FootState.LockComponentRelativeLocation = FVector3f{ComponentTransformInverse.TransformPosition(FootState.LockLocation)};
+	FootState.LockComponentRelativeRotation = FQuat4f{ComponentTransformInverse.TransformRotation(FootState.LockRotation)};
 
 	if (MovementBase.bHasRelativeLocation)
 	{
 		const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-		FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
-		FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
+		FootState.LockMovementBaseRelativeLocation =
+			FVector3f{BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location)};
+
+		FootState.LockMovementBaseRelativeRotation = FQuat4f{BaseRotationInverse * FootState.LockRotation};
 	}
 	else
 	{
-		FootState.LockMovementBaseRelativeLocation = FVector::ZeroVector;
-		FootState.LockMovementBaseRelativeRotation = FQuat::Identity;
+		FootState.LockMovementBaseRelativeLocation = FVector3f::ZeroVector;
+		FootState.LockMovementBaseRelativeRotation = FQuat4f::Identity;
 	}
 }
 
-void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FName& LockCurveName,
-                                            const FTransform& ComponentTransformInverse, const float DeltaTime,
-                                            FVector& FinalLocation, FQuat& FinalRotation) const
+void UAlsAnimationInstance::RefreshFootLock(const float IkAmount, FAlsFootState& FootState, const FName& LockCurveName,
+                                            const FTransform& ComponentTransformInverse, const float DeltaTime) const
 {
 	auto NewLockAmount{GetCurveValueClamped01(LockCurveName)};
 
@@ -1180,7 +1153,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 				                             (LocomotionState.bMovingSmooth ? MovingDecreaseSpeed : NotGroundedDecreaseSpeed)));
 	}
 
-	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(FootState.IkAmount * NewLockAmount))
+	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(IkAmount * NewLockAmount))
 	{
 		if (FootState.LockAmount > 0.0f)
 		{
@@ -1189,13 +1162,15 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 			FootState.LockLocation = FVector::ZeroVector;
 			FootState.LockRotation = FQuat::Identity;
 
-			FootState.LockComponentRelativeLocation = FVector::ZeroVector;
-			FootState.LockComponentRelativeRotation = FQuat::Identity;
+			FootState.LockComponentRelativeLocation = FVector3f::ZeroVector;
+			FootState.LockComponentRelativeRotation = FQuat4f::Identity;
 
-			FootState.LockMovementBaseRelativeLocation = FVector::ZeroVector;
-			FootState.LockMovementBaseRelativeRotation = FQuat::Identity;
+			FootState.LockMovementBaseRelativeLocation = FVector3f::ZeroVector;
+			FootState.LockMovementBaseRelativeRotation = FQuat4f::Identity;
 		}
 
+		FootState.FinalLocation = FVector3f{ComponentTransformInverse.TransformPosition(FootState.TargetLocation)};
+		FootState.FinalRotation = FQuat4f{ComponentTransformInverse.TransformRotation(FootState.TargetRotation)};
 		return;
 	}
 
@@ -1216,24 +1191,26 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 				// Keep the same lock location and rotation when the previous lock
 				// amount is close to 1 to get rid of the foot "teleportation" issue.
 
-				FootState.LockLocation = FinalLocation;
-				FootState.LockRotation = FinalRotation;
+				FootState.LockLocation = FootState.TargetLocation;
+				FootState.LockRotation = FootState.TargetRotation;
 
-				FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
-				FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
+				FootState.LockComponentRelativeLocation = FVector3f{ComponentTransformInverse.TransformPosition(FootState.LockLocation)};
+				FootState.LockComponentRelativeRotation = FQuat4f{ComponentTransformInverse.TransformRotation(FootState.LockRotation)};
 			}
 
 			if (MovementBase.bHasRelativeLocation)
 			{
 				const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-				FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FinalLocation - MovementBase.Location);
-				FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FinalRotation;
+				FootState.LockMovementBaseRelativeLocation =
+					FVector3f{BaseRotationInverse.RotateVector(FootState.TargetLocation - MovementBase.Location)};
+
+				FootState.LockMovementBaseRelativeRotation = FQuat4f{BaseRotationInverse * FootState.TargetRotation};
 			}
 			else
 			{
-				FootState.LockMovementBaseRelativeLocation = FVector::ZeroVector;
-				FootState.LockMovementBaseRelativeRotation = FQuat::Identity;
+				FootState.LockMovementBaseRelativeLocation = FVector3f::ZeroVector;
+				FootState.LockMovementBaseRelativeRotation = FQuat4f::Identity;
 			}
 		}
 
@@ -1251,199 +1228,40 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 
 		const auto& ComponentTransform{GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform()};
 
-		FootState.LockLocation = ComponentTransform.TransformPosition(FootState.LockComponentRelativeLocation);
-		FootState.LockRotation = ComponentTransform.TransformRotation(FootState.LockComponentRelativeRotation);
+		FootState.LockLocation = ComponentTransform.TransformPosition(FVector{FootState.LockComponentRelativeLocation});
+		FootState.LockRotation = ComponentTransform.TransformRotation(FQuat{FootState.LockComponentRelativeRotation});
 
 		if (MovementBase.bHasRelativeLocation)
 		{
 			const auto BaseRotationInverse{MovementBase.Rotation.Inverse()};
 
-			FootState.LockMovementBaseRelativeLocation = BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location);
-			FootState.LockMovementBaseRelativeRotation = BaseRotationInverse * FootState.LockRotation;
+			FootState.LockMovementBaseRelativeLocation =
+				FVector3f{BaseRotationInverse.RotateVector(FootState.LockLocation - MovementBase.Location)};
+
+			FootState.LockMovementBaseRelativeRotation = FQuat4f{BaseRotationInverse * FootState.LockRotation};
 		}
 	}
 	else
 	{
 		if (MovementBase.bHasRelativeLocation)
 		{
-			FootState.LockLocation = MovementBase.Location + MovementBase.Rotation.RotateVector(FootState.LockMovementBaseRelativeLocation);
-			FootState.LockRotation = MovementBase.Rotation * FootState.LockMovementBaseRelativeRotation;
+			FootState.LockLocation =
+				MovementBase.Location + MovementBase.Rotation.RotateVector(FVector{FootState.LockMovementBaseRelativeLocation});
+
+			FootState.LockRotation = MovementBase.Rotation * FQuat{FootState.LockMovementBaseRelativeRotation};
 		}
 
-		FootState.LockComponentRelativeLocation = ComponentTransformInverse.TransformPosition(FootState.LockLocation);
-		FootState.LockComponentRelativeRotation = ComponentTransformInverse.TransformRotation(FootState.LockRotation);
+		FootState.LockComponentRelativeLocation = FVector3f{ComponentTransformInverse.TransformPosition(FootState.LockLocation)};
+		FootState.LockComponentRelativeRotation = FQuat4f{ComponentTransformInverse.TransformRotation(FootState.LockRotation)};
 	}
 
-	FinalLocation = FMath::Lerp(FinalLocation, FootState.LockLocation, FootState.LockAmount);
-	FinalRotation = FQuat::FastLerp(FinalRotation, FootState.LockRotation, FootState.LockAmount);
+	const auto FinalLocation{FMath::Lerp(FootState.TargetLocation, FootState.LockLocation, FootState.LockAmount)};
+
+	auto FinalRotation{FQuat::FastLerp(FootState.TargetRotation, FootState.LockRotation, FootState.LockAmount)};
 	FinalRotation.Normalize();
-}
 
-void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const float DeltaTime,
-                                              FVector& FinalLocation, FQuat& FinalRotation) const
-{
-	if (!FAnimWeight::IsRelevant(FootState.IkAmount))
-	{
-		FootState.OffsetTargetLocationZ = 0.0f;
-		FootState.OffsetTargetRotation = FQuat::Identity;
-		FootState.OffsetSpringState.Reset();
-		return;
-	}
-
-	if (LocomotionMode == AlsLocomotionModeTags::InAir)
-	{
-		FootState.OffsetTargetLocationZ = 0.0f;
-		FootState.OffsetTargetRotation = FQuat::Identity;
-		FootState.OffsetSpringState.Reset();
-
-		if (bPendingUpdate)
-		{
-			FootState.OffsetLocationZ = 0.0f;
-			FootState.OffsetRotation = FQuat::Identity;
-		}
-		else
-		{
-			static constexpr auto InterpolationSpeed{15.0f};
-
-			FootState.OffsetLocationZ *= 1.0f - UAlsMath::Clamp01(DeltaTime * InterpolationSpeed);
-
-			FootState.OffsetRotation = UAlsRotation::InterpolateQuaternionFast(FootState.OffsetRotation, FQuat::Identity,
-			                                                                   DeltaTime, InterpolationSpeed);
-
-			FinalLocation.Z += FootState.OffsetLocationZ;
-			FinalRotation = FootState.OffsetRotation * FinalRotation;
-		}
-
-		return;
-	}
-
-	// Trace downward from the foot location to find the geometry. If the surface is walkable, save the impact location and normal.
-
-	const FVector TraceLocation{
-		FinalLocation.X, FinalLocation.Y, GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().GetLocation().Z
-	};
-
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     TraceLocation + FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-	                                     },
-	                                     TraceLocation - FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-	                                     },
-	                                     Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
-
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
-
-#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-	if (bDisplayDebugTraces)
-	{
-		if (IsInGameThread())
-		{
-			UAlsDebugUtility::DrawLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
-			                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
-		}
-		else
-		{
-			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
-				{
-					UAlsDebugUtility::DrawLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
-					                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
-				}
-			);
-		}
-	}
-#endif
-
-	if (bGroundValid)
-	{
-		const auto SlopeAngleCos{UE_REAL_TO_FLOAT(Hit.ImpactNormal.Z)};
-
-		const auto FootHeight{Settings->Feet.FootHeight * LocomotionState.Scale};
-		const auto FootHeightOffset{SlopeAngleCos > UE_SMALL_NUMBER ? FootHeight / SlopeAngleCos - FootHeight : 0.0f};
-
-		// Find the difference between the impact location and the expected (flat) floor location.
-		// These values are offset by the foot height to get better behavior on sloped surfaces.
-
-		FootState.OffsetTargetLocationZ = UE_REAL_TO_FLOAT(Hit.ImpactPoint.Z - TraceLocation.Z) + FootHeightOffset;
-
-		// Calculate the rotation offset.
-
-		FootState.OffsetTargetRotation = FQuat::FindBetweenNormals(FVector::ZAxisVector, Hit.ImpactNormal);
-	}
-
-	// Interpolate current offsets to the new target values.
-
-	if (bPendingUpdate)
-	{
-		FootState.OffsetSpringState.Reset();
-
-		FootState.OffsetLocationZ = FootState.OffsetTargetLocationZ;
-		FootState.OffsetRotation = FootState.OffsetTargetRotation;
-	}
-	else
-	{
-		static constexpr auto LocationInterpolationFrequency{0.4f};
-		static constexpr auto LocationInterpolationDampingRatio{4.0f};
-		static constexpr auto LocationInterpolationTargetVelocityAmount{1.0f};
-
-		FootState.OffsetLocationZ = UAlsMath::SpringDampFloat(FootState.OffsetSpringState, FootState.OffsetLocationZ,
-		                                                      FootState.OffsetTargetLocationZ, DeltaTime, LocationInterpolationFrequency,
-		                                                      LocationInterpolationDampingRatio, LocationInterpolationTargetVelocityAmount);
-
-		static constexpr auto RotationInterpolationSpeed{30.0f};
-
-		FootState.OffsetRotation = UAlsRotation::InterpolateQuaternionFast(FootState.OffsetRotation, FootState.OffsetTargetRotation,
-		                                                                   DeltaTime, RotationInterpolationSpeed);
-	}
-
-	FinalLocation.Z += FootState.OffsetLocationZ;
-	FinalRotation = FootState.OffsetRotation * FinalRotation;
-}
-
-void UAlsAnimationInstance::ConstraintFootRotation(const FAlsFootConstraintsSettings& ConstraintsSettings,
-                                                   const FQuat& ParentRotation, FQuat& Rotation) const
-{
-	const auto RelativeRotation{ParentRotation.Inverse() * Rotation};
-
-	FQuat Swing;
-	FQuat Twist;
-	RelativeRotation.ToSwingTwist(FVector{ConstraintsSettings.TwistAxis}, Swing, Twist);
-
-	// Limit swing.
-
-	const auto SwingLimitOffset{FQuat{ConstraintsSettings.SwingLimitOffsetQuaternion}};
-
-	Swing = SwingLimitOffset * Swing;
-
-	// Clamp a point with Swing.Y and Swing.Z coordinates to an ellipse with LimitsSettings.Swing2Limit
-	// and LimitsSettings.Swing1Limit dimensions. A simplified and not very accurate algorithm is used here,
-	// but it is enough for our needs. To get a more accurate result, you can use an algorithm similar
-	// to the one used in Chaos::NearPointOnEllipse() or FRigUnit_SphericalPoseReader::DistanceToEllipse().
-
-	FVector2D SwingLimit{Swing.Y, Swing.Z};
-	SwingLimit.Normalize();
-
-	SwingLimit.X = FMath::Abs(SwingLimit.X * ConstraintsSettings.Swing2Limit);
-	SwingLimit.Y = FMath::Abs(SwingLimit.Y * ConstraintsSettings.Swing1Limit);
-
-	const auto NewSwingY{FMath::Sign(Swing.Y) * FMath::Min(FMath::Abs(Swing.Y), SwingLimit.X)};
-	const auto NewSwingZ{FMath::Sign(Swing.Z) * FMath::Min(FMath::Abs(Swing.Z), SwingLimit.Y)};
-
-	FQuat NewSwing{
-		0.0f, NewSwingY, NewSwingZ, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewSwingY * NewSwingY - NewSwingZ * NewSwingZ))
-	};
-
-	NewSwing = SwingLimitOffset.Inverse() * NewSwing;
-
-	// Limit twist.
-
-	const auto NewTwistX{FMath::Sign(Twist.X) * FMath::Min(FMath::Abs(Twist.X), ConstraintsSettings.TwistLimit)};
-
-	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewTwistX * NewTwistX)));
-
-	Rotation = ParentRotation * (NewSwing * NewTwist);
-	Rotation.Normalize();
+	FootState.FinalLocation = FVector3f{ComponentTransformInverse.TransformPosition(FinalLocation)};
+	FootState.FinalRotation = FQuat4f{ComponentTransformInverse.TransformRotation(FinalRotation)};
 }
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()

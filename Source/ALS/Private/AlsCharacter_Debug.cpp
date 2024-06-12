@@ -550,15 +550,6 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 
 	const auto RowOffset{12.0f * Scale};
 
-	static const auto FootOffsetTraceText{LOCTEXT("FootOffsetTrace", "Foot Offset")};
-
-	Text.SetColor({0.0f, 0.75f, 1.0f});
-
-	Text.Text = FootOffsetTraceText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
 	static const auto GroundPredictionTraceText{LOCTEXT("GroundPredictionTrace", "Ground Prediction")};
 
 	Text.SetColor({0.75f, 0.0f, 1.0f});

@@ -31,7 +31,7 @@ struct ALS_API FAlsLocomotionAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
 	float MaxBrakingDeceleration{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float WalkableFloorZ{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

@@ -24,7 +24,6 @@
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
-struct FAlsFootConstraintsSettings;
 class UAlsLinkedAnimationInstance;
 class AAlsCharacter;
 
@@ -282,19 +281,14 @@ private:
 	void RefreshFeet(float DeltaTime);
 
 	void RefreshFoot(FAlsFootState& FootState, const FName& IkCurveName, const FName& LockCurveName,
-	                 const FAlsFootConstraintsSettings& ConstraintsSettings, const FTransform& ComponentTransformInverse,
-	                 float DeltaTime) const;
+	                 const FTransform& ComponentTransformInverse, float DeltaTime) const;
 
-	void ProcessFootLockTeleport(FAlsFootState& FootState) const;
+	void ProcessFootLockTeleport(float IkAmount, FAlsFootState& FootState) const;
 
-	void ProcessFootLockBaseChange(FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const;
+	void ProcessFootLockBaseChange(float IkAmount, FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const;
 
-	void RefreshFootLock(FAlsFootState& FootState, const FName& LockCurveName, const FTransform& ComponentTransformInverse,
-	                     float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
-
-	void RefreshFootOffset(FAlsFootState& FootState, float DeltaTime, FVector& FinalLocation, FQuat& FinalRotation) const;
-
-	void ConstraintFootRotation(const FAlsFootConstraintsSettings& ConstraintsSettings, const FQuat& ParentRotation, FQuat& Rotation) const;
+	void RefreshFootLock(float IkAmount, FAlsFootState& FootState, const FName& LockCurveName,
+	                     const FTransform& ComponentTransformInverse, float DeltaTime) const;
 
 	// Transitions
 

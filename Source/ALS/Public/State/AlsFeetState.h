@@ -1,15 +1,11 @@
 ﻿#pragma once
 
-#include "Utility/AlsMath.h"
 #include "AlsFeetState.generated.h"
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsFootState
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float IkAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float LockAmount{0.0f};
@@ -27,37 +23,22 @@ struct ALS_API FAlsFootState
 	FQuat LockRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector LockComponentRelativeLocation{ForceInit};
+	FVector3f LockComponentRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat LockComponentRelativeRotation{ForceInit};
+	FQuat4f LockComponentRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector LockMovementBaseRelativeLocation{ForceInit};
+	FVector3f LockMovementBaseRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat LockMovementBaseRelativeRotation{ForceInit};
+	FQuat4f LockMovementBaseRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float OffsetTargetLocationZ{0.0f};
+	FVector3f FinalLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat OffsetTargetRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsSpringFloatState OffsetSpringState;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float OffsetLocationZ{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat OffsetRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector IkLocation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat IkRotation{ForceInit};
+	FQuat4f FinalRotation{ForceInit};
 };
 
 USTRUCT(BlueprintType)
@@ -83,9 +64,4 @@ struct ALS_API FAlsFeetState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsFootState Right;
-
-	// Pelvis
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector2f MinMaxPelvisOffsetZ{ForceInit};
 };

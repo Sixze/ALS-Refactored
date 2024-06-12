@@ -40,15 +40,12 @@ void UAlsCameraComponent::RegisterComponentTickFunctions(const bool bRegister)
 
 void UAlsCameraComponent::Activate(const bool bReset)
 {
-	if (!bReset && !ShouldActivate())
+	if (bReset || ShouldActivate())
 	{
-		Super::Activate(bReset);
-		return;
+		TickCamera(0.0f, false);
 	}
 
 	Super::Activate(bReset);
-
-	TickCamera(0.0f, false);
 }
 
 void UAlsCameraComponent::InitAnim(const bool bForceReinitialize)
