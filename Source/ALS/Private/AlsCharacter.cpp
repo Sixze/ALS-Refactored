@@ -538,6 +538,8 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 		}
 		else
 		{
+			// Increase friction for a short period of time to prevent sliding on the ground after landing.
+
 			static constexpr auto HasInputBrakingFrictionFactor{0.5f};
 			static constexpr auto NoInputBrakingFrictionFactor{3.0f};
 

@@ -95,7 +95,6 @@ FAlsRigUnit_ChainLength_Execute()
 
 	if (Length < 0.0f)
 	{
-		// TODO
 		Length = FMath::Max(0.0f, AlsChainLengthRigUnit::CalculateChainLength(DescendantTransformElement, AncestorTransformElement,
 		                                                                      Hierarchy, TransformType, VisitedElements));
 	}

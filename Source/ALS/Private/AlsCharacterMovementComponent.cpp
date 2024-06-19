@@ -123,51 +123,55 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 {
 	SetNetworkMoveDataContainer(MoveDataContainer);
 
-	bTickBeforeOwner = true;
+	bRunPhysicsWithNoController = true;
+	bAllowPhysicsRotationDuringAnimRootMotion = true;       // Required to be able to manually rotate the actor while rolling.
+	bNetworkAlwaysReplicateTransformUpdateTimestamp = true; // Required for view network smoothing.
 
-	// NetworkMaxSmoothUpdateDistance = 92.0f;
-	// NetworkNoSmoothUpdateDistance = 140.0f;
-
-	MaxAcceleration = 1500.0f;
-	BrakingFrictionFactor = 0.0f;
 	SetCrouchedHalfHeight(56.0f);
 
-	bRunPhysicsWithNoController = true;
+	// Default values for standing walking movement.
 
-	GroundFriction = 4.0f;
-	MaxWalkSpeed = 375.0f;
-	MaxWalkSpeedCrouched = 200.0f;
 	MinAnalogWalkSpeed = 25.0f;
+	MaxWalkSpeed = 375.0f;
+	MaxWalkSpeedCrouched = 150.0f;
+	GroundFriction = 12.0f;
+
+	AirControl = 0.15f;
+
+	// This value is only used when the actor is in the air, since when moving on the ground
+	// the value from the AccelerationAndDecelerationAndGroundFriction curve is used instead.
+	MaxAcceleration = 2000.0f;
+
+	// Makes GroundFriction and FallingLateralFriction used for both acceleration and deceleration.
+	bUseSeparateBrakingFriction = false;
+
+	// Makes friction does not affect deceleration by default. Greater than zero only for a short period of time after landing.
+	BrakingFrictionFactor = 0.0f;
+
 	bCanWalkOffLedgesWhenCrouching = true;
+
+	// Subtracted from the capsule radius to check how far the actor is allowed to
+	// perch on the edge of a surface. Currently this is half the capsule radius.
+	PerchRadiusThreshold = 15.0f;
+
+	// This value allows the actor to perch a ledge whose height is close to MaxStepHeight.
+	PerchAdditionalHeight = 0.0f;
+
+	JumpOffJumpZFactor = 0.0f; // Makes the actor slide down instead of bouncing on a surface it can't stand on.
 
 	// bImpartBaseVelocityX = false;
 	// bImpartBaseVelocityY = false;
 	// bImpartBaseVelocityZ = false;
 	// bImpartBaseAngularVelocity = false;
-
 	bIgnoreBaseRotation = true;
 
-	PerchRadiusThreshold = 20.0f;
-	PerchAdditionalHeight = 0.0f;
-	LedgeCheckThreshold = 0.0f;
-
-	AirControl = 0.15f;
-
-	// https://unrealengine.hatenablog.com/entry/2019/01/16/231404
-
-	FallingLateralFriction = 1.0f;
-	JumpOffJumpZFactor = 0.0f;
-
-	bNetworkAlwaysReplicateTransformUpdateTimestamp = true; // Required for view network smoothing.
+	// These values prohibit the character movement component from affecting the actor's rotation.
 
 	RotationRate = FRotator::ZeroRotator;
 	bUseControllerDesiredRotation = false;
 	bOrientRotationToMovement = false;
 
-	bAllowPhysicsRotationDuringAnimRootMotion = true; // Used to allow character rotation while rolling.
-
 	NavAgentProps.bCanCrouch = true;
-	NavAgentProps.bCanFly = true;
 	bUseAccelerationForPaths = true;
 }
 

@@ -608,7 +608,6 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 
 	static const FName FreeSpaceTraceTag{FString::Printf(TEXT("%hs (Free Space Overlap)"), __FUNCTION__)};
 
-	// TODO
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, Settings->ThirdPerson.TraceChannel,
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
