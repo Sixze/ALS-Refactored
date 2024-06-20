@@ -200,6 +200,12 @@ public:
 	const FGameplayTag& GetMaxAllowedGait() const;
 
 	void SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait);
+	
+	void SetRelativeVelocityDirection(const FVector& Direction);
+	FVector GetRelativeVelocityDirection() const;
+
+	float GetWalkSpeed() const;
+	float GetRunSpeed() const;
 
 private:
 	void RefreshMaxWalkSpeed();
@@ -212,6 +218,9 @@ public:
 	void SetInputBlocked(bool bNewInputBlocked);
 
 	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);
+
+private:
+	FVector RelativeVelocityDirection;
 };
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const
