@@ -632,12 +632,15 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 
 	auto& VelocityBlend{GroundedState.VelocityBlend};
 
-	const auto RelativeVelocityDirection{GetRelativeVelocity().GetSafeNormal()};
+	auto RelativeVelocityDirection{GetRelativeVelocity()};
+	auto TargetVelocityBlend{FVector3f::ZeroVector};
 
-	const auto TargetVelocityBlend{
-		RelativeVelocityDirection /
-		(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z))
-	};
+	if (RelativeVelocityDirection.Normalize())
+	{
+		TargetVelocityBlend =
+			RelativeVelocityDirection /
+			(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z));
+	}
 
 	if (VelocityBlend.bInitializationRequired)
 	{
