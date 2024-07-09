@@ -14,10 +14,16 @@ struct ALS_API FAlsMovementGaitSettings
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
-	float WalkSpeed{175.0f};
+	float WalkForwardSpeed{175.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
-	float RunSpeed{375.0f};
+	float WalkBackwardSpeed{175.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	float RunForwardSpeed{375.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	float RunBackwardSpeed{375.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float SprintSpeed{650.0f};
@@ -33,7 +39,9 @@ public:
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve;
 
 public:
-	float GetSpeedByGait(const FGameplayTag& Gait) const;
+	float GetMaxWalkSpeed() const;
+
+	float GetMaxRunSpeed() const;
 };
 
 USTRUCT(BlueprintType)
@@ -55,6 +63,14 @@ class ALS_API UAlsMovementSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	// X-components of the velocity direction relative to the view direction at
+	// which interpolation from forward speed to backward speed will take place.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = -1, ClampMax = 1))
+	FVector2f VelocityDirectionToSpeedInterpolationRange{
+		FMath::Asin(FMath::DegreesToRadians(-10.0f)),
+		FMath::Asin(FMath::DegreesToRadians(-35.0f))
+	};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
 	TMap<FGameplayTag, FAlsMovementStanceSettings> RotationModes
 	{
@@ -62,24 +78,19 @@ public:
 		{AlsRotationModeTags::ViewDirection, {}},
 		{AlsRotationModeTags::Aiming, {}}
 	};
+
+public:
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent) override;
+#endif
 };
 
-inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait) const
+inline float FAlsMovementGaitSettings::GetMaxWalkSpeed() const
 {
-	if (Gait == AlsGaitTags::Walking)
-	{
-		return WalkSpeed;
-	}
+	return FMath::Max(WalkForwardSpeed, WalkBackwardSpeed);
+}
 
-	if (Gait == AlsGaitTags::Running)
-	{
-		return RunSpeed;
-	}
-
-	if (Gait == AlsGaitTags::Sprinting)
-	{
-		return SprintSpeed;
-	}
-
-	return 0.0f;
+inline float FAlsMovementGaitSettings::GetMaxRunSpeed() const
+{
+	return FMath::Max(RunForwardSpeed, RunBackwardSpeed);
 }

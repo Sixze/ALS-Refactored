@@ -1001,12 +1001,14 @@ FGameplayTag AAlsCharacter::CalculateActualGait(const FGameplayTag& MaxAllowedGa
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
 	// walking, the new gait will still be running until the character decelerates to the walking speed.
 
-	if (LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().WalkSpeed + 10.0f)
+	const auto& GaitSettings{AlsCharacterMovement->GetGaitSettings()};
+
+	if (LocomotionState.Speed < GaitSettings.GetMaxWalkSpeed() + 10.0f)
 	{
 		return AlsGaitTags::Walking;
 	}
 
-	if (LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().RunSpeed + 10.0f || MaxAllowedGait != AlsGaitTags::Sprinting)
+	if (LocomotionState.Speed < GaitSettings.GetMaxRunSpeed() + 10.0f || MaxAllowedGait != AlsGaitTags::Sprinting)
 	{
 		return AlsGaitTags::Running;
 	}
@@ -1490,8 +1492,7 @@ void AAlsCharacter::OnJumpedNetworked()
 
 void AAlsCharacter::FaceRotation(const FRotator Rotation, const float DeltaTime)
 {
-	// Left empty intentionally. We are ignoring rotation changes from external
-	// sources because ALS itself has full control over character rotation.
+	// Left empty intentionally. We ignore rotation changes from external sources because ALS itself has full control over actor rotation.
 }
 
 void AAlsCharacter::CharacterMovement_OnPhysicsRotation(const float DeltaTime)
@@ -1720,7 +1721,7 @@ float AAlsCharacter::CalculateGroundedMovingRotationInterpolationSpeed() const
 
 	const auto InterpolationSpeed{
 		ALS_ENSURE(IsValid(InterpolationSpeedCurve))
-			? InterpolationSpeedCurve->GetFloatValue(AlsCharacterMovement->CalculateGaitAmount())
+			? InterpolationSpeedCurve->GetFloatValue(AlsCharacterMovement->GetGaitAmount())
 			: DefaultInterpolationSpeed
 	};
 

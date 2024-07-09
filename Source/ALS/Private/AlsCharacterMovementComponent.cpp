@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterMovementComponent)
@@ -29,7 +30,7 @@ bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Moveme
 
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode, AlsRotationModeTags::ViewDirection.GetTag(), Map);
 	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance, AlsStanceTags::Standing.GetTag(), Map);
-	NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, AlsGaitTags::Walking.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, AlsGaitTags::Running.GetTag(), Map);
 
 	return !Archive.IsError();
 }
@@ -47,7 +48,7 @@ void FAlsSavedMove::Clear()
 
 	RotationMode = AlsRotationModeTags::ViewDirection;
 	Stance = AlsStanceTags::Standing;
-	MaxAllowedGait = AlsGaitTags::Walking;
+	MaxAllowedGait = AlsGaitTags::Running;
 }
 
 void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, const FVector& NewAcceleration,
@@ -134,7 +135,9 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	MinAnalogWalkSpeed = 25.0f;
 	MaxWalkSpeed = 375.0f;
 	MaxWalkSpeedCrouched = 150.0f;
-	GroundFriction = 12.0f;
+	MaxAccelerationWalking = 2000.0f;
+	BrakingDecelerationWalking = 1500.0f;
+	GroundFriction = 4.0f;
 
 	AirControl = 0.15f;
 
@@ -284,20 +287,12 @@ void UAlsCharacterMovementComponent::CalcVelocity(const float DeltaTime, const f
 
 float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 {
-	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
+	if (IsMovingOnGround())
+	{
+		return MaxAccelerationWalking;
+	}
 
-	return IsMovingOnGround() && ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve))
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
-		       : Super::GetMaxAcceleration();
-}
-
-float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
-{
-	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
-
-	return IsMovingOnGround() && ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve))
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
-		       : Super::GetMaxBrakingDeceleration();
+	return Super::GetMaxAcceleration();
 }
 
 void UAlsCharacterMovementComponent::ControlledCharacterMove(const FVector& InputVector, const float DeltaTime)
@@ -321,14 +316,19 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 	}
 }
 
+void UAlsCharacterMovementComponent::MoveSmooth(const FVector& InVelocity, const float DeltaTime, FStepDownResult* StepDownResult)
+{
+	if (IsMovingOnGround())
+	{
+		RefreshGroundedMovementSettings();
+	}
+
+	Super::MoveSmooth(InVelocity, DeltaTime, StepDownResult);
+}
+
 void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 Iterations)
 {
-	if (ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)))
-	{
-		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
-
-		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
-	}
+	RefreshGroundedMovementSettings();
 
 	// TODO Copied with modifications from UCharacterMovementComponent::PhysWalking(). After the
 	// TODO release of a new engine version, this code should be updated to match the source code.
@@ -582,12 +582,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 
 void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
 {
-	if (ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)))
-	{
-		// Get the ground friction using the movement curve. This allows for fine control over movement behavior at each speed.
-
-		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
-	}
+	RefreshGroundedMovementSettings();
 
 	Super::PhysNavWalking(DeltaTime, Iterations);
 }
@@ -896,15 +891,15 @@ void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* N
 
 void UAlsCharacterMovementComponent::RefreshGaitSettings()
 {
-	if (ALS_ENSURE(IsValid(MovementSettings)))
+	if (!ALS_ENSURE(IsValid(MovementSettings)))
 	{
-		const auto* StanceSettings{MovementSettings->RotationModes.Find(RotationMode)};
-		const auto* NewGaitSettings{ALS_ENSURE(StanceSettings != nullptr) ? StanceSettings->Stances.Find(Stance) : nullptr};
-
-		GaitSettings = ALS_ENSURE(NewGaitSettings != nullptr) ? *NewGaitSettings : FAlsMovementGaitSettings{};
+		return;
 	}
 
-	RefreshMaxWalkSpeed();
+	const auto* StanceSettings{MovementSettings->RotationModes.Find(RotationMode)};
+	const auto* NewGaitSettings{ALS_ENSURE(StanceSettings != nullptr) ? StanceSettings->Stances.Find(Stance) : nullptr};
+
+	GaitSettings = ALS_ENSURE(NewGaitSettings != nullptr) ? *NewGaitSettings : FAlsMovementGaitSettings{};
 }
 
 void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewRotationMode)
@@ -927,47 +922,92 @@ void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStance)
 	}
 }
 
-void UAlsCharacterMovementComponent::SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait)
+void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 {
-	if (MaxAllowedGait != NewMaxAllowedGait)
+	auto WalkSpeed{GaitSettings.WalkForwardSpeed};
+	auto RunSpeed{GaitSettings.RunForwardSpeed};
+
+	if (RotationMode != AlsRotationModeTags::VelocityDirection && IsValid(MovementSettings))
 	{
-		MaxAllowedGait = NewMaxAllowedGait;
+		auto VelocityDirection{Velocity};
 
-		RefreshMaxWalkSpeed();
+		if (VelocityDirection.Normalize())
+		{
+			const auto* Controller{GetController()};
+
+			const auto ViewRotation{
+				IsValid(Controller)
+					? GetController()->GetControlRotation()
+					: GetCharacterOwner()->GetViewRotation()
+			};
+
+			const auto ViewRotation2D{UAlsRotation::GetTwist(ViewRotation.Quaternion(), -GetGravityDirection())};
+
+			// Ideally we should use actor rotation here instead of view rotation, but we can't do that because ALS has
+			// full control over actor rotation and it is not synchronized over the network, so it would cause jitter.
+
+			const auto RelativeVelocityDirection{ViewRotation2D.UnrotateVector(VelocityDirection)};
+
+			const auto MovingForwardAmount{
+				FMath::GetMappedRangeValueClamped(MovementSettings->VelocityDirectionToSpeedInterpolationRange,
+				                                  {1.0f, 0.0f}, RelativeVelocityDirection.X)
+			};
+
+			WalkSpeed = FMath::Lerp(GaitSettings.WalkBackwardSpeed, GaitSettings.WalkForwardSpeed, MovingForwardAmount);
+			RunSpeed = FMath::Lerp(GaitSettings.RunBackwardSpeed, GaitSettings.RunForwardSpeed, MovingForwardAmount);
+		}
 	}
-}
 
-void UAlsCharacterMovementComponent::RefreshMaxWalkSpeed()
-{
-	MaxWalkSpeed = GaitSettings.GetSpeedByGait(MaxAllowedGait);
-	MaxWalkSpeedCrouched = MaxWalkSpeed;
-}
-
-float UAlsCharacterMovementComponent::CalculateGaitAmount() const
-{
-	// Map the character's current speed to the configured movement speeds ranging from 0 to 3,
-	// where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting. This allows us to vary
-	// movement speeds but still use the mapped range in calculations for consistent results.
+	// Map the character's current speed to the to the speed ranges from the movement settings. This allows
+	// us to vary movement speeds but still use the mapped range in calculations for consistent results.
 
 	const auto Speed{UE_REAL_TO_FLOAT(Velocity.Size2D())};
 
-	if (Speed <= GaitSettings.WalkSpeed)
+	if (Speed <= WalkSpeed)
 	{
-		static const FVector2f GaitAmount{0.0f, 1.0f};
-
-		return FMath::GetMappedRangeValueClamped({0.0f, GaitSettings.WalkSpeed}, GaitAmount, Speed);
+		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, WalkSpeed}, {0.0f, 1.0f}, Speed);
+	}
+	else if (Speed <= RunSpeed)
+	{
+		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{WalkSpeed, RunSpeed}, {1.0f, 2.0f}, Speed);
+	}
+	else
+	{
+		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
 	}
 
-	if (Speed <= GaitSettings.RunSpeed)
+	if (MaxAllowedGait == AlsGaitTags::Walking)
 	{
-		static const FVector2f GaitAmount{1.0f, 2.0f};
-
-		return FMath::GetMappedRangeValueClamped({GaitSettings.WalkSpeed, GaitSettings.RunSpeed}, GaitAmount, Speed);
+		MaxWalkSpeed = WalkSpeed;
+	}
+	else if (MaxAllowedGait == AlsGaitTags::Running)
+	{
+		MaxWalkSpeed = RunSpeed;
+	}
+	else if (MaxAllowedGait == AlsGaitTags::Sprinting)
+	{
+		MaxWalkSpeed = GaitSettings.SprintSpeed;
+	}
+	else
+	{
+		MaxWalkSpeed = GaitSettings.RunForwardSpeed;
 	}
 
-	static const FVector2f GaitAmount{2.0f, 3.0f};
+	MaxWalkSpeedCrouched = MaxWalkSpeed;
 
-	return FMath::GetMappedRangeValueClamped({GaitSettings.RunSpeed, GaitSettings.SprintSpeed}, GaitAmount, Speed);
+	// Get acceleration, deceleration and ground friction using a curve. This
+	// allows us to precisely control the movement behavior at each speed.
+
+	if (ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)))
+	{
+		const auto& AccelerationAndDecelerationAndGroundFrictionCurves{
+			GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves
+		};
+
+		MaxAccelerationWalking = AccelerationAndDecelerationAndGroundFrictionCurves[0].Eval(GaitAmount);
+		BrakingDecelerationWalking = AccelerationAndDecelerationAndGroundFrictionCurves[1].Eval(GaitAmount);
+		GroundFriction = AccelerationAndDecelerationAndGroundFrictionCurves[2].Eval(GaitAmount);
+	}
 }
 
 void UAlsCharacterMovementComponent::SetMovementModeLocked(const bool bNewMovementModeLocked)
