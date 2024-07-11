@@ -160,11 +160,11 @@ public:
 	virtual void MoveSmooth(const FVector& InVelocity, float DeltaTime, FStepDownResult* StepDownResult = nullptr) override;
 
 protected:
-	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
+	virtual void PhysWalking(float DeltaTime, int32 IterationsCount) override;
 
-	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
+	virtual void PhysNavWalking(float DeltaTime, int32 IterationsCount) override;
 
-	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
+	virtual void PhysCustom(float DeltaTime, int32 IterationsCount) override;
 
 public:
 	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,

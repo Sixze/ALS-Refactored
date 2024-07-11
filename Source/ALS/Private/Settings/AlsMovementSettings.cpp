@@ -5,10 +5,10 @@
 #if WITH_EDITOR
 void UAlsMovementSettings::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, VelocityDirectionToSpeedInterpolationRange))
+	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, VelocityAngleToSpeedInterpolationRange))
 	{
-		VelocityDirectionToSpeedInterpolationRange.Y = FMath::Min(VelocityDirectionToSpeedInterpolationRange.X,
-		                                                          VelocityDirectionToSpeedInterpolationRange.Y);
+		VelocityAngleToSpeedInterpolationRange.Y = FMath::Max(VelocityAngleToSpeedInterpolationRange.X,
+		                                                      VelocityAngleToSpeedInterpolationRange.Y);
 	}
 
 	Super::PostEditChangeProperty(ChangedEvent);

@@ -9,6 +9,7 @@
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsVector.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterMovementComponent)
 
@@ -326,9 +327,11 @@ void UAlsCharacterMovementComponent::MoveSmooth(const FVector& InVelocity, const
 	Super::MoveSmooth(InVelocity, DeltaTime, StepDownResult);
 }
 
-void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 Iterations)
+void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 IterationsCount)
 {
 	RefreshGroundedMovementSettings();
+
+	auto Iterations{IterationsCount};
 
 	// TODO Copied with modifications from UCharacterMovementComponent::PhysWalking(). After the
 	// TODO release of a new engine version, this code should be updated to match the source code.
@@ -580,22 +583,22 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	// ReSharper restore All
 }
 
-void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
+void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 IterationsCount)
 {
 	RefreshGroundedMovementSettings();
 
-	Super::PhysNavWalking(DeltaTime, Iterations);
+	Super::PhysNavWalking(DeltaTime, IterationsCount);
 }
 
-void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Iterations)
+void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 IterationsCount)
 {
 	if (DeltaTime < MIN_TICK_TIME)
 	{
-		Super::PhysCustom(DeltaTime, Iterations);
+		Super::PhysCustom(DeltaTime, IterationsCount);
 		return;
 	}
 
-	Iterations += 1;
+	IterationsCount += 1;
 	bJustTeleported = false;
 
 	RestorePreAdditiveRootMotionVelocity();
@@ -609,7 +612,7 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 
 	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
-	Super::PhysCustom(DeltaTime, Iterations);
+	Super::PhysCustom(DeltaTime, IterationsCount);
 }
 
 void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance,
@@ -927,35 +930,33 @@ void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 	auto WalkSpeed{GaitSettings.WalkForwardSpeed};
 	auto RunSpeed{GaitSettings.RunForwardSpeed};
 
-	if (RotationMode != AlsRotationModeTags::VelocityDirection && IsValid(MovementSettings))
+	if (Velocity.SizeSquared() > UE_KINDA_SMALL_NUMBER &&
+	    RotationMode != AlsRotationModeTags::VelocityDirection &&
+	    IsValid(MovementSettings))
 	{
-		auto VelocityDirection{Velocity};
+		const auto* Controller{GetController()};
 
-		if (VelocityDirection.Normalize())
-		{
-			const auto* Controller{GetController()};
+		const auto ViewRotation{
+			IsValid(Controller)
+				? GetController()->GetControlRotation()
+				: GetCharacterOwner()->GetViewRotation()
+		};
 
-			const auto ViewRotation{
-				IsValid(Controller)
-					? GetController()->GetControlRotation()
-					: GetCharacterOwner()->GetViewRotation()
-			};
+		// Ideally we should use actor rotation here instead of view rotation, but we can't do that because ALS has
+		// full control over actor rotation and it is not synchronized over the network, so it would cause jitter.
 
-			const auto ViewRotation2D{UAlsRotation::GetTwist(ViewRotation.Quaternion(), -GetGravityDirection())};
+		const auto RelativeViewRotation{UAlsRotation::GetTwist(ViewRotation.Quaternion(), -GetGravityDirection())};
 
-			// Ideally we should use actor rotation here instead of view rotation, but we can't do that because ALS has
-			// full control over actor rotation and it is not synchronized over the network, so it would cause jitter.
+		const FVector2D RelativeVelocity{RelativeViewRotation.UnrotateVector(Velocity)};
+		const auto VelocityAngle{UAlsVector::DirectionToAngle(RelativeVelocity)};
 
-			const auto RelativeVelocityDirection{ViewRotation2D.UnrotateVector(VelocityDirection)};
+		const auto ForwardSpeedAmount{
+			FMath::GetMappedRangeValueClamped(MovementSettings->VelocityAngleToSpeedInterpolationRange,
+			                                  {1.0f, 0.0f}, FMath::Abs(VelocityAngle))
+		};
 
-			const auto MovingForwardAmount{
-				FMath::GetMappedRangeValueClamped(MovementSettings->VelocityDirectionToSpeedInterpolationRange,
-				                                  {1.0f, 0.0f}, RelativeVelocityDirection.X)
-			};
-
-			WalkSpeed = FMath::Lerp(GaitSettings.WalkBackwardSpeed, GaitSettings.WalkForwardSpeed, MovingForwardAmount);
-			RunSpeed = FMath::Lerp(GaitSettings.RunBackwardSpeed, GaitSettings.RunForwardSpeed, MovingForwardAmount);
-		}
+		WalkSpeed = FMath::Lerp(GaitSettings.WalkBackwardSpeed, GaitSettings.WalkForwardSpeed, ForwardSpeedAmount);
+		RunSpeed = FMath::Lerp(GaitSettings.RunBackwardSpeed, GaitSettings.RunForwardSpeed, ForwardSpeedAmount);
 	}
 
 	// Map the character's current speed to the to the speed ranges from the movement settings. This allows
