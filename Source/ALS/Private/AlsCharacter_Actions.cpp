@@ -934,13 +934,13 @@ FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 	const auto CollisionChannel{GetCharacterMovement()->UpdatedComponent->GetCollisionObjectType()};
 
 	FCollisionQueryParams QueryParameters{__FUNCTION__, false, this};
-	FCollisionResponseParams ResponseParameters;
-	GetCharacterMovement()->InitCollisionParams(QueryParameters, ResponseParameters);
+	FCollisionResponseParams CollisionResponses;
+	GetCharacterMovement()->InitCollisionParams(QueryParameters, CollisionResponses);
 
 	FHitResult Hit;
 	bGrounded = GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity,
 	                                             CollisionChannel, FCollisionShape::MakeSphere(CapsuleRadius),
-	                                             QueryParameters, ResponseParameters);
+	                                             QueryParameters, CollisionResponses);
 
 	// #if ENABLE_DRAW_DEBUG
 	// 	UAlsDebugUtility::DrawSweepSingleSphere(GetWorld(), TraceStart, TraceEnd, CapsuleRadius,

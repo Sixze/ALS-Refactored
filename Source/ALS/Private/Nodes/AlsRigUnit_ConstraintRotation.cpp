@@ -8,11 +8,11 @@ FAlsRigUnit_ConstraintRotation_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	const auto DeltaRotation{CurrentRotation.Inverse() * TargetRotation};
+	const auto RelativeRotation{CurrentRotation.Inverse() * TargetRotation};
 
 	FQuat Swing;
 	FQuat Twist;
-	DeltaRotation.ToSwingTwist(FVector{TwistAxis.GetSafeNormal()}, Swing, Twist);
+	RelativeRotation.ToSwingTwist(FVector::XAxisVector, Swing, Twist);
 
 	// Limit swing.
 
@@ -21,7 +21,8 @@ FAlsRigUnit_ConstraintRotation_Execute()
 	// Clamp a point with Swing.Y and Swing.Z coordinates to an ellipse with LimitsSettings.Swing2Limit
 	// and LimitsSettings.Swing1Limit dimensions. A simplified and not very accurate algorithm is used here,
 	// but it is enough for our needs. To get a more accurate result, you can use an algorithm similar
-	// to the one used in Chaos::NearPointOnEllipse() or FRigUnit_SphericalPoseReader::DistanceToEllipse().
+	// to the one used in Chaos::NearPointOnEllipse() or FRigUnit_SphericalPoseReader::DistanceToEllipse(),
+	// or https://github.com/jrouwe/JoltPhysics/blob/master/Jolt/Geometry/Ellipse.h#L30.
 
 	const auto Swing1Limit{FMath::Sin(FMath::DegreesToRadians(Swing1LimitAngle) * 0.5f)};
 	const auto Swing2Limit{FMath::Sin(FMath::DegreesToRadians(Swing2LimitAngle) * 0.5f)};
@@ -35,7 +36,7 @@ FAlsRigUnit_ConstraintRotation_Execute()
 	const auto NewSwingY{FMath::Sign(Swing.Y) * FMath::Min(FMath::Abs(Swing.Y), SwingLimit.X)};
 	const auto NewSwingZ{FMath::Sign(Swing.Z) * FMath::Min(FMath::Abs(Swing.Z), SwingLimit.Y)};
 
-	FQuat NewSwing{0.0f, NewSwingY, NewSwingZ, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewSwingY * NewSwingY - NewSwingZ * NewSwingZ))};
+	FQuat NewSwing{0.0f, NewSwingY, NewSwingZ, FMath::Sqrt(FMath::Max(0.0f, 1.0f - FMath::Square(NewSwingY) - FMath::Square(NewSwingZ)))};
 
 	NewSwing = SwingLimitOffset.Inverse() * NewSwing;
 
@@ -45,8 +46,10 @@ FAlsRigUnit_ConstraintRotation_Execute()
 
 	const auto NewTwistX{FMath::Sign(Twist.X) * FMath::Min(FMath::Abs(Twist.X), TwistLimit)};
 
-	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - NewTwistX * NewTwistX)));
+	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - FMath::Square(NewTwistX))));
 
-	ConstraintedRotation = CurrentRotation * (NewSwing * NewTwist);
-	ConstraintedRotation.Normalize();
+	const auto NewRelativeRotation{NewSwing * NewTwist};
+
+	ConstrainedRotation = CurrentRotation * NewRelativeRotation;
+	ConstrainedRotation.Normalize();
 }

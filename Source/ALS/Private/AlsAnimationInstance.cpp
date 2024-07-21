@@ -1079,7 +1079,7 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(const float IkAmount, FAlsFo
 {
 	// Due to network smoothing, we assume that teleportation occurs over a short period of time, not
 	// in one frame, since after accepting the teleportation event, the character can still be moved for
-	// some indefinite time, and this must be taken into account in order to avoid foot locking glitches.
+	// some indefinite time, and this must be taken into account in order to avoid foot lock glitches.
 
 	if (bPendingUpdate || GetWorld()->TimeSince(TeleportedTime) > 0.2f || !FAnimWeight::IsRelevant(IkAmount * FootState.LockAmount))
 	{
@@ -1142,7 +1142,7 @@ void UAlsAnimationInstance::RefreshFootLock(const float IkAmount, FAlsFootState&
 
 	if (LocomotionState.bMovingSmooth || LocomotionMode != AlsLocomotionModeTags::Grounded)
 	{
-		// Smoothly disable foot locking if the character is moving or in the air,
+		// Smoothly disable foot lock if the character is moving or in the air,
 		// instead of relying on the curve value from the animation blueprint.
 
 		static constexpr auto MovingDecreaseSpeed{5.0f};

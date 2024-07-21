@@ -15,9 +15,6 @@ public:
 	UPROPERTY(Transient, Meta = (Input))
 	FQuat TargetRotation{ForceInit};
 
-	UPROPERTY(Meta = (Input))
-	FVector3f TwistAxis{1.0f, 0.0f, 0.0f};
-
 	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float TwistLimitAngle{180.0f};
 
@@ -31,7 +28,7 @@ public:
 	float Swing2LimitAngle{180.0f};
 
 	UPROPERTY(Transient, Meta = (Output))
-	FQuat ConstraintedRotation{ForceInit};
+	FQuat ConstrainedRotation{ForceInit};
 
 public:
 	RIGVM_METHOD()
