@@ -63,6 +63,9 @@ public:
 		Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Angle"))
 	static double AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Angle"))
+	static float AngleBetweenSignedXY(const FVector3f& From, const FVector3f& To);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", DisplayName = "Slerp (Skip Normalization)",
 		Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Direction"))
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Ratio);
@@ -170,4 +173,14 @@ inline FVector UAlsVector::PerpendicularCounterClockwiseXY(const FVector& Vector
 inline double UAlsVector::AngleBetweenSkipNormalization(const FVector& From, const FVector& To)
 {
 	return FMath::RadiansToDegrees(FMath::Acos(From | To));
+}
+
+inline float UAlsVector::AngleBetweenSignedXY(const FVector3f& From, const FVector3f& To)
+{
+	const auto FromXY{FVector2f{From}.GetSafeNormal()};
+	const auto ToXY{FVector2f{To}.GetSafeNormal()};
+
+	// return FMath::RadiansToDegrees(FMath::Atan2(FromXY ^ ToXY, FromXY | ToXY));
+
+	return FMath::RadiansToDegrees(FMath::Acos(FromXY | ToXY)) * FMath::Sign(FromXY ^ ToXY);
 }

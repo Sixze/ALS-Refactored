@@ -11,6 +11,9 @@ struct ALS_API FAlsFootState
 	float LockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FVector3f ThighAxis{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector TargetLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
@@ -46,6 +49,9 @@ struct ALS_API FAlsFeetState
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FQuat4f PelvisRotation{ForceInit};
+
 	// Choose whether a foot is planted or about to plant when stopping using the foot planted animation
 	// curve. A value less than 0.5 means the foot is planted and a value more than 0.5 means the
 	// foot is still in the air. The foot planted curve also determines which foot is planted (or
@@ -57,11 +63,12 @@ struct ALS_API FAlsFeetState
 	float FeetCrossingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bInhibitFootLockForOneFrame : 1 {false};
+	FAlsFootState Left{
+		.ThighAxis = -FVector3f::ZAxisVector
+	};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsFootState Left;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FAlsFootState Right;
+	FAlsFootState Right{
+		.ThighAxis = FVector3f::ZAxisVector
+	};
 };

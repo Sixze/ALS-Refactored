@@ -270,11 +270,6 @@ protected:
 
 	// Feet
 
-public:
-	// Temporarily "pauses" foot locking for one frame. This is not the same as a complete
-	// shutdown because the internal state of the foot locking will continue to update.
-	void InhibitFootLockForOneFrame();
-
 private:
 	void RefreshFeetOnGameThread();
 
