@@ -856,7 +856,6 @@ void UAlsAnimationInstance::RefreshStandingMovement()
 
 	// Do not let the play rate be exactly zero, otherwise animation notifies
 	// may start to be triggered every frame until the play rate is changed.
-
 	// TODO Check the need for this hack in future engine versions.
 
 	StandingState.PlayRate = FMath::Clamp(WalkRunSprintSpeedAmount / StandingState.StrideBlendAmount, UE_KINDA_SMALL_NUMBER, 3.0f);

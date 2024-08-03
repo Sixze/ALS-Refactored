@@ -859,7 +859,6 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 		// The code below essentially undoes the changes that will be made later at the end of the
 		// UCharacterMovementComponent::Crouch() function because they literally break network smoothing when crouching
 		// while the root motion montage is playing, causing the  mesh to take an incorrect location for a while.
-
 		// TODO Check the need for this hack in future engine versions.
 
 		PredictionData->MeshTranslationOffset.Z += ScaledHalfHeightAdjust;
@@ -1482,6 +1481,7 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacter::OnJumpedNetworked()
 {
 	if (AnimationInstance.IsValid())

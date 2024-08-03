@@ -542,6 +542,7 @@ UAlsMantlingSettings* AAlsCharacter::SelectMantlingSettings_Implementation(EAlsM
 	return nullptr;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 float AAlsCharacter::CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const
 {
 	if (!MantlingSettings->bAutoCalculateStartTime)

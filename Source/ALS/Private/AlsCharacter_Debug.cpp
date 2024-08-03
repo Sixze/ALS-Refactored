@@ -533,6 +533,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 #endif
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
                                        const float HorizontalLocation, float& VerticalLocation) const
 {
@@ -569,6 +570,7 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 	VerticalLocation += RowOffset;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scale,
                                          const float HorizontalLocation, float& VerticalLocation) const
 {

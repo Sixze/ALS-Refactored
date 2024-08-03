@@ -272,6 +272,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
                                              const float HorizontalLocation, float& VerticalLocation) const
 {
