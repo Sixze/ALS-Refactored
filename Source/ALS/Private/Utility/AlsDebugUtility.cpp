@@ -1,6 +1,7 @@
 #include "Utility/AlsDebugUtility.h"
 
 #include "DrawDebugHelpers.h"
+#include "Engine/HitResult.h"
 #include "Engine/World.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"

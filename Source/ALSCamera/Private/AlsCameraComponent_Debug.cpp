@@ -169,7 +169,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	const auto ColumnOffset{120.0f * Scale};
 
 	static const auto PivotTargetLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotTargetLocation), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(
+			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, PivotTargetLocation)}, false))
 	};
 
 	auto Color{FLinearColor::Green};
@@ -193,7 +194,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto PivotLagLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLagLocation), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(
+			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, PivotLagLocation)}, false))
 	};
 
 	Color = {1.0f, 0.5f, 0.0f};
@@ -217,7 +219,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto PivotLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLocation), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(
+			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, PivotLocation)}, false))
 	};
 
 	Color = {0.0f, 0.75f, 1.0f};
@@ -241,7 +244,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto CameraFieldOfViewText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, CameraFieldOfView), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(
+			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, CameraFieldOfView)}, false))
 	};
 
 	Color = FLinearColor::White;
@@ -260,7 +264,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto RightShoulderText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, bRightShoulder), true))
+		FText::AsCultureInvariant(FName::NameToDisplayString(
+			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, bRightShoulder)}, true))
 	};
 
 	Text.Text = RightShoulderText;

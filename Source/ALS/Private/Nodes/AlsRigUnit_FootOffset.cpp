@@ -1,5 +1,6 @@
 #include "Nodes/AlsRigUnit_FootOffset.h"
 
+#include "Engine/HitResult.h"
 #include "Engine/World.h"
 #include "Utility/AlsRotation.h"
 
