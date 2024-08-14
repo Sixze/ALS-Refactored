@@ -943,8 +943,8 @@ void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 	auto WalkSpeed{GaitSettings.WalkForwardSpeed};
 	auto RunSpeed{GaitSettings.RunForwardSpeed};
 
-	if (Velocity.SizeSquared() > UE_KINDA_SMALL_NUMBER &&
-	    RotationMode != AlsRotationModeTags::VelocityDirection &&
+	if (GaitSettings.bAllowDirectionDependentMovementSpeed &&
+	    Velocity.SizeSquared() > UE_KINDA_SMALL_NUMBER &&
 	    IsValid(MovementSettings))
 	{
 		const auto* Controller{GetController()};
@@ -977,17 +977,17 @@ void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 
 	const auto Speed{UE_REAL_TO_FLOAT(Velocity.Size2D())};
 
-	if (Speed <= WalkSpeed)
+	if (Speed > RunSpeed)
 	{
-		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, WalkSpeed}, {0.0f, 1.0f}, Speed);
+		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
 	}
-	else if (Speed <= RunSpeed)
+	else if (Speed > WalkSpeed)
 	{
 		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{WalkSpeed, RunSpeed}, {1.0f, 2.0f}, Speed);
 	}
 	else
 	{
-		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{RunSpeed, GaitSettings.SprintSpeed}, {2.0f, 3.0f}, Speed);
+		GaitAmount = FMath::GetMappedRangeValueClamped(FVector2f{0.0f, WalkSpeed}, {0.0f, 1.0f}, Speed);
 	}
 
 	if (MaxAllowedGait == AlsGaitTags::Walking)

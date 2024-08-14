@@ -13,16 +13,22 @@ struct ALS_API FAlsMovementGaitSettings
 	GENERATED_BODY()
 
 public:
+	// Currently, the direction-dependent movement speed can cause some jitter in multiplayer, so enable it at your own risk.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	uint8 bAllowDirectionDependentMovementSpeed : 1 {false};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float WalkForwardSpeed{175.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
+		Meta = (ClampMin = 0, EditCondition = "bAllowDirectionDependentMovementSpeed", ForceUnits = "cm/s"))
 	float WalkBackwardSpeed{175.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float RunForwardSpeed{375.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
+		Meta = (ClampMin = 0, EditCondition = "bAllowDirectionDependentMovementSpeed", ForceUnits = "cm/s"))
 	float RunBackwardSpeed{375.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
@@ -84,10 +90,14 @@ public:
 
 inline float FAlsMovementGaitSettings::GetMaxWalkSpeed() const
 {
-	return FMath::Max(WalkForwardSpeed, WalkBackwardSpeed);
+	return bAllowDirectionDependentMovementSpeed
+		       ? FMath::Max(WalkForwardSpeed, WalkBackwardSpeed)
+		       : WalkForwardSpeed;
 }
 
 inline float FAlsMovementGaitSettings::GetMaxRunSpeed() const
 {
-	return FMath::Max(RunForwardSpeed, RunBackwardSpeed);
+	return bAllowDirectionDependentMovementSpeed
+		       ? FMath::Max(RunForwardSpeed, RunBackwardSpeed)
+		       : RunForwardSpeed;
 }
