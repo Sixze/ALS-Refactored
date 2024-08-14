@@ -77,6 +77,12 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 
 	friend FAlsSavedMove;
 
+public:
+	// If checked, this improves the response to interaction from moving kinematic physical
+	// bodies, but may cause some issues when interacting with simulated physical bodies.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Settings", Transient)
+	uint8 bAllowImprovedPenetrationAdjustment : 1 {true};
+
 protected:
 	FAlsCharacterNetworkMoveDataContainer MoveDataContainer;
 

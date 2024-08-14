@@ -62,7 +62,7 @@ constexpr ValueType UAlsRotation::RemapAngleForClockwiseRotation(const ValueType
 	return Angle;
 }
 
-inline float UAlsRotation::RemapAngleForClockwiseRotation(float Angle)
+inline float UAlsRotation::RemapAngleForClockwiseRotation(const float Angle)
 {
 	return RemapAngleForClockwiseRotation<float>(Angle);
 }

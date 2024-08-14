@@ -877,7 +877,7 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 
 void UAlsCharacterMovementComponent::SavePenetrationAdjustment(const FHitResult& Hit)
 {
-	if (Hit.bStartPenetrating)
+	if (bAllowImprovedPenetrationAdjustment && Hit.bStartPenetrating)
 	{
 		PendingPenetrationAdjustment = Hit.Normal * Hit.PenetrationDepth;
 	}
