@@ -14,7 +14,9 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent());
 
 #if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld())
+	const auto* World{GetWorld()};
+
+	if (IsValid(World) && !World->IsGameWorld())
 	{
 		// Use default objects for editor preview.
 

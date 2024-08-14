@@ -24,7 +24,9 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
 #if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld() && !IsValid(Character))
+	const auto* World{GetWorld()};
+
+	if (IsValid(World) && !World->IsGameWorld() && !IsValid(Character))
 	{
 		// Use default objects for editor preview.
 		Character = GetMutableDefault<AAlsCharacter>();

@@ -20,7 +20,9 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
 #if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld())
+	const auto* World{GetWorld()};
+
+	if (IsValid(World) && !World->IsGameWorld())
 	{
 		// Use default objects for editor preview.
 
