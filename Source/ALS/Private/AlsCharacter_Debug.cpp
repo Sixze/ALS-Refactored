@@ -448,7 +448,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 			FString{GET_MEMBER_NAME_STRING_VIEW_CHECKED(FAlsLocomotionState, Speed)}, false))
 	};
 
-	Color = LocomotionState.bHasSpeed ? FLinearColor{0.75f, 0.0f, 1.0f} : FLinearColor{0.375f, 0.0f, 0.5f};
+	Color = LocomotionState.bHasVelocity ? FLinearColor{0.75f, 0.0f, 1.0f} : FLinearColor{0.375f, 0.0f, 0.5f};
 	Text.SetColor(Color);
 
 	Text.Text = SpeedText;

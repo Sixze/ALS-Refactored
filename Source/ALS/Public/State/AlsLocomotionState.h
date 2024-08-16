@@ -14,7 +14,7 @@ struct ALS_API FAlsLocomotionState
 	float InputYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bHasSpeed : 1 {false};
+	uint8 bHasVelocity : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float Speed{0.0f};
