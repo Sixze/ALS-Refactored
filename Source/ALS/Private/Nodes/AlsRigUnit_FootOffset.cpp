@@ -98,6 +98,11 @@ FAlsRigUnit_FootOffset_Execute()
 			DrawInterface->DrawPoint(FTransform::Identity, HitLocation, 12.0f, {0.0f, 0.75f, 1.0f});
 		}
 	}
+	else
+	{
+		OffsetTargetLocationZ = 0.0f;
+		OffsetTargetRotation = FQuat::Identity;
+	}
 
 	// Interpolate current offsets to the new target values.
 
