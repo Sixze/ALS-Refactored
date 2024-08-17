@@ -11,8 +11,6 @@ UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 #if WITH_EDITORONLY_DATA
 	bShouldFireInEditor = false;
 #endif
-
-	bIsNativeBranchingPoint = true;
 }
 
 FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() const

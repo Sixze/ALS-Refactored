@@ -11,8 +11,6 @@ UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 #if WITH_EDITORONLY_DATA
 	bShouldFireInEditor = false;
 #endif
-
-	bIsNativeBranchingPoint = true;
 }
 
 FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() const
