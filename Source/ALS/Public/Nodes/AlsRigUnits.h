@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RigVMFunctions/RigVMFunction_ControlFlow.h"
 #include "RigVMFunctions/Math/RigVMFunction_MathFloat.h"
 #include "RigVMFunctions/Simulation/RigVMFunction_SimBase.h"
 #include "Units/RigUnit.h"
@@ -97,4 +98,33 @@ public:
 	RIGVM_METHOD()
 	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
+};
+
+USTRUCT(DisplayName = "Is Game World", Meta = (Category = "ALS"))
+struct ALS_API FAlsRigVMFunction_IsGameWorld : public FRigVMFunction_ControlFlowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(Transient, DisplayName = "Execute", Meta = (Input))
+	FRigVMExecuteContext ExecuteContext;
+
+	UPROPERTY(Transient, Meta = (Output))
+	FRigVMExecuteContext True;
+
+	UPROPERTY(Transient, Meta = (Output))
+	FRigVMExecuteContext False;
+
+	UPROPERTY(meta=(Output))
+	FRigVMExecuteContext Completed;
+
+	UPROPERTY(Transient, Meta = (Singleton))
+	FName BlockToRun;
+
+public:
+	RIGVM_METHOD()
+	// ReSharper disable once CppFunctionIsNotImplemented
+	virtual void Execute() override;
+
+	virtual const TArray<FName>& GetControlFlowBlocks_Impl() const override;
 };
