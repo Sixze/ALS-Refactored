@@ -19,7 +19,7 @@ UAlsAnimationInstanceSettings::UAlsAnimationInstanceSettings()
 #if WITH_EDITOR
 void UAlsAnimationInstanceSettings::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, InAir))
+	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, InAir))
 	{
 		InAir.PostEditChangeProperty(ChangedEvent);
 	}

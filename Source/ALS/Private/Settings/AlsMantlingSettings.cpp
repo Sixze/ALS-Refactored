@@ -5,11 +5,11 @@
 #if WITH_EDITOR
 void FAlsGeneralMantlingSettings::PostEditChangeProperty(const FPropertyChangedEvent& ChangedEvent)
 {
-	if (ChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsGeneralMantlingSettings, SlopeAngleThreshold))
+	if (ChangedEvent.GetPropertyName() == GET_MEMBER_NAME_STRING_VIEW_CHECKED(FAlsGeneralMantlingSettings, SlopeAngleThreshold))
 	{
 		SlopeAngleThresholdCos = FMath::Cos(FMath::DegreesToRadians(SlopeAngleThreshold));
 	}
-	else if (ChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsGeneralMantlingSettings, MantlingTraceResponseChannels))
+	else if (ChangedEvent.GetPropertyName() != GET_MEMBER_NAME_STRING_VIEW_CHECKED(FAlsGeneralMantlingSettings, MantlingTraceResponseChannels))
 	{
 		return;
 	}
