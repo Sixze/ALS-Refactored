@@ -56,4 +56,10 @@ struct ALS_API FAlsLocomotionState
 	// Specifies the maximum angle by which the actor's rotation can differ from the view rotation when aiming.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float AimingYawAngleLimit{180.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bAimingLimitAppliedThisFrame : 1 {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bResetAimingLimit : 1 {true};
 };
