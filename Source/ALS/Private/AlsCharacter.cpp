@@ -1728,7 +1728,7 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 		return false;
 	}
 
-	ViewRelativeAngle = UAlsRotation::RemapAngleForClockwiseRotation(ViewRelativeAngle);
+	ViewRelativeAngle = UAlsRotation::RemapAngleForCounterClockwiseRotation(ViewRelativeAngle);
 
 	// Secondary constraint. Simply increases the actor's rotation speed. Typically only used when the actor is standing still.
 

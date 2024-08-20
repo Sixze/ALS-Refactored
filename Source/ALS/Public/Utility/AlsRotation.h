@@ -9,16 +9,16 @@ class ALS_API UAlsRotation : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr auto ClockwiseRotationAngleThreshold{5.0f};
+	static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
 
 public:
-	// Remaps the angle from the [-175, -180] range to [185, 180]. Used
-	// to make the character rotate clockwise during a 180 degree turn.
 	template <typename ValueType> requires std::is_floating_point_v<ValueType>
-	static constexpr ValueType RemapAngleForClockwiseRotation(ValueType Angle);
+	static constexpr ValueType RemapAngleForCounterClockwiseRotation(ValueType Angle);
 
+	// Remaps the angle from the [175, 180] range to [-185, -180]. Used to
+	// make the character rotate counterclockwise during a 180 degree turn.
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Angle"))
-	static float RemapAngleForClockwiseRotation(float Angle);
+	static float RemapAngleForCounterClockwiseRotation(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Angle"))
 	static float LerpAngle(float From, float To, float Ratio);
@@ -52,25 +52,25 @@ public:
 };
 
 template <typename ValueType> requires std::is_floating_point_v<ValueType>
-constexpr ValueType UAlsRotation::RemapAngleForClockwiseRotation(const ValueType Angle)
+constexpr ValueType UAlsRotation::RemapAngleForCounterClockwiseRotation(const ValueType Angle)
 {
-	if (Angle < -180.0f + ClockwiseRotationAngleThreshold)
+	if (Angle > 180.0f - CounterClockwiseRotationAngleThreshold)
 	{
-		return Angle + 360.0f;
+		return Angle - 360.0f;
 	}
 
 	return Angle;
 }
 
-inline float UAlsRotation::RemapAngleForClockwiseRotation(const float Angle)
+inline float UAlsRotation::RemapAngleForCounterClockwiseRotation(const float Angle)
 {
-	return RemapAngleForClockwiseRotation<float>(Angle);
+	return RemapAngleForCounterClockwiseRotation<float>(Angle);
 }
 
 inline float UAlsRotation::LerpAngle(const float From, const float To, const float Ratio)
 {
 	auto Delta{FRotator3f::NormalizeAxis(To - From)};
-	Delta = RemapAngleForClockwiseRotation(Delta);
+	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
 	return FRotator3f::NormalizeAxis(From + Delta * Ratio);
 }
@@ -80,9 +80,9 @@ inline FRotator UAlsRotation::LerpRotation(const FRotator& From, const FRotator&
 	auto Result{To - From};
 	Result.Normalize();
 
-	Result.Pitch = RemapAngleForClockwiseRotation(Result.Pitch);
-	Result.Yaw = RemapAngleForClockwiseRotation(Result.Yaw);
-	Result.Roll = RemapAngleForClockwiseRotation(Result.Roll);
+	Result.Pitch = RemapAngleForCounterClockwiseRotation(Result.Pitch);
+	Result.Yaw = RemapAngleForCounterClockwiseRotation(Result.Yaw);
+	Result.Roll = RemapAngleForCounterClockwiseRotation(Result.Roll);
 
 	Result *= Ratio;
 	Result += From;
@@ -99,7 +99,7 @@ inline float UAlsRotation::InterpolateAngleConstant(const float Current, const f
 	}
 
 	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
-	Delta = RemapAngleForClockwiseRotation(Delta);
+	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
 	const auto MaxDelta{Speed * DeltaTime};
 
