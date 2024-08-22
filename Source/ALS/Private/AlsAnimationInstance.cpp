@@ -844,6 +844,8 @@ void UAlsAnimationInstance::RefreshStandingMovement()
 	// the play rate is always in sync with the currently blended animation. The value is also divided by the
 	// stride blend and the capsule scale so that the play rate increases as the stride or scale gets smaller.
 
+	// TODO Automatically calculate the play rate, such as is done in the UAnimDistanceMatchingLibrary::SetPlayrateToMatchSpeed() function.
+
 	const auto WalkRunSpeedAmount{
 		FMath::Lerp(Speed / Settings->Standing.AnimatedWalkSpeed,
 		            Speed / Settings->Standing.AnimatedRunSpeed,

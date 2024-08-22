@@ -27,7 +27,7 @@ public:
 class ALS_API FAlsCharacterNetworkMoveDataContainer : public FCharacterNetworkMoveDataContainer
 {
 public:
-	FAlsCharacterNetworkMoveData MoveData[3]{};
+	TStaticArray<FAlsCharacterNetworkMoveData, 3> MoveData;
 
 public:
 	FAlsCharacterNetworkMoveDataContainer();

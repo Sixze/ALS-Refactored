@@ -3,6 +3,7 @@
 #include "CoreGlobals.h"
 #include "Async/UniqueLock.h"
 #include "Async/WordMutex.h"
+#include "Containers/StaticArray.h"
 #include "HAL/IConsoleManager.h"
 #include "HAL/PlatformTime.h"
 #include "Templates/Function.h"
@@ -31,14 +32,14 @@ bool UE_DEBUG_SECTION AlsEnsure::Execute(std::atomic<bool>& bExecuted, const boo
 
 	static UE::FWordMutex FormatMutex;
 	static constexpr auto FormattedMessageSize{65535};
-	static TCHAR FormattedMessage[FormattedMessageSize];
+	static TStaticArray<TCHAR, FormattedMessageSize> FormattedMessage;
 
 	// ReSharper disable once CppLocalVariableWithNonTrivialDtorIsNeverUsed
 	UE::TUniqueLock Lock{FormatMutex};
 
-	GET_TYPED_VARARGS(TCHAR, FormattedMessage, FormattedMessageSize, FormattedMessageSize - 1, Format, Format);
+	GET_TYPED_VARARGS(TCHAR, FormattedMessage.GetData(), FormattedMessageSize, FormattedMessageSize - 1, Format, Format);
 
-	if (UNLIKELY(GetEnsureHandler() && GetEnsureHandler()({Expression, FormattedMessage})))
+	if (UNLIKELY(GetEnsureHandler() && GetEnsureHandler()({Expression, FormattedMessage.GetData()})))
 	{
 		return false;
 	}
@@ -54,12 +55,12 @@ bool UE_DEBUG_SECTION AlsEnsure::Execute(std::atomic<bool>& bExecuted, const boo
 		if (EnsuresAreErrorsConsoleVariable->GetBool())
 		{
 			UE_LOG(LogOutputDevice, Error, TEXT("%s"), StaticMessage);
-			UE_LOG(LogOutputDevice, Error, TEXT("%s"), FormattedMessage);
+			UE_LOG(LogOutputDevice, Error, TEXT("%s"), FormattedMessage.GetData());
 		}
 		else
 		{
 			UE_LOG(LogOutputDevice, Warning, TEXT("%s"), StaticMessage);
-			UE_LOG(LogOutputDevice, Warning, TEXT("%s"), FormattedMessage);
+			UE_LOG(LogOutputDevice, Warning, TEXT("%s"), FormattedMessage.GetData());
 		}
 #endif
 

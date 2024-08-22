@@ -8,7 +8,7 @@ class UAlsCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 
-UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
+UCLASS(AutoExpandCategories = ("Settings|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 {
 	GENERATED_BODY()
