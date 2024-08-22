@@ -11,7 +11,7 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State", Transient)
 	TWeakObjectPtr<UAlsAnimationInstance> Parent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -30,11 +30,16 @@ protected:
 protected:
 	// Be very careful when using this function to read your custom variables using the property access system. It is
 	// safe to use this function to read variables that change only inside UAlsAnimationInstance::NativeUpdateAnimation()
-	// because it is guaranteed that this function will be called before parallel animation evaluation. Reading variables
-	// that change in other functions can be dangerous because they can be changed in the game thread at the same
-	// time as being read in the worker thread, which can lead to undefined behavior or even a crash. If you're not
-	// sure what you're doing, then it's better to access your custom variables through the "Parent" variable.
-	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe, ReturnDisplayName = "Parent"))
+	// because it is guaranteed that this function will be called before parallel animation evaluation. Reading
+	// variables that change in other functions can be dangerous because they can be changed in the game thread
+	// at the same time as being read in the worker thread, which can lead to undefined behavior or even a crash.
+	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance",
+		Meta = (BlueprintThreadSafe, ReturnDisplayName = "Parent"))
+	UAlsAnimationInstance* GetParent() const;
+
+	UE_DEPRECATED(4.14, "Please use GetParent() instead")
+	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance",
+		Meta = (DeprecatedFunction, DeprecationMessage = "Please use GetParent() instead."))
 	UAlsAnimationInstance* GetParentUnsafe() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
@@ -90,6 +95,11 @@ protected:
 };
 
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const
+{
+	return Parent.Get();
+}
+
+inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParent() const
 {
 	return Parent.Get();
 }
