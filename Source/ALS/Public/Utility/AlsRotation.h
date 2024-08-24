@@ -69,10 +69,10 @@ inline float UAlsRotation::RemapAngleForCounterClockwiseRotation(const float Ang
 
 inline float UAlsRotation::LerpAngle(const float From, const float To, const float Ratio)
 {
-	auto Delta{FRotator3f::NormalizeAxis(To - From)};
+	auto Delta{FMath::UnwindDegrees(To - From)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
-	return FRotator3f::NormalizeAxis(From + Delta * Ratio);
+	return FMath::UnwindDegrees(From + Delta * Ratio);
 }
 
 inline FRotator UAlsRotation::LerpRotation(const FRotator& From, const FRotator& To, const float Ratio)
@@ -98,12 +98,12 @@ inline float UAlsRotation::InterpolateAngleConstant(const float Current, const f
 		return Target;
 	}
 
-	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
+	auto Delta{FMath::UnwindDegrees(Target - Current)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
 	const auto MaxDelta{Speed * DeltaTime};
 
-	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -MaxDelta, MaxDelta));
+	return FMath::UnwindDegrees(Current + FMath::Clamp(Delta, -MaxDelta, MaxDelta));
 }
 
 inline float UAlsRotation::DampAngle(const float Current, const float Target, const float DeltaTime, const float Smoothing)

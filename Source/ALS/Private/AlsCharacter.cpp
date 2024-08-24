@@ -534,7 +534,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 			StartRolling(PlayRate, LocomotionState.bHasVelocity
 				                       ? LocomotionState.VelocityYawAngle
-				                       : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
+				                       : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(GetActorRotation().Yaw)));
 		}
 		else
 		{
@@ -1030,7 +1030,7 @@ bool AAlsCharacter::CanSprint() const
 
 	static constexpr auto ViewRelativeAngleThreshold{50.0f};
 
-	if (FMath::Abs(FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+	if (FMath::Abs(FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
 		    LocomotionState.InputYawAngle - ViewState.Rotation.Yaw))) < ViewRelativeAngleThreshold)
 	{
 		return true;
@@ -1377,13 +1377,13 @@ void AAlsCharacter::RefreshLocomotionEarly()
 	{
 		// Offset the rotations (the actor's rotation too) to keep them relative to the movement base.
 
-		LocomotionState.TargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		LocomotionState.TargetYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
 			LocomotionState.TargetYawAngle + MovementBase.DeltaRotation.Yaw));
 
-		LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		LocomotionState.ViewRelativeTargetYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
 			LocomotionState.ViewRelativeTargetYawAngle + MovementBase.DeltaRotation.Yaw));
 
-		LocomotionState.SmoothTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+		LocomotionState.SmoothTargetYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
 			LocomotionState.SmoothTargetYawAngle + MovementBase.DeltaRotation.Yaw));
 
 		auto NewRotation{GetActorRotation()};
@@ -1692,7 +1692,7 @@ void AAlsCharacter::RefreshGroundedAimingRotation(const float DeltaTime)
 
 		SetTargetYawAngleSmooth(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw), DeltaTime, TargetYawAngleRotationSpeed);
 
-		NewActorRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewActorRotation.Yaw)),
+		NewActorRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(NewActorRotation.Yaw)),
 		                                                           LocomotionState.SmoothTargetYawAngle,
 		                                                           DeltaTime, RotationInterpolationSpeed);
 
@@ -1720,7 +1720,7 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 		LocomotionState.AimingYawAngleLimit = 180.0f;
 	}
 
-	auto ViewRelativeAngle{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ActorRotation.Yaw))};
+	auto ViewRelativeAngle{FMath::UnwindDegrees(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ActorRotation.Yaw))};
 
 	if (FMath::Abs(ViewRelativeAngle) <= AlsCharacterConstants::MinAimingYawAngleLimit + UE_KINDA_SMALL_NUMBER)
 	{
@@ -1742,10 +1742,10 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 			FMath::Clamp(ViewRelativeAngle, -AlsCharacterConstants::MinAimingYawAngleLimit, AlsCharacterConstants::MinAimingYawAngleLimit)
 		};
 
-		const auto DeltaAngle{FRotator3f::NormalizeAxis(TargetViewRelativeAngle - ViewRelativeAngle)};
+		const auto DeltaAngle{FMath::UnwindDegrees(TargetViewRelativeAngle - ViewRelativeAngle)};
 		const auto InterpolationAmount{UAlsMath::ExponentialDecay(DeltaTime, RotationInterpolationSpeed)};
 
-		ViewRelativeAngle = FRotator3f::NormalizeAxis(ViewRelativeAngle + DeltaAngle * InterpolationAmount);
+		ViewRelativeAngle = FMath::UnwindDegrees(ViewRelativeAngle + DeltaAngle * InterpolationAmount);
 	}
 
 	// Primary constraint. Prevents the actor from rotating beyond a certain angle relative to the camera.
@@ -1761,7 +1761,7 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 
 	const auto PreviousActorYawAngle{ActorRotation.Yaw};
 
-	ActorRotation.Yaw = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ViewRelativeAngle));
+	ActorRotation.Yaw = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ViewRelativeAngle));
 
 	// We use UE_KINDA_SMALL_NUMBER here because even if ViewRelativeAngle hasn't
 	// changed, converting it back to ActorRotation.Yaw may introduce a rounding
@@ -1869,7 +1869,7 @@ void AAlsCharacter::RefreshInAirAimingRotation(const float DeltaTime)
 	SetTargetYawAngle(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw));
 
 	auto NewRotation{GetActorRotation()};
-	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewRotation.Yaw)),
+	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(NewRotation.Yaw)),
 	                                                      LocomotionState.SmoothTargetYawAngle, DeltaTime, RotationInterpolationSpeed);
 
 	ConstrainAimingRotation(NewRotation, DeltaTime);
@@ -1884,7 +1884,7 @@ void AAlsCharacter::SetRotationSmooth(const float TargetYawAngle, const float De
 	SetTargetYawAngle(TargetYawAngle);
 
 	auto NewRotation{GetActorRotation()};
-	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewRotation.Yaw)),
+	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(NewRotation.Yaw)),
 	                                                      LocomotionState.SmoothTargetYawAngle, DeltaTime, InterpolationSpeed);
 
 	SetActorRotation(NewRotation);
@@ -1898,7 +1898,7 @@ void AAlsCharacter::SetRotationExtraSmooth(const float TargetYawAngle, const flo
 	SetTargetYawAngleSmooth(TargetYawAngle, DeltaTime, TargetYawAngleRotationSpeed);
 
 	auto NewRotation{GetActorRotation()};
-	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(NewRotation.Yaw)),
+	NewRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(NewRotation.Yaw)),
 	                                                      LocomotionState.SmoothTargetYawAngle, DeltaTime, InterpolationSpeed);
 
 	SetActorRotation(NewRotation);
@@ -1925,7 +1925,7 @@ void AAlsCharacter::RefreshTargetYawAngleUsingLocomotionRotation()
 
 void AAlsCharacter::SetTargetYawAngle(const float TargetYawAngle)
 {
-	LocomotionState.TargetYawAngle = FRotator3f::NormalizeAxis(TargetYawAngle);
+	LocomotionState.TargetYawAngle = FMath::UnwindDegrees(TargetYawAngle);
 
 	LocomotionState.SmoothTargetYawAngle = LocomotionState.TargetYawAngle;
 
@@ -1934,7 +1934,7 @@ void AAlsCharacter::SetTargetYawAngle(const float TargetYawAngle)
 
 void AAlsCharacter::SetTargetYawAngleSmooth(const float TargetYawAngle, const float DeltaTime, const float RotationSpeed)
 {
-	LocomotionState.TargetYawAngle = FRotator3f::NormalizeAxis(TargetYawAngle);
+	LocomotionState.TargetYawAngle = FMath::UnwindDegrees(TargetYawAngle);
 
 	LocomotionState.SmoothTargetYawAngle = UAlsRotation::InterpolateAngleConstant(
 		LocomotionState.SmoothTargetYawAngle, LocomotionState.TargetYawAngle, DeltaTime, RotationSpeed);
@@ -1944,6 +1944,6 @@ void AAlsCharacter::SetTargetYawAngleSmooth(const float TargetYawAngle, const fl
 
 void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
+	LocomotionState.ViewRelativeTargetYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
 		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
 }
