@@ -6,7 +6,9 @@ Completely reworked and improved С++ version of [Advanced Locomotion System V4]
 
 The main goal of this ALS version is a complete and high-quality refactoring of all aspects of the plugin to make it easier to understand, flexible, reliable (especially in network multiplayer), performant, and simply more enjoyable to work with.
 
-## Features
+<details>
+
+<summary><b>Features</b></summary>
 
 - Reworked plugin structure. Content is separated into 3 categories: `ALS` - main content, `ALSCamera` - camera-related content, and `ALSExtras` - other optional content
 - Use of multiple linked animation blueprints instead of a single monolithic animation blueprint.
@@ -20,22 +22,27 @@ The main goal of this ALS version is a complete and high-quality refactoring of 
 - Added `Slot` overlay animation curves to control the blending of overlay poses with animation montages played in `Layering` animation slots.
 - Added `Blend Curves` and `Blend Poses by Gameplay Tag` animation graph nodes. `Blend Curves` blends animation curves without the need for the `VB curves` virtual bone, and `Blend Poses by Gameplay Tag` is similar to `Blend Poses by Enum` but uses gameplay tags instead of enum.
 - Moved thread-safe animation instance logic to the worker thread to improve game thread performance.
+- Added automatic generation of foot sync markers using `B_Als_AnimationModifier_FootSyncMarkers`.
 - Replaced C++ enums such as `EAlsOverlayMode` with gameplay tags, allowing new entries to be added without code modification.
 - Reworked `UAlsCharacterMovementComponent` for better movement synchronization over the network.
+- Added support for direction-dependent movement speed.
 - Reworked mantling. Implemented as root motion source for better movement synchronization over the network.
 - Reworked camera. Implemented as a component similar to the standard camera component, no need for custom `APlayerCameraManager` or `APlayerController` classes.
 - Reworked debug mode. Toggled by pressing `Shift + [1-8]` or using console commands such as `ShowDebug ALS.Curves`.
-- Use of **Push Model** for more efficient replication.
+- Use of **Push Model** and support of **Iris** replication system.
 - Use of the **MetaSounds** and **Enhanced Input** plugins.
-- Support for **Update Rate Optimization** (disabled by default) and **Large World Coordinates**.
+- Support of **Update Rate Optimization** (disabled by default) and **Large World Coordinates**.
 - A lot of other fixes, improvements and refactorings.
 
 For more information, see the [Releases](https://github.com/Sixze/ALS-Refactored/releases). Reading the changelogs is a good way to keep up to date with the newest features of a plugin.
+
+</details>
 
 ## Supported Unreal Engine Versions & Platforms
 
 | Plugin Version                                                            | Unreal Engine Version           |
 |---------------------------------------------------------------------------|---------------------------------|
+| [4.14](https://github.com/Sixze/ALS-Refactored/releases/tag/4.14)         | 5.4                             |
 | [4.13](https://github.com/Sixze/ALS-Refactored/releases/tag/4.13)         | 5.3                             |
 | [4.12](https://github.com/Sixze/ALS-Refactored/releases/tag/4.12)         | 5.2                             |
 | [4.11](https://github.com/Sixze/ALS-Refactored/releases/tag/4.11)         | 5.1                             |
