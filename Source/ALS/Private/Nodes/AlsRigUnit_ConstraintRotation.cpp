@@ -46,7 +46,7 @@ FAlsRigUnit_ConstraintRotation_Execute()
 
 	const auto NewTwistX{FMath::Sign(Twist.X) * FMath::Min(FMath::Abs(Twist.X), TwistLimit)};
 
-	const FQuat NewTwist(NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - FMath::Square(NewTwistX))));
+	const FQuat NewTwist{NewTwistX, 0.0f, 0.0f, FMath::Sqrt(FMath::Max(0.0f, 1.0f - FMath::Square(NewTwistX)))};
 
 	const auto NewRelativeRotation{NewSwing * NewTwist};
 

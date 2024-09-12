@@ -555,8 +555,8 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 				                                GetCharacterMovement()->BrakingFrictionFactor = 0.0f;
 			                                }), ResetDelay, false);
 
-			// Block character rotation towards the last input direction after landing to
-			// prevent legs from twisting into a spiral while the landing animation is playing.
+			// Block rotation towards the last input direction after landing to prevent
+			// legs from twisting into a spiral while the landing animation is playing.
 
 			LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
 		}
@@ -572,8 +572,6 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 	OnLocomotionModeChanged(PreviousLocomotionMode);
 }
-
-void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousLocomotionMode) {}
 
 void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
 {
@@ -680,8 +678,6 @@ void AAlsCharacter::NotifyRotationModeChanged(const FGameplayTag& PreviousRotati
 {
 	OnRotationModeChanged(PreviousRotationMode);
 }
-
-void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
 
 void AAlsCharacter::RefreshRotationMode()
 {
@@ -1112,8 +1108,6 @@ void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLo
 
 	OnLocomotionActionChanged(PreviousLocomotionAction);
 }
-
-void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag& PreviousLocomotionAction) {}
 
 FRotator AAlsCharacter::GetViewRotation() const
 {
@@ -1621,10 +1615,11 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 				: LocomotionState.VelocityYawAngle
 		};
 
+		const auto RotationInterpolationSpeed{CalculateGroundedMovingRotationInterpolationSpeed()};
+
 		static constexpr auto TargetYawAngleRotationSpeed{800.0f};
 
-		SetRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateGroundedMovingRotationInterpolationSpeed(),
-		                       TargetYawAngleRotationSpeed);
+		SetRotationExtraSmooth(TargetYawAngle, DeltaTime, RotationInterpolationSpeed, TargetYawAngleRotationSpeed);
 		return;
 	}
 
@@ -1642,10 +1637,11 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 				ViewState.Rotation.Yaw + GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName()));
 		}
 
+		const auto RotationInterpolationSpeed{CalculateGroundedMovingRotationInterpolationSpeed()};
+
 		static constexpr auto TargetYawAngleRotationSpeed{500.0f};
 
-		SetRotationExtraSmooth(TargetYawAngle, DeltaTime, CalculateGroundedMovingRotationInterpolationSpeed(),
-		                       TargetYawAngleRotationSpeed);
+		SetRotationExtraSmooth(TargetYawAngle, DeltaTime, RotationInterpolationSpeed, TargetYawAngleRotationSpeed);
 		return;
 	}
 

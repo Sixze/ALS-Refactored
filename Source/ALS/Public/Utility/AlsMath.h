@@ -8,6 +8,7 @@ struct ALS_API FAlsSpringFloatState
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float Velocity{ForceInit};
 
@@ -17,6 +18,7 @@ struct ALS_API FAlsSpringFloatState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bStateValid : 1 {false};
 
+public:
 	void Reset();
 };
 

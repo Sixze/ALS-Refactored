@@ -4,7 +4,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimGraphNode_GameplayTagsBlend)
 
-#define LOCTEXT_NAMESPACE "AlsGameplayTagsBlendAnimationGraphNode"
+#define LOCTEXT_NAMESPACE "AlsAnimGraphNode_GameplayTagsBlend"
 
 UAlsAnimGraphNode_GameplayTagsBlend::UAlsAnimGraphNode_GameplayTagsBlend()
 {
