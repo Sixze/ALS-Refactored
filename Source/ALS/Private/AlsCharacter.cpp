@@ -1551,6 +1551,14 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
+	if (RotationMode != AlsRotationModeTags::VelocityDirection)
+	{
+		// This prevents the actor from rotating in the last input direction after the rotation mode
+		// has been changed to the velocity direction and the actor is not moving at that moment.
+
+		LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
+	}
+
 	if (!LocomotionState.bMoving)
 	{
 		// Not moving.

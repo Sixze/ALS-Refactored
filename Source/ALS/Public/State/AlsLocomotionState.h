@@ -32,7 +32,7 @@ struct ALS_API FAlsLocomotionState
 	uint8 bMoving : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bRotationTowardsLastInputDirectionBlocked : 1 {false};
+	uint8 bRotationTowardsLastInputDirectionBlocked : 1 {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float TargetYawAngle{0.0f};
