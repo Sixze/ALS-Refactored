@@ -31,6 +31,26 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "cm"))
 	float FootHeight{13.5f};
 
+	// Determines how hard the spring pulls towards the target. The value
+	// represents the frequency at which it oscillates when there is no damping.
+	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "hz"))
+	float LocationInterpolationFrequency{0.4f};
+
+	// If the value is less than 1, the spring will oscillate before stabilizing on the target.
+	// If the value is equal to 1, the spring will reach the target without overshooting.
+	// If the value is greater than 1, the spring will take longer to reach the target.
+	UPROPERTY(Meta = (Input, ClampMin = 0))
+	float LocationInterpolationDampingRatio{4.0f};
+
+	// The amount of velocity that will be passed to the spring. A value of 1 will result in a more responsive output, but
+	// if the input is noisy or has step changes, these discontinuities will be more noticeable than with a lower value.
+	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 1))
+	float LocationInterpolationTargetVelocityAmount{1.0f};
+
+	// The higher the value, the faster the interpolation. A zero value will result in instant interpolation.
+	UPROPERTY(Meta = (Input, ClampMin = 0))
+	float RotationInterpolationSpeed{30.0f};
+
 	UPROPERTY(Meta = (Input))
 	bool bReset{false};
 

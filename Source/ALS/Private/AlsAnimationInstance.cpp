@@ -215,6 +215,7 @@ FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 		.FootLeftRotation{FQuat{FeetState.Left.FinalRotation}},
 		.FootRightLocation{FVector{FeetState.Right.FinalLocation}},
 		.FootRightRotation{FQuat{FeetState.Right.FinalRotation}},
+		.WalkableFloorAngle{LocomotionState.WalkableFloorAngle},
 		.SpineYawAngle = SpineState.YawAngle
 	};
 }
@@ -586,7 +587,8 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.MaxAcceleration = Movement->GetMaxAcceleration();
 	LocomotionState.MaxBrakingDeceleration = Movement->GetMaxBrakingDeceleration();
-	LocomotionState.WalkableFloorZ = Movement->GetWalkableFloorZ();
+	LocomotionState.WalkableFloorAngle = Movement->GetWalkableFloorAngle();
+	LocomotionState.WalkableFloorAngleCos = Movement->GetWalkableFloorZ();
 
 	LocomotionState.bMoving = Locomotion.bMoving;
 
@@ -1008,7 +1010,7 @@ void UAlsAnimationInstance::RefreshGroundPrediction()
 	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
 	                                 {__FUNCTION__, false, Character}, Settings->InAir.GroundPredictionSweepResponses);
 
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
+	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorAngleCos};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (bDisplayDebugTraces)

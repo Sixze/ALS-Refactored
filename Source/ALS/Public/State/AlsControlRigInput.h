@@ -36,6 +36,9 @@ struct ALS_API FAlsControlRigInput
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat FootRightRotation{ForceInit};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
+	float WalkableFloorAngle{90.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float SpineYawAngle{0.0f};
 };
