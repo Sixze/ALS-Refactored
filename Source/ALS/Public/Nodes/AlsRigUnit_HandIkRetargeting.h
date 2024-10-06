@@ -3,7 +3,7 @@
 #include "Units/RigUnit.h"
 #include "AlsRigUnit_HandIkRetargeting.generated.h"
 
-USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS", NodeColor = "0 0.36 1.0"))
+USTRUCT(DisplayName = "Hand Ik Retargeting", Meta = (Category = "ALS", NodeColor = "0.0 0.36 1.0"))
 struct ALS_API FAlsRigUnit_HandIkRetargeting : public FRigUnitMutable
 {
 	GENERATED_BODY()
@@ -51,6 +51,5 @@ public:
 
 public:
 	RIGVM_METHOD()
-	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
 };

@@ -7,12 +7,9 @@ FAlsRigUnit_HandIkRetargeting_Execute()
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
 	auto* Hierarchy{ExecuteContext.Hierarchy};
-	if (!IsValid(Hierarchy))
-	{
-		return;
-	}
 
-	if (!CachedLeftHandItem.UpdateCache(LeftHandItem, Hierarchy) ||
+	if (!IsValid(Hierarchy) ||
+	    !CachedLeftHandItem.UpdateCache(LeftHandItem, Hierarchy) ||
 	    !CachedLeftHandIkItem.UpdateCache(LeftHandIkItem, Hierarchy) ||
 	    !CachedRightHandItem.UpdateCache(RightHandItem, Hierarchy) ||
 	    !CachedRightHandIkItem.UpdateCache(RightHandIkItem, Hierarchy))

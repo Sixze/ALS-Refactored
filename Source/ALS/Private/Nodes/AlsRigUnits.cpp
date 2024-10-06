@@ -28,9 +28,22 @@ FAlsRigVMFunction_ExponentialDecayVector_Execute()
 	Current = UAlsMath::ExponentialDecay(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), Lambda);
 }
 
-void FAlsRigUnit_CalculatePoleVector::Initialize()
+void FAlsRigVMFunction_ExponentialDecayQuaternion::Initialize()
 {
 	bInitialized = false;
+}
+
+FAlsRigVMFunction_ExponentialDecayQuaternion_Execute()
+{
+	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
+
+	if (!bInitialized)
+	{
+		bInitialized = true;
+		Current = Target;
+	}
+
+	Current = UAlsMath::ExponentialDecay(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), Lambda);
 }
 
 FAlsRigUnit_CalculatePoleVector_Execute()
@@ -38,21 +51,9 @@ FAlsRigUnit_CalculatePoleVector_Execute()
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
 	const auto* Hierarchy{ExecuteContext.Hierarchy};
-	if (!IsValid(Hierarchy))
-	{
-		return;
-	}
 
-	if (!bInitialized)
-	{
-		bInitialized = true;
-
-		CachedItemA.Reset();
-		CachedItemB.Reset();
-		CachedItemC.Reset();
-	}
-
-	if (!CachedItemA.UpdateCache(ItemA, Hierarchy) ||
+	if (!IsValid(Hierarchy) ||
+	    !CachedItemA.UpdateCache(ItemA, Hierarchy) ||
 	    !CachedItemB.UpdateCache(ItemB, Hierarchy) ||
 	    !CachedItemC.UpdateCache(ItemC, Hierarchy))
 	{

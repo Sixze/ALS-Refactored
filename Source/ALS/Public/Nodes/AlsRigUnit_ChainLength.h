@@ -29,6 +29,5 @@ public:
 
 public:
 	RIGVM_METHOD()
-	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;
 };

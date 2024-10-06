@@ -3,7 +3,7 @@
 #include "Units/RigUnit.h"
 #include "AlsRigUnit_DistributeRotationSimple.generated.h"
 
-USTRUCT(DisplayName = "Distribute Rotation Simple", Meta = (Category = "ALS", NodeColor = "0 0.36 1.0"))
+USTRUCT(DisplayName = "Distribute Rotation Simple", Meta = (Category = "ALS", NodeColor = "0.0 0.36 1.0"))
 struct ALS_API FAlsRigUnit_DistributeRotationSimple : public FRigUnitMutable
 {
 	GENERATED_BODY()

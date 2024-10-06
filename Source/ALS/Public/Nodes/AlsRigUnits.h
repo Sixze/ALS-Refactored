@@ -49,6 +49,32 @@ public:
 	virtual void Execute() override;
 };
 
+USTRUCT(DisplayName = "Exponential Decay (Quaternion)", Meta = (Category = "ALS"))
+struct ALS_API FAlsRigVMFunction_ExponentialDecayQuaternion : public FRigVMFunction_SimBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(Meta = (Input))
+	FQuat Target{ForceInit};
+
+	UPROPERTY(Meta = (Input, ClampMin = 0))
+	float Lambda{1.0f};
+
+	UPROPERTY(Transient, Meta = (Output))
+	FQuat Current{ForceInit};
+
+	UPROPERTY(Transient)
+	bool bInitialized{false};
+
+public:
+	virtual void Initialize() override;
+
+	RIGVM_METHOD()
+	// ReSharper disable once CppFunctionIsNotImplemented
+	virtual void Execute() override;
+};
+
 // Calculates the projection location and direction of the perpendicular to AC through B.
 USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS", NodeColor = "0.05 0.25 0.05"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FRigUnit
@@ -81,9 +107,6 @@ public:
 	FVector PoleDirection{FVector::XAxisVector};
 
 	UPROPERTY(Transient)
-	bool bInitialized{false};
-
-	UPROPERTY(Transient)
 	FCachedRigElement CachedItemA;
 
 	UPROPERTY(Transient)
@@ -93,8 +116,6 @@ public:
 	FCachedRigElement CachedItemC;
 
 public:
-	virtual void Initialize() override;
-
 	RIGVM_METHOD()
 	// ReSharper disable once CppFunctionIsNotImplemented
 	virtual void Execute() override;

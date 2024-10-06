@@ -73,13 +73,10 @@ FAlsRigUnit_ChainLength_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
-	const URigHierarchy* Hierarchy{ExecuteContext.Hierarchy};
-	if (!IsValid(Hierarchy))
-	{
-		return;
-	}
+	const auto* Hierarchy{ExecuteContext.Hierarchy};
 
-	if (!CachedAncestorItem.UpdateCache(AncestorItem, Hierarchy) ||
+	if (!IsValid(Hierarchy) ||
+	    !CachedAncestorItem.UpdateCache(AncestorItem, Hierarchy) ||
 	    !CachedDescendantItem.UpdateCache(DescendantItem, Hierarchy))
 	{
 		return;

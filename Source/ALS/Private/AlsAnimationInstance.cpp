@@ -215,7 +215,6 @@ FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 		.FootLeftRotation{FQuat{FeetState.Left.FinalRotation}},
 		.FootRightLocation{FVector{FeetState.Right.FinalLocation}},
 		.FootRightRotation{FQuat{FeetState.Right.FinalRotation}},
-		.WalkableFloorAngle{LocomotionState.WalkableFloorAngle},
 		.SpineYawAngle = SpineState.YawAngle
 	};
 }
@@ -587,7 +586,6 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.MaxAcceleration = Movement->GetMaxAcceleration();
 	LocomotionState.MaxBrakingDeceleration = Movement->GetMaxBrakingDeceleration();
-	LocomotionState.WalkableFloorAngle = Movement->GetWalkableFloorAngle();
 	LocomotionState.WalkableFloorAngleCos = Movement->GetWalkableFloorZ();
 
 	LocomotionState.bMoving = Locomotion.bMoving;
