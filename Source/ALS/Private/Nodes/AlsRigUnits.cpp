@@ -100,7 +100,7 @@ FAlsRigVMFunction_IsGameWorld_Execute()
 
 const TArray<FName>& FAlsRigVMFunction_IsGameWorld::GetControlFlowBlocks_Impl() const
 {
-	static const TArray Blocks{
+	static const TArray<FName> Blocks{
 		FName{GET_MEMBER_NAME_STRING_VIEW_CHECKED(FAlsRigVMFunction_IsGameWorld, True)},
 		FName{GET_MEMBER_NAME_STRING_VIEW_CHECKED(FAlsRigVMFunction_IsGameWorld, False)},
 		ForLoopCompletedPinName

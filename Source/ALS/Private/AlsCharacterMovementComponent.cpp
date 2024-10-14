@@ -178,7 +178,7 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	bOrientRotationToMovement = false;
 
 	NavAgentProps.bCanCrouch = true;
-	bUseAccelerationForPaths = true;
+	NavMovementProperties.bUseAccelerationForPaths = true;
 }
 
 #if WITH_EDITOR
@@ -461,7 +461,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		{
 			// calculate possible alternate movement
 			const FVector GravDir = GetGravityDirection();
-			const FVector NewDelta = bTriedLedgeMove ? FVector::ZeroVector : GetLedgeMove(OldLocation, Delta, GravDir);
+			const FVector NewDelta = bTriedLedgeMove ? FVector::ZeroVector : GetLedgeMove(OldLocation, Delta, OldFloor);
 			if ( !NewDelta.IsZero() )
 			{
 				// first revert this move
