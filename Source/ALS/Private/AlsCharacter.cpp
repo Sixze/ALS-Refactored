@@ -839,7 +839,6 @@ void AAlsCharacter::ApplyDesiredStance()
 bool AAlsCharacter::CanCrouch() const
 {
 	// This allows the ACharacter::Crouch() function to execute properly when bIsCrouched is true.
-
 	// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/9558 to be merged into the engine.
 
 	return bIsCrouched || Super::CanCrouch();
@@ -855,7 +854,7 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 		// The code below essentially undoes the changes that will be made later at the end of the
 		// UCharacterMovementComponent::Crouch() function because they literally break network smoothing when crouching
 		// while the root motion montage is playing, causing the  mesh to take an incorrect location for a while.
-		// TODO Check the need for this hack in future engine versions.
+		// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/10373 to be merged into the engine.
 
 		PredictionData->MeshTranslationOffset.Z += ScaledHalfHeightAdjust;
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
