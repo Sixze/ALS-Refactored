@@ -154,9 +154,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 
 	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(),
-	                   TEXT("%hs should not be called during parallel animation evaluation, because accessing animation curves")
-	                   TEXT(" causes the game thread to wait for the parallel task to complete, resulting in performance degradation."),
-	                   __FUNCTION__);
+	                   TEXT("UAlsCameraComponent::TickCamera() should not be called during parallel animation")
+	                   TEXT(" evaluation, because accessing animation curves causes the game thread to wait")
+	                   TEXT(" for the parallel task to complete, resulting in performance degradation"));
 
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraShapes{
