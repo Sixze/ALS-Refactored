@@ -279,7 +279,7 @@ void AAlsCharacter::OnRep_ReplicatedBasedMovement()
 void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(AAlsCharacter::Tick);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings) || !AnimationInstance.IsValid())
 	{

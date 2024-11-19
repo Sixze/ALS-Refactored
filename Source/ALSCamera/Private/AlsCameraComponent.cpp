@@ -146,7 +146,7 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraComponent::TickCamera"), STAT_UAlsCameraComponent_TickCamera, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsCameraComponent::TickCamera);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !IsValid(Character))
 	{

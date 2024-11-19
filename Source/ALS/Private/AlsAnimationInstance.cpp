@@ -89,7 +89,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativeUpdateAnimation, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativeUpdateAnimation);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	Super::NativeUpdateAnimation(DeltaTime);
 
@@ -145,7 +145,7 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativeThreadSafeUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativeThreadSafeUpdateAnimation, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativeThreadSafeUpdateAnimation);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	Super::NativeThreadSafeUpdateAnimation(DeltaTime);
 
@@ -172,7 +172,7 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostUpdateAnimation"),
 	                            STAT_UAlsAnimationInstance_NativePostUpdateAnimation, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::NativePostUpdateAnimation);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings) || !IsValid(Character))
 	{
@@ -483,7 +483,7 @@ void UAlsAnimationInstance::RefreshLook()
 #endif
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshLook);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -632,7 +632,7 @@ void UAlsAnimationInstance::RefreshGrounded()
 #endif
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGrounded"), STAT_UAlsAnimationInstance_RefreshGrounded, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshGrounded);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -751,7 +751,7 @@ void UAlsAnimationInstance::RefreshGroundedMovement()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshGroundedMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshGroundedMovement, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshGroundedMovement);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -817,7 +817,7 @@ void UAlsAnimationInstance::RefreshStandingMovement()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshStandingMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshStandingMovement, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshStandingMovement);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -904,7 +904,7 @@ void UAlsAnimationInstance::RefreshCrouchingMovement()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshCrouchingMovement"),
 	                            STAT_UAlsAnimationInstance_RefreshCrouchingMovement, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshCrouchingMovement);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -938,7 +938,7 @@ void UAlsAnimationInstance::RefreshInAir()
 #endif
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshInAir"), STAT_UAlsAnimationInstance_RefreshInAir, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshInAir);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (!IsValid(Settings))
 	{
@@ -1433,7 +1433,7 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshDynamicTransitions"),
 	                            STAT_UAlsAnimationInstance_RefreshDynamicTransitions, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshDynamicTransitions);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (DynamicTransitionsState.bUpdatedThisFrame || !IsValid(Settings))
 	{
@@ -1580,7 +1580,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshRotateInPlace"),
 	                            STAT_UAlsAnimationInstance_RefreshRotateInPlace, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshRotateInPlace);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (RotateInPlaceState.bUpdatedThisFrame || !IsValid(Settings))
 	{
@@ -1648,7 +1648,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace()
 
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshTurnInPlace"),
 	                            STAT_UAlsAnimationInstance_RefreshTurnInPlace, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(UAlsAnimationInstance::RefreshTurnInPlace);
+	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
 
 	if (TurnInPlaceState.bUpdatedThisFrame || !IsValid(Settings))
 	{

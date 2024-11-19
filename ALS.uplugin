@@ -52,11 +52,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "EnhancedInput",
+			"Name": "EngineCameras",
 			"Enabled": true
 		},
 		{
-			"Name": "GameplayCameras",
+			"Name": "EnhancedInput",
 			"Enabled": true
 		},
 		{
