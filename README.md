@@ -54,8 +54,7 @@ For more information, see the [Releases](https://github.com/Sixze/ALS-Refactored
 ## Quick Start
 
 1. Clone the repository to your project's `Plugins` folder, or download the latest release and extract it to your project's `Plugins` folder.
-2. Merge the `DefaultEngine.ini` and `DefaultInput.ini` files from the plugin's `Config` folder with files from your project's `Config` folder.
-3. Recompile your project.
+2. Recompile your project.
 
 ## Known Issues & Discussion
 

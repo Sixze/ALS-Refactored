@@ -1,6 +1,6 @@
 @echo off
 
-set EngineVersion=5.4
+set EngineVersion=5.5
 
 for /f "skip=2 tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\EpicGames\Unreal Engine\%EngineVersion%" /v "InstalledDirectory"') do set "EngineDirectory=%%b"
 
