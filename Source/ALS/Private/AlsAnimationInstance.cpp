@@ -11,11 +11,15 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsPrivateMemberAccessor.h"
 #include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/AlsVector.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
+
+ALS_DEFINE_PRIVATE_MEMBER_ACCESSOR(AlsGetAnimationCurvesAccessor, &FAnimInstanceProxy::GetAnimationCurves,
+                                   const TMap<FName, float>& (FAnimInstanceProxy::*)(EAnimCurveType) const)
 
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
@@ -249,7 +253,9 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 
 void UAlsAnimationInstance::RefreshLayering()
 {
-	const auto& Curves{GetProxyOnAnyThread<FAlsAnimationInstanceProxy>().GetAnimationCurves(EAnimCurveType::AttributeCurve)};
+	const auto& Curves{
+		AlsGetAnimationCurvesAccessor::Access(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
+	};
 
 	static const auto GetCurveValue{
 		[](const TMap<FName, float>& Curves, const FName& CurveName) -> float
@@ -296,7 +302,9 @@ void UAlsAnimationInstance::RefreshLayering()
 
 void UAlsAnimationInstance::RefreshPose()
 {
-	const auto& Curves{GetProxyOnAnyThread<FAlsAnimationInstanceProxy>().GetAnimationCurves(EAnimCurveType::AttributeCurve)};
+	const auto& Curves{
+		AlsGetAnimationCurvesAccessor::Access(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
+	};
 
 	static const auto GetCurveValue{
 		[](const TMap<FName, float>& Curves, const FName& CurveName) -> float
