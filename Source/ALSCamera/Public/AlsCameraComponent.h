@@ -77,6 +77,8 @@ protected:
 public:
 	UAlsCameraComponent();
 
+	virtual void PostLoad() override;
+
 	virtual void OnRegister() override;
 
 	virtual void RegisterComponentTickFunctions(bool bRegister) override;

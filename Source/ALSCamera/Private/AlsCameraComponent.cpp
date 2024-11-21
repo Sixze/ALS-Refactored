@@ -23,6 +23,15 @@ UAlsCameraComponent::UAlsCameraComponent()
 	bHiddenInGame = true;
 }
 
+void UAlsCameraComponent::PostLoad()
+{
+	Super::PostLoad();
+
+	// This is required for the camera to work properly, as its mesh is never rendered.
+	// We change the tick option here to override the value that comes from the config file.
+	VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+}
+
 void UAlsCameraComponent::OnRegister()
 {
 	Character = Cast<ACharacter>(GetOwner());
