@@ -44,7 +44,19 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	ViewMode = Character->GetViewMode();
 	LocomotionMode = Character->GetLocomotionMode();
-	RotationMode = Character->GetRotationMode();
+
+	if (ViewMode != AlsViewModeTags::FirstPerson)
+	{
+		RotationMode = Character->GetRotationMode();
+	}
+	else
+	{
+		// In first-person mode, the rotation mode is always view direction, which can lead to weird camera movement when switching between
+		// the first-person view mode and the velocity direction rotation mode, so to fix this we use the desired rotation mode here.
+
+		RotationMode = Character->GetDesiredRotationMode();
+	}
+
 	Stance = Character->GetStance();
 	Gait = Character->GetGait();
 	LocomotionAction = Character->GetLocomotionAction();
