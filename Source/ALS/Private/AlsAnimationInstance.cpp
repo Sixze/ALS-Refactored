@@ -8,6 +8,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
+#include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
@@ -137,12 +138,21 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		ResetGroundedEntryMode();
 	}
 
+	const auto PreviousLocation{LocomotionState.Location};
+
 	RefreshMovementBaseOnGameThread();
 	RefreshViewOnGameThread();
 	RefreshLocomotionOnGameThread();
 	RefreshInAirOnGameThread();
 	RefreshFeetOnGameThread();
 	RefreshRagdollingOnGameThread();
+
+	if (!bPendingUpdate && IsValid(Character->GetSettings()) &&
+	    FVector::DistSquared(PreviousLocation, LocomotionState.Location) >
+	    FMath::Square(Character->GetSettings()->TeleportDistanceThreshold))
+	{
+		MarkTeleported();
+	}
 }
 
 void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
@@ -575,19 +585,23 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	check(IsInGameThread())
 
 	const auto* World{GetWorld()};
-	const auto ActorDeltaTime{IsValid(World) ? World->DeltaTimeSeconds * Character->CustomTimeDilation : 0.0f};
+
+	const auto ActorDeltaTime{IsValid(World) ? World->GetDeltaSeconds() * Character->CustomTimeDilation : 0.0f};
+	const auto bCanCalculateRateOfChange{!bPendingUpdate && ActorDeltaTime > UE_SMALL_NUMBER};
 
 	const auto& Locomotion{Character->GetLocomotionState()};
 
 	LocomotionState.bHasInput = Locomotion.bHasInput;
 	LocomotionState.InputYawAngle = Locomotion.InputYawAngle;
 
+	const auto PreviousVelocity{LocomotionState.Velocity};
+
 	LocomotionState.Speed = Locomotion.Speed;
 	LocomotionState.Velocity = Locomotion.Velocity;
 	LocomotionState.VelocityYawAngle = Locomotion.VelocityYawAngle;
 
-	LocomotionState.Acceleration = ActorDeltaTime > UE_SMALL_NUMBER
-		                               ? (Locomotion.Velocity - Locomotion.PreviousVelocity) / ActorDeltaTime
+	LocomotionState.Acceleration = bCanCalculateRateOfChange
+		                               ? (LocomotionState.Velocity - PreviousVelocity) / ActorDeltaTime
 		                               : FVector::ZeroVector;
 
 	const auto* Movement{Character->GetCharacterMovement()};
@@ -602,16 +616,56 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	                                Locomotion.Speed > Settings->General.MovingSmoothSpeedThreshold;
 
 	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
-	LocomotionState.Location = Locomotion.Location;
-	LocomotionState.Rotation = Locomotion.Rotation;
-	LocomotionState.RotationQuaternion = Locomotion.Rotation.Quaternion();
 
-	LocomotionState.YawSpeed = ActorDeltaTime > UE_SMALL_NUMBER
+	const auto PreviousYawAngle{LocomotionState.Rotation.Yaw};
+
+	const auto& Proxy{GetProxyOnGameThread<FAnimInstanceProxy>()};
+	const auto& ActorTransform{Proxy.GetActorTransform()};
+	const auto& MeshRelativeTransform{Proxy.GetComponentRelativeTransform()};
+
+	static const auto* EnableListenServerSmoothingConsoleVariable{
+		IConsoleManager::Get().FindConsoleVariable(TEXT("p.NetEnableListenServerSmoothing"))
+	};
+	check(EnableListenServerSmoothingConsoleVariable != nullptr)
+
+	if (Movement->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled ||
+	    (Character->GetLocalRole() != ROLE_SimulatedProxy &&
+	     !(Character->IsNetMode(NM_ListenServer) && EnableListenServerSmoothingConsoleVariable->GetBool())))
+	{
+		// If the network smoothing is disabled, use the regular actor transform.
+
+		LocomotionState.Location = ActorTransform.GetLocation();
+		LocomotionState.Rotation = ActorTransform.Rotator();
+		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
+	}
+	else if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
+	{
+		LocomotionState.Location = ActorTransform.TransformPosition(
+			MeshRelativeTransform.GetLocation() - Character->GetBaseTranslationOffset());
+
+		LocomotionState.Rotation = ActorTransform.Rotator();
+		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
+	}
+	else
+	{
+		const auto SmoothTransform{
+			ActorTransform * FTransform{
+				MeshRelativeTransform.GetRotation() * Character->GetBaseRotationOffset().Inverse(),
+				MeshRelativeTransform.GetLocation() - Character->GetBaseTranslationOffset()
+			}
+		};
+
+		LocomotionState.Location = SmoothTransform.GetLocation();
+		LocomotionState.Rotation = SmoothTransform.Rotator();
+		LocomotionState.RotationQuaternion = SmoothTransform.GetRotation();
+	}
+
+	LocomotionState.YawSpeed = bCanCalculateRateOfChange
 		                           ? FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
-			                             Locomotion.Rotation.Yaw - Locomotion.PreviousYawAngle)) / ActorDeltaTime
+			                             LocomotionState.Rotation.Yaw - PreviousYawAngle)) / ActorDeltaTime
 		                           : 0.0f;
 
-	LocomotionState.Scale = UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetComponentScale().Z);
+	LocomotionState.Scale = UE_REAL_TO_FLOAT(Proxy.GetComponentTransform().GetScale3D().Z);
 
 	const auto* Capsule{Character->GetCapsuleComponent()};
 

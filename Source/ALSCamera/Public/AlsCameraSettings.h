@@ -81,8 +81,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bIgnoreTimeDilation : 1 {true};
 
-	// The camera will be teleported if the character has moved further than this
-	// distance in 1 frame. If zero is specified, then teleportation will be disabled.
+	// Camera will be teleported if the actor has moved farther than this
+	// distance in 1 frame. If zero is specified, teleportation will be disabled.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float TeleportDistanceThreshold{200.0f};
 

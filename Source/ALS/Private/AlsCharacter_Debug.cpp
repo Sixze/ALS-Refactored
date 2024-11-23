@@ -431,8 +431,10 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	DebugStringBuilder.Reset();
 
+	const auto& ActorTransform{GetActorTransform()};
+
 #if ENABLE_DRAW_DEBUG
-	const auto FeetLocation{LocomotionState.Location - FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()}};
+	const auto FeetLocation{ActorTransform.GetLocation() - FVector{0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()}};
 
 	DrawDebugDirectionalArrow(GetWorld(),
 	                          FeetLocation + FVector{0.0f, 0.0f, 3.0f},
@@ -540,8 +542,8 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	VerticalLocation += RowOffset;
 
 #if ENABLE_DRAW_DEBUG
-	DrawDebugCapsule(GetWorld(), LocomotionState.Location, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), LocomotionState.Rotation.Quaternion(),
+	DrawDebugCapsule(GetWorld(), ActorTransform.GetLocation(), GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
+	                 GetCapsuleComponent()->GetScaledCapsuleRadius(), ActorTransform.GetRotation(),
 	                 FColor::Green, false, -1.0f, SDPG_World, 1.0f);
 #endif
 }
@@ -619,7 +621,7 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 
 	VerticalLocation += RowOffset;
 
-	static const auto FailedTargetLocationOverlapText{LOCTEXT("FailedTargetocationOverlap", "Failed Target Location Overlap")};
+	static const auto FailedTargetLocationOverlapText{LOCTEXT("FailedTargetLocationOverlap", "Failed Target Location Overlap")};
 
 	Text.SetColor(FLinearColor::Red);
 
