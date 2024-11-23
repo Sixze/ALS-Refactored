@@ -750,7 +750,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 			(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z));
 	}
 
-	if (VelocityBlend.bInitializationRequired)
+	if (VelocityBlend.bInitializationRequired || Settings->Grounded.VelocityBlendInterpolationSpeed <= 0.0f)
 	{
 		VelocityBlend.bInitializationRequired = false;
 
@@ -761,23 +761,26 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 	}
 	else
 	{
-		const auto DeltaTime{GetDeltaSeconds()};
+		// WWe use UAlsMath::ExponentialDecay() instead of FMath::FInterpTo(), because FMath::FInterpTo() is very sensitive to large
+		// delta time, at low FPS interpolation becomes almost instant which causes issues with character pose during the stop.
 
-		VelocityBlend.ForwardAmount = FMath::FInterpTo(VelocityBlend.ForwardAmount,
-		                                               UAlsMath::Clamp01(TargetVelocityBlend.X),
-		                                               DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->Grounded.VelocityBlendInterpolationSpeed)};
 
-		VelocityBlend.BackwardAmount = FMath::FInterpTo(VelocityBlend.BackwardAmount,
-		                                                FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f)),
-		                                                DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+		VelocityBlend.ForwardAmount = FMath::Lerp(VelocityBlend.ForwardAmount,
+		                                          UAlsMath::Clamp01(TargetVelocityBlend.X),
+		                                          InterpolationAmount);
 
-		VelocityBlend.LeftAmount = FMath::FInterpTo(VelocityBlend.LeftAmount,
-		                                            FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f)),
-		                                            DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+		VelocityBlend.BackwardAmount = FMath::Lerp(VelocityBlend.BackwardAmount,
+		                                           FMath::Abs(FMath::Clamp(TargetVelocityBlend.X, -1.0f, 0.0f)),
+		                                           InterpolationAmount);
 
-		VelocityBlend.RightAmount = FMath::FInterpTo(VelocityBlend.RightAmount,
-		                                             UAlsMath::Clamp01(TargetVelocityBlend.Y),
-		                                             DeltaTime, Settings->Grounded.VelocityBlendInterpolationSpeed);
+		VelocityBlend.LeftAmount = FMath::Lerp(VelocityBlend.LeftAmount,
+		                                       FMath::Abs(FMath::Clamp(TargetVelocityBlend.Y, -1.0f, 0.0f)),
+		                                       InterpolationAmount);
+
+		VelocityBlend.RightAmount = FMath::Lerp(VelocityBlend.RightAmount,
+		                                        UAlsMath::Clamp01(TargetVelocityBlend.Y),
+		                                        InterpolationAmount);
 	}
 }
 
@@ -785,20 +788,17 @@ void UAlsAnimationInstance::RefreshGroundedLean()
 {
 	const auto TargetLeanAmount{GetRelativeAccelerationAmount()};
 
-	if (bPendingUpdate)
+	if (bPendingUpdate || Settings->General.LeanInterpolationSpeed <= 0.0f)
 	{
 		LeanState.RightAmount = TargetLeanAmount.Y;
 		LeanState.ForwardAmount = TargetLeanAmount.X;
 	}
 	else
 	{
-		const auto DeltaTime{GetDeltaSeconds()};
+		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->General.LeanInterpolationSpeed)};
 
-		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, TargetLeanAmount.Y,
-		                                         DeltaTime, Settings->General.LeanInterpolationSpeed);
-
-		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, TargetLeanAmount.X,
-		                                           DeltaTime, Settings->General.LeanInterpolationSpeed);
+		LeanState.RightAmount = FMath::Lerp(LeanState.RightAmount, TargetLeanAmount.Y, InterpolationAmount);
+		LeanState.ForwardAmount = FMath::Lerp(LeanState.ForwardAmount, TargetLeanAmount.X, InterpolationAmount);
 	}
 }
 
@@ -1111,20 +1111,17 @@ void UAlsAnimationInstance::RefreshInAirLean()
 		GetRelativeVelocity() / ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 
-	if (bPendingUpdate)
+	if (bPendingUpdate || Settings->General.LeanInterpolationSpeed <= 0.0f)
 	{
 		LeanState.RightAmount = TargetLeanAmount.Y;
 		LeanState.ForwardAmount = TargetLeanAmount.X;
 	}
 	else
 	{
-		const auto DeltaTime{GetDeltaSeconds()};
+		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->General.LeanInterpolationSpeed)};
 
-		LeanState.RightAmount = FMath::FInterpTo(LeanState.RightAmount, TargetLeanAmount.Y,
-		                                         DeltaTime, Settings->General.LeanInterpolationSpeed);
-
-		LeanState.ForwardAmount = FMath::FInterpTo(LeanState.ForwardAmount, TargetLeanAmount.X,
-		                                           DeltaTime, Settings->General.LeanInterpolationSpeed);
+		LeanState.RightAmount = FMath::Lerp(LeanState.RightAmount, TargetLeanAmount.Y, InterpolationAmount);
+		LeanState.ForwardAmount = FMath::Lerp(LeanState.ForwardAmount, TargetLeanAmount.X, InterpolationAmount);
 	}
 }
 

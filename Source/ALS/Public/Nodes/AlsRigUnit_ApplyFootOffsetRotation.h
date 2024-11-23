@@ -30,7 +30,7 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float TwistLimitAngle{0.0f};
 
-	// The higher the value, the faster the interpolation. A zero value will result in instant interpolation.
+	// The higher the value, the faster the interpolation. A zero value results in instant interpolation.
 	UPROPERTY(Meta = (Input, ClampMin = 0))
 	float OffsetInterpolationSpeed{20.0f};
 
