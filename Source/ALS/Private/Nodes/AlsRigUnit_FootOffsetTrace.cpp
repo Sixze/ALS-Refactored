@@ -38,7 +38,7 @@ FAlsRigUnit_FootOffsetTrace_Execute()
 
 	const auto HitNormal{ExecuteContext.GetToWorldSpaceTransform().InverseTransformVector(Hit.ImpactNormal)};
 
-	if (!Hit.bBlockingHit)
+	if (!Hit.bBlockingHit || HitNormal.Z < FMath::Cos(FMath::DegreesToRadians(WalkableFloorAngle)))
 	{
 		OffsetLocationZ = 0.0f;
 		OffsetNormal = FVector::ZAxisVector;
