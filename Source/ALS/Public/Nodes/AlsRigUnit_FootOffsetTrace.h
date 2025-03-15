@@ -19,7 +19,7 @@ public:
 	float TraceDistanceUpward{50.0f};
 
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "cm"))
-	float TraceDistanceDownward{100.0f};
+	float TraceDistanceDownward{80.0f};
 
 	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
 	float WalkableFloorAngle{45.0f};

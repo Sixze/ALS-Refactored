@@ -108,7 +108,17 @@ void AAlsCharacterExample::Input_OnMove(const FInputActionValue& ActionValue)
 {
 	const auto Value{UAlsVector::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
 
-	const auto ForwardDirection{UAlsVector::AngleToDirectionXY(UE_REAL_TO_FLOAT(GetViewState().Rotation.Yaw))};
+	auto ViewRotation{GetViewState().Rotation};
+
+	if (IsValid(GetController()))
+	{
+		// Use exact camera rotation instead of target rotation whenever possible.
+
+		FVector ViewLocation;
+		GetController()->GetPlayerViewPoint(ViewLocation, ViewRotation);
+	}
+
+	const auto ForwardDirection{UAlsVector::AngleToDirectionXY(UE_REAL_TO_FLOAT(ViewRotation.Yaw))};
 	const auto RightDirection{UAlsVector::PerpendicularCounterClockwiseXY(ForwardDirection)};
 
 	AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);

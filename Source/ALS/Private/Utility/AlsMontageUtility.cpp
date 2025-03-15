@@ -11,7 +11,7 @@ FTransform UAlsMontageUtility::ExtractRootTransformFromMontage(const UAnimMontag
 {
 	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
 
-	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(Montage->SlotAnimTracks.Num() > 0))
+	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(!Montage->SlotAnimTracks.IsEmpty()))
 	{
 		return FTransform::Identity;
 	}
@@ -35,8 +35,8 @@ FTransform UAlsMontageUtility::ExtractLastRootTransformFromMontage(const UAnimMo
 {
 	// Based on UMotionWarpingUtilities::ExtractRootTransformFromAnimation().
 
-	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(Montage->SlotAnimTracks.Num() > 0) ||
-	    !ALS_ENSURE(Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Num() > 0))
+	if (!ALS_ENSURE(IsValid(Montage)) || !ALS_ENSURE(!Montage->SlotAnimTracks.IsEmpty()) ||
+	    !ALS_ENSURE(!Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.IsEmpty()))
 	{
 		return FTransform::Identity;
 	}
@@ -60,7 +60,7 @@ void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* Animation
 		return;
 	}
 
-	TSet<FName, DefaultKeyFuncs<FName>, TInlineSetAllocator<4>> SlotNames;
+	TSet<FName, DefaultKeyFuncs<FName>, TInlineSetAllocator<8>> SlotNames;
 	SlotNames.Reserve(ReferenceMontage->SlotAnimTracks.Num());
 
 	for (const auto& SlotTrack : ReferenceMontage->SlotAnimTracks)

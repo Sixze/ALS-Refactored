@@ -8,6 +8,91 @@ class ALS_API UAlsConstants : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+protected:
+	// Bones
+
+	inline static const FName RootBone{TEXTVIEW("root")};
+	inline static const FName PelvisBone{TEXTVIEW("pelvis")};
+	inline static const FName HeadBone{TEXTVIEW("head")};
+	inline static const FName Spine03Bone{TEXTVIEW("spine_03")};
+	inline static const FName FootLeftBone{TEXTVIEW("foot_l")};
+	inline static const FName FootRightBone{TEXTVIEW("foot_r")};
+	inline static const FName HandLeftGunVirtualBone{TEXTVIEW("VB hand_l_to_ik_hand_gun")};
+	inline static const FName HandRightGunVirtualBone{TEXTVIEW("VB hand_r_to_ik_hand_gun")};
+	inline static const FName FootLeftIkBone{TEXTVIEW("ik_foot_l")};
+	inline static const FName FootRightIkBone{TEXTVIEW("ik_foot_r")};
+	inline static const FName FootLeftVirtualBone{TEXTVIEW("VB foot_l")};
+
+	// Animation Slots
+
+	inline static const FName FootRightVirtualBone{TEXTVIEW("VB foot_r")};
+	inline static const FName TransitionSlot{TEXTVIEW("Transition")};
+	inline static const FName TurnInPlaceStandingSlot{TEXTVIEW("TurnInPlaceStanding")};
+
+	// Layering Animation Curves
+
+	inline static const FName TurnInPlaceCrouchingSlot{TEXTVIEW("TurnInPlaceCrouching")};
+	inline static const FName LayerHeadCurve{TEXTVIEW("LayerHead")};
+	inline static const FName LayerHeadAdditiveCurve{TEXTVIEW("LayerHeadAdditive")};
+	inline static const FName LayerHeadSlotCurve{TEXTVIEW("LayerHeadSlot")};
+	inline static const FName LayerArmLeftCurve{TEXTVIEW("LayerArmLeft")};
+	inline static const FName LayerArmLeftAdditiveCurve{TEXTVIEW("LayerArmLeftAdditive")};
+	inline static const FName LayerArmLeftLocalSpaceCurve{TEXTVIEW("LayerArmLeftLocalSpace")};
+	inline static const FName LayerArmLeftSlotCurve{TEXTVIEW("LayerArmLeftSlot")};
+	inline static const FName LayerArmRightCurve{TEXTVIEW("LayerArmRight")};
+	inline static const FName LayerArmRightAdditiveCurve{TEXTVIEW("LayerArmRightAdditive")};
+	inline static const FName LayerArmRightLocalSpaceCurve{TEXTVIEW("LayerArmRightLocalSpace")};
+	inline static const FName LayerArmRightSlotCurve{TEXTVIEW("LayerArmRightSlot")};
+	inline static const FName LayerHandLeftCurve{TEXTVIEW("LayerHandLeft")};
+	inline static const FName LayerHandRightCurve{TEXTVIEW("LayerHandRight")};
+	inline static const FName LayerSpineCurve{TEXTVIEW("LayerSpine")};
+	inline static const FName LayerSpineAdditiveCurve{TEXTVIEW("LayerSpineAdditive")};
+	inline static const FName LayerSpineSlotCurve{TEXTVIEW("LayerSpineSlot")};
+	inline static const FName LayerPelvisCurve{TEXTVIEW("LayerPelvis")};
+	inline static const FName LayerPelvisSlotCurve{TEXTVIEW("LayerPelvisSlot")};
+	inline static const FName LayerLegsCurve{TEXTVIEW("LayerLegs")};
+	inline static const FName LayerLegsSlotCurve{TEXTVIEW("LayerLegsSlot")};
+	inline static const FName HandLeftIkCurve{TEXTVIEW("HandLeftIk")};
+	inline static const FName HandRightIkCurve{TEXTVIEW("HandRightIk")};
+	inline static const FName ViewBlockCurve{TEXTVIEW("ViewBlock")};
+	inline static const FName AllowAimingCurve{TEXTVIEW("AllowAiming")};
+	inline static const FName HipsDirectionLockCurve{TEXTVIEW("HipsDirectionLock")};
+
+	// Pose Animation Curves
+
+	inline static const FName PoseGaitCurve{TEXTVIEW("PoseGait")};
+	inline static const FName PoseMovingCurve{TEXTVIEW("PoseMoving")};
+	inline static const FName PoseStandingCurve{TEXTVIEW("PoseStanding")};
+	inline static const FName PoseCrouchingCurve{TEXTVIEW("PoseCrouching")};
+	inline static const FName PoseGroundedCurve{TEXTVIEW("PoseGrounded")};
+	inline static const FName PoseInAirCurve{TEXTVIEW("PoseInAir")};
+
+	// Feet Animation Curves
+
+	inline static const FName FootLeftIkCurve{TEXTVIEW("FootLeftIk")};
+	inline static const FName FootLeftLockCurve{TEXTVIEW("FootLeftLock")};
+	inline static const FName FootRightIkCurve{TEXTVIEW("FootRightIk")};
+	inline static const FName FootRightLockCurve{TEXTVIEW("FootRightLock")};
+	inline static const FName FootPlantedCurve{TEXTVIEW("FootPlanted")};
+	inline static const FName FeetCrossingCurve{TEXTVIEW("FeetCrossing")};
+
+	// Other Animation Curves
+
+	inline static const FName RotationYawSpeedCurve{TEXTVIEW("RotationYawSpeed")};
+	inline static const FName RotationYawOffsetCurve{TEXTVIEW("RotationYawOffset")};
+	inline static const FName AllowTransitionsCurve{TEXTVIEW("AllowTransitions")};
+	inline static const FName SprintBlockCurve{TEXTVIEW("SprintBlock")};
+	inline static const FName GroundPredictionBlockCurve{TEXTVIEW("GroundPredictionBlock")};
+	inline static const FName FootstepSoundBlockCurve{TEXTVIEW("FootstepSoundBlock")};
+
+	// Debug
+
+	inline static const FName CurvesDebugDisplay{TEXTVIEW("ALS.Curves")};
+	inline static const FName StateDebugDisplay{TEXTVIEW("ALS.State")};
+	inline static const FName ShapesDebugDisplay{TEXTVIEW("ALS.Shapes")};
+	inline static const FName TracesDebugDisplay{TEXTVIEW("ALS.Traces")};
+	inline static const FName MantlingDebugDisplay{TEXTVIEW("ALS.Mantling")};
+
 public:
 	// Bones
 
@@ -215,378 +300,315 @@ public:
 
 inline const FName& UAlsConstants::RootBoneName()
 {
-	static const FName Name{TEXTVIEW("root")};
-	return Name;
+	return RootBone;
 }
 
 inline const FName& UAlsConstants::PelvisBoneName()
 {
-	static const FName Name{TEXTVIEW("pelvis")};
-	return Name;
+	return PelvisBone;
 }
 
 inline const FName& UAlsConstants::HeadBoneName()
 {
-	static const FName Name{TEXTVIEW("head")};
-	return Name;
+	return HeadBone;
 }
 
 inline const FName& UAlsConstants::Spine03BoneName()
 {
-	static const FName Name{TEXTVIEW("spine_03")};
-	return Name;
+	return Spine03Bone;
 }
 
 inline const FName& UAlsConstants::FootLeftBoneName()
 {
-	static const FName Name{TEXTVIEW("foot_l")};
-	return Name;
+	return FootLeftBone;
 }
 
 inline const FName& UAlsConstants::FootRightBoneName()
 {
-	static const FName Name{TEXTVIEW("foot_r")};
-	return Name;
+	return FootRightBone;
 }
 
 inline const FName& UAlsConstants::HandLeftGunVirtualBoneName()
 {
-	static const FName Name{TEXTVIEW("VB hand_l_to_ik_hand_gun")};
-	return Name;
+	return HandLeftGunVirtualBone;
 }
 
 inline const FName& UAlsConstants::HandRightGunVirtualBoneName()
 {
-	static const FName Name{TEXTVIEW("VB hand_r_to_ik_hand_gun")};
-	return Name;
+	return HandRightGunVirtualBone;
 }
 
 inline const FName& UAlsConstants::FootLeftIkBoneName()
 {
-	static const FName Name{TEXTVIEW("ik_foot_l")};
-	return Name;
+	return FootLeftIkBone;
 }
 
 inline const FName& UAlsConstants::FootRightIkBoneName()
 {
-	static const FName Name{TEXTVIEW("ik_foot_r")};
-	return Name;
+	return FootRightIkBone;
 }
 
 inline const FName& UAlsConstants::FootLeftVirtualBoneName()
 {
-	static const FName Name{TEXTVIEW("VB foot_l")};
-	return Name;
+	return FootLeftVirtualBone;
 }
 
 inline const FName& UAlsConstants::FootRightVirtualBoneName()
 {
-	static const FName Name{TEXTVIEW("VB foot_r")};
-	return Name;
+	return FootRightVirtualBone;
 }
 
 inline const FName& UAlsConstants::TransitionSlotName()
 {
-	static const FName Name{TEXTVIEW("Transition")};
-	return Name;
+	return TransitionSlot;
 }
 
 inline const FName& UAlsConstants::TurnInPlaceStandingSlotName()
 {
-	static const FName Name{TEXTVIEW("TurnInPlaceStanding")};
-	return Name;
+	return TurnInPlaceStandingSlot;
 }
 
 inline const FName& UAlsConstants::TurnInPlaceCrouchingSlotName()
 {
-	static const FName Name{TEXTVIEW("TurnInPlaceCrouching")};
-	return Name;
+	return TurnInPlaceCrouchingSlot;
 }
 
 inline const FName& UAlsConstants::LayerHeadCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerHead")};
-	return Name;
+	return LayerHeadCurve;
 }
 
 inline const FName& UAlsConstants::LayerHeadAdditiveCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerHeadAdditive")};
-	return Name;
+	return LayerHeadAdditiveCurve;
 }
 
 inline const FName& UAlsConstants::LayerHeadSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerHeadSlot")};
-	return Name;
+	return LayerHeadSlotCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmLeftCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmLeft")};
-	return Name;
+	return LayerArmLeftCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmLeftAdditiveCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmLeftAdditive")};
-	return Name;
+	return LayerArmLeftAdditiveCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmLeftLocalSpaceCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmLeftLocalSpace")};
-	return Name;
+	return LayerArmLeftLocalSpaceCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmLeftSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmLeftSlot")};
-	return Name;
+	return LayerArmLeftSlotCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmRightCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmRight")};
-	return Name;
+	return LayerArmRightCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmRightAdditiveCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmRightAdditive")};
-	return Name;
+	return LayerArmRightAdditiveCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmRightLocalSpaceCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmRightLocalSpace")};
-	return Name;
+	return LayerArmRightLocalSpaceCurve;
 }
 
 inline const FName& UAlsConstants::LayerArmRightSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerArmRightSlot")};
-	return Name;
+	return LayerArmRightSlotCurve;
 }
 
 inline const FName& UAlsConstants::LayerHandLeftCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerHandLeft")};
-	return Name;
+	return LayerHandLeftCurve;
 }
 
 inline const FName& UAlsConstants::LayerHandRightCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerHandRight")};
-	return Name;
+	return LayerHandRightCurve;
 }
 
 inline const FName& UAlsConstants::LayerSpineCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerSpine")};
-	return Name;
+	return LayerSpineCurve;
 }
 
 inline const FName& UAlsConstants::LayerSpineAdditiveCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerSpineAdditive")};
-	return Name;
+	return LayerSpineAdditiveCurve;
 }
 
 inline const FName& UAlsConstants::LayerSpineSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerSpineSlot")};
-	return Name;
+	return LayerSpineSlotCurve;
 }
 
 inline const FName& UAlsConstants::LayerPelvisCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerPelvis")};
-	return Name;
+	return LayerPelvisCurve;
 }
 
 inline const FName& UAlsConstants::LayerPelvisSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerPelvisSlot")};
-	return Name;
+	return LayerPelvisSlotCurve;
 }
 
 inline const FName& UAlsConstants::LayerLegsCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerLegs")};
-	return Name;
+	return LayerLegsCurve;
 }
 
 inline const FName& UAlsConstants::LayerLegsSlotCurveName()
 {
-	static const FName Name{TEXTVIEW("LayerLegsSlot")};
-	return Name;
+	return LayerLegsSlotCurve;
 }
 
 inline const FName& UAlsConstants::HandLeftIkCurveName()
 {
-	static const FName Name{TEXTVIEW("HandLeftIk")};
-	return Name;
+	return HandLeftIkCurve;
 }
 
 inline const FName& UAlsConstants::HandRightIkCurveName()
 {
-	static const FName Name{TEXTVIEW("HandRightIk")};
-	return Name;
+	return HandRightIkCurve;
 }
 
 inline const FName& UAlsConstants::ViewBlockCurveName()
 {
-	static const FName Name{TEXTVIEW("ViewBlock")};
-	return Name;
+	return ViewBlockCurve;
 }
 
 inline const FName& UAlsConstants::AllowAimingCurveName()
 {
-	static const FName Name{TEXTVIEW("AllowAiming")};
-	return Name;
+	return AllowAimingCurve;
 }
 
 inline const FName& UAlsConstants::HipsDirectionLockCurveName()
 {
-	static const FName Name{TEXTVIEW("HipsDirectionLock")};
-	return Name;
+	return HipsDirectionLockCurve;
 }
 
 inline const FName& UAlsConstants::PoseGaitCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseGait")};
-	return Name;
+	return PoseGaitCurve;
 }
 
 inline const FName& UAlsConstants::PoseMovingCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseMoving")};
-	return Name;
+	return PoseMovingCurve;
 }
 
 inline const FName& UAlsConstants::PoseStandingCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseStanding")};
-	return Name;
+	return PoseStandingCurve;
 }
 
 inline const FName& UAlsConstants::PoseCrouchingCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseCrouching")};
-	return Name;
+	return PoseCrouchingCurve;
 }
 
 inline const FName& UAlsConstants::PoseGroundedCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseGrounded")};
-	return Name;
+	return PoseGroundedCurve;
 }
 
 inline const FName& UAlsConstants::PoseInAirCurveName()
 {
-	static const FName Name{TEXTVIEW("PoseInAir")};
-	return Name;
+	return PoseInAirCurve;
 }
 
 inline const FName& UAlsConstants::FootLeftIkCurveName()
 {
-	static const FName Name{TEXTVIEW("FootLeftIk")};
-	return Name;
+	return FootLeftIkCurve;
 }
 
 inline const FName& UAlsConstants::FootLeftLockCurveName()
 {
-	static const FName Name{TEXTVIEW("FootLeftLock")};
-	return Name;
+	return FootLeftLockCurve;
 }
 
 inline const FName& UAlsConstants::FootRightIkCurveName()
 {
-	static const FName Name{TEXTVIEW("FootRightIk")};
-	return Name;
+	return FootRightIkCurve;
 }
 
 inline const FName& UAlsConstants::FootRightLockCurveName()
 {
-	static const FName Name{TEXTVIEW("FootRightLock")};
-	return Name;
+	return FootRightLockCurve;
 }
 
 inline const FName& UAlsConstants::FootPlantedCurveName()
 {
-	static const FName Name{TEXTVIEW("FootPlanted")};
-	return Name;
+	return FootPlantedCurve;
 }
 
 inline const FName& UAlsConstants::FeetCrossingCurveName()
 {
-	static const FName Name{TEXTVIEW("FeetCrossing")};
-	return Name;
+	return FeetCrossingCurve;
 }
 
 inline const FName& UAlsConstants::RotationYawSpeedCurveName()
 {
-	static const FName Name{TEXTVIEW("RotationYawSpeed")};
-	return Name;
+	return RotationYawSpeedCurve;
 }
 
 inline const FName& UAlsConstants::RotationYawOffsetCurveName()
 {
-	static const FName Name{TEXTVIEW("RotationYawOffset")};
-	return Name;
+	return RotationYawOffsetCurve;
 }
 
 inline const FName& UAlsConstants::AllowTransitionsCurveName()
 {
-	static const FName Name{TEXTVIEW("AllowTransitions")};
-	return Name;
+	return AllowTransitionsCurve;
 }
 
 inline const FName& UAlsConstants::SprintBlockCurveName()
 {
-	static const FName Name{TEXTVIEW("SprintBlock")};
-	return Name;
+	return SprintBlockCurve;
 }
 
 inline const FName& UAlsConstants::GroundPredictionBlockCurveName()
 {
-	static const FName Name{TEXTVIEW("GroundPredictionBlock")};
-	return Name;
+	return GroundPredictionBlockCurve;
 }
 
 inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 {
-	static const FName Name{TEXTVIEW("FootstepSoundBlock")};
-	return Name;
+	return FootstepSoundBlockCurve;
 }
 
 inline const FName& UAlsConstants::CurvesDebugDisplayName()
 {
-	static const FName Name{TEXTVIEW("ALS.Curves")};
-	return Name;
+	return CurvesDebugDisplay;
 }
 
 inline const FName& UAlsConstants::StateDebugDisplayName()
 {
-	static const FName Name{TEXTVIEW("ALS.State")};
-	return Name;
+	return StateDebugDisplay;
 }
 
 inline const FName& UAlsConstants::ShapesDebugDisplayName()
 {
-	static const FName Name{TEXTVIEW("ALS.Shapes")};
-	return Name;
+	return ShapesDebugDisplay;
 }
 
 inline const FName& UAlsConstants::TracesDebugDisplayName()
 {
-	static const FName Name{TEXTVIEW("ALS.Traces")};
-	return Name;
+	return TracesDebugDisplay;
 }
 
 inline const FName& UAlsConstants::MantlingDebugDisplayName()
 {
-	static const FName Name{TEXTVIEW("ALS.Mantling")};
-	return Name;
+	return MantlingDebugDisplay;
 }
