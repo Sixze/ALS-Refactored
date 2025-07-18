@@ -30,11 +30,11 @@ namespace AlsPrivateMemberAccessor
 	{
 		if constexpr (std::is_pointer_v<ThisType>)
 		{
-			return This->*TMemberPointer<AccessorName>;
+			return Forward<ThisType>(This)->*TMemberPointer<AccessorName>;
 		}
 		else
 		{
-			return This.*TMemberPointer<AccessorName>;
+			return Forward<ThisType>(This).*TMemberPointer<AccessorName>;
 		}
 	}
 
@@ -44,11 +44,11 @@ namespace AlsPrivateMemberAccessor
 	{
 		if constexpr (std::is_pointer_v<ThisType>)
 		{
-			return (This->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			return (Forward<ThisType>(This)->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
 		}
 		else
 		{
-			return (This.*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			return (Forward<ThisType>(This).*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
 		}
 	}
 }

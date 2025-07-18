@@ -29,7 +29,7 @@ bool FAlsRootMotionSource_Mantling::Matches(const FRootMotionSource* Other) cons
 		return false;
 	}
 
-	const auto* OtherCasted{static_cast<const FAlsRootMotionSource_Mantling*>(Other)};
+	const auto* OtherCasted{static_cast<const FAlsRootMotionSource_Mantling*>(Other)}; // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 
 	return MantlingSettings == OtherCasted->MantlingSettings &&
 	       TargetPrimitive == OtherCasted->TargetPrimitive;

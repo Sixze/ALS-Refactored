@@ -17,7 +17,7 @@ void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Ch
 {
 	Super::ClientFillNetworkMoveData(Move, MoveType);
 
-	const auto& SavedMove{static_cast<const FAlsSavedMove&>(Move)};
+	const auto& SavedMove{static_cast<const FAlsSavedMove&>(Move)}; // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 
 	RotationMode = SavedMove.RotationMode;
 	Stance = SavedMove.Stance;
@@ -68,7 +68,7 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 
 bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDeltaTime) const
 {
-	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
+	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())}; // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 
 	return RotationMode == NewMove->RotationMode &&
 	       Stance == NewMove->Stance &&
@@ -193,7 +193,7 @@ bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) co
 
 void UAlsCharacterMovementComponent::BeginPlay()
 {
-	ALS_ENSURE_MESSAGE(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
+	ALS_ENSURE_MESSAGE(!bUseControllerDesiredRotation && !bOrientRotationToMovement, // NOLINT(clang-diagnostic-unused-value)
 	                   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
@@ -257,13 +257,13 @@ void UAlsCharacterMovementComponent::UpdateBasedRotation(FRotator& FinalRotation
 	if (!OldBaseQuat.Equals(MovementBaseRotation, UE_SMALL_NUMBER))
 	{
 		const auto DeltaRotation{(MovementBaseRotation * OldBaseQuat.Inverse()).Rotator()};
-		auto NewControlRotation{CharacterOwner->Controller->GetControlRotation()};
+		auto NewControlRotation{CharacterOwner->GetController()->GetControlRotation()};
 
 		NewControlRotation.Pitch += DeltaRotation.Pitch;
 		NewControlRotation.Yaw += DeltaRotation.Yaw;
 		NewControlRotation.Normalize();
 
-		CharacterOwner->Controller->SetControlRotation(NewControlRotation);
+		CharacterOwner->GetController()->SetControlRotation(NewControlRotation);
 	}
 }
 
@@ -313,7 +313,7 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 {
 	Super::PhysicsRotation(DeltaTime);
 
-	if (HasValidData() && (bRunPhysicsWithNoController || IsValid(CharacterOwner->Controller)))
+	if (HasValidData() && (bRunPhysicsWithNoController || IsValid(CharacterOwner->GetController())))
 	{
 		OnPhysicsRotation.Broadcast(DeltaTime);
 	}
@@ -766,8 +766,8 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 				if (LineResult <= LineDistance && IsWalkable(Hit))
 				{
 					// Keep the data from the previous sweep test, which will be required later to properly resolve
-					// penetration in the USCCharacterMovementComponentGravity::PhysWalking() function. By default,
-					// penetration is only resolved when line trace starts in penetration and the sweep test is ignored.
+					// penetration in the UCharacterMovementComponent::PhysWalking() function. By default, penetration
+					// is only resolved when line trace starts in penetration and the sweep test is ignored.
 
 					const auto NormalPrevious{OutFloorResult.HitResult.Normal};
 					const auto PenetrationDepthPrevious{OutFloorResult.HitResult.PenetrationDepth};
@@ -852,7 +852,7 @@ void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
 void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp, const float DeltaTime,
                                                     const uint8 CompressedFlags, const FVector& NewAcceleration)
 {
-	const auto* MoveData{static_cast<FAlsCharacterNetworkMoveData*>(GetCurrentNetworkMoveData())};
+	const auto* MoveData{static_cast<FAlsCharacterNetworkMoveData*>(GetCurrentNetworkMoveData())}; // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
 	if (MoveData != nullptr)
 	{
 		RotationMode = MoveData->RotationMode;

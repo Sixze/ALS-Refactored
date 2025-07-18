@@ -32,6 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	FPoseLink CurvesPose;
 
+protected:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1, FoldProperty, PinShownByDefault))
 	float BlendAmount{1.0f};

@@ -37,11 +37,6 @@ protected:
 		Meta = (BlueprintThreadSafe, ReturnDisplayName = "Parent"))
 	UAlsAnimationInstance* GetParent() const;
 
-	UE_DEPRECATED(4.14, "Please use GetParent() instead")
-	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance",
-		Meta = (DeprecatedFunction, DeprecationMessage = "Please use GetParent() instead."))
-	UAlsAnimationInstance* GetParentUnsafe() const;
-
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
 	void InitializeLook();
 
@@ -93,11 +88,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
 	void RefreshTurnInPlace();
 };
-
-inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const
-{
-	return Parent.Get();
-}
 
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParent() const
 {

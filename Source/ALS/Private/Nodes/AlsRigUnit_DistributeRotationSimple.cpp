@@ -12,12 +12,12 @@ FAlsRigUnit_DistributeRotationSimple_Execute()
 		return;
 	}
 
-	if (Items.Num() <= 0 || Rotation.IsIdentity(UE_KINDA_SMALL_NUMBER))
+	if (Items.IsEmpty() || Rotation.IsIdentity(UE_KINDA_SMALL_NUMBER))
 	{
 		return;
 	}
 
-	const auto DeltaRotation{FQuat::Slerp(FQuat::Identity, Rotation, 1.0f / Items.Num())};
+	const auto DeltaRotation{FQuat::Slerp(FQuat::Identity, Rotation, 1.0f / static_cast<float>(Items.Num()))};
 	if (DeltaRotation.IsIdentity(UE_KINDA_SMALL_NUMBER))
 	{
 		return;

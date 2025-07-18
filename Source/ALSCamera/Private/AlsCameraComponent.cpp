@@ -155,14 +155,14 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraComponent::TickCamera"), STAT_UAlsCameraComponent_TickCamera, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__)
 
 	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !IsValid(Character))
 	{
 		return;
 	}
 
-	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(),
+	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(), // NOLINT(clang-diagnostic-unused-value)
 	                   TEXT("UAlsCameraComponent::TickCamera() should not be called during parallel animation")
 	                   TEXT(" evaluation, because accessing animation curves causes the game thread to wait")
 	                   TEXT(" for the parallel task to complete, resulting in performance degradation"));

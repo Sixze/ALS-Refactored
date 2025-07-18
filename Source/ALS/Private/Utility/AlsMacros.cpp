@@ -36,7 +36,7 @@ namespace AlsEnsure
 			return false;
 		}
 
-		if (FPlatformTime::GetSecondsPerCycle() != 0.0)
+		if (FPlatformTime::GetSecondsPerCycle() != 0.0f)
 		{
 			static const auto* EnsuresAreErrorsConsoleVariable{
 				IConsoleManager::Get().FindConsoleVariable(TEXT("core.EnsuresAreErrors"))
@@ -47,16 +47,16 @@ namespace AlsEnsure
 			if (EnsuresAreErrorsConsoleVariable->GetBool())
 			{
 				UE_LOG(LogOutputDevice, Error, TEXT("Ensure failed: %hs, File: %hs, Line: %d."),
-				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber);
+				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber)
 
-				UE_LOG(LogOutputDevice, Error, TEXT("%s"), Message);
+				UE_LOG(LogOutputDevice, Error, TEXT("%s"), Message)
 			}
 			else
 			{
 				UE_LOG(LogOutputDevice, Error, TEXT("Ensure failed: %hs, File: %hs, Line: %d."),
-				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber);
+				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber)
 
-				UE_LOG(LogOutputDevice, Warning, TEXT("%s"), Message);
+				UE_LOG(LogOutputDevice, Warning, TEXT("%s"), Message)
 			}
 #endif
 

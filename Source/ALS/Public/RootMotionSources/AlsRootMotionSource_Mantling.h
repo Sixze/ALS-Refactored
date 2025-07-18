@@ -57,8 +57,8 @@ public:
 template <>
 struct TStructOpsTypeTraits<FAlsRootMotionSource_Mantling> : public TStructOpsTypeTraitsBase2<FAlsRootMotionSource_Mantling>
 {
-	enum
+	enum // NOLINT(performance-enum-size)
 	{
-		WithNetSerializer = true,
+		WithNetSerializer = true
 	};
 };

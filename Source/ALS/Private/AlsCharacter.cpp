@@ -19,7 +19,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacter)
 
-namespace AlsCharacterConstants
+namespace AlsCharacter
 {
 	constexpr auto MinAimingYawAngleLimit{70.0f};
 }
@@ -150,7 +150,7 @@ void AAlsCharacter::BeginPlay()
 	ALS_ENSURE(IsValid(MovementSettings));
 	std::ignore = ALS_ENSURE(AnimationInstance.IsValid());
 
-	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
+	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll, // NOLINT(clang-diagnostic-unused-value)
 	                   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
@@ -276,7 +276,7 @@ void AAlsCharacter::OnRep_ReplicatedBasedMovement()
 void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
-	TRACE_CPUPROFILER_EVENT_SCOPE(__FUNCTION__);
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__)
 
 	if (!IsValid(Settings) || !AnimationInstance.IsValid())
 	{
@@ -481,7 +481,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
 	// custom set of movement modes but still use the functionality of the default character movement component.
 
-	switch (GetCharacterMovement()->MovementMode)
+	switch (GetCharacterMovement()->MovementMode) // NOLINT(clang-diagnostic-switch-enum)
 	{
 		case MOVE_Walking:
 		case MOVE_NavWalking:
@@ -1119,7 +1119,7 @@ void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
 	NewInputDirection = NewInputDirection.GetSafeNormal();
 
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this);
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, InputDirection, NewInputDirection, this)
 }
 
 void AAlsCharacter::RefreshInput(const float DeltaTime)
@@ -1332,7 +1332,7 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 
 void AAlsCharacter::SetDesiredVelocityYawAngle(const float NewVelocityYawAngle)
 {
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, DesiredVelocityYawAngle, NewVelocityYawAngle, this);
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(ThisClass, DesiredVelocityYawAngle, NewVelocityYawAngle, this)
 }
 
 void AAlsCharacter::RefreshLocomotionEarly()
@@ -1582,7 +1582,9 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 
 			// Rotate to the last view direction.
 
-			const auto TargetYawAngle{LocomotionState.bHasInput ? ViewState.Rotation.Yaw : LocomotionState.TargetYawAngle};
+			const auto TargetYawAngle{
+				LocomotionState.bHasInput ? UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw) : LocomotionState.TargetYawAngle
+			};
 
 			const auto RotationInterpolationSpeed{CalculateGroundedMovingRotationInterpolationSpeed()};
 
@@ -1724,9 +1726,9 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 
 	auto ViewRelativeAngle{FMath::UnwindDegrees(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - ActorRotation.Yaw))};
 
-	if (FMath::Abs(ViewRelativeAngle) <= AlsCharacterConstants::MinAimingYawAngleLimit + UE_KINDA_SMALL_NUMBER)
+	if (FMath::Abs(ViewRelativeAngle) <= AlsCharacter::MinAimingYawAngleLimit + UE_KINDA_SMALL_NUMBER)
 	{
-		LocomotionState.AimingYawAngleLimit = AlsCharacterConstants::MinAimingYawAngleLimit;
+		LocomotionState.AimingYawAngleLimit = AlsCharacter::MinAimingYawAngleLimit;
 		return false;
 	}
 
@@ -1741,7 +1743,7 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 		// Interpolate the angle only to the point where the constraints no longer apply to ensure a smoother completion of the rotation.
 
 		const auto TargetViewRelativeAngle{
-			FMath::Clamp(ViewRelativeAngle, -AlsCharacterConstants::MinAimingYawAngleLimit, AlsCharacterConstants::MinAimingYawAngleLimit)
+			FMath::Clamp(ViewRelativeAngle, -AlsCharacter::MinAimingYawAngleLimit, AlsCharacter::MinAimingYawAngleLimit)
 		};
 
 		const auto DeltaAngle{FMath::UnwindDegrees(TargetViewRelativeAngle - ViewRelativeAngle)};
@@ -1758,7 +1760,7 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 	}
 	else
 	{
-		LocomotionState.AimingYawAngleLimit = FMath::Max(FMath::Abs(ViewRelativeAngle), AlsCharacterConstants::MinAimingYawAngleLimit);
+		LocomotionState.AimingYawAngleLimit = FMath::Max(FMath::Abs(ViewRelativeAngle), AlsCharacter::MinAimingYawAngleLimit);
 	}
 
 	const auto PreviousActorYawAngle{ActorRotation.Yaw};
@@ -1825,7 +1827,7 @@ void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 
 	if (RotationMode == AlsRotationModeTags::VelocityDirection || RotationMode == AlsRotationModeTags::ViewDirection)
 	{
-		switch (Settings->InAirRotationMode)
+		switch (Settings->InAirRotationMode) // NOLINT(clang-diagnostic-switch-enum)
 		{
 			case EAlsInAirRotationMode::RotateToVelocityOnJump:
 				if (LocomotionState.bMoving)

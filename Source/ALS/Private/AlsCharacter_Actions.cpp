@@ -474,7 +474,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
 	{
 		UE_LOG(LogAls, Warning, TEXT("Can't start mantling! The %s animation montage has incorrect root motion,")
-		       TEXT(" the final vertical location of the character must be non-zero!"), *MantlingSettings->Montage->GetName());
+		       TEXT(" the final vertical location of the character must be non-zero!"), *MantlingSettings->Montage->GetName())
 		return;
 	}
 
@@ -1074,7 +1074,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 		GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
 		{
-			ALS_ENSURE(!GetMesh()->bEnableUpdateRateOptimizations);
+			ALS_ENSURE(!GetMesh()->bEnableUpdateRateOptimizations); // NOLINT(clang-diagnostic-unused-value)
 			GetMesh()->bEnableUpdateRateOptimizations = true;
 		}));
 	}

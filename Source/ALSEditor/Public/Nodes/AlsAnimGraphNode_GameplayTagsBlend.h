@@ -24,6 +24,8 @@ public:
 
 	virtual void ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& PreviousPins) override;
 
+	virtual FText GetMenuCategory() const override;
+
 	virtual FString GetNodeCategory() const override;
 
 	virtual void CustomizePinData(UEdGraphPin* Pin, FName SourcePropertyName, int32 PinIndex) const override;

@@ -30,7 +30,7 @@ struct ALSEDITOR_API FAlsAnimationCurve
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TArray<FAlsAnimationCurveKey> Keys
 	{
-		{0, 0.0f}
+		{.Frame = 0, .Value = 0.0f}
 	};
 };
 
@@ -46,24 +46,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FAlsAnimationCurve> Curves
 	{
-		{UAlsConstants::PoseGaitCurveName()},
-		{UAlsConstants::PoseMovingCurveName()},
-		{UAlsConstants::PoseStandingCurveName()},
-		{UAlsConstants::PoseCrouchingCurveName()},
-		{UAlsConstants::PoseInAirCurveName()},
-		{UAlsConstants::PoseGroundedCurveName()},
+		{.Name = UAlsConstants::PoseGaitCurveName()},
+		{.Name = UAlsConstants::PoseMovingCurveName()},
+		{.Name = UAlsConstants::PoseStandingCurveName()},
+		{.Name = UAlsConstants::PoseCrouchingCurveName()},
+		{.Name = UAlsConstants::PoseInAirCurveName()},
+		{.Name = UAlsConstants::PoseGroundedCurveName()},
 
-		{UAlsConstants::FootLeftIkCurveName()},
-		{UAlsConstants::FootLeftLockCurveName()},
-		{UAlsConstants::FootRightIkCurveName()},
-		{UAlsConstants::FootRightLockCurveName()},
-		{UAlsConstants::FootPlantedCurveName()},
-		{UAlsConstants::FeetCrossingCurveName()},
+		{.Name = UAlsConstants::FootLeftIkCurveName()},
+		{.Name = UAlsConstants::FootLeftLockCurveName()},
+		{.Name = UAlsConstants::FootRightIkCurveName()},
+		{.Name = UAlsConstants::FootRightLockCurveName()},
+		{.Name = UAlsConstants::FootPlantedCurveName()},
+		{.Name = UAlsConstants::FeetCrossingCurveName()},
 
-		{UAlsConstants::AllowTransitionsCurveName()},
-		{UAlsConstants::SprintBlockCurveName()},
-		{UAlsConstants::GroundPredictionBlockCurveName()},
-		{UAlsConstants::FootstepSoundBlockCurveName()}
+		{.Name = UAlsConstants::AllowTransitionsCurveName()},
+		{.Name = UAlsConstants::SprintBlockCurveName()},
+		{.Name = UAlsConstants::GroundPredictionBlockCurveName()},
+		{.Name = UAlsConstants::FootstepSoundBlockCurveName()}
 	};
 
 public:

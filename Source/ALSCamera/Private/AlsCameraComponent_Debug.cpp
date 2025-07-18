@@ -11,7 +11,10 @@
 
 void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
 {
-	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
+	const auto Scale{
+		FMath::Min(static_cast<float>(Canvas->SizeX) / (1280.0f * Canvas->GetDPIScale()),
+		           static_cast<float>(Canvas->SizeY) / (720.0f * Canvas->GetDPIScale()))
+	};
 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{200.0f * Scale};
@@ -88,7 +91,7 @@ void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText&
 	FCanvasTextItem Text{
 		{HorizontalLocation, VerticalLocation},
 		HeaderText,
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		HeaderColor
 	};
 
@@ -108,7 +111,7 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -158,7 +161,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -286,7 +289,7 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 

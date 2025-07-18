@@ -3,6 +3,7 @@
 #include "AlsAnimationInstance.h"
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Utility/AlsMacros.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsLinkedAnimationInstance)
