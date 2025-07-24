@@ -2,32 +2,29 @@ using UnrealBuildTool;
 
 public class ALS : ModuleRules
 {
-	public ALS(ReadOnlyTargetRules Target) : base(Target)
+	public ALS(ReadOnlyTargetRules target) : base(target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 
-		bEnableNonInlinedGenCppWarnings = true;
-		// UnsafeTypeCastWarningLevel = WarningLevel.Warning;
+		// CppCompileWarningSettings.UnsafeTypeCastWarningLevel = WarningLevel.Warning;
+		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
+		PublicDependencyModuleNames.AddRange([
 			"Core", "CoreUObject", "Engine", "GameplayTags", "AnimGraphRuntime", "RigVM", "ControlRig"
-		});
+		]);
 
-		PrivateDependencyModuleNames.AddRange(new[]
-		{
+		PrivateDependencyModuleNames.AddRange([
 			"EngineSettings", "NetCore", "PhysicsCore", "Niagara"
-		});
+		]);
 
-		if (Target.Type == TargetRules.TargetType.Editor)
+		if (target.Type == TargetRules.TargetType.Editor)
 		{
-			PrivateDependencyModuleNames.AddRange(new[]
-			{
+			PrivateDependencyModuleNames.AddRange([
 				"MessageLog"
-			});
+			]);
 		}
 
-		SetupIrisSupport(Target);
+		SetupIrisSupport(target);
 	}
 }

@@ -4,8 +4,9 @@
 
 namespace AlsChainLengthRigUnit
 {
-	float CalculateChainLength(FRigTransformElement* AncestorElement, FRigTransformElement* DescendantElement,
-	                           const URigHierarchy* Hierarchy, const ERigTransformType::Type TransformType, TBitArray<>& VisitedElements)
+	static float CalculateChainLength(FRigTransformElement* AncestorElement, FRigTransformElement* DescendantElement,
+	                                  const URigHierarchy* Hierarchy, const ERigTransformType::Type TransformType,
+	                                  TBitArray<>& VisitedElements)
 	{
 		// Based on URigHierarchy::IsDependentOn().
 
@@ -92,7 +93,7 @@ FAlsRigUnit_ChainLength_Execute()
 
 	if (Length < 0.0f)
 	{
-		Length = FMath::Max(0.0f, AlsChainLengthRigUnit::CalculateChainLength(DescendantTransformElement, AncestorTransformElement,
+		Length = FMath::Max(0.0f, AlsChainLengthRigUnit::CalculateChainLength(DescendantTransformElement, AncestorTransformElement, // NOLINT(readability-suspicious-call-argument)
 		                                                                      Hierarchy, TransformType, VisitedElements));
 	}
 }

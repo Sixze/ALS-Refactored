@@ -28,7 +28,8 @@ FTransform UAlsMontageUtility::ExtractRootTransformFromMontage(const UAnimMontag
 		return FTransform::Identity;
 	}
 
-	return Sequence->ExtractRootTrackTransform(Segment->ConvertTrackPosToAnimPos(Time), nullptr);
+	const FAnimExtractContext ExtractionContext{static_cast<double>(Segment->ConvertTrackPosToAnimPos(Time))};
+	return Sequence->ExtractRootTrackTransform(ExtractionContext, nullptr);
 }
 
 FTransform UAlsMontageUtility::ExtractLastRootTransformFromMontage(const UAnimMontage* Montage)
@@ -49,7 +50,8 @@ FTransform UAlsMontageUtility::ExtractLastRootTransformFromMontage(const UAnimMo
 		return FTransform::Identity;
 	}
 
-	return Sequence->ExtractRootTrackTransform(Segment.GetEndPos(), nullptr);
+	const FAnimExtractContext ExtractionContext{static_cast<double>(Segment.GetEndPos())};
+	return Sequence->ExtractRootTrackTransform(ExtractionContext, nullptr);
 }
 
 void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance, const UAnimMontage* ReferenceMontage,

@@ -8,5 +8,5 @@ struct ALS_API FAlsMantlingState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	int32 RootMotionSourceId = 0;
+	int32 RootMotionSourceId{0};
 };

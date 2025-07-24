@@ -24,31 +24,31 @@ namespace AlsPrivateMemberAccessor
 	template <typename AccessorName, typename AccessorName::MemberType MemberPointer>
 	TPointerInitializer<AccessorName, MemberPointer> TPointerInitializer<AccessorName, MemberPointer>::Instance;
 
-	// Function that helps access a field or call a method.
-	template <typename AccessorName, typename ThisType, typename... ArgumentsType>
-	decltype(auto) Access(ThisType&& This, ArgumentsType&&... Arguments)
+	// Returns the value of the data member referenced by this accessor.
+	template <typename AccessorName, typename ThisType>
+	decltype(auto) Access(ThisType&& This)
 	{
 		if constexpr (std::is_pointer_v<ThisType>)
 		{
-			if constexpr (sizeof...(Arguments) > 0)
-			{
-				return (This->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
-			}
-			else
-			{
-				return This->*TMemberPointer<AccessorName>;
-			}
+			return Forward<ThisType>(This)->*TMemberPointer<AccessorName>;
 		}
 		else
 		{
-			if constexpr (sizeof...(Arguments) > 0)
-			{
-				return (This.*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
-			}
-			else
-			{
-				return This.*TMemberPointer<AccessorName>;
-			}
+			return Forward<ThisType>(This).*TMemberPointer<AccessorName>;
+		}
+	}
+
+	// Invokes the member function referenced by this accessor.
+	template <typename AccessorName, typename ThisType, typename... ArgumentsType>
+	decltype(auto) Invoke(ThisType&& This, ArgumentsType&&... Arguments)
+	{
+		if constexpr (std::is_pointer_v<ThisType>)
+		{
+			return (Forward<ThisType>(This)->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+		}
+		else
+		{
+			return (Forward<ThisType>(This).*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
 		}
 	}
 }
@@ -59,11 +59,17 @@ namespace AlsPrivateMemberAccessor
 	{ \
 		using MemberType = __VA_ARGS__; \
 		\
-		template <typename ThisType, typename... ArgumentsType> \
-		static decltype(auto) Access(ThisType&& This, ArgumentsType&&... Arguments) \
+		template <typename ThisType> \
+		static decltype(auto) Access(ThisType&& This) \
 		{ \
-			return AlsPrivateMemberAccessor::Access<AccessorName>(Forward<ThisType>(This), Forward<ArgumentsType>(Arguments)...); \
+			return AlsPrivateMemberAccessor::Access<AccessorName>(Forward<ThisType>(This)); \
+		} \
+		\
+		template <typename ThisType, typename... ArgumentsType> \
+		static decltype(auto) Invoke(ThisType&& This, ArgumentsType&&... Arguments) \
+		{ \
+			return AlsPrivateMemberAccessor::Invoke<AccessorName>(Forward<ThisType>(This), Forward<ArgumentsType>(Arguments)...); \
 		} \
 	}; \
 	\
-	template struct AlsPrivateMemberAccessor::TPointerInitializer<AccessorName, MemberPointer>; \
+	template struct AlsPrivateMemberAccessor::TPointerInitializer<AccessorName, MemberPointer>;

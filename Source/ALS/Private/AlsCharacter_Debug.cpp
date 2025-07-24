@@ -19,7 +19,10 @@
 
 void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
-	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
+	const auto Scale{
+		FMath::Min(static_cast<float>(Canvas->SizeX) / (1280.0f * Canvas->GetDPIScale()),
+		           static_cast<float>(Canvas->SizeY) / (720.0f * Canvas->GetDPIScale()))
+	};
 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{200.0f * Scale};
@@ -139,7 +142,7 @@ void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& Heade
 	FCanvasTextItem Text{
 		{HorizontalLocation, VerticalLocation},
 		HeaderText,
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		HeaderColor
 	};
 
@@ -159,7 +162,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -207,7 +210,7 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -372,7 +375,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -557,7 +560,7 @@ void AAlsCharacter::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 
@@ -594,7 +597,7 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		UEngine::GetMediumFont(),
 		FLinearColor::White
 	};
 

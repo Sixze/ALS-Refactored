@@ -5,7 +5,7 @@
 #if WITH_EDITORONLY_DATA
 void UAlsCameraSettings::Serialize(FArchive& Archive)
 {
-	UObject::Serialize(Archive);
+	UObject::Serialize(Archive); // NOLINT(bugprone-parent-virtual-call)
 
 	if (Archive.IsLoading())
 	{

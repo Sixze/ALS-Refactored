@@ -38,9 +38,14 @@ void UAlsAnimGraphNode_GameplayTagsBlend::ReallocatePinsDuringReconstruction(TAr
 	Super::ReallocatePinsDuringReconstruction(PreviousPins);
 }
 
+FText UAlsAnimGraphNode_GameplayTagsBlend::GetMenuCategory() const
+{
+	return LOCTEXT("Category", "ALS");
+}
+
 FString UAlsAnimGraphNode_GameplayTagsBlend::GetNodeCategory() const
 {
-	return FString{TEXTVIEW("ALS")};
+	return GetMenuCategory().ToString();
 }
 
 void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, const FName SourcePropertyName, const int32 PinIndex) const

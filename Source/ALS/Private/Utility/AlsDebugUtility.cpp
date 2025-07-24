@@ -244,23 +244,23 @@ void UAlsDebugUtility::DrawSweepSingleCapsuleAlternative(const UObject* WorldCon
 	const auto EndTop{End + DistanceToHemisphere * ZAxis};
 	const auto EndBottom{End - DistanceToHemisphere * ZAxis};
 
-	DrawHalfCircle(World, StartTop, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, StartTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, StartTop, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
 	DrawQuarterCircle(World, StartTop, XAxisInverse, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, StartBottom, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, StartBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, StartBottom, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
 	DrawQuarterCircle(World, StartBottom, XAxisInverse, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, EndTop, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, EndTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, EndTop, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
 	DrawQuarterCircle(World, EndTop, XAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, EndBottom, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
-	DrawHalfCircle(World, EndBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawHalfCircle(World, EndBottom, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
 	DrawQuarterCircle(World, EndBottom, XAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 

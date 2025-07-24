@@ -1,14 +1,14 @@
 #include "ALSModule.h"
 
-#if WITH_EDITOR
-#include "MessageLogModule.h"
-#endif
+#include "Utility/AlsLog.h"
 
 #if ALLOW_CONSOLE
 #include "Engine/Console.h"
 #endif
 
-#include "Utility/AlsLog.h"
+#if WITH_EDITOR
+#include "MessageLogModule.h"
+#endif
 
 IMPLEMENT_MODULE(FALSModule, ALS)
 

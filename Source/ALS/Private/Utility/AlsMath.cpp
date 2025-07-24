@@ -1,7 +1,5 @@
 #include "Utility/AlsMath.h"
 
-#include "State/AlsMovementDirection.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsMath)
 
 float UAlsMath::SpringDampFloat(FAlsSpringFloatState& SpringState, const float Current, const float Target, const float DeltaTime,

@@ -16,7 +16,11 @@ protected:
 public:
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 
+	virtual FLinearColor GetNodeTitleColor() const override;
+
 	virtual FText GetTooltipText() const override;
+
+	virtual FText GetMenuCategory() const override;
 
 	virtual FString GetNodeCategory() const override;
 };
