@@ -86,7 +86,7 @@ protected:
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
 
-private:
+protected:
 	virtual void Input_OnLookMouse(const FInputActionValue& ActionValue);
 
 	virtual void Input_OnLook(const FInputActionValue& ActionValue);
