@@ -5,13 +5,16 @@
 
 namespace AlsEnumUtility
 {
-	template <typename EnumType> requires std::is_enum_v<EnumType>
+	template<class T>
+	concept is_uenum = static_cast<bool>(TIsUEnumClass<T>::Value);
+
+	template <is_uenum EnumType>
 	int32 GetIndexByValue(const EnumType Value)
 	{
 		return StaticEnum<EnumType>()->GetIndexByValue(static_cast<int64>(Value));
 	}
 
-	template <typename EnumType> requires std::is_enum_v<EnumType>
+	template <is_uenum EnumType>
 	FString GetNameStringByValue(const EnumType Value)
 	{
 		return StaticEnum<EnumType>()->GetNameStringByValue(static_cast<int64>(Value));
