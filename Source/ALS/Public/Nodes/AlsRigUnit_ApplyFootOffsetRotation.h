@@ -12,23 +12,23 @@ public:
 	UPROPERTY(Meta = (Input, ExpandByDefault))
 	FRigElementKey CalfItem;
 
+	UPROPERTY(Meta = (Input, ExpandByDefault))
+	FRigElementKey FootItem;
+
 	UPROPERTY(Transient, Meta = (Input))
 	FQuat FootTargetRotation{ForceInit};
 
 	UPROPERTY(Transient, Meta = (Input))
 	FVector FootOffsetNormal{FVector::ZAxisVector};
 
-	UPROPERTY(Meta = (Input))
-	FQuat LimitOffset{FRotator{5.0f, 5.0f, 0.0f}};
+	UPROPERTY(DisplayName = "Swing 1 Limit Angle", Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	FVector2f Swing1LimitAngleRange{-20.0f, 40.0f};
 
-	UPROPERTY(DisplayName = "Swing 1 Limit Angle", Meta = (Input, ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float Swing1LimitAngle{25.0f};
+	UPROPERTY(DisplayName = "Swing 2 Limit Angle", Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	FVector2f Swing2LimitAngleRange{-15.0f, 5.0f};
 
-	UPROPERTY(DisplayName = "Swing 2 Limit Angle", Meta = (Input, ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float Swing2LimitAngle{5.0f};
-
-	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float TwistLimitAngle{0.0f};
+	UPROPERTY(Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	FVector2f TwistLimitAngleRange{0.0f, 0.0f};
 
 	// The higher the value, the faster the interpolation. A zero value results in instant interpolation.
 	UPROPERTY(Meta = (Input, ClampMin = 0))
@@ -41,10 +41,16 @@ public:
 	FCachedRigElement CachedCalfItem;
 
 	UPROPERTY(Transient)
+	FCachedRigElement CachedFootItem;
+
+	UPROPERTY(Transient)
 	FVector OffsetNormal{FVector::ZAxisVector};
 
 	UPROPERTY(Transient, Meta = (Output))
 	FQuat FootRotation{ForceInit};
+
+	UPROPERTY(Transient)
+	FQuat FootReferenceLocalRotation{ForceInit};
 
 public:
 	virtual void Initialize() override;
