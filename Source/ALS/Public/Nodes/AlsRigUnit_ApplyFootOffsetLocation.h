@@ -39,18 +39,18 @@ public:
 	// Determines how hard the spring pulls towards the target. The value
 	// represents the frequency at which it oscillates when there is no damping.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "hz"))
-	float OffsetInterpolationFrequency{0.4f};
+	float OffsetInterpolationFrequency{12.0};
 
 	// If the value is less than 1, the spring will oscillate before stabilizing on the target.
 	// If the value is equal to 1, the spring will reach the target without overshooting.
 	// If the value is greater than 1, the spring will take longer to reach the target.
 	UPROPERTY(Meta = (Input, ClampMin = 0))
-	float OffsetInterpolationDampingRatio{4.0f};
+	float OffsetInterpolationDampingRatio{2.0f};
 
 	// The amount of velocity that will be passed to the spring. A value of 1 will result in a more responsive output, but
 	// if the input is noisy or has step changes, these discontinuities will be more noticeable than with a lower value.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 1))
-	float OffsetInterpolationTargetVelocityAmount{1.0f};
+	float OffsetInterpolationTargetVelocityAmount{0.0f};
 
 	UPROPERTY(Transient)
 	bool bInitialized{false};
