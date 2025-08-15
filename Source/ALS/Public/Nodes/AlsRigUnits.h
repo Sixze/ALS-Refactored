@@ -23,8 +23,8 @@ public:
 	virtual void Execute() override;
 };
 
-USTRUCT(DisplayName = "Exponential Decay (Vector)", Meta = (Category = "ALS"))
-struct ALS_API FAlsRigVMFunction_ExponentialDecayVector : public FRigVMFunction_SimBase
+USTRUCT(DisplayName = "Damper Exact (Vector)", Meta = (Category = "ALS"))
+struct ALS_API FAlsRigVMFunction_DamperExactVector : public FRigVMFunction_SimBase
 {
 	GENERATED_BODY()
 
@@ -32,8 +32,9 @@ public:
 	UPROPERTY(Meta = (Input))
 	FVector Target{ForceInit};
 
-	UPROPERTY(Meta = (Input, ClampMin = 0))
-	float Lambda{1.0f};
+	// HalfLife is the time it takes for the distance to the target to be reduced by half.
+	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))
+	float HalfLife{1.0f};
 
 	UPROPERTY(Transient, Meta = (Output))
 	FVector Current{ForceInit};
@@ -49,8 +50,8 @@ public:
 	virtual void Execute() override;
 };
 
-USTRUCT(DisplayName = "Exponential Decay (Quaternion)", Meta = (Category = "ALS"))
-struct ALS_API FAlsRigVMFunction_ExponentialDecayQuaternion : public FRigVMFunction_SimBase
+USTRUCT(DisplayName = "Damper Exact (Quaternion)", Meta = (Category = "ALS"))
+struct ALS_API FAlsRigVMFunction_DamperExactQuaternion : public FRigVMFunction_SimBase
 {
 	GENERATED_BODY()
 
@@ -58,8 +59,9 @@ public:
 	UPROPERTY(Meta = (Input))
 	FQuat Target{ForceInit};
 
-	UPROPERTY(Meta = (Input, ClampMin = 0))
-	float Lambda{1.0f};
+	// HalfLife is the time it takes for the distance to the target to be reduced by half.
+	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))
+	float HalfLife{1.0f};
 
 	UPROPERTY(Transient, Meta = (Output))
 	FQuat Current{ForceInit};

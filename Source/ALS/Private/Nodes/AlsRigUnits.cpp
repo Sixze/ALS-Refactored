@@ -10,12 +10,12 @@ FAlsRigVMFunction_Clamp01Float_Execute()
 	Result = UAlsMath::Clamp01(Value);
 }
 
-void FAlsRigVMFunction_ExponentialDecayVector::Initialize()
+void FAlsRigVMFunction_DamperExactVector::Initialize()
 {
 	bInitialized = false;
 }
 
-FAlsRigVMFunction_ExponentialDecayVector_Execute()
+FAlsRigVMFunction_DamperExactVector_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
@@ -25,15 +25,15 @@ FAlsRigVMFunction_ExponentialDecayVector_Execute()
 		Current = Target;
 	}
 
-	Current = UAlsMath::ExponentialDecay(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), Lambda);
+	Current = UAlsMath::DamperExact(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), HalfLife);
 }
 
-void FAlsRigVMFunction_ExponentialDecayQuaternion::Initialize()
+void FAlsRigVMFunction_DamperExactQuaternion::Initialize()
 {
 	bInitialized = false;
 }
 
-FAlsRigVMFunction_ExponentialDecayQuaternion_Execute()
+FAlsRigVMFunction_DamperExactQuaternion_Execute()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_RIGUNIT()
 
@@ -43,7 +43,7 @@ FAlsRigVMFunction_ExponentialDecayQuaternion_Execute()
 		Current = Target;
 	}
 
-	Current = UAlsMath::ExponentialDecay(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), Lambda);
+	Current = UAlsMath::DamperExact(Current, Target, UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), HalfLife);
 }
 
 FAlsRigUnit_CalculatePoleVector_Execute()

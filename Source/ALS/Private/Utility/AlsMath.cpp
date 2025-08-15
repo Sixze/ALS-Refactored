@@ -2,10 +2,10 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsMath)
 
-float UAlsMath::SpringDampFloat(FAlsSpringFloatState& SpringState, const float Current, const float Target, const float DeltaTime,
-                                const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
+float UAlsMath::SpringDamperFloat(FAlsSpringFloatState& SpringState, const float Current, const float Target, const float DeltaTime,
+                                  const float Frequency, const float DampingRatio, const float TargetVelocityAmount)
 {
-	return SpringDamp(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
+	return SpringDamper(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }
 
 EAlsMovementDirection UAlsMath::CalculateMovementDirection(const float Angle, const float ForwardHalfAngle, const float AngleThreshold)

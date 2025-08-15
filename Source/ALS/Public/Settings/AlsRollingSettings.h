@@ -18,8 +18,9 @@ struct ALS_API FAlsRollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bRotateToInputOnStart : 1 {true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	float RotationInterpolationSpeed{10.0f};
+	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float RotationInterpolationHalfLife{0.1f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bStartRollingOnLand : 1 {true};

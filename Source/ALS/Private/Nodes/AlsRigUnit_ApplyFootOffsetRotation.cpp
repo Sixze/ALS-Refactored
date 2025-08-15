@@ -37,8 +37,8 @@ FAlsRigUnit_ApplyFootOffsetRotation_Execute()
 		FootReferenceLocalRotation = CalfInitialRotation.Inverse() * FootInitialRotation;
 	}
 
-	OffsetNormal = UAlsMath::ExponentialDecay(OffsetNormal, FootOffsetNormal,
-	                                          UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), OffsetInterpolationSpeed);
+	OffsetNormal = UAlsMath::DamperExact(OffsetNormal, FootOffsetNormal,
+	                                     UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), OffsetInterpolationHalfLife);
 
 	const auto OffsetRotation{FQuat::FindBetweenVectors(FVector::ZAxisVector, OffsetNormal)};
 

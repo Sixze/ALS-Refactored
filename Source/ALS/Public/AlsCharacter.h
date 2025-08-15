@@ -437,7 +437,7 @@ protected:
 
 	virtual bool RefreshCustomGroundedNotMovingRotation(float DeltaTime);
 
-	float CalculateGroundedMovingRotationInterpolationSpeed() const;
+	float CalculateGroundedMovingRotationInterpolationHalfLife() const;
 
 	void RefreshGroundedAimingRotation(float DeltaTime);
 
@@ -453,9 +453,9 @@ protected:
 
 	void RefreshInAirAimingRotation(float DeltaTime);
 
-	void SetRotationSmooth(float TargetYawAngle, float DeltaTime, float InterpolationSpeed);
+	void SetRotationSmooth(float TargetYawAngle, float DeltaTime, float InterpolationHalfLife);
 
-	void SetRotationExtraSmooth(float TargetYawAngle, float DeltaTime, float InterpolationSpeed, float TargetYawAngleRotationSpeed);
+	void SetRotationExtraSmooth(float TargetYawAngle, float DeltaTime, float InterpolationHalfLife, float TargetYawAngleRotationSpeed);
 
 	void SetRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 

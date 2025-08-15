@@ -30,9 +30,9 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	FVector2f TwistLimitAngleRange{0.0f, 0.0f};
 
-	// The higher the value, the faster the interpolation. A zero value results in instant interpolation.
-	UPROPERTY(Meta = (Input, ClampMin = 0))
-	float OffsetInterpolationSpeed{20.0f};
+	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
+	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))
+	float OffsetInterpolationHalfLife{0.1f};
 
 	UPROPERTY(Transient)
 	bool bInitialized{false};

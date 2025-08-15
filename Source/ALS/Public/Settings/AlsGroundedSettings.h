@@ -21,7 +21,7 @@ struct ALS_API FAlsGroundedSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UCurveFloat> RotationYawOffsetRightCurve;
 
-	// The higher the value, the faster the interpolation. A zero value results in instant interpolation.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	float VelocityBlendInterpolationSpeed{12.0f};
+	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float VelocityBlendInterpolationHalfLife{0.1f};
 };

@@ -25,9 +25,9 @@ FVector UAlsVector::SlerpSkipNormalization(const FVector& From, const FVector& T
 	return From * Cos + FromPerpendicular * Sin;
 }
 
-FVector UAlsVector::SpringDampVector(FAlsSpringVectorState& SpringState, const FVector& Current,
-                                     const FVector& Target, const float DeltaTime, const float Frequency,
-                                     const float DampingRatio, const float TargetVelocityAmount)
+FVector UAlsVector::SpringDamperVector(FAlsSpringVectorState& SpringState, const FVector& Current,
+                                       const FVector& Target, const float DeltaTime, const float Frequency,
+                                       const float DampingRatio, const float TargetVelocityAmount)
 {
-	return UAlsMath::SpringDamp(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
+	return UAlsMath::SpringDamper(SpringState, Current, Target, DeltaTime, Frequency, DampingRatio, TargetVelocityAmount);
 }

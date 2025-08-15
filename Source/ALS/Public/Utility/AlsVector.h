@@ -73,8 +73,8 @@ public:
 	static FVector SlerpSkipNormalization(const FVector& From, const FVector& To, float Ratio);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Vector"))
-	static FVector SpringDampVector(UPARAM(ref) FAlsSpringVectorState& SpringState, const FVector& Current, const FVector& Target,
-	                                float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
+	static FVector SpringDamperVector(UPARAM(ref) FAlsSpringVectorState& SpringState, const FVector& Current, const FVector& Target,
+	                                  float DeltaTime, float Frequency, float DampingRatio, float TargetVelocityAmount = 1.0f);
 };
 
 inline void FAlsSpringVectorState::Reset()

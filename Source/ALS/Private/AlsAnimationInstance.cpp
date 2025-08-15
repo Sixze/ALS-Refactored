@@ -431,9 +431,9 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 		}
 		else
 		{
-			static constexpr auto InterpolationSpeed{20.0f};
+			static constexpr auto InterpolationHalfLife{0.1f};
 
-			SpineState.SpineAmount = UAlsMath::ExponentialDecay(SpineState.SpineAmount, 1.0f, DeltaTime, InterpolationSpeed);
+			SpineState.SpineAmount = UAlsMath::DamperExact(SpineState.SpineAmount, 1.0f, DeltaTime, InterpolationHalfLife);
 
 			SpineState.CurrentYawAngle = UAlsRotation::LerpAngle(SpineState.LastYawAngle, ViewState.YawAngle,
 			                                                     SpineState.SpineAmount * SpineState.SpineAmountScale +
@@ -449,16 +449,20 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 		}
 		else
 		{
-			static constexpr auto InterpolationSpeed{1.0f};
+			static constexpr auto InterpolationHalfLife{0.7f};
 			static constexpr auto ReferenceViewYawSpeed{40.0f};
 
-			// Increase the interpolation speed when the camera rotates quickly,
+			// Decrease the interpolation half life when the camera rotates quickly,
 			// otherwise the spine rotation may lag too much behind the actor rotation.
 
-			const auto InterpolationSpeedMultiplier{FMath::Max(1.0f, FMath::Abs(ViewState.YawSpeed) / ReferenceViewYawSpeed)};
+			const auto InterpolationHalfLifeMultiplier{
+				ViewState.YawSpeed > ReferenceViewYawSpeed
+					? ReferenceViewYawSpeed / ViewState.YawSpeed
+					: 1.0f
+			};
 
-			SpineState.SpineAmount = UAlsMath::ExponentialDecay(SpineState.SpineAmount, 0.0f, DeltaTime,
-			                                                    InterpolationSpeed * InterpolationSpeedMultiplier);
+			SpineState.SpineAmount = UAlsMath::DamperExact(SpineState.SpineAmount, 0.0f, DeltaTime,
+			                                               InterpolationHalfLife * InterpolationHalfLifeMultiplier);
 
 			if (MovementBase.bHasRelativeRotation)
 			{
@@ -519,7 +523,7 @@ void UAlsAnimationInstance::RefreshLook()
 
 	float TargetYawAngle;
 	float TargetPitchAngle;
-	float InterpolationSpeed;
+	float InterpolationHalfLife;
 
 	if (RotationMode == AlsRotationModeTags::VelocityDirection)
 	{
@@ -529,7 +533,7 @@ void UAlsAnimationInstance::RefreshLook()
 			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) - ActorYawAngle);
 
 		TargetPitchAngle = 0.0f;
-		InterpolationSpeed = Settings->View.LookTowardsInputYawAngleInterpolationSpeed;
+		InterpolationHalfLife = Settings->View.LookTowardsInputYawAngleInterpolationHalfLife;
 	}
 	else
 	{
@@ -537,10 +541,10 @@ void UAlsAnimationInstance::RefreshLook()
 
 		TargetYawAngle = ViewState.YawAngle;
 		TargetPitchAngle = ViewState.PitchAngle;
-		InterpolationSpeed = Settings->View.LookTowardsCameraRotationInterpolationSpeed;
+		InterpolationHalfLife = Settings->View.LookTowardsCameraRotationInterpolationHalfLife;
 	}
 
-	if (LookState.bInitializationRequired || InterpolationSpeed <= 0.0f)
+	if (LookState.bInitializationRequired || InterpolationHalfLife <= 0.0f)
 	{
 		LookState.YawAngle = TargetYawAngle;
 		LookState.PitchAngle = TargetPitchAngle;
@@ -564,7 +568,7 @@ void UAlsAnimationInstance::RefreshLook()
 			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
 		}
 
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), InterpolationSpeed)};
+		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), InterpolationHalfLife)};
 
 		LookState.YawAngle = FMath::UnwindDegrees(YawAngle + DeltaYawAngle * InterpolationAmount);
 		LookState.PitchAngle = UAlsRotation::LerpAngle(LookState.PitchAngle, TargetPitchAngle, InterpolationAmount);
@@ -751,7 +755,7 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 			(FMath::Abs(RelativeVelocityDirection.X) + FMath::Abs(RelativeVelocityDirection.Y) + FMath::Abs(RelativeVelocityDirection.Z));
 	}
 
-	if (VelocityBlend.bInitializationRequired || Settings->Grounded.VelocityBlendInterpolationSpeed <= 0.0f)
+	if (VelocityBlend.bInitializationRequired || Settings->Grounded.VelocityBlendInterpolationHalfLife <= 0.0f)
 	{
 		VelocityBlend.bInitializationRequired = false;
 
@@ -762,10 +766,10 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 	}
 	else
 	{
-		// WWe use UAlsMath::ExponentialDecay() instead of FMath::FInterpTo(), because FMath::FInterpTo() is very sensitive to large
+		// We use UAlsMath::DamperExact() instead of FMath::FInterpTo(), because FMath::FInterpTo() is very sensitive to large
 		// delta time, at low FPS interpolation becomes almost instant which causes issues with character pose during the stop.
 
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->Grounded.VelocityBlendInterpolationSpeed)};
+		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), Settings->Grounded.VelocityBlendInterpolationHalfLife)};
 
 		VelocityBlend.ForwardAmount = FMath::Lerp(VelocityBlend.ForwardAmount,
 		                                          UAlsMath::Clamp01(TargetVelocityBlend.X),
@@ -789,14 +793,14 @@ void UAlsAnimationInstance::RefreshGroundedLean()
 {
 	const auto TargetLeanAmount{GetRelativeAccelerationAmount()};
 
-	if (bPendingUpdate || Settings->General.LeanInterpolationSpeed <= 0.0f)
+	if (bPendingUpdate || Settings->General.LeanInterpolationHalfLife <= 0.0f)
 	{
 		LeanState.RightAmount = TargetLeanAmount.Y;
 		LeanState.ForwardAmount = TargetLeanAmount.X;
 	}
 	else
 	{
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->General.LeanInterpolationSpeed)};
+		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), Settings->General.LeanInterpolationHalfLife)};
 
 		LeanState.RightAmount = FMath::Lerp(LeanState.RightAmount, TargetLeanAmount.Y, InterpolationAmount);
 		LeanState.ForwardAmount = FMath::Lerp(LeanState.ForwardAmount, TargetLeanAmount.X, InterpolationAmount);
@@ -1112,14 +1116,14 @@ void UAlsAnimationInstance::RefreshInAirLean()
 		GetRelativeVelocity() / ReferenceSpeed * Settings->InAir.LeanAmountCurve->GetFloatValue(InAirState.VerticalVelocity)
 	};
 
-	if (bPendingUpdate || Settings->General.LeanInterpolationSpeed <= 0.0f)
+	if (bPendingUpdate || Settings->General.LeanInterpolationHalfLife <= 0.0f)
 	{
 		LeanState.RightAmount = TargetLeanAmount.Y;
 		LeanState.ForwardAmount = TargetLeanAmount.X;
 	}
 	else
 	{
-		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), Settings->General.LeanInterpolationSpeed)};
+		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), Settings->General.LeanInterpolationHalfLife)};
 
 		LeanState.RightAmount = FMath::Lerp(LeanState.RightAmount, TargetLeanAmount.Y, InterpolationAmount);
 		LeanState.ForwardAmount = FMath::Lerp(LeanState.ForwardAmount, TargetLeanAmount.X, InterpolationAmount);
@@ -1650,14 +1654,14 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 		RotateInPlaceState.bRotatingRight = ViewState.YawAngle > Settings->RotateInPlace.ViewYawAngleThreshold;
 	}
 
-	static constexpr auto PlayRateInterpolationSpeed{5.0f};
+	static constexpr auto PlayRateInterpolationHalfLife{0.15f};
 
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
 		RotateInPlaceState.PlayRate = bPendingUpdate
 			                              ? Settings->RotateInPlace.PlayRate.X
-			                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
-			                                                 GetDeltaSeconds(), PlayRateInterpolationSpeed);
+			                              : UAlsMath::DamperExact(RotateInPlaceState.PlayRate, Settings->RotateInPlace.PlayRate.X,
+			                                                      GetDeltaSeconds(), PlayRateInterpolationHalfLife);
 		return;
 	}
 
@@ -1671,8 +1675,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 
 	RotateInPlaceState.PlayRate = bPendingUpdate
 		                              ? PlayRate
-		                              : FMath::FInterpTo(RotateInPlaceState.PlayRate, PlayRate,
-		                                                 GetDeltaSeconds(), PlayRateInterpolationSpeed);
+		                              : UAlsMath::DamperExact(RotateInPlaceState.PlayRate, PlayRate,
+		                                                      GetDeltaSeconds(), PlayRateInterpolationHalfLife);
 }
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()

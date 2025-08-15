@@ -29,19 +29,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Angle"))
 	static float InterpolateAngleConstant(float Current, float Target, float DeltaTime, float Speed);
 
+	// HalfLife is the time it takes for the distance to the target to be reduced by half.
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Angle"))
-	static float DampAngle(float Current, float Target, float DeltaTime, float Smoothing);
+	static float DamperExactAngle(float Current, float Target, float DeltaTime, float HalfLife);
 
+	// HalfLife is the time it takes for the distance to the target to be reduced by half.
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility",
 		Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotation"))
-	static FRotator DampRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float Smoothing);
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Angle"))
-	static float ExponentialDecayAngle(float Current, float Target, float DeltaTime, float Lambda);
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility",
-		Meta = (AutoCreateRefTerm = "Current, Target", ReturnDisplayName = "Rotation"))
-	static FRotator ExponentialDecayRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float Lambda);
+	static FRotator DamperExactRotation(const FRotator& Current, const FRotator& Target, float DeltaTime, float HalfLife);
 
 	// Same as FMath::QInterpTo(), but uses FQuat::FastLerp() instead of FQuat::Slerp().
 	UFUNCTION(BlueprintPure, Category = "ALS|Rotation Utility", Meta = (ReturnDisplayName = "Quaternion"))
@@ -106,33 +101,15 @@ inline float UAlsRotation::InterpolateAngleConstant(const float Current, const f
 	return FMath::UnwindDegrees(Current + FMath::Clamp(Delta, -MaxDelta, MaxDelta));
 }
 
-inline float UAlsRotation::DampAngle(const float Current, const float Target, const float DeltaTime, const float Smoothing)
+inline float UAlsRotation::DamperExactAngle(const float Current, const float Target, const float DeltaTime, const float HalfLife)
 {
-	return Smoothing > 0.0f
-		       ? LerpAngle(Current, Target, UAlsMath::Damp(DeltaTime, Smoothing))
-		       : Target;
+	return LerpAngle(Current, Target, UAlsMath::DamperExactAlpha(DeltaTime, HalfLife));
 }
 
-inline float UAlsRotation::ExponentialDecayAngle(const float Current, const float Target, const float DeltaTime, const float Lambda)
+inline FRotator UAlsRotation::DamperExactRotation(const FRotator& Current, const FRotator& Target,
+                                                  const float DeltaTime, const float HalfLife)
 {
-	return Lambda > 0.0f
-		       ? LerpAngle(Current, Target, UAlsMath::ExponentialDecay(DeltaTime, Lambda))
-		       : Target;
-}
-
-inline FRotator UAlsRotation::DampRotation(const FRotator& Current, const FRotator& Target, const float DeltaTime, const float Smoothing)
-{
-	return Smoothing > 0.0f
-		       ? LerpRotation(Current, Target, UAlsMath::Damp(DeltaTime, Smoothing))
-		       : Target;
-}
-
-inline FRotator UAlsRotation::ExponentialDecayRotation(const FRotator& Current, const FRotator& Target,
-                                                       const float DeltaTime, const float Lambda)
-{
-	return Lambda > 0.0f
-		       ? LerpRotation(Current, Target, UAlsMath::ExponentialDecay(DeltaTime, Lambda))
-		       : Target;
+	return LerpRotation(Current, Target, UAlsMath::DamperExactAlpha(DeltaTime, HalfLife));
 }
 
 inline FQuat UAlsRotation::InterpolateQuaternionFast(const FQuat& Current, const FQuat& Target, const float DeltaTime, const float Speed)

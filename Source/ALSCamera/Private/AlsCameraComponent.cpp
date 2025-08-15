@@ -341,7 +341,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 
 	const auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurveName())};
 
-	return UAlsRotation::ExponentialDecayRotation(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
+	return UAlsRotation::DamperExactRotation(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
 }
 
 FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRotation, const float DeltaTime, const bool bAllowLag) const
@@ -359,9 +359,9 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurveName())};
 
 	return CameraYawRotation.RotateVector({
-		UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
-		UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.Y, RelativePivotTargetLocation.Y, DeltaTime, LocationLagY),
-		UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.Z, RelativePivotTargetLocation.Z, DeltaTime, LocationLagZ)
+		UAlsMath::DamperExact(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
+		UAlsMath::DamperExact(RelativePivotInitialLagLocation.Y, RelativePivotTargetLocation.Y, DeltaTime, LocationLagY),
+		UAlsMath::DamperExact(RelativePivotInitialLagLocation.Z, RelativePivotTargetLocation.Z, DeltaTime, LocationLagZ)
 	});
 }
 
@@ -472,8 +472,8 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		                        ? TargetTraceDistanceRatio
-		                        : UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
-		                                                     Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationSpeed);
+		                        : UAlsMath::DamperExact(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
+		                                                Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationHalfLife);
 
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }

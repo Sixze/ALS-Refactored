@@ -121,7 +121,7 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 
 	auto TargetRotation{GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};
 
-	if (Settings->Rolling.RotationInterpolationSpeed <= 0.0f)
+	if (Settings->Rolling.RotationInterpolationHalfLife <= 0.0f)
 	{
 		TargetRotation.Yaw = RollingState.TargetYawAngle;
 
@@ -129,9 +129,9 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 	else
 	{
-		TargetRotation.Yaw = UAlsRotation::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(TargetRotation.Yaw)),
-		                                                         RollingState.TargetYawAngle, DeltaTime,
-		                                                         Settings->Rolling.RotationInterpolationSpeed);
+		TargetRotation.Yaw = UAlsRotation::DamperExactAngle(UE_REAL_TO_FLOAT(FMath::UnwindDegrees(TargetRotation.Yaw)),
+		                                                    RollingState.TargetYawAngle, DeltaTime,
+		                                                    Settings->Rolling.RotationInterpolationHalfLife);
 
 		GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
 	}
@@ -870,9 +870,9 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		// Apply ragdoll location corrections.
 
 		static constexpr auto PullForce{750.0f};
-		static constexpr auto InterpolationSpeed{0.6f};
+		static constexpr auto InterpolationHalfLife{1.2f};
 
-		RagdollingState.PullForce = FMath::FInterpTo(RagdollingState.PullForce, PullForce, DeltaTime, InterpolationSpeed);
+		RagdollingState.PullForce = UAlsMath::DamperExact(RagdollingState.PullForce, PullForce, DeltaTime, InterpolationHalfLife);
 
 		const auto HorizontalSpeedSquared{RagdollingState.Velocity.SizeSquared2D()};
 

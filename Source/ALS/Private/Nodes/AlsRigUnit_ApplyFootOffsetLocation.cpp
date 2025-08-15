@@ -41,9 +41,9 @@ FAlsRigUnit_ApplyFootOffsetLocation_Execute()
 	}
 	else
 	{
-		OffsetLocationZ = UAlsMath::SpringDampFloat(OffsetSpringState, OffsetLocationZ, TargetOffsetLocationZ,
-		                                            UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), OffsetInterpolationFrequency,
-		                                            OffsetInterpolationDampingRatio, OffsetInterpolationTargetVelocityAmount);
+		OffsetLocationZ = UAlsMath::SpringDamperFloat(OffsetSpringState, OffsetLocationZ, TargetOffsetLocationZ,
+		                                              UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), OffsetInterpolationFrequency,
+		                                              OffsetInterpolationDampingRatio, OffsetInterpolationTargetVelocityAmount);
 	}
 
 	FootLocation.X = FootTargetLocation.X;
