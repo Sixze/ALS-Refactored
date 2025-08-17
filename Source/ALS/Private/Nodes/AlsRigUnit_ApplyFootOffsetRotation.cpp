@@ -68,29 +68,29 @@ FAlsRigUnit_ApplyFootOffsetRotation_Execute()
 	// Limit swing.
 
 	static const auto ApplyConstraint{
-		[](const float InitialAngle, const float TargetAngle, const FVector2f& LimitAngleRange)
+		[](const float InitialAngle, const float TargetAngle, const FFloatInterval& LimitAngle)
 		{
 			// Initial rotation is the rotation of the foot that comes from animations. It must be taken
 			// into account so that, for example, if the foot is rotated 45 degrees in the animation
 			// and the limit angle is 25 degrees, the resulting foot rotation will still be 45 degrees.
 
-			const auto MinAngle{FMath::Min3(InitialAngle, LimitAngleRange.X, LimitAngleRange.Y)};
-			const auto MaxAngle{FMath::Max3(InitialAngle, LimitAngleRange.X, LimitAngleRange.Y)};
+			const auto MinAngle{FMath::Min3(InitialAngle, LimitAngle.Min, LimitAngle.Max)};
+			const auto MaxAngle{FMath::Max3(InitialAngle, LimitAngle.Min, LimitAngle.Max)};
 
 			return FMath::Clamp(TargetAngle, MinAngle, MaxAngle);
 		}
 	};
 
 	const auto NewPitch{
-		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Pitch), UE_REAL_TO_FLOAT(TargetLocalRotator.Pitch), Swing2LimitAngleRange)
+		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Pitch), UE_REAL_TO_FLOAT(TargetLocalRotator.Pitch), Swing2LimitAngle)
 	};
 
 	const auto NewYaw{
-		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Yaw), UE_REAL_TO_FLOAT(TargetLocalRotator.Yaw), Swing1LimitAngleRange)
+		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Yaw), UE_REAL_TO_FLOAT(TargetLocalRotator.Yaw), Swing1LimitAngle)
 	};
 
 	const auto NewRoll{
-		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Roll), UE_REAL_TO_FLOAT(TargetLocalRotator.Roll), TwistLimitAngleRange)
+		ApplyConstraint(UE_REAL_TO_FLOAT(InitialLocalRotator.Roll), UE_REAL_TO_FLOAT(TargetLocalRotator.Roll), TwistLimitAngle)
 	};
 
 	// Convert the new local offset back to a global offset.

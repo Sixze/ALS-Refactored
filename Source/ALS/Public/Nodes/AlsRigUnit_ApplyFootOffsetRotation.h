@@ -22,13 +22,13 @@ public:
 	FVector FootOffsetNormal{FVector::ZAxisVector};
 
 	UPROPERTY(DisplayName = "Swing 1 Limit Angle", Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	FVector2f Swing1LimitAngleRange{-20.0f, 40.0f};
+	FFloatInterval Swing1LimitAngle{-20.0f, 40.0f};
 
 	UPROPERTY(DisplayName = "Swing 2 Limit Angle", Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	FVector2f Swing2LimitAngleRange{-15.0f, 5.0f};
+	FFloatInterval Swing2LimitAngle{-15.0f, 5.0f};
 
 	UPROPERTY(Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	FVector2f TwistLimitAngleRange{0.0f, 0.0f};
+	FFloatInterval TwistLimitAngle{0.0f, 0.0f};
 
 	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))

@@ -950,8 +950,8 @@ void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 		const auto VelocityAngle{UAlsVector::DirectionToAngle(RelativeVelocity)};
 
 		const auto ForwardSpeedAmount{
-			FMath::GetMappedRangeValueClamped(MovementSettings->VelocityAngleToSpeedInterpolationRange,
-			                                  {1.0f, 0.0f}, FMath::Abs(VelocityAngle))
+			1.0f - UAlsMath::Clamp01(MovementSettings->VelocityAngleToSpeedInterpolationRange
+			                                         .GetRangePct(static_cast<float>(FMath::Abs(VelocityAngle))))
 		};
 
 		WalkSpeed = FMath::Lerp(GaitSettings.WalkBackwardSpeed, GaitSettings.WalkForwardSpeed, ForwardSpeedAmount);

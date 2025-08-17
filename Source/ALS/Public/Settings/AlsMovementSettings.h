@@ -72,7 +72,7 @@ public:
 	// Range of velocity angle relative to the view direction at which
 	// interpolation from forward speed to backward speed will take place.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	FVector2f VelocityAngleToSpeedInterpolationRange{100.0f, 125.0f};
+	FFloatInterval VelocityAngleToSpeedInterpolationRange{100.0f, 125.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ForceInlineRow))
 	TMap<FGameplayTag, FAlsMovementStanceSettings> RotationModes
@@ -81,11 +81,6 @@ public:
 		{AlsRotationModeTags::ViewDirection, {}},
 		{AlsRotationModeTags::Aiming, {}}
 	};
-
-public:
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent) override;
-#endif
 };
 
 inline float FAlsMovementGaitSettings::GetMaxWalkSpeed() const
