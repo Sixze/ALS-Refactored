@@ -275,15 +275,11 @@ private:
 
 	void RefreshFeet(float DeltaTime);
 
-	void RefreshFoot(FAlsFootState& FootState, const FName& IkCurveName, const FName& LockCurveName,
-	                 const FTransform& ComponentTransformInverse, float DeltaTime) const;
+	void ProcessFootLockTeleport(const FAlsFootUpdateContext& Context) const;
 
-	void ProcessFootLockTeleport(float IkAmount, FAlsFootState& FootState) const;
+	void ProcessFootLockBaseChange(const FAlsFootUpdateContext& Context) const;
 
-	void ProcessFootLockBaseChange(float IkAmount, FAlsFootState& FootState, const FTransform& ComponentTransformInverse) const;
-
-	void RefreshFootLock(float IkAmount, FAlsFootState& FootState, const FName& LockCurveName,
-	                     const FTransform& ComponentTransformInverse, float DeltaTime) const;
+	void RefreshFootLock(const FAlsFootUpdateContext& Context) const;
 
 	// Transitions
 

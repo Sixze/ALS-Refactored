@@ -72,3 +72,18 @@ struct ALS_API FAlsFeetState
 		.ThighAxis = FVector3f::ZAxisVector
 	};
 };
+
+struct ALS_API FAlsFootUpdateContext
+{
+	FTransform ComponentTransform;
+
+	FTransform ComponentTransformInverse;
+
+	FAlsFootState* FootState{nullptr};
+
+	float IkAmount{0.0f};
+
+	float LockAmount{0.0f};
+
+	float DeltaTime{0.0f};
+};
