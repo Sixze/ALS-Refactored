@@ -1747,9 +1747,16 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 		};
 
 		const auto DeltaAngle{FMath::UnwindDegrees(TargetViewRelativeAngle - ViewRelativeAngle)};
-		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(DeltaTime, RotationInterpolationHalfLife)};
 
-		ViewRelativeAngle = FMath::UnwindDegrees(ViewRelativeAngle + DeltaAngle * InterpolationAmount);
+		if (FMath::IsNearlyZero(DeltaAngle, UE_KINDA_SMALL_NUMBER))
+		{
+			ViewRelativeAngle = TargetViewRelativeAngle;
+		}
+		else
+		{
+			const auto InterpolationAmount{UAlsMath::DamperExactAlpha(DeltaTime, RotationInterpolationHalfLife)};
+			ViewRelativeAngle = FMath::UnwindDegrees(ViewRelativeAngle + DeltaAngle * InterpolationAmount);
+		}
 	}
 
 	// Primary constraint. Prevents the actor from rotating beyond a certain angle relative to the camera.
@@ -1769,9 +1776,9 @@ bool AAlsCharacter::ConstrainAimingRotation(FRotator& ActorRotation, const float
 
 	// We use UE_KINDA_SMALL_NUMBER here because even if ViewRelativeAngle hasn't
 	// changed, converting it back to ActorRotation.Yaw may introduce a rounding
-	// error, and FMath::IsNearlyEqual() with default arguments will return false.
+	// error, and FMath::IsNearlyZero() with default arguments will return false.
 
-	return !FMath::IsNearlyEqual(PreviousActorYawAngle, ActorRotation.Yaw, UE_KINDA_SMALL_NUMBER);
+	return !FMath::IsNearlyZero(FMath::UnwindDegrees(ActorRotation.Yaw - PreviousActorYawAngle), UE_KINDA_SMALL_NUMBER);
 }
 
 float AAlsCharacter::CalculateGroundedMovingRotationInterpolationHalfLife() const
