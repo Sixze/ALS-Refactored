@@ -599,7 +599,11 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.bHasInput = Locomotion.bHasInput;
 	LocomotionState.InputYawAngle = Locomotion.InputYawAngle;
 
-	const auto PreviousVelocity{LocomotionState.Velocity};
+	const auto PreviousVelocity{
+		MovementBase.bHasRelativeRotation
+			? MovementBase.DeltaRotation.RotateVector(LocomotionState.Velocity)
+			: LocomotionState.Velocity
+	};
 
 	LocomotionState.Speed = Locomotion.Speed;
 	LocomotionState.Velocity = Locomotion.Velocity;
@@ -622,7 +626,13 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.TargetYawAngle = Locomotion.TargetYawAngle;
 
-	const auto PreviousYawAngle{LocomotionState.Rotation.Yaw};
+	auto PreviousYawAngle{LocomotionState.Rotation.Yaw};
+
+	if (MovementBase.bHasRelativeRotation)
+	{
+		// Offset the angle to keep it relative to the movement base.
+		PreviousYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(PreviousYawAngle + MovementBase.DeltaRotation.Yaw));
+	}
 
 	const auto& Proxy{GetProxyOnGameThread<FAnimInstanceProxy>()};
 	const auto& ActorTransform{Proxy.GetActorTransform()};
