@@ -38,10 +38,10 @@ protected:
 	UAlsAnimationInstance* GetParent() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
-	void InitializeLook();
+	void InitializeHead();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLook();
+	void RefreshHead();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintThreadSafe))
 	void InitializeLean();

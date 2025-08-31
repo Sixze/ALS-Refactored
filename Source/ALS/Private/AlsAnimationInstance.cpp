@@ -374,7 +374,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	const auto ViewAmount{1.0f - GetCurveValueClamped01(UAlsConstants::ViewBlockCurveName())};
 	const auto AimingAmount{GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName())};
 
-	ViewState.LookAmount = ViewAmount * (1.0f - AimingAmount);
+	ViewState.HeadBlendAmount = ViewAmount * (1.0f - AimingAmount);
 
 	RefreshSpine(ViewAmount * AimingAmount, DeltaTime);
 }
@@ -491,12 +491,12 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 	SpineState.YawAngle = UAlsRotation::LerpAngle(0.0f, SpineState.CurrentYawAngle, SpineBlendAmount);
 }
 
-void UAlsAnimationInstance::InitializeLook()
+void UAlsAnimationInstance::InitializeHead()
 {
-	LookState.bInitializationRequired = true;
+	HeadState.bInitializationRequired = true;
 }
 
-void UAlsAnimationInstance::RefreshLook()
+void UAlsAnimationInstance::RefreshHead()
 {
 #if WITH_EDITOR
 	if (!IsValid(GetWorld()) || !GetWorld()->IsGameWorld())
@@ -505,7 +505,7 @@ void UAlsAnimationInstance::RefreshLook()
 	}
 #endif
 
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshHead"), STAT_UAlsAnimationInstance_RefreshHead, STATGROUP_Als)
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__)
 
 	if (!IsValid(Settings))
@@ -518,18 +518,18 @@ void UAlsAnimationInstance::RefreshLook()
 	if (MovementBase.bHasRelativeRotation)
 	{
 		// Offset the angle to keep it relative to the movement base.
-		LookState.YawAngle += UE_REAL_TO_FLOAT(MovementBase.DeltaRotation.Yaw);
+		HeadState.YawAngle += UE_REAL_TO_FLOAT(MovementBase.DeltaRotation.Yaw);
 	}
 
 	// Offset the angle to make it independent of the character's rotation.
-	LookState.YawAngle -= LocomotionState.YawSpeed * DeltaTime;
+	HeadState.YawAngle -= LocomotionState.YawSpeed * DeltaTime;
 
 	// Clamp the angle instead of using FMath::UnwindDegrees() so that the head does not suddenly change the look side.
-	LookState.YawAngle = FMath::Clamp(LookState.YawAngle, -180.0f, 180.0f);
+	HeadState.YawAngle = FMath::Clamp(HeadState.YawAngle, -180.0f, 180.0f);
 
 	float TargetPitchAngle;
 	float TargetYawAngle;
-	auto bReadyToSwitchSides{false};
+	auto bReadyToSwitchLookSides{false};
 
 	if (RotationMode == AlsRotationModeTags::VelocityDirection)
 	{
@@ -552,10 +552,10 @@ void UAlsAnimationInstance::RefreshLook()
 		else if (FMath::Abs(TargetYawAngle) > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold)
 		{
 			// Do not rotate the head if the character is going to turn 180 degrees, or it may start rotating in the wrong direction.
-			TargetYawAngle = LookState.YawAngle;
+			TargetYawAngle = HeadState.YawAngle;
 		}
 
-		LookState.bSwitchingSides = false;
+		HeadState.bSwitchingLookSides = false;
 	}
 	else
 	{
@@ -576,49 +576,49 @@ void UAlsAnimationInstance::RefreshLook()
 
 		if (ViewMode != AlsViewModeTags::FirstPerson)
 		{
-			if (LookState.YawAngle >= SwitchSidesCurrentYawAngleThreshold &&
+			if (HeadState.YawAngle >= SwitchSidesCurrentYawAngleThreshold &&
 			    TargetYawAngle <= -SwitchSidesTargetYawAngleThreshold)
 			{
 				// Keep the target angle at 175 degrees if the character is looking at an angle greater than 90 degrees,
 				// and the target angle less than -160 degrees to prevent the character from switching look sides too often.
 
 				TargetYawAngle = 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold;
-				bReadyToSwitchSides = !LocomotionState.bHasInput;
+				bReadyToSwitchLookSides = !LocomotionState.bHasInput;
 			}
-			else if (LookState.YawAngle <= -SwitchSidesCurrentYawAngleThreshold &&
+			else if (HeadState.YawAngle <= -SwitchSidesCurrentYawAngleThreshold &&
 			         TargetYawAngle >= SwitchSidesTargetYawAngleThreshold)
 			{
 				TargetYawAngle = -180.0f + UAlsRotation::CounterClockwiseRotationAngleThreshold;
-				bReadyToSwitchSides = !LocomotionState.bHasInput;
+				bReadyToSwitchLookSides = !LocomotionState.bHasInput;
 			}
 		}
 	}
 
-	if (LookState.bInitializationRequired)
+	if (HeadState.bInitializationRequired)
 	{
-		LookState.bInitializationRequired = false;
+		HeadState.bInitializationRequired = false;
 
-		LookState.PitchAngle = TargetPitchAngle;
-		LookState.YawAngle = TargetYawAngle;
-		LookState.YawVelocity = 0.0f;
-		LookState.bSwitchingSides = false;
+		HeadState.PitchAngle = TargetPitchAngle;
+		HeadState.YawAngle = TargetYawAngle;
+		HeadState.YawVelocity = 0.0f;
+		HeadState.bSwitchingLookSides = false;
 	}
 	else
 	{
-		LookState.PitchAngle = UAlsRotation::DamperExactAngle(LookState.PitchAngle, TargetPitchAngle, DeltaTime,
-		                                                      Settings->View.PitchAngleInterpolationHalfLife);
+		HeadState.PitchAngle = UAlsRotation::DamperExactAngle(HeadState.PitchAngle, TargetPitchAngle, DeltaTime,
+		                                                      Settings->Head.PitchAngleInterpolationHalfLife);
 
-		if (bReadyToSwitchSides)
+		if (bReadyToSwitchLookSides)
 		{
-			LookState.bSwitchingSides = true;
+			HeadState.bSwitchingLookSides = true;
 		}
 		else
 		{
-			const auto DeltaYawAngle{FMath::UnwindDegrees(TargetYawAngle - LookState.YawAngle)};
+			const auto DeltaYawAngle{FMath::UnwindDegrees(TargetYawAngle - HeadState.YawAngle)};
 			if (FMath::Abs(DeltaYawAngle) <= 10.0f)
 			{
-				// Consider the side switching completed if the current yaw angle is close to the target.
-				LookState.bSwitchingSides = false;
+				// Consider the switching completed if the current angle is close to the target.
+				HeadState.bSwitchingLookSides = false;
 			}
 		}
 
@@ -626,13 +626,13 @@ void UAlsAnimationInstance::RefreshLook()
 		// different smoothing time when switching sides for even smoother head rotation.
 		// https://theorangeduck.com/page/spring-roll-call#critical
 
-		FMath::CriticallyDampedSmoothing(LookState.YawAngle, LookState.YawVelocity, TargetYawAngle, 0.0f, DeltaTime,
-		                                 LookState.bSwitchingSides
-			                                 ? Settings->View.SwitchLookSidesYawAngleInterpolationSmoothingTime
-			                                 : Settings->View.YawAngleInterpolationSmoothingTime);
+		FMath::CriticallyDampedSmoothing(HeadState.YawAngle, HeadState.YawVelocity, TargetYawAngle, 0.0f, DeltaTime,
+		                                 HeadState.bSwitchingLookSides
+			                                 ? Settings->Head.SwitchLookSidesYawAngleInterpolationSmoothingTime
+			                                 : Settings->Head.YawAngleInterpolationSmoothingTime);
 	}
 
-	LookState.YawAmount = LookState.YawAngle / 360.0f + 0.5f;
+	HeadState.YawAmount = HeadState.YawAngle / 360.0f + 0.5f;
 }
 
 void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
@@ -1608,7 +1608,7 @@ void UAlsAnimationInstance::RefreshDynamicTransitions()
 		return;
 	}
 
-	// Check each foot to see if the location difference between the foot look and its desired / target location
+	// Check each foot to see if the location difference between the foot lock and its desired / target location
 	// exceeds a threshold. If it does, play an additive transition animation on that foot. The currently set
 	// transition plays the second half of a 2 foot transition animation, so that only a single foot moves.
 

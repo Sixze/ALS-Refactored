@@ -7,11 +7,11 @@
 #include "State/AlsDynamicTransitionsState.h"
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
+#include "State/AlsHeadState.h"
 #include "State/AlsInAirState.h"
 #include "State/AlsLayeringState.h"
 #include "State/AlsLeanState.h"
 #include "State/AlsLocomotionAnimationState.h"
-#include "State/AlsLookState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsPoseState.h"
 #include "State/AlsRagdollingAnimationState.h"
@@ -97,7 +97,7 @@ protected:
 	FAlsSpineState SpineState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsLookState LookState;
+	FAlsHeadState HeadState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsLocomotionAnimationState LocomotionState;
@@ -177,18 +177,22 @@ private:
 
 	void RefreshView(float DeltaTime);
 
+	// Spine
+
 public:
 	virtual bool IsSpineRotationAllowed();
 
 private:
 	void RefreshSpine(float SpineBlendAmount, float DeltaTime);
 
+	// Head
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
-	void InitializeLook();
+	void InitializeHead();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshLook();
+	void RefreshHead();
 
 	// Locomotion
 

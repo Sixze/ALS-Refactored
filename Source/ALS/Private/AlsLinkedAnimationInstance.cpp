@@ -55,19 +55,19 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
-void UAlsLinkedAnimationInstance::InitializeLook()
+void UAlsLinkedAnimationInstance::InitializeHead()
 {
 	if (Parent.IsValid())
 	{
-		Parent->InitializeLook();
+		Parent->InitializeHead();
 	}
 }
 
-void UAlsLinkedAnimationInstance::RefreshLook()
+void UAlsLinkedAnimationInstance::RefreshHead()
 {
 	if (Parent.IsValid())
 	{
-		Parent->RefreshLook();
+		Parent->RefreshHead();
 	}
 }
 

@@ -23,5 +23,5 @@ struct ALS_API FAlsViewAnimationState
 	float PitchAmount{0.5f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float LookAmount{1.0f};
+	float HeadBlendAmount{1.0f};
 };
