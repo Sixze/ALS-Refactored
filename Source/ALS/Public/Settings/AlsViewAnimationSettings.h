@@ -9,9 +9,13 @@ struct ALS_API FAlsViewAnimationSettings
 
 	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float LookTowardsCameraRotationInterpolationHalfLife{0.1f};
+	float PitchAngleInterpolationHalfLife{0.1f};
 
-	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
+	// The lower the value, the faster the interpolation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float LookTowardsInputYawAngleInterpolationHalfLife{0.1f};
+	float YawAngleInterpolationSmoothingTime{0.14f};
+
+	// The lower the value, the faster the interpolation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float SwitchLookSidesYawAngleInterpolationSmoothingTime{0.28f};
 };

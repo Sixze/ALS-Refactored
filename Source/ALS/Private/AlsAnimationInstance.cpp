@@ -513,76 +513,126 @@ void UAlsAnimationInstance::RefreshLook()
 		return;
 	}
 
-	const auto ActorYawAngle{UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw)};
+	const auto DeltaTime{GetDeltaSeconds()};
 
 	if (MovementBase.bHasRelativeRotation)
 	{
 		// Offset the angle to keep it relative to the movement base.
-		LookState.WorldYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(LookState.WorldYawAngle + MovementBase.DeltaRotation.Yaw));
+		LookState.YawAngle += UE_REAL_TO_FLOAT(MovementBase.DeltaRotation.Yaw);
 	}
 
-	float TargetYawAngle;
+	// Offset the angle to make it independent of the character's rotation.
+	LookState.YawAngle -= LocomotionState.YawSpeed * DeltaTime;
+
+	// Clamp the angle instead of using FMath::UnwindDegrees() so that the head does not suddenly change the look side.
+	LookState.YawAngle = FMath::Clamp(LookState.YawAngle, -180.0f, 180.0f);
+
 	float TargetPitchAngle;
-	float InterpolationHalfLife;
+	float TargetYawAngle;
+	auto bReadyToSwitchSides{false};
 
 	if (RotationMode == AlsRotationModeTags::VelocityDirection)
 	{
 		// Look towards input direction.
 
-		TargetYawAngle = FMath::UnwindDegrees(
-			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) - ActorYawAngle);
-
 		TargetPitchAngle = 0.0f;
-		InterpolationHalfLife = Settings->View.LookTowardsInputYawAngleInterpolationHalfLife;
+
+		TargetYawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
+			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle: LocomotionState.TargetYawAngle) - LocomotionState.Rotation.Yaw));
+
+		static constexpr auto LocomotionYawSpeedThreshold{20.0f};
+
+		if (FMath::Abs(LocomotionState.YawSpeed) > LocomotionYawSpeedThreshold)
+		{
+			// Favor the character rotation direction, over the shortest rotation direction, so
+			// that the rotation of the head remains synchronized with the rotation of the body.
+
+			TargetYawAngle = FMath::Sign(LocomotionState.YawSpeed) * FMath::Abs(TargetYawAngle);
+		}
+		else if (FMath::Abs(TargetYawAngle) > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold)
+		{
+			// Do not rotate the head if the character is going to turn 180 degrees, or it may start rotating in the wrong direction.
+			TargetYawAngle = LookState.YawAngle;
+		}
+
+		LookState.bSwitchingSides = false;
 	}
 	else
 	{
 		// Look towards view direction.
 
-		TargetYawAngle = ViewState.YawAngle;
 		TargetPitchAngle = ViewState.PitchAngle;
-		InterpolationHalfLife = Settings->View.LookTowardsCameraRotationInterpolationHalfLife;
+		TargetYawAngle = ViewState.YawAngle;
+
+		static constexpr auto SwitchSidesCurrentYawAngleThreshold{90.0f};
+		static constexpr auto SwitchSidesTargetYawAngleThreshold{160.0f};
+
+		// Keep the target angle in the [-175, 175] range, as the character often
+		// tends to break his neck when the target angle is close to 180 degrees.
+
+		TargetYawAngle = FMath::Clamp(TargetYawAngle,
+		                              -180.0f + UAlsRotation::CounterClockwiseRotationAngleThreshold,
+		                              180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold);
+
+		if (ViewMode != AlsViewModeTags::FirstPerson)
+		{
+			if (LookState.YawAngle >= SwitchSidesCurrentYawAngleThreshold &&
+			    TargetYawAngle <= -SwitchSidesTargetYawAngleThreshold)
+			{
+				// Keep the target angle at 175 degrees if the character is looking at an angle greater than 90 degrees,
+				// and the target angle less than -160 degrees to prevent the character from switching look sides too often.
+
+				TargetYawAngle = 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold;
+				bReadyToSwitchSides = !LocomotionState.bHasInput;
+			}
+			else if (LookState.YawAngle <= -SwitchSidesCurrentYawAngleThreshold &&
+			         TargetYawAngle >= SwitchSidesTargetYawAngleThreshold)
+			{
+				TargetYawAngle = -180.0f + UAlsRotation::CounterClockwiseRotationAngleThreshold;
+				bReadyToSwitchSides = !LocomotionState.bHasInput;
+			}
+		}
 	}
 
-	if (LookState.bInitializationRequired || InterpolationHalfLife <= 0.0f)
+	if (LookState.bInitializationRequired)
 	{
-		LookState.YawAngle = TargetYawAngle;
-		LookState.PitchAngle = TargetPitchAngle;
-
 		LookState.bInitializationRequired = false;
+
+		LookState.PitchAngle = TargetPitchAngle;
+		LookState.YawAngle = TargetYawAngle;
+		LookState.YawVelocity = 0.0f;
+		LookState.bSwitchingSides = false;
 	}
 	else
 	{
-		const auto YawAngle{FMath::UnwindDegrees(LookState.WorldYawAngle - ActorYawAngle)};
-		auto DeltaYawAngle{FMath::UnwindDegrees(TargetYawAngle - YawAngle)};
+		LookState.PitchAngle = UAlsRotation::DamperExactAngle(LookState.PitchAngle, TargetPitchAngle, DeltaTime,
+		                                                      Settings->View.PitchAngleInterpolationHalfLife);
 
-		if (DeltaYawAngle > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold)
+		if (bReadyToSwitchSides)
 		{
-			DeltaYawAngle -= 360.0f;
+			LookState.bSwitchingSides = true;
 		}
-		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		else
 		{
-			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
-			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
-
-			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
+			const auto DeltaYawAngle{FMath::UnwindDegrees(TargetYawAngle - LookState.YawAngle)};
+			if (FMath::Abs(DeltaYawAngle) <= 10.0f)
+			{
+				// Consider the side switching completed if the current yaw angle is close to the target.
+				LookState.bSwitchingSides = false;
+			}
 		}
 
-		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), InterpolationHalfLife)};
+		// Use the exact critical spring damper as it provides smooth head rotation. Use a
+		// different smoothing time when switching sides for even smoother head rotation.
+		// https://theorangeduck.com/page/spring-roll-call#critical
 
-		LookState.YawAngle = FMath::UnwindDegrees(YawAngle + DeltaYawAngle * InterpolationAmount);
-		LookState.PitchAngle = UAlsRotation::LerpAngle(LookState.PitchAngle, TargetPitchAngle, InterpolationAmount);
+		FMath::CriticallyDampedSmoothing(LookState.YawAngle, LookState.YawVelocity, TargetYawAngle, 0.0f, DeltaTime,
+		                                 LookState.bSwitchingSides
+			                                 ? Settings->View.SwitchLookSidesYawAngleInterpolationSmoothingTime
+			                                 : Settings->View.YawAngleInterpolationSmoothingTime);
 	}
 
-	LookState.WorldYawAngle = FMath::UnwindDegrees(ActorYawAngle + LookState.YawAngle);
-
-	// Separate the yaw angle into 3 separate values. These 3 values are used to improve the
-	// blending of the view when rotating completely around the character. This allows to
-	// keep the view responsive but still smoothly blend from left to right or right to left.
-
-	LookState.YawForwardAmount = LookState.YawAngle / 360.0f + 0.5f;
-	LookState.YawLeftAmount = 0.5f - FMath::Abs(LookState.YawForwardAmount - 0.5f);
-	LookState.YawRightAmount = 0.5f + FMath::Abs(LookState.YawForwardAmount - 0.5f);
+	LookState.YawAmount = LookState.YawAngle / 360.0f + 0.5f;
 }
 
 void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
@@ -779,7 +829,9 @@ void UAlsAnimationInstance::RefreshVelocityBlend()
 		// We use UAlsMath::DamperExact() instead of FMath::FInterpTo(), because FMath::FInterpTo() is very sensitive to large
 		// delta time, at low FPS interpolation becomes almost instant which causes issues with character pose during the stop.
 
-		const auto InterpolationAmount{UAlsMath::DamperExactAlpha(GetDeltaSeconds(), Settings->Grounded.VelocityBlendInterpolationHalfLife)};
+		const auto InterpolationAmount{
+			UAlsMath::DamperExactAlpha(GetDeltaSeconds(), Settings->Grounded.VelocityBlendInterpolationHalfLife)
+		};
 
 		VelocityBlend.ForwardAmount = FMath::Lerp(VelocityBlend.ForwardAmount,
 		                                          UAlsMath::Clamp01(TargetVelocityBlend.X),
