@@ -31,5 +31,5 @@ struct ALS_API FAlsTransitionsState
 	uint8 bStopTransitionsQueued : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float QueuedStopTransitionsBlendOutDuration{0.0f};
+	float QueuedStopTransitionsBlendOutDuration{-1.0f};
 };

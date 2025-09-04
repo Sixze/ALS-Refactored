@@ -13,6 +13,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
+#include "Utility/AlsMontageUtility.h"
 #include "Utility/AlsPrivateMemberAccessor.h"
 #include "Utility/AlsRotation.h"
 #include "Utility/AlsUtility.h"
@@ -1699,12 +1700,17 @@ void UAlsAnimationInstance::StopQueuedTransitionAndTurnInPlaceAnimations()
 		return;
 	}
 
-	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TransitionSlotName());
-	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TurnInPlaceStandingSlotName());
-	StopSlotAnimation(TransitionsState.QueuedStopTransitionsBlendOutDuration, UAlsConstants::TurnInPlaceCrouchingSlotName());
+	UAlsMontageUtility::StopMontagesWithSlot(this, UAlsConstants::TransitionSlotName(),
+	                                         TransitionsState.QueuedStopTransitionsBlendOutDuration);
+
+	UAlsMontageUtility::StopMontagesWithSlot(this, UAlsConstants::TurnInPlaceStandingSlotName(),
+	                                         TransitionsState.QueuedStopTransitionsBlendOutDuration);
+
+	UAlsMontageUtility::StopMontagesWithSlot(this, UAlsConstants::TurnInPlaceCrouchingSlotName(),
+	                                         TransitionsState.QueuedStopTransitionsBlendOutDuration);
 
 	TransitionsState.bStopTransitionsQueued = false;
-	TransitionsState.QueuedStopTransitionsBlendOutDuration = 0.0f;
+	TransitionsState.QueuedStopTransitionsBlendOutDuration = -1.0f;
 }
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
@@ -1900,9 +1906,16 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 
 	const auto* TurnInPlaceSettings{TurnInPlaceState.QueuedSettings.Get()};
 
-	PlaySlotAnimationAsDynamicMontage(TurnInPlaceSettings->Sequence, TurnInPlaceState.QueuedSlotName,
-	                                  Settings->TurnInPlace.BlendDuration, Settings->TurnInPlace.BlendDuration,
-	                                  TurnInPlaceSettings->PlayRate, 1, 0.0f);
+	const FMontageBlendSettings BlendInSettings{Settings->TurnInPlace.BlendDuration};
+
+	// We use inertialization here to prevent blending out turn in place montages from modifying the RotationYawSpeed
+	// animation curve and therefore preventing the character from continuing to rotate in the input direction.
+
+	FMontageBlendSettings BlendOutSettings{Settings->TurnInPlace.BlendDuration};
+	BlendOutSettings.BlendMode = EMontageBlendMode::Inertialization;
+
+	PlaySlotAnimationAsDynamicMontage_WithBlendSettings(TurnInPlaceSettings->Sequence, TurnInPlaceState.QueuedSlotName,
+	                                                    BlendInSettings, BlendOutSettings, TurnInPlaceSettings->PlayRate, 1, 0.0f);
 
 	// Scale the rotation yaw delta (gets scaled in animation graph) to compensate for play rate and turn angle (if allowed).
 

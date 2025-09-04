@@ -54,6 +54,45 @@ FTransform UAlsMontageUtility::ExtractLastRootTransformFromMontage(const UAnimMo
 	return Sequence->ExtractRootTrackTransform(ExtractionContext, nullptr);
 }
 
+void UAlsMontageUtility::StopMontagesWithSlot(UAnimInstance* AnimationInstance, const FName& SlotName, const float BlendOutDuration)
+{
+	if (!ALS_ENSURE(IsValid(AnimationInstance)) || !ALS_ENSURE(!SlotName.IsNone()))
+	{
+		return;
+	}
+
+	for (auto* MontageInstance : AnimationInstance->MontageInstances)
+	{
+		if (MontageInstance == nullptr || !MontageInstance->IsActive())
+		{
+			continue;
+		}
+
+		const auto* Montage{MontageInstance->Montage.Get()};
+
+		for (const auto& SlotTrack : Montage->SlotAnimTracks)
+		{
+			if (SlotTrack.SlotName != SlotName)
+			{
+				continue;
+			}
+
+			FMontageBlendSettings BlendOutSettings{Montage->BlendOut};
+
+			if (BlendOutDuration >= 0.0f)
+			{
+				BlendOutSettings.Blend.BlendTime = BlendOutDuration;
+			}
+
+			BlendOutSettings.BlendMode = Montage->BlendModeOut;
+			BlendOutSettings.BlendProfile = Montage->BlendProfileOut;
+
+			MontageInstance->Stop(BlendOutSettings);
+			break;
+		}
+	}
+}
+
 void UAlsMontageUtility::StopMontagesWithAnySharedSlots(UAnimInstance* AnimationInstance, const UAnimMontage* ReferenceMontage,
                                                         const float BlendOutDuration)
 {

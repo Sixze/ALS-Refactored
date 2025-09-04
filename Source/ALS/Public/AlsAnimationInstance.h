@@ -304,7 +304,7 @@ public:
 	                                  float StartTime = 0.0f, bool bFromStandingIdleOnly = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
-	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = 0.2f);
+	void StopTransitionAndTurnInPlaceAnimations(float BlendOutDuration = -1.0f);
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
