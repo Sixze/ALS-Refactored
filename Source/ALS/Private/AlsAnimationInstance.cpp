@@ -221,17 +221,24 @@ FAnimInstanceProxy* UAlsAnimationInstance::CreateAnimInstanceProxy()
 
 FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 {
+	// In addition to being on the ground, allow pelvis offset if the
+	// character is in the air, but only if GroundPredictionAmount is non-zero.
+
+	const auto PelvisOffsetAmount{
+		UAlsMath::Clamp01(PoseState.GroundedAmount + PoseState.InAirAmount * InAirState.GroundPredictionAmount)
+	};
+
 	return {
 		.bUseHandIkBones = !IsValid(Settings) || Settings->General.bUseHandIkBones,
 		.bUseFootIkBones = !IsValid(Settings) || Settings->General.bUseFootIkBones,
-		.bFootOffsetAllowed = LocomotionMode != AlsLocomotionModeTags::InAir,
 		.VelocityBlendForwardAmount = GroundedState.VelocityBlend.ForwardAmount,
 		.VelocityBlendBackwardAmount = GroundedState.VelocityBlend.BackwardAmount,
+		.SpineYawAngle = SpineState.YawAngle,
+		.PelvisOffsetAmount = PelvisOffsetAmount,
 		.FootLeftLocation{FVector{FeetState.Left.FinalLocation}},
 		.FootLeftRotation{FQuat{FeetState.Left.FinalRotation}},
 		.FootRightLocation{FVector{FeetState.Right.FinalLocation}},
 		.FootRightRotation{FQuat{FeetState.Right.FinalRotation}},
-		.SpineYawAngle = SpineState.YawAngle
 	};
 }
 
@@ -1138,7 +1145,9 @@ void UAlsAnimationInstance::RefreshGroundPrediction()
 	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
 	                                 {__FUNCTION__, false, Character}, Settings->InAir.GroundPredictionSweepResponses);
 
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorAngleCos};
+	// Consider the ground valid, even if the trace started in penetration.
+
+	const auto bGroundValid{Hit.bBlockingHit && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorAngleCos};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (bDisplayDebugTraces)

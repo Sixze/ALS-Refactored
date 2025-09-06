@@ -15,14 +15,17 @@ struct ALS_API FAlsControlRigInput
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bUseFootIkBones{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFootOffsetAllowed{false};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float VelocityBlendForwardAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
 	float VelocityBlendBackwardAmount{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	float SpineYawAngle{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	float PelvisOffsetAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector FootLeftLocation{ForceInit};
@@ -35,7 +38,4 @@ struct ALS_API FAlsControlRigInput
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat FootRightRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float SpineYawAngle{0.0f};
 };
