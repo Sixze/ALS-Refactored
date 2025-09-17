@@ -244,7 +244,7 @@ public:
 	                    const FAnimNotifyEventReference& NotifyEventReference) override;
 
 private:
-	void SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepSoundSettings& SoundSettings,
+	void SpawnSound(const AAlsCharacter* Character, USkeletalMeshComponent* Mesh, const FAlsFootstepSoundSettings& SoundSettings,
 	                const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
 
 	void SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,
