@@ -234,7 +234,7 @@ void UAlsAnimNotify_FootstepEffects::SpawnSound(const AAlsCharacter* Character, 
 		Audio->SetIntParameter(FName{TEXTVIEW("FootstepType")}, static_cast<int32>(SoundType));
 	}
 	
-	Character->SpawnFootstepSound();
+	Character->SpawnFootstepSound(VolumeMultiplier, SoundPitchMultiplier);
 }
 
 void UAlsAnimNotify_FootstepEffects::SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,
