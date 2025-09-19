@@ -216,6 +216,9 @@ void UAlsAnimNotify_FootstepEffects::SpawnSound(const AAlsCharacter* Character, 
 			Audio = UGameplayStatics::SpawnSoundAtLocation(World, SoundSettings.Sound.Get(), FootstepLocation,
 			                                               FootstepRotation.Rotator(),
 			                                               VolumeMultiplier, SoundPitchMultiplier);
+			
+			const_cast<AAlsCharacter*>(Character)->SpawnFootstepSound(VolumeMultiplier, SoundPitchMultiplier);
+
 		}
 	}
 	else if (SoundSettings.SpawnMode == EAlsFootstepSoundSpawnMode::SpawnAttachedToFootBone)
@@ -233,8 +236,6 @@ void UAlsAnimNotify_FootstepEffects::SpawnSound(const AAlsCharacter* Character, 
 	{
 		Audio->SetIntParameter(FName{TEXTVIEW("FootstepType")}, static_cast<int32>(SoundType));
 	}
-	
-	Character->SpawnFootstepSound(VolumeMultiplier, SoundPitchMultiplier);
 }
 
 void UAlsAnimNotify_FootstepEffects::SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,

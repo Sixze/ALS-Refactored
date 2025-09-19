@@ -594,7 +594,7 @@ private:
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Als Character")
-	void SpawnFootstepSound(const float VolumeMultiplier, const float PitchMultiplier) const;
+	void SpawnFootstepSound(const float VolumeMultiplier, const float PitchMultiplier);
 	// Debug
 
 public:
