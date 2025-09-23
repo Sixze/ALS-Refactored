@@ -179,8 +179,11 @@ inline double UAlsVector::AngleBetweenSkipNormalization(const FVector& From, con
 
 inline float UAlsVector::AngleBetweenSignedXY(const FVector3f& From, const FVector3f& To)
 {
-	const auto FromXY{FVector2f{From}.GetSafeNormal()};
-	const auto ToXY{FVector2f{To}.GetSafeNormal()};
+	FVector2f FromXY{From};
+	FromXY.Normalize();
+
+	FVector2f ToXY{To};
+	ToXY.Normalize();
 
 	// return FMath::RadiansToDegrees(FMath::Atan2(FromXY ^ ToXY, FromXY | ToXY));
 

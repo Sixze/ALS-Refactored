@@ -53,7 +53,7 @@ struct ALS_API FAlsLocomotionAnimationState
 	FQuat RotationQuaternion{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "deg/s"))
-	float YawSpeed{0.0f};
+	float YawVelocity{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "x"))
 	float Scale{1.0f};
