@@ -12,11 +12,12 @@
 
 namespace 
 {
-    uint8 GEnsureResetState = 1;
-    FAutoConsoleCommand CVarResetEnsureState(
+    int32 GEnsureResetState = 1;
+    FAutoConsoleVariableRef CVarResetEnsureState(
         TEXT("AlsEnsure.ResetEnsureState"),
+        GEnsureResetState,
         TEXT("Reset all ensures so they will fire again"),
-        FConsoleCommandDelegate::CreateLambda([]()
+        FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*)
             {
                 ++GEnsureResetState;
             }));
