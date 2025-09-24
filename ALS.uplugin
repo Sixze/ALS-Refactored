@@ -10,7 +10,7 @@
 	"DocsURL": "https://github.com/Sixze/ALS-Refactored",
 	"MarketplaceURL": "https://www.fab.com/listings/ef9651a4-fb55-4866-a2d9-1b38b028f9c7",
 	"SupportURL": "https://github.com/Sixze/ALS-Refactored/discussions",
-	"EngineVersion": "5.6.0",
+	"EngineVersion": "5.7.0",
 	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
