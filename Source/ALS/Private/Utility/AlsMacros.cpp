@@ -10,23 +10,36 @@
 
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 
+namespace 
+{
+    uint8 GEnsureResetState = 1;
+    FAutoConsoleCommand CVarResetEnsureState(
+        TEXT("AlsEnsure.ResetEnsureState"),
+        TEXT("Reset all ensures so they will fire again"),
+        FConsoleCommandDelegate::CreateLambda([]()
+            {
+                ++GEnsureResetState;
+            }));
+}
+
 namespace AlsEnsure
 {
-	static bool CanExecute(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
+	static bool CanExecute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
 	{
-		static const auto* EnsureAlwaysEnabledConsoleVariable{
-			IConsoleManager::Get().FindConsoleVariable(TEXT("core.EnsureAlwaysEnabled"))
-		};
-		check(EnsureAlwaysEnabledConsoleVariable != nullptr)
+	    static const auto* EnsureAlwaysEnabledConsoleVariable{
+	        IConsoleManager::Get().FindConsoleVariable(TEXT("core.EnsureAlwaysEnabled"))
+        };
+	    check(EnsureAlwaysEnabledConsoleVariable != nullptr)
 
-		if ((bExecuted.load(std::memory_order_relaxed) &&
-		     (!EnsureInfo.bEnsureAlways || !EnsureAlwaysEnabledConsoleVariable->GetBool())) ||
-		    !FPlatformMisc::IsEnsureAllowed())
-		{
-			return false;
-		}
+	    if ((bExecuted.load(std::memory_order_relaxed) == GEnsureResetState &&
+             (!EnsureInfo.bEnsureAlways || !EnsureAlwaysEnabledConsoleVariable->GetBool())) ||
+            !FPlatformMisc::IsEnsureAllowed())
+	    {
+	        return false;
+	    }
 
-		return !bExecuted.exchange(true, std::memory_order_release) || EnsureInfo.bEnsureAlways;
+	    // UE::Assert::Private::CheckEnsureFailed(EnsureInfo.bEnsureAlways, bExecuted);
+	    return GEnsureResetState != bExecuted.exchange(GEnsureResetState, std::memory_order_release) || EnsureInfo.bEnsureAlways;
 	}
 
 	static bool ExecuteInternal(const FAlsEnsureInfo& EnsureInfo, const TCHAR* Message)
@@ -76,12 +89,12 @@ namespace AlsEnsure
 #endif
 	}
 
-	bool UE_COLD UE_DEBUG_SECTION Execute(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
+	bool UE_COLD UE_DEBUG_SECTION Execute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
 	{
 		return CanExecute(bExecuted, EnsureInfo) && ExecuteInternal(EnsureInfo, TEXT(""));
 	}
 
-	bool UE_COLD UE_DEBUG_SECTION ExecuteFormat(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo,
+	bool UE_COLD UE_DEBUG_SECTION ExecuteFormat(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo,
 	                                            const TCHAR* Format, ...)
 	{
 		if (!CanExecute(bExecuted, EnsureInfo))
