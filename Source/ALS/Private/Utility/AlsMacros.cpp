@@ -12,21 +12,33 @@
 
 namespace AlsEnsure
 {
-	static bool CanExecute(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
+	static uint8 GEnsureResetState{1};
+
+	// TODO Use "core.ResetEnsureState" instead.
+	static FAutoConsoleCommand ConsoleCommandResetEnsureState{
+		TEXT("als.ResetEnsureState"),
+		TEXT("Reset all ensures so they will fire again."),
+		FConsoleCommandDelegate::CreateLambda([]
+		{
+			GEnsureResetState += 1;
+		})
+	};
+
+	static bool CanExecute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
 	{
 		static const auto* EnsureAlwaysEnabledConsoleVariable{
 			IConsoleManager::Get().FindConsoleVariable(TEXT("core.EnsureAlwaysEnabled"))
 		};
 		check(EnsureAlwaysEnabledConsoleVariable != nullptr)
 
-		if ((bExecuted.load(std::memory_order_relaxed) &&
+		if ((bExecuted.load(std::memory_order_relaxed) == GEnsureResetState &&
 		     (!EnsureInfo.bEnsureAlways || !EnsureAlwaysEnabledConsoleVariable->GetBool())) ||
 		    !FPlatformMisc::IsEnsureAllowed())
 		{
 			return false;
 		}
 
-		return !bExecuted.exchange(true, std::memory_order_release) || EnsureInfo.bEnsureAlways;
+		return bExecuted.exchange(GEnsureResetState, std::memory_order_release) != GEnsureResetState || EnsureInfo.bEnsureAlways;
 	}
 
 	static bool ExecuteInternal(const FAlsEnsureInfo& EnsureInfo, const TCHAR* Message)
@@ -47,14 +59,14 @@ namespace AlsEnsure
 			if (EnsuresAreErrorsConsoleVariable->GetBool())
 			{
 				UE_LOG(LogOutputDevice, Error, TEXT("Ensure failed: %hs, File: %hs, Line: %d."),
-				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber)
+				       EnsureInfo.Expression, EnsureInfo.FilePath ? EnsureInfo.FilePath : "Unknown", EnsureInfo.LineNumber)
 
 				UE_LOG(LogOutputDevice, Error, TEXT("%s"), Message)
 			}
 			else
 			{
 				UE_LOG(LogOutputDevice, Error, TEXT("Ensure failed: %hs, File: %hs, Line: %d."),
-				       EnsureInfo.Expression, EnsureInfo.FilePath, EnsureInfo.LineNumber)
+				       EnsureInfo.Expression, EnsureInfo.FilePath ? EnsureInfo.FilePath : "Unknown", EnsureInfo.LineNumber)
 
 				UE_LOG(LogOutputDevice, Warning, TEXT("%s"), Message)
 			}
@@ -76,12 +88,12 @@ namespace AlsEnsure
 #endif
 	}
 
-	bool UE_COLD UE_DEBUG_SECTION Execute(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
+	bool UE_COLD UE_DEBUG_SECTION Execute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo)
 	{
 		return CanExecute(bExecuted, EnsureInfo) && ExecuteInternal(EnsureInfo, TEXT(""));
 	}
 
-	bool UE_COLD UE_DEBUG_SECTION ExecuteFormat(std::atomic<bool>& bExecuted, const FAlsEnsureInfo& EnsureInfo,
+	bool UE_COLD UE_DEBUG_SECTION ExecuteFormat(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo,
 	                                            const TCHAR* Format, ...)
 	{
 		if (!CanExecute(bExecuted, EnsureInfo))
