@@ -461,7 +461,7 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 			static constexpr auto ReferenceViewYawSpeed{40.0f};
 
 			// Decrease the interpolation half life when the camera rotates quickly,
-			// otherwise the spine rotation may lag too much behind the actor rotation.
+			// otherwise the spine rotation may lag too much behind the character's rotation.
 
 			const auto InterpolationHalfLifeMultiplier{
 				ViewState.YawSpeed > ReferenceViewYawSpeed
@@ -483,7 +483,7 @@ void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const flo
 
 			auto YawAngleOffset{FMath::UnwindDegrees(UE_REAL_TO_FLOAT(SpineState.LastActorYawAngle - LocomotionState.Rotation.Yaw))};
 
-			// Keep the offset within 30 degrees, otherwise the spine rotation may lag too much behind the actor rotation.
+			// Keep the offset within 30 degrees, otherwise the spine rotation may lag too much behind the character's rotation.
 
 			static constexpr auto MaxYawAngleOffset{30.0f};
 			YawAngleOffset = FMath::Clamp(YawAngleOffset, -MaxYawAngleOffset, MaxYawAngleOffset);
@@ -530,7 +530,7 @@ void UAlsAnimationInstance::RefreshHead()
 	}
 
 	// Offset the angle to make it independent of the character's rotation.
-	HeadState.YawAngle -= LocomotionState.YawSpeed * DeltaTime;
+	HeadState.YawAngle -= LocomotionState.YawVelocity * DeltaTime;
 
 	// Clamp the angle instead of using FMath::UnwindDegrees() so that the head does not suddenly change the look side.
 	HeadState.YawAngle = FMath::Clamp(HeadState.YawAngle, -180.0f, 180.0f);
@@ -550,12 +550,12 @@ void UAlsAnimationInstance::RefreshHead()
 
 		static constexpr auto LocomotionYawSpeedThreshold{20.0f};
 
-		if (FMath::Abs(LocomotionState.YawSpeed) > LocomotionYawSpeedThreshold)
+		if (FMath::Abs(LocomotionState.YawVelocity) > LocomotionYawSpeedThreshold)
 		{
 			// Favor the character rotation direction, over the shortest rotation direction, so
 			// that the rotation of the head remains synchronized with the rotation of the body.
 
-			TargetYawAngle = FMath::Sign(LocomotionState.YawSpeed) * FMath::Abs(TargetYawAngle);
+			TargetYawAngle = FMath::Sign(LocomotionState.YawVelocity) * FMath::Abs(TargetYawAngle);
 		}
 		else if (FMath::Abs(TargetYawAngle) > 180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold)
 		{
@@ -733,10 +733,10 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 		LocomotionState.RotationQuaternion = SmoothTransform.GetRotation();
 	}
 
-	LocomotionState.YawSpeed = bCanCalculateRateOfChange
-		                           ? FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
-			                             LocomotionState.Rotation.Yaw - PreviousYawAngle)) / ActorDeltaTime
-		                           : 0.0f;
+	LocomotionState.YawVelocity = bCanCalculateRateOfChange
+		                              ? FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
+			                                LocomotionState.Rotation.Yaw - PreviousYawAngle)) / ActorDeltaTime
+		                              : 0.0f;
 
 	LocomotionState.Scale = UE_REAL_TO_FLOAT(Proxy.GetComponentTransform().GetScale3D().Z);
 

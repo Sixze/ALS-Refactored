@@ -130,17 +130,15 @@ inline FRotator UAlsRotation::LerpRotation(const FRotator& From, const FRotator&
 inline float UAlsRotation::InterpolateAngleConstant(const float Current, const float Target, const float DeltaTime, const float Speed)
 {
 	auto Delta{FMath::UnwindDegrees(Target - Current)};
+	const auto MaxDelta{Speed * DeltaTime};
 
-	if (Speed <= 0.0f || FMath::IsNearlyZero(Delta))
+	if (Speed <= 0.0f || FMath::Abs(Delta) <= MaxDelta)
 	{
 		return Target;
 	}
 
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
-
-	const auto MaxDelta{Speed * DeltaTime};
-
-	return FMath::UnwindDegrees(Current + FMath::Clamp(Delta, -MaxDelta, MaxDelta));
+	return FMath::UnwindDegrees(Current + FMath::Sign(Delta) * MaxDelta);
 }
 
 inline float UAlsRotation::DamperExactAngle(const float Current, const float Target, const float DeltaTime, const float HalfLife)
@@ -155,7 +153,6 @@ inline float UAlsRotation::DamperExactAngle(const float Current, const float Tar
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
 	const auto Alpha{UAlsMath::DamperExactAlpha(DeltaTime, HalfLife)};
-
 	return FMath::UnwindDegrees(Current + Delta * Alpha);
 }
 

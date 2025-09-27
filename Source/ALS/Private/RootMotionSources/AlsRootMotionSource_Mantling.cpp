@@ -2,7 +2,6 @@
 
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Curves/CurveFloat.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMantlingSettings.h"
@@ -54,91 +53,77 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	Character.GetMesh()->GetAnimInstance()->Montage_SetPosition(Montage, FMath::Max(0.0f, MontageTime - DeltaTime));
 
-	// Calculate the target transform based on the stored relative transform to follow moving objects.
+	auto BlendInAmount{1.0f};
+	const auto& MontageBlendIn{Montage->BlendIn};
 
-	auto TargetTransform{
-		MovementBaseUtility::UseRelativeLocation(TargetPrimitive.Get())
-			? FTransform{TargetRelativeRotation, TargetRelativeLocation, TargetPrimitive->GetComponentScale()}
-			.GetRelativeTransformReverse(TargetPrimitive->GetComponentTransform())
-			: FTransform{TargetRelativeRotation, TargetRelativeLocation}
+	if (MontageBlendIn.GetBlendTime() > UE_SMALL_NUMBER)
+	{
+		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
+		                                                MontageBlendIn.GetBlendOption(),
+		                                                MontageBlendIn.GetCustomCurve());
+	}
+
+	const auto WarpAmount{UAlsMath::Clamp01(MantlingSettings->MotionWarpingTimeRange.GetRangePct(MontageTime))};
+
+	const auto LocationWarpAmount{
+		BlendInAmount * FAlphaBlend::AlphaToBlendOption(WarpAmount,
+		                                                MantlingSettings->MotionWarpingLocationBlendOption,
+		                                                MantlingSettings->MotionWarpingLocationCustomBlendCurve)
 	};
+
+	const auto RotationWarpAmount{
+		BlendInAmount * FAlphaBlend::AlphaToBlendOption(WarpAmount,
+		                                                MantlingSettings->MotionWarpingRotationBlendOption,
+		                                                MantlingSettings->MotionWarpingRotationCustomBlendCurve)
+	};
+
+	// Calculate the start and target transforms based on the stored relative transforms to follow moving objects.
+
+	FTransform StartTransform{StartRotation, StartLocation};
+	FTransform TargetTransform{TargetRotation, TargetLocation};
+
+	if (MovementBaseUtility::UseRelativeLocation(TargetPrimitive.Get()))
+	{
+		StartTransform *= TargetPrimitive->GetComponentTransform();
+		StartTransform.SetScale3D(FVector::OneVector);
+
+		TargetTransform *= TargetPrimitive->GetComponentTransform();
+		TargetTransform.SetScale3D(FVector::OneVector);
+	}
+
+	// Interpolate the start and target transform to obtain the warped transform.
+
+	const auto WarpLocation{FMath::Lerp(StartTransform.GetLocation(), TargetTransform.GetLocation(), LocationWarpAmount)};
+
+	auto WarpRotation{FQuat::FastLerp(StartTransform.GetRotation(), TargetTransform.GetRotation(), RotationWarpAmount)};
+	WarpRotation.Normalize();
 
 	// Remove the pitch and roll components of the rotation so that the actor's Z axis is always aligned with the gravity direction.
 
-	const auto Twist{UAlsRotation::GetTwist(TargetTransform.GetRotation(), -Character.GetGravityDirection())};
-	TargetTransform.SetRotation(Twist);
+	WarpRotation = UAlsRotation::GetTwist(WarpRotation, -Character.GetGravityDirection());
 
-	auto BlendInAmount{1.0f};
+	const FTransform WarpTransform{WarpRotation, WarpLocation};
 
-	const auto& MontageBlendIn{Montage->BlendIn};
-	if (MontageBlendIn.GetBlendTime() > 0.0f)
-	{
-		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
-		                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
-	}
+	// Extract the current root transform, convert from the mesh space to the actor space.
 
-	const auto CurrentAnimationLocation{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+	auto RootTransform{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, MontageTime)};
+	RootTransform.SetScale3D(FVector::OneVector);
 
-	// The target animation location is expected to be non-zero, so it's safe to divide by it here.
+	const FTransform MeshTransform{Character.GetBaseRotationOffset()};
+	RootTransform = MeshTransform.GetRelativeTransformReverse(RootTransform);
 
-	const auto InterpolationAmount{UE_REAL_TO_FLOAT(CurrentAnimationLocation.Z / TargetAnimationLocation.Z)};
+	// Apply the current root transform to the warped transform to get the target actor transform.
 
-	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
-	{
-		// Calculate the target animation location offset. This is the offset to
-		// the location where the animation ends relative to the target transform.
+	const auto TargetActorTransform{RootTransform * WarpTransform};
 
-		auto TargetAnimationLocationOffset{TargetTransform.GetUnitAxis(EAxis::X) * -TargetAnimationLocation.Y};
-		TargetAnimationLocationOffset.Z = -TargetAnimationLocation.Z;
-		TargetAnimationLocationOffset *= Character.GetMesh()->GetComponentScale().Z;
+	// Calculate the final root motion by taking the delta between the current actor transform and the target actor transform.
 
-		// Blend into the animation offset and the final offset at the same time.
-		// Horizontal and vertical blends use different correction amounts.
+	const FTransform FinalRootMotion{
+		TargetActorTransform.GetRotation() * Character.GetActorQuat().Inverse(),
+		(TargetActorTransform.GetLocation() - Character.GetActorLocation()) / DeltaTime
+	};
 
-		auto HorizontalCorrectionAmount{1.0f};
-		auto VerticalCorrectionAmount{1.0f};
-
-		if (IsValid(MantlingSettings->HorizontalCorrectionCurve))
-		{
-			HorizontalCorrectionAmount = MantlingSettings->HorizontalCorrectionCurve->GetFloatValue(MontageTime);
-		}
-
-		if (IsValid(MantlingSettings->VerticalCorrectionCurve))
-		{
-			VerticalCorrectionAmount = MantlingSettings->VerticalCorrectionCurve->GetFloatValue(MontageTime);
-		}
-
-		FVector LocationOffset{
-			FMath::Lerp(ActorFeetLocationOffset.X, TargetAnimationLocationOffset.X, HorizontalCorrectionAmount),
-			FMath::Lerp(ActorFeetLocationOffset.Y, TargetAnimationLocationOffset.Y, HorizontalCorrectionAmount),
-			FMath::Lerp(ActorFeetLocationOffset.Z, TargetAnimationLocationOffset.Z, VerticalCorrectionAmount)
-		};
-
-		LocationOffset = FMath::Lerp(ActorFeetLocationOffset, LocationOffset * (1.0f - InterpolationAmount), BlendInAmount);
-
-		// The actor's rotation offset must be normalized for this code block to work properly.
-
-		const auto RotationOffset{
-			ActorRotationOffset *
-			FMath::Lerp(1.0f, (1.0f - HorizontalCorrectionAmount) * (1.0f - InterpolationAmount), BlendInAmount)
-		};
-
-		// Apply final offsets.
-
-		TargetTransform.AddToTranslation(LocationOffset);
-		TargetTransform.ConcatenateRotation(RotationOffset.Quaternion());
-	}
-	else
-	{
-		Status.SetFlag(ERootMotionSourceStatusFlags::Finished);
-	}
-
-	// Find the delta transform between the actor and the target transform and divide it by the time delta to get the velocity.
-
-	TargetTransform.AddToTranslation(-Movement.GetActorFeetLocation());
-	TargetTransform.ConcatenateRotation(Movement.UpdatedComponent->GetComponentQuat().Inverse());
-
-	RootMotionParams.Set(TargetTransform * ScalarRegister{1.0f / DeltaTime});
+	RootMotionParams.Set(FinalRootMotion);
 }
 
 bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap* Map, bool& bSuccess)
@@ -155,19 +140,17 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	Archive << MantlingSettings;
 	Archive << TargetPrimitive;
 
-	bSuccess &= SerializePackedVector<100, 30>(TargetRelativeLocation, Archive);
+	bSuccess &= SerializePackedVector<100, 30>(StartLocation, Archive);
 
-	TargetRelativeRotation.NetSerialize(Archive, Map, bSuccessLocal);
-	TargetRelativeRotation.Normalize();
+	StartRotation.NetSerialize(Archive, Map, bSuccessLocal);
+	StartRotation.Normalize();
 	bSuccess &= bSuccessLocal;
 
-	bSuccess &= SerializePackedVector<100, 30>(ActorFeetLocationOffset, Archive);
+	bSuccess &= SerializePackedVector<100, 30>(TargetLocation, Archive);
 
-	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
-	ActorRotationOffset.Normalize();
+	TargetRotation.NetSerialize(Archive, Map, bSuccessLocal);
+	TargetRotation.Normalize();
 	bSuccess &= bSuccessLocal;
-
-	bSuccess &= SerializePackedVector<100, 30>(TargetAnimationLocation, Archive);
 
 	Archive << MontageStartTime;
 

@@ -46,9 +46,9 @@ void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& 
 	}
 	else if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, Effects))
 	{
-		for (auto& Tuple : Effects)
+		for (auto& [SurfaceType, EffectSettings] : Effects)
 		{
-			Tuple.Value.PostEditChangeProperty(ChangedEvent);
+			EffectSettings.PostEditChangeProperty(ChangedEvent);
 		}
 	}
 
@@ -140,9 +140,9 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	if (EffectSettings == nullptr)
 	{
-		for (const auto& Tuple : FootstepEffectsSettings->Effects)
+		for (const auto& [OtherSurfaceType, OtherEffectSettings] : FootstepEffectsSettings->Effects)
 		{
-			EffectSettings = &Tuple.Value;
+			EffectSettings = &OtherEffectSettings;
 			break;
 		}
 

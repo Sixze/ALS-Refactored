@@ -22,16 +22,16 @@ protected:
 	inline static const FName FootLeftIkBone{TEXTVIEW("ik_foot_l")};
 	inline static const FName FootRightIkBone{TEXTVIEW("ik_foot_r")};
 	inline static const FName FootLeftVirtualBone{TEXTVIEW("VB foot_l")};
+	inline static const FName FootRightVirtualBone{TEXTVIEW("VB foot_r")};
 
 	// Animation Slots
 
-	inline static const FName FootRightVirtualBone{TEXTVIEW("VB foot_r")};
 	inline static const FName TransitionSlot{TEXTVIEW("Transition")};
 	inline static const FName TurnInPlaceStandingSlot{TEXTVIEW("TurnInPlaceStanding")};
+	inline static const FName TurnInPlaceCrouchingSlot{TEXTVIEW("TurnInPlaceCrouching")};
 
 	// Layering Animation Curves
 
-	inline static const FName TurnInPlaceCrouchingSlot{TEXTVIEW("TurnInPlaceCrouching")};
 	inline static const FName LayerHeadCurve{TEXTVIEW("LayerHead")};
 	inline static const FName LayerHeadAdditiveCurve{TEXTVIEW("LayerHeadAdditive")};
 	inline static const FName LayerHeadSlotCurve{TEXTVIEW("LayerHeadSlot")};

@@ -42,6 +42,7 @@ For more information, see the [Releases](https://github.com/Sixze/ALS-Refactored
 
 | Plugin Version                                                            | Unreal Engine Version           |
 |---------------------------------------------------------------------------|---------------------------------|
+| [4.16](https://github.com/Sixze/ALS-Refactored/releases/tag/4.16)         | 5.6                            |
 | [4.15](https://github.com/Sixze/ALS-Refactored/releases/tag/4.15)         | 5.5                             |
 | [4.14](https://github.com/Sixze/ALS-Refactored/releases/tag/4.14)         | 5.4                             |
 | [4.13](https://github.com/Sixze/ALS-Refactored/releases/tag/4.13)         | 5.3                             |
