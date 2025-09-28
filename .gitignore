@@ -1,4 +1,7 @@
-# Visual Studio 2015 user specific files
+# Visual Studio Code
+.vscode/
+
+# Visual Studio
 .vs/
 
 # Rider
