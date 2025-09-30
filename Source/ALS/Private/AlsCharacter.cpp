@@ -836,7 +836,6 @@ void AAlsCharacter::ApplyDesiredStance()
 bool AAlsCharacter::CanCrouch() const
 {
 	// This allows the ACharacter::Crouch() function to execute properly when bIsCrouched is true.
-	// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/9558 to be merged into the engine.
 
 	return bIsCrouched || Super::CanCrouch();
 }
