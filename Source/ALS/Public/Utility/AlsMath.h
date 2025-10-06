@@ -29,9 +29,6 @@ class ALS_API UAlsMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static constexpr auto Ln2{0.6931471805599453f}; // FMath::Loge(2.0f).
-
-public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Value"))
 	static float Clamp01(float Value);
 
@@ -88,7 +85,7 @@ inline float UAlsMath::DamperExactAlpha(const float DeltaTime, const float HalfL
 {
 	// https://theorangeduck.com/page/spring-roll-call#exactdamper
 
-	return 1.0f - FMath::InvExpApprox(Ln2 / (HalfLife + UE_SMALL_NUMBER) * DeltaTime);
+	return 1.0f - FMath::InvExpApprox(UE_LN2 / (HalfLife + UE_SMALL_NUMBER) * DeltaTime);
 }
 
 template <typename ValueType>
