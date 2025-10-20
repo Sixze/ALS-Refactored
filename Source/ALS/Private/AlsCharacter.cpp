@@ -567,6 +567,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 		StartRagdolling();
 	}
 
+	OnLocomotionModeChangedEvent.Broadcast(PreviousLocomotionMode);
 	OnLocomotionModeChanged(PreviousLocomotionMode);
 }
 

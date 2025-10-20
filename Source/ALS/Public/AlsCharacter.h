@@ -18,8 +18,10 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 
-/// A general purpose delegate signature indicating the completion of some event.
+// A general purpose delegate signature indicating the completion of some event.
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventComplete);
+// A delegate signature used for character locomotion mode changes.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionModeChanged, const FGameplayTag&, PreviousLocomotionMode);
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State"))
 class ALS_API AAlsCharacter : public ACharacter
@@ -176,9 +178,12 @@ private:
 	// Locomotion Mode
 
 public:
+	// Event emitted when the character's locomotion mode has changed.
+	UPROPERTY(BlueprintAssignable, Category = "ALS Character")
+	FLocomotionModeChanged OnLocomotionModeChangedEvent;
+
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode = 0) override;
 
-public:
 	const FGameplayTag& GetLocomotionMode() const;
 
 protected:
@@ -499,7 +504,7 @@ private:
 	// Mantling
 
 public:
-	/// Event emitted when a mantling action completes.
+	// Event emitted when a mantling action completes.
 	UPROPERTY(BlueprintAssignable, Category = "ALS Character")
 	FEventComplete OnMantlingComplete;
 
@@ -537,8 +542,7 @@ private:
 	void StopMantling(bool bStopMontage = false);
 
 protected:
-	// Deprecated: use \c OnMantlingComplete event delegate instead.
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character", meta = (DeprecatedFunction = "Deprecated: use OnMantlingComplete event delegate instead."))
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingEnded();
 
 	// Ragdolling
