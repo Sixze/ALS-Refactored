@@ -689,6 +689,7 @@ void AAlsCharacter::StopMantling(const bool bStopMontage)
 	AlsCharacterMovement->SetMovementModeLocked(false);
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
+	OnMantlingComplete.Broadcast();
 	OnMantlingEnded();
 
 	ForceNetUpdate();

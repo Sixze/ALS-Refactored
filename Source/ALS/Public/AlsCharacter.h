@@ -18,6 +18,9 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 
+/// A general purpose delegate signature indicating the completion of some event.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEventComplete);
+
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State"))
 class ALS_API AAlsCharacter : public ACharacter
 {
@@ -496,6 +499,10 @@ private:
 	// Mantling
 
 public:
+	/// Event emitted when a mantling action completes.
+	UPROPERTY(BlueprintAssignable, Category = "ALS Character")
+	FEventComplete OnMantlingComplete;
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	bool IsMantlingAllowedToStart() const;
 
@@ -530,7 +537,8 @@ private:
 	void StopMantling(bool bStopMontage = false);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	// Deprecated: use \c OnMantlingComplete event delegate instead.
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character", meta = (DeprecatedFunction = "Deprecated: use OnMantlingComplete event delegate instead."))
 	void OnMantlingEnded();
 
 	// Ragdolling
