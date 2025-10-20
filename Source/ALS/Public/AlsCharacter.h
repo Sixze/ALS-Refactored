@@ -478,9 +478,10 @@ public:
 
 	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
 
-private:
+protected:
 	void StartRolling(float PlayRate, float TargetYawAngle);
 
+private:
 	UFUNCTION(Server, Reliable)
 	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float InitialYawAngle, float TargetYawAngle);
 
