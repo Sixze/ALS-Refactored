@@ -502,9 +502,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
 	bool StartMantlingGrounded();
 
-private:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
 	bool StartMantlingInAir();
 
+private:
 	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
 	UFUNCTION(Server, Reliable)

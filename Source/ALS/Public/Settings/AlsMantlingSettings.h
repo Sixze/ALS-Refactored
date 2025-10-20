@@ -106,6 +106,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bAllowMantling : 1 {true};
 
+	// If true, the character will automatically try to mantle while in air.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bAutoInAirMantling: 1 {true};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float TraceAngleThreshold{110.0f};
 
