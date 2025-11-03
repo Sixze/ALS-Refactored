@@ -273,7 +273,7 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 void UAlsAnimationInstance::RefreshLayering()
 {
 	const auto& Curves{
-		AlsGetAnimationCurvesAccessor::Invoke(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
+		AlsGetAnimationCurvesAccessor::Access(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
 	};
 
 	static const auto GetCurveValue{
@@ -322,7 +322,7 @@ void UAlsAnimationInstance::RefreshLayering()
 void UAlsAnimationInstance::RefreshPose()
 {
 	const auto& Curves{
-		AlsGetAnimationCurvesAccessor::Invoke(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
+		AlsGetAnimationCurvesAccessor::Access(GetProxyOnAnyThread<FAnimInstanceProxy>(), EAnimCurveType::AttributeCurve)
 	};
 
 	static const auto GetCurveValue{
