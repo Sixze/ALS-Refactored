@@ -514,7 +514,7 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 			continue;
 		}
 
-		const auto* OverlapBody{Overlap.Component->GetBodyInstance(NAME_None, true, Overlap.ItemIndex)};
+		const auto* OverlapBody{Overlap.Component->GetBodyInstance(NAME_None, true, Overlap.GetItemIndex())};
 
 		if (OverlapBody == nullptr || !OverlapBody->OverlapTest(Location, FQuat::Identity, CollisionShape, &MtdResult))
 		{

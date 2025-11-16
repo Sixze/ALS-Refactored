@@ -4,7 +4,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstanceProxy)
 
-FAlsAnimationInstanceProxy::FAlsAnimationInstanceProxy(UAnimInstance* AnimationInstance): FAnimInstanceProxy{AnimationInstance} {}
+FAlsAnimationInstanceProxy::FAlsAnimationInstanceProxy(UAnimInstance* AnimationInstance) : FAnimInstanceProxy{AnimationInstance} {}
 
 void FAlsAnimationInstanceProxy::PostUpdate(UAnimInstance* AnimationInstance) const
 {

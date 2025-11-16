@@ -12,7 +12,7 @@ public:
 	static constexpr auto CounterClockwiseRotationAngleThreshold{5.0f};
 
 public:
-	template <typename ValueType> requires std::is_floating_point_v<ValueType>
+	template <typename ValueType> requires UE::CFloatingPoint<ValueType>
 	static constexpr ValueType RemapAngleForCounterClockwiseRotation(ValueType Angle);
 
 	static VectorRegister4Double RemapRotationForCounterClockwiseRotation(const VectorRegister4Double& Rotation);
@@ -48,7 +48,7 @@ public:
 	static FQuat GetTwist(const FQuat& Quaternion, const FVector& TwistAxis = FVector::UpVector);
 };
 
-template <typename ValueType> requires std::is_floating_point_v<ValueType>
+template <typename ValueType> requires UE::CFloatingPoint<ValueType>
 constexpr ValueType UAlsRotation::RemapAngleForCounterClockwiseRotation(const ValueType Angle)
 {
 	if (Angle > 180.0f - CounterClockwiseRotationAngleThreshold)

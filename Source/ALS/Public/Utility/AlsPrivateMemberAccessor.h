@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include <type_traits>
+#include "Concepts/Pointer.h"
 
 namespace AlsPrivateMemberAccessor
 {
 	// Global pointer to a field or method.
 	template <typename AccessorName>
-	typename AccessorName::MemberType TMemberPointer;
+	AccessorName::MemberType TMemberPointer;
 
 	// Struct that is used to initialize TPointer.
 	template <typename AccessorName, typename AccessorName::MemberType MemberPointer>
@@ -24,31 +24,31 @@ namespace AlsPrivateMemberAccessor
 	template <typename AccessorName, typename AccessorName::MemberType MemberPointer>
 	TPointerInitializer<AccessorName, MemberPointer> TPointerInitializer<AccessorName, MemberPointer>::Instance;
 
-	// Returns the value of the data member referenced by this accessor.
-	template <typename AccessorName, typename ThisType>
-	decltype(auto) Access(ThisType&& This)
-	{
-		if constexpr (std::is_pointer_v<ThisType>)
-		{
-			return Forward<ThisType>(This)->*TMemberPointer<AccessorName>;
-		}
-		else
-		{
-			return Forward<ThisType>(This).*TMemberPointer<AccessorName>;
-		}
-	}
-
-	// Invokes the member function referenced by this accessor.
+	// Returns the value of the data member or invokes the member function referenced by this accessor.
 	template <typename AccessorName, typename ThisType, typename... ArgumentsType>
-	decltype(auto) Invoke(ThisType&& This, ArgumentsType&&... Arguments)
+	decltype(auto) Access(ThisType&& This, ArgumentsType&&... Arguments)
 	{
-		if constexpr (std::is_pointer_v<ThisType>)
+		if constexpr (UE::CPointer<std::remove_reference_t<ThisType>>)
 		{
-			return (Forward<ThisType>(This)->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			if constexpr (sizeof...(ArgumentsType) > 0)
+			{
+				return (Forward<ThisType>(This)->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			}
+			else
+			{
+				return Forward<ThisType>(This)->*TMemberPointer<AccessorName>;
+			}
 		}
 		else
 		{
-			return (Forward<ThisType>(This).*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			if constexpr (sizeof...(ArgumentsType) > 0)
+			{
+				return (Forward<ThisType>(This).*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
+			}
+			else
+			{
+				return Forward<ThisType>(This).*TMemberPointer<AccessorName>;
+			}
 		}
 	}
 }
@@ -59,16 +59,10 @@ namespace AlsPrivateMemberAccessor
 	{ \
 		using MemberType = __VA_ARGS__; \
 		\
-		template <typename ThisType> \
-		static decltype(auto) Access(ThisType&& This) \
-		{ \
-			return AlsPrivateMemberAccessor::Access<AccessorName>(Forward<ThisType>(This)); \
-		} \
-		\
 		template <typename ThisType, typename... ArgumentsType> \
-		static decltype(auto) Invoke(ThisType&& This, ArgumentsType&&... Arguments) \
+		static decltype(auto) Access(ThisType&& This, ArgumentsType&&... Arguments) \
 		{ \
-			return AlsPrivateMemberAccessor::Invoke<AccessorName>(Forward<ThisType>(This), Forward<ArgumentsType>(Arguments)...); \
+			return AlsPrivateMemberAccessor::Access<AccessorName>(Forward<ThisType>(This), Forward<ArgumentsType>(Arguments)...); \
 		} \
 	}; \
 	\

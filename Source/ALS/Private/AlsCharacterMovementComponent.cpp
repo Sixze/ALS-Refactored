@@ -378,6 +378,12 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		const float timeTick = GetSimulationTimeStep(remainingTime, Iterations);
 		remainingTime -= timeTick;
 
+#if UE_WITH_REMOTE_OBJECT_HANDLE
+		//Scale down impact force if CharacterMoveComponent is taking multiple substeps.
+		const float LastFrameDt = GetWorld()->GetDeltaSeconds();
+		PhysicsForceSubsteppingFactor = timeTick / LastFrameDt;
+#endif
+
 		// Save current values
 		UPrimitiveComponent * const OldBase = GetMovementBase();
 		const FVector PreviousBaseLocation = (OldBase != NULL) ? OldBase->GetComponentLocation() : FVector::ZeroVector;
