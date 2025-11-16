@@ -102,7 +102,7 @@ namespace AlsEnsure
 		}
 
 		static UE::FWordMutex FormatMutex;
-		static constexpr auto MessageSize{65535};
+		static constexpr auto MessageSize{std::numeric_limits<uint16>::max()};
 		static TStaticArray<TCHAR, MessageSize> Message;
 
 		// ReSharper disable once CppLocalVariableWithNonTrivialDtorIsNeverUsed
