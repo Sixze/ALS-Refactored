@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <type_traits>
+#include "Concepts/Pointer.h"
 
 namespace AlsPrivateMemberAccessor
 {
@@ -28,7 +28,7 @@ namespace AlsPrivateMemberAccessor
 	template <typename AccessorName, typename ThisType, typename... ArgumentsType>
 	decltype(auto) Access(ThisType&& This, ArgumentsType&&... Arguments)
 	{
-		if constexpr (std::is_pointer_v<std::remove_reference_t<ThisType>>)
+		if constexpr (UE::CPointer<std::remove_reference_t<ThisType>>)
 		{
 			if constexpr (sizeof...(ArgumentsType) > 0)
 			{
