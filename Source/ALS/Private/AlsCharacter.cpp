@@ -300,7 +300,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshGroundedRotation(DeltaTime);
 	RefreshInAirRotation(DeltaTime);
 
-	StartMantlingInAir();
+	if (Settings->Mantling.bAutoInAirMantling) StartMantlingInAir();
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);

@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsVector.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExample)
@@ -158,6 +159,11 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 	if (ActionValue.Get<bool>())
 	{
 		if (StopRagdolling())
+		{
+			return;
+		}
+
+		if (!Settings->Mantling.bAutoInAirMantling && LocomotionMode == AlsLocomotionModeTags::InAir && StartMantlingInAir())
 		{
 			return;
 		}
