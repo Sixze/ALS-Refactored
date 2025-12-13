@@ -58,7 +58,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
 	FVector2f StartTime{0.5f, 0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "t"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	FFloatInterval MotionWarpingTimeRange{0.0f, 0.3f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
