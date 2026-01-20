@@ -15,7 +15,7 @@ namespace AlsEnsure
 	static uint8 GEnsureResetState{1};
 
 	// TODO Use "core.ResetEnsureState" instead.
-	static FAutoConsoleCommand ConsoleCommandResetEnsureState{
+	static FAutoConsoleCommand ResetEnsureStateConsoleCommand{
 		TEXT("als.ResetEnsureState"),
 		TEXT("Reset all ensures so they will fire again."),
 		FConsoleCommandDelegate::CreateLambda([]

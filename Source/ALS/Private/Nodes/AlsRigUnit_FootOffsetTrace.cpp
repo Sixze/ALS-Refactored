@@ -12,7 +12,7 @@ FAlsRigUnit_FootOffsetTrace_Execute()
 	if (!bEnabled)
 	{
 		OffsetLocationZ = 0.0f;
-		OffsetNormal = FVector::ZAxisVector;
+		OffsetNormal = FVector::UpVector;
 		return;
 	}
 
@@ -41,7 +41,7 @@ FAlsRigUnit_FootOffsetTrace_Execute()
 	if (!Hit.bBlockingHit || HitNormal.Z < FMath::Cos(FMath::DegreesToRadians(WalkableFloorAngle)))
 	{
 		OffsetLocationZ = 0.0f;
-		OffsetNormal = FVector::ZAxisVector;
+		OffsetNormal = FVector::UpVector;
 		return;
 	}
 

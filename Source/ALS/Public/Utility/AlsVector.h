@@ -31,11 +31,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "Vector", ReturnDisplayName = "Vector"))
 	static FVector ClampMagnitude01(const FVector& Vector);
 
-	static FVector3f ClampMagnitude01(const FVector3f& Vector);
+	static FVector3f ClampMagnitude01(FVector3f Vector);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", DisplayName = "Clamp Magnitude 01 2D",
-		Meta = (AutoCreateRefTerm = "Vector", ReturnDisplayName = "Vector"))
-	static FVector2D ClampMagnitude012D(const FVector2D& Vector);
+	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", DisplayName = "Clamp Magnitude 01 2D", Meta = (ReturnDisplayName = "Vector"))
+	static FVector2D ClampMagnitude012D(FVector2D Vector);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (ReturnDisplayName = "Direction"))
 	static FVector2D RadianToDirection(float Radian);
@@ -50,7 +49,7 @@ public:
 	static FVector AngleToDirectionXY(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "Direction", ReturnDisplayName = "Angle"))
-	static double DirectionToAngle(const FVector2D& Direction);
+	static double DirectionToAngle(FVector2D Direction);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "Direction", ReturnDisplayName = "Angle"))
 	static double DirectionToAngleXY(const FVector& Direction);
@@ -65,8 +64,8 @@ public:
 		Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Angle"))
 	static double AngleBetweenSkipNormalization(const FVector& From, const FVector& To);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Angle"))
-	static float AngleBetweenSignedXY(const FVector3f& From, const FVector3f& To);
+	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", Meta = (ReturnDisplayName = "Angle"))
+	static float AngleBetweenSignedXY(FVector3f From, FVector3f To);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Vector Utility", DisplayName = "Slerp (Skip Normalization)",
 		Meta = (AutoCreateRefTerm = "From, To", ReturnDisplayName = "Direction"))
@@ -98,7 +97,7 @@ inline FVector UAlsVector::ClampMagnitude01(const FVector& Vector)
 	return {Vector.X * Scale, Vector.Y * Scale, Vector.Z * Scale};
 }
 
-inline FVector3f UAlsVector::ClampMagnitude01(const FVector3f& Vector)
+inline FVector3f UAlsVector::ClampMagnitude01(const FVector3f Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
 
@@ -112,7 +111,7 @@ inline FVector3f UAlsVector::ClampMagnitude01(const FVector3f& Vector)
 	return {Vector.X * Scale, Vector.Y * Scale, Vector.Z * Scale};
 }
 
-inline FVector2D UAlsVector::ClampMagnitude012D(const FVector2D& Vector)
+inline FVector2D UAlsVector::ClampMagnitude012D(const FVector2D Vector)
 {
 	const auto MagnitudeSquared{Vector.SizeSquared()};
 
@@ -152,7 +151,7 @@ inline FVector UAlsVector::AngleToDirectionXY(const float Angle)
 	return RadianToDirectionXY(FMath::DegreesToRadians(Angle));
 }
 
-inline double UAlsVector::DirectionToAngle(const FVector2D& Direction)
+inline double UAlsVector::DirectionToAngle(FVector2D Direction)
 {
 	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
 }
@@ -177,7 +176,7 @@ inline double UAlsVector::AngleBetweenSkipNormalization(const FVector& From, con
 	return FMath::RadiansToDegrees(FMath::Acos(From | To));
 }
 
-inline float UAlsVector::AngleBetweenSignedXY(const FVector3f& From, const FVector3f& To)
+inline float UAlsVector::AngleBetweenSignedXY(const FVector3f From, const FVector3f To)
 {
 	FVector2f FromXY{From};
 	FromXY.Normalize();

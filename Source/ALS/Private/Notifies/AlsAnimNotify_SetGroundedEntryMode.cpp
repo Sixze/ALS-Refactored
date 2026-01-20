@@ -15,9 +15,11 @@ UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 
 FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() const
 {
-	TStringBuilder<256> NotifyNameBuilder{
-		InPlace, TEXTVIEW("Als Set Grounded Entry Mode: "),
-		FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(GroundedEntryMode).ToString(), false)
+	// For some reason editor cuts off some characters at the end of the string, so to avoid this we insert a bunch of spaces.
+	// TODO Check the need for this hack in future engine versions.
+
+	TStringBuilder<128> NotifyNameBuilder{
+		InPlace, TEXTVIEW("Als Set Grounded Entry Mode: "), GroundedEntryMode.GetTagName(), TEXTVIEW("                ")
 	};
 
 	return FString{NotifyNameBuilder};

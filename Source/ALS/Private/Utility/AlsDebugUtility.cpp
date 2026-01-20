@@ -9,7 +9,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsDebugUtility)
 
-bool UAlsDebugUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)
+bool UAlsDebugUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName DisplayName)
 {
 	const auto* World{IsValid(Actor) ? Actor->GetWorld() : nullptr};
 	const auto* Player{IsValid(World) ? World->GetFirstPlayerController() : nullptr};
@@ -18,8 +18,8 @@ bool UAlsDebugUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FNa
 	return IsValid(Hud) && Hud->ShouldDisplayDebug(DisplayName) && Hud->GetCurrentDebugTargetActor() == Actor;
 }
 
-void UAlsDebugUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
-                                      const FVector& YAxis, const float Radius, const FLinearColor& Color,
+void UAlsDebugUtility::DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& ForwardAxis,
+                                      const FVector& RightAxis, const float Radius, const FLinearColor Color,
                                       const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -32,7 +32,7 @@ void UAlsDebugUtility::DrawHalfCircle(const UObject* WorldContext, const FVector
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	auto PreviousVertex{Location + XAxis * Radius};
+	auto PreviousVertex{Location + ForwardAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 2; i++)
 	{
@@ -41,7 +41,7 @@ void UAlsDebugUtility::DrawHalfCircle(const UObject* WorldContext, const FVector
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaRadian * static_cast<float>(i));
 
-		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
+		const auto NextVertex{Location + Radius * Cos * ForwardAxis + Radius * Sin * RightAxis};
 
 		DrawDebugLine(World, PreviousVertex, NextVertex, FColor, bPersistent, Duration, DepthPriority, Thickness);
 
@@ -50,8 +50,8 @@ void UAlsDebugUtility::DrawHalfCircle(const UObject* WorldContext, const FVector
 #endif
 }
 
-void UAlsDebugUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
-                                         const FVector& YAxis, const float Radius, const FLinearColor& Color,
+void UAlsDebugUtility::DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& ForwardAxis,
+                                         const FVector& RightAxis, const float Radius, const FLinearColor Color,
                                          const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -64,7 +64,7 @@ void UAlsDebugUtility::DrawQuarterCircle(const UObject* WorldContext, const FVec
 	const auto FColor{Color.ToFColor(true)};
 	const auto bPersistent{Duration < 0.0f};
 
-	auto PreviousVertex{Location + XAxis * Radius};
+	auto PreviousVertex{Location + ForwardAxis * Radius};
 
 	for (auto i{1}; i <= DrawCircleSidesCount / 4; i++)
 	{
@@ -73,7 +73,7 @@ void UAlsDebugUtility::DrawQuarterCircle(const UObject* WorldContext, const FVec
 		float Sin, Cos;
 		FMath::SinCos(&Sin, &Cos, DeltaRadian * static_cast<float>(i));
 
-		const auto NextVertex{Location + Radius * Cos * XAxis + Radius * Sin * YAxis};
+		const auto NextVertex{Location + Radius * Cos * ForwardAxis + Radius * Sin * RightAxis};
 
 		DrawDebugLine(World, PreviousVertex, NextVertex, FColor, bPersistent, Duration, DepthPriority, Thickness);
 
@@ -83,7 +83,7 @@ void UAlsDebugUtility::DrawQuarterCircle(const UObject* WorldContext, const FVec
 }
 
 void UAlsDebugUtility::DrawSphereAlternative(const UObject* WorldContext, const FVector& Location, const FRotator& Rotation,
-                                             const float Radius, const FLinearColor& Color, const float Duration,
+                                             const float Radius, const FLinearColor Color, const float Duration,
                                              const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -98,17 +98,22 @@ void UAlsDebugUtility::DrawSphereAlternative(const UObject* WorldContext, const 
 
 	const FRotationMatrix RotationMatrix{Rotation};
 
-	FVector XAxis, YAxis, ZAxis;
-	RotationMatrix.GetScaledAxes(XAxis, YAxis, ZAxis);
+	FVector ForwardAxis, RightAxis, UpAxis;
+	RotationMatrix.GetScaledAxes(ForwardAxis, RightAxis, UpAxis);
 
-	DrawCircle(World, Location, XAxis, YAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
-	DrawCircle(World, Location, XAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
-	DrawCircle(World, Location, YAxis, ZAxis, FColor, Radius, DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+	DrawCircle(World, Location, ForwardAxis, RightAxis, FColor, Radius,
+	           DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+
+	DrawCircle(World, Location, ForwardAxis, UpAxis, FColor, Radius,
+	           DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
+
+	DrawCircle(World, Location, RightAxis, UpAxis, FColor, Radius,
+	           DrawCircleSidesCount, bPersistent, Duration, DepthPriority, Thickness);
 #endif
 }
 
 void UAlsDebugUtility::DrawLineTraceSingle(const UObject* WorldContext, const FVector& Start, const FVector& End, const bool bHit,
-                                           const FHitResult& Hit, const FLinearColor& TraceColor, const FLinearColor& HitColor,
+                                           const FHitResult& Hit, const FLinearColor TraceColor, const FLinearColor HitColor,
                                            const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -130,7 +135,7 @@ void UAlsDebugUtility::DrawLineTraceSingle(const UObject* WorldContext, const FV
 }
 
 void UAlsDebugUtility::DrawSweepSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, const float Radius,
-                                       const FLinearColor& Color, const float Duration, const float Thickness, const uint8 DepthPriority)
+                                       const FLinearColor Color, const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
 	const auto* World{IsValid(WorldContext) ? WorldContext->GetWorld() : nullptr};
@@ -154,7 +159,7 @@ void UAlsDebugUtility::DrawSweepSphere(const UObject* WorldContext, const FVecto
 
 void UAlsDebugUtility::DrawSweepSingleSphere(const UObject* WorldContext, const FVector& Start, const FVector& End,
                                              const float Radius, const bool bHit, const FHitResult& Hit,
-                                             const FLinearColor& SweepColor, const FLinearColor& HitColor,
+                                             const FLinearColor SweepColor, const FLinearColor HitColor,
                                              const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -180,7 +185,7 @@ void UAlsDebugUtility::DrawSweepSingleSphere(const UObject* WorldContext, const 
 
 void UAlsDebugUtility::DrawSweepSingleCapsule(const UObject* WorldContext, const FVector& Start, const FVector& End,
                                               const FRotator& Rotation, const float Radius, const float HalfHeight, const bool bHit,
-                                              const FHitResult& Hit, const FLinearColor& SweepColor, const FLinearColor& HitColor,
+                                              const FHitResult& Hit, const FLinearColor SweepColor, const FLinearColor HitColor,
                                               const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -214,7 +219,7 @@ void UAlsDebugUtility::DrawSweepSingleCapsule(const UObject* WorldContext, const
 
 void UAlsDebugUtility::DrawSweepSingleCapsuleAlternative(const UObject* WorldContext, const FVector& Start, const FVector& End,
                                                          const float Radius, const float HalfHeight, const bool bHit, const FHitResult& Hit,
-                                                         const FLinearColor& SweepColor, const FLinearColor& HitColor,
+                                                         const FLinearColor SweepColor, const FLinearColor HitColor,
                                                          const float Duration, const float Thickness, const uint8 DepthPriority)
 {
 #if ENABLE_DRAW_DEBUG
@@ -230,74 +235,74 @@ void UAlsDebugUtility::DrawSweepSingleCapsuleAlternative(const UObject* WorldCon
 	const auto Rotation{(End - Start).ToOrientationQuat()};
 	const FQuatRotationMatrix RotationMatrix{Rotation};
 
-	FVector XAxis, YAxis, ZAxis;
-	RotationMatrix.GetScaledAxes(XAxis, YAxis, ZAxis);
+	FVector ForwardAxis, RightAxis, UpAxis;
+	RotationMatrix.GetScaledAxes(ForwardAxis, RightAxis, UpAxis);
 
-	const auto XAxisInverse{-XAxis};
-	const auto ZAxisInverse{-ZAxis};
+	const auto ForwardAxisInverse{-ForwardAxis};
+	const auto UpAxisInverse{-UpAxis};
 
 	const auto DistanceToHemisphere{FMath::Max(1.0f, HalfHeight - Radius)};
 
-	const auto StartTop{Start + DistanceToHemisphere * ZAxis};
-	const auto StartBottom{Start - DistanceToHemisphere * ZAxis};
+	const auto StartTop{Start + DistanceToHemisphere * UpAxis};
+	const auto StartBottom{Start - DistanceToHemisphere * UpAxis};
 
-	const auto EndTop{End + DistanceToHemisphere * ZAxis};
-	const auto EndBottom{End - DistanceToHemisphere * ZAxis};
+	const auto EndTop{End + DistanceToHemisphere * UpAxis};
+	const auto EndBottom{End - DistanceToHemisphere * UpAxis};
 
-	DrawHalfCircle(World, StartTop, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
-	DrawHalfCircle(World, StartTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartTop, RightAxis, ForwardAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartTop, RightAxis, UpAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
-	DrawQuarterCircle(World, StartTop, XAxisInverse, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, StartTop, ForwardAxisInverse, UpAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, StartBottom, YAxis, XAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
-	DrawHalfCircle(World, StartBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartBottom, RightAxis, ForwardAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, StartBottom, RightAxis, UpAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
-	DrawQuarterCircle(World, StartBottom, XAxisInverse, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, StartBottom, ForwardAxisInverse, UpAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, EndTop, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
-	DrawHalfCircle(World, EndTop, YAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndTop, RightAxis, ForwardAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndTop, RightAxis, UpAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
-	DrawQuarterCircle(World, EndTop, XAxis, ZAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, EndTop, ForwardAxis, UpAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawHalfCircle(World, EndBottom, YAxis, XAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
-	DrawHalfCircle(World, EndBottom, YAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndBottom, RightAxis, ForwardAxis, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
+	DrawHalfCircle(World, EndBottom, RightAxis, UpAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority); // NOLINT(readability-suspicious-call-argument)
 
-	DrawQuarterCircle(World, EndBottom, XAxis, ZAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
+	DrawQuarterCircle(World, EndBottom, ForwardAxis, UpAxisInverse, Radius, SweepFColor, Duration, Thickness, DepthPriority);
 
-	DrawDebugLine(World, StartTop - Radius * XAxis, StartBottom - Radius * XAxis,
+	DrawDebugLine(World, StartTop - Radius * ForwardAxis, StartBottom - Radius * ForwardAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartTop + Radius * YAxis, StartBottom + Radius * YAxis,
+	DrawDebugLine(World, StartTop + Radius * RightAxis, StartBottom + Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartTop - Radius * YAxis, StartBottom - Radius * YAxis,
+	DrawDebugLine(World, StartTop - Radius * RightAxis, StartBottom - Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, EndTop + Radius * XAxis, EndBottom + Radius * XAxis,
+	DrawDebugLine(World, EndTop + Radius * ForwardAxis, EndBottom + Radius * ForwardAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, EndTop + Radius * YAxis, EndBottom + Radius * YAxis,
+	DrawDebugLine(World, EndTop + Radius * RightAxis, EndBottom + Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, EndTop - Radius * YAxis, EndBottom - Radius * YAxis,
+	DrawDebugLine(World, EndTop - Radius * RightAxis, EndBottom - Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartTop + Radius * ZAxis, EndTop + Radius * ZAxis,
+	DrawDebugLine(World, StartTop + Radius * UpAxis, EndTop + Radius * UpAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartTop - Radius * YAxis, EndTop - Radius * YAxis,
+	DrawDebugLine(World, StartTop - Radius * RightAxis, EndTop - Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartTop + Radius * YAxis, EndTop + Radius * YAxis,
+	DrawDebugLine(World, StartTop + Radius * RightAxis, EndTop + Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartBottom - Radius * ZAxis, EndBottom - Radius * ZAxis,
+	DrawDebugLine(World, StartBottom - Radius * UpAxis, EndBottom - Radius * UpAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartBottom + Radius * YAxis, EndBottom + Radius * YAxis,
+	DrawDebugLine(World, StartBottom + Radius * RightAxis, EndBottom + Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
-	DrawDebugLine(World, StartBottom - Radius * YAxis, EndBottom - Radius * YAxis,
+	DrawDebugLine(World, StartBottom - Radius * RightAxis, EndBottom - Radius * RightAxis,
 	              SweepFColor, bPersistent, Duration, DepthPriority, Thickness);
 
 	DrawDebugDirectionalArrow(World, Start, End, DrawArrowSize, SweepFColor, bPersistent, Duration, DepthPriority, Thickness);

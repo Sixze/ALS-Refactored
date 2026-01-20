@@ -3,6 +3,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AlsDebugUtility.generated.h"
 
+struct FHitResult;
+
 UCLASS()
 class ALS_API UAlsDebugUtility : public UBlueprintFunctionLibrary
 {
@@ -15,56 +17,55 @@ public:
 	static constexpr auto DrawCircleSidesCount{16};
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Debug Utility",
-		Meta = (DefaultToSelf = "Actor", AutoCreateRefTerm = "DisplayName", ReturnDisplayName = "Value"))
-	static bool ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName);
+	UFUNCTION(BlueprintPure, Category = "ALS|Debug Utility", Meta = (DefaultToSelf = "Actor", ReturnDisplayName = "Value"))
+	static bool ShouldDisplayDebugForActor(const AActor* Actor, FName DisplayName);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, XAxis, YAxis, Color"))
-	static void DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
-	                           const FVector& YAxis, float Radius, const FLinearColor& Color,
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, ForwardAxis, RightAxis"))
+	static void DrawHalfCircle(const UObject* WorldContext, const FVector& Location, const FVector& ForwardAxis,
+	                           const FVector& RightAxis, float Radius, FLinearColor Color,
 	                           float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, XAxis, YAxis, Color"))
-	static void DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& XAxis,
-	                              const FVector& YAxis, float Radius, const FLinearColor& Color,
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, ForwardAxis, RightAxis"))
+	static void DrawQuarterCircle(const UObject* WorldContext, const FVector& Location, const FVector& ForwardAxis,
+	                              const FVector& RightAxis, float Radius, FLinearColor Color,
 	                              float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, Rotation, Color"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Location, Rotation"))
 	static void DrawSphereAlternative(const UObject* WorldContext, const FVector& Location, const FRotator& Rotation,
-	                                  float Radius, const FLinearColor& Color, float Duration = 0.0f,
+	                                  float Radius, FLinearColor Color, float Duration = 0.0f,
 	                                  float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, Color"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End"))
 	static void DrawSweepSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
-	                            const FLinearColor& Color, float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
+	                            FLinearColor Color, float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, TraceColor, HitColor"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End"))
 	static void DrawLineTraceSingle(const UObject* WorldContext, const FVector& Start, const FVector& End, bool bHit,
-	                                const FHitResult& Hit, const FLinearColor& TraceColor, const FLinearColor& HitColor,
+	                                const FHitResult& Hit, FLinearColor TraceColor, FLinearColor HitColor,
 	                                float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, SweepColor, HitColor"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End"))
 	static void DrawSweepSingleSphere(const UObject* WorldContext, const FVector& Start, const FVector& End, float Radius,
-	                                  bool bHit, const FHitResult& Hit, const FLinearColor& SweepColor, const FLinearColor& HitColor,
+	                                  bool bHit, const FHitResult& Hit, FLinearColor SweepColor, FLinearColor HitColor,
 	                                  float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, Rotation, SweepColor, HitColor"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, Rotation"))
 	static void DrawSweepSingleCapsule(const UObject* WorldContext, const FVector& Start, const FVector& End,
 	                                   const FRotator& Rotation, float Radius, float HalfHeight, bool bHit,
-	                                   const FHitResult& Hit, const FLinearColor& SweepColor, const FLinearColor& HitColor,
+	                                   const FHitResult& Hit, FLinearColor SweepColor, FLinearColor HitColor,
 	                                   float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Debug Utility",
-		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End, SweepColor, HitColor"))
+		Meta = (WorldContext = "WorldContext", DevelopmentOnly, AutoCreateRefTerm = "Start, End"))
 	static void DrawSweepSingleCapsuleAlternative(const UObject* WorldContext, const FVector& Start, const FVector& End,
 	                                              float Radius, float HalfHeight, bool bHit, const FHitResult& Hit,
-	                                              const FLinearColor& SweepColor, const FLinearColor& HitColor,
-	                                              float Duration = 0.0f, float Thickness = 1.0f, uint8 DepthPriority = 0);
+	                                              FLinearColor SweepColor, FLinearColor HitColor, float Duration = 0.0f,
+	                                              float Thickness = 1.0f, uint8 DepthPriority = 0);
 };

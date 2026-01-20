@@ -252,7 +252,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
 	}
 
-	const FQuat CameraYawRotation{FVector::ZAxisVector, FMath::DegreesToRadians(CameraRotation.Yaw)};
+	const FQuat CameraYawRotation{FVector::UpVector, FMath::DegreesToRadians(CameraRotation.Yaw)};
 
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraShapes)

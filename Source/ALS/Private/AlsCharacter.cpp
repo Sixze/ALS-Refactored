@@ -437,12 +437,12 @@ void AAlsCharacter::RefreshMovementBase()
 		                             : FRotator::ZeroRotator;
 }
 
-void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
+void AAlsCharacter::SetViewMode(const FGameplayTag NewViewMode)
 {
 	SetViewMode(NewViewMode, true);
 }
 
-void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode, const bool bSendRpc)
+void AAlsCharacter::SetViewMode(const FGameplayTag NewViewMode, const bool bSendRpc)
 {
 	if (ViewMode == NewViewMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -466,12 +466,12 @@ void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode, const bool bSen
 	}
 }
 
-void AAlsCharacter::ClientSetViewMode_Implementation(const FGameplayTag& NewViewMode)
+void AAlsCharacter::ClientSetViewMode_Implementation(const FGameplayTag NewViewMode)
 {
 	SetViewMode(NewViewMode, false);
 }
 
-void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag& NewViewMode)
+void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag NewViewMode)
 {
 	SetViewMode(NewViewMode, false);
 }
@@ -500,7 +500,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
 }
 
-void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewLocomotionMode)
+void AAlsCharacter::SetLocomotionMode(const FGameplayTag NewLocomotionMode)
 {
 	if (LocomotionMode != NewLocomotionMode)
 	{
@@ -512,7 +512,7 @@ void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewLocomotionMode)
 	}
 }
 
-void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode)
+void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag PreviousLocomotionMode)
 {
 	ApplyDesiredStance();
 
@@ -618,12 +618,12 @@ void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming
 
 void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
 
-void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
+void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag NewDesiredRotationMode)
 {
 	SetDesiredRotationMode(NewDesiredRotationMode, true);
 }
 
-void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode, const bool bSendRpc)
+void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag NewDesiredRotationMode, const bool bSendRpc)
 {
 	if (DesiredRotationMode == NewDesiredRotationMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -647,17 +647,17 @@ void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotatio
 	}
 }
 
-void AAlsCharacter::ClientSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
+void AAlsCharacter::ClientSetDesiredRotationMode_Implementation(const FGameplayTag NewDesiredRotationMode)
 {
 	SetDesiredRotationMode(NewDesiredRotationMode, false);
 }
 
-void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
+void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag NewDesiredRotationMode)
 {
 	SetDesiredRotationMode(NewDesiredRotationMode, false);
 }
 
-void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
+void AAlsCharacter::SetRotationMode(const FGameplayTag NewRotationMode)
 {
 	AlsCharacterMovement->SetRotationMode(NewRotationMode);
 
@@ -671,7 +671,7 @@ void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
 	}
 }
 
-void AAlsCharacter::NotifyRotationModeChanged(const FGameplayTag& PreviousRotationMode)
+void AAlsCharacter::NotifyRotationModeChanged(const FGameplayTag PreviousRotationMode)
 {
 	// This prevents the actor from rotating in the last input direction after the
 	// rotation mode has been changed and the actor is not moving at that moment.
@@ -766,12 +766,12 @@ void AAlsCharacter::RefreshRotationMode()
 	}
 }
 
-void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance)
+void AAlsCharacter::SetDesiredStance(const FGameplayTag NewDesiredStance)
 {
 	SetDesiredStance(NewDesiredStance, true);
 }
 
-void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance, const bool bSendRpc)
+void AAlsCharacter::SetDesiredStance(const FGameplayTag NewDesiredStance, const bool bSendRpc)
 {
 	if (DesiredStance == NewDesiredStance || GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -797,12 +797,12 @@ void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance, const
 	ApplyDesiredStance();
 }
 
-void AAlsCharacter::ClientSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
+void AAlsCharacter::ClientSetDesiredStance_Implementation(const FGameplayTag NewDesiredStance)
 {
 	SetDesiredStance(NewDesiredStance, false);
 }
 
-void AAlsCharacter::ServerSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
+void AAlsCharacter::ServerSetDesiredStance_Implementation(const FGameplayTag NewDesiredStance)
 {
 	SetDesiredStance(NewDesiredStance, false);
 }
@@ -879,7 +879,7 @@ void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float Scaled
 	SetStance(AlsStanceTags::Standing);
 }
 
-void AAlsCharacter::SetStance(const FGameplayTag& NewStance)
+void AAlsCharacter::SetStance(const FGameplayTag NewStance)
 {
 	AlsCharacterMovement->SetStance(NewStance);
 
@@ -893,14 +893,14 @@ void AAlsCharacter::SetStance(const FGameplayTag& NewStance)
 	}
 }
 
-void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag& PreviousStance) {}
+void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag PreviousStance) {}
 
-void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
+void AAlsCharacter::SetDesiredGait(const FGameplayTag NewDesiredGait)
 {
 	SetDesiredGait(NewDesiredGait, true);
 }
 
-void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const bool bSendRpc)
+void AAlsCharacter::SetDesiredGait(const FGameplayTag NewDesiredGait, const bool bSendRpc)
 {
 	if (DesiredGait == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -924,17 +924,17 @@ void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const boo
 	}
 }
 
-void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
+void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag NewDesiredGait)
 {
 	SetDesiredGait(NewDesiredGait, false);
 }
 
-void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
+void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag NewDesiredGait)
 {
 	SetDesiredGait(NewDesiredGait, false);
 }
 
-void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
+void AAlsCharacter::SetGait(const FGameplayTag NewGait)
 {
 	if (Gait != NewGait)
 	{
@@ -946,7 +946,7 @@ void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
 	}
 }
 
-void AAlsCharacter::OnGaitChanged_Implementation(const FGameplayTag& PreviousGait) {}
+void AAlsCharacter::OnGaitChanged_Implementation(const FGameplayTag PreviousGait) {}
 
 void AAlsCharacter::RefreshGait()
 {
@@ -985,7 +985,7 @@ FGameplayTag AAlsCharacter::CalculateMaxAllowedGait() const
 	return AlsGaitTags::Running;
 }
 
-FGameplayTag AAlsCharacter::CalculateActualGait(const FGameplayTag& MaxAllowedGait) const
+FGameplayTag AAlsCharacter::CalculateActualGait(const FGameplayTag MaxAllowedGait) const
 {
 	// Calculate the new gait. This is calculated by the actual movement of the character and so it can be
 	// different from the desired gait or max allowed gait. For instance, if the max allowed gait becomes
@@ -1035,12 +1035,12 @@ bool AAlsCharacter::CanSprint() const
 	return false;
 }
 
-void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
+void AAlsCharacter::SetOverlayMode(const FGameplayTag NewOverlayMode)
 {
 	SetOverlayMode(NewOverlayMode, true);
 }
 
-void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode, const bool bSendRpc)
+void AAlsCharacter::SetOverlayMode(const FGameplayTag NewOverlayMode, const bool bSendRpc)
 {
 	if (OverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
@@ -1068,24 +1068,24 @@ void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode, const boo
 	}
 }
 
-void AAlsCharacter::ClientSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
+void AAlsCharacter::ClientSetOverlayMode_Implementation(const FGameplayTag NewOverlayMode)
 {
 	SetOverlayMode(NewOverlayMode, false);
 }
 
-void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
+void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag NewOverlayMode)
 {
 	SetOverlayMode(NewOverlayMode, false);
 }
 
-void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode)
+void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag PreviousOverlayMode)
 {
 	OnOverlayModeChanged(PreviousOverlayMode);
 }
 
-void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousOverlayMode) {}
+void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag PreviousOverlayMode) {}
 
-void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
+void AAlsCharacter::SetLocomotionAction(const FGameplayTag NewLocomotionAction)
 {
 	if (LocomotionAction != NewLocomotionAction)
 	{
@@ -1097,7 +1097,7 @@ void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
 	}
 }
 
-void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction)
+void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag PreviousLocomotionAction)
 {
 	if (!LocomotionAction.IsValid())
 	{

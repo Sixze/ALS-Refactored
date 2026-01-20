@@ -19,7 +19,7 @@ public:
 	FQuat FootTargetRotation{ForceInit};
 
 	UPROPERTY(Transient, Meta = (Input))
-	FVector FootOffsetNormal{FVector::ZAxisVector};
+	FVector FootOffsetNormal{FVector::UpVector};
 
 	UPROPERTY(DisplayName = "Swing 1 Limit Angle", Meta = (Input, ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	FFloatInterval Swing1LimitAngle{-20.0f, 40.0f};
@@ -44,7 +44,7 @@ public:
 	FCachedRigElement CachedFootItem;
 
 	UPROPERTY(Transient)
-	FVector OffsetNormal{FVector::ZAxisVector};
+	FVector OffsetNormal{FVector::UpVector};
 
 	UPROPERTY(Transient, Meta = (Output))
 	FQuat FootRotation{ForceInit};

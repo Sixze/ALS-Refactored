@@ -3,6 +3,8 @@
 #include "Animation/AnimInstance.h"
 #include "AlsLinkedAnimationInstance.generated.h"
 
+enum class EAlsHipsDirection : uint8;
+class UAlsAnimationInstance;
 class AAlsCharacter;
 
 UCLASS()

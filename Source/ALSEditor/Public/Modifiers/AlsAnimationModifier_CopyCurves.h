@@ -22,5 +22,5 @@ public:
 	virtual void OnApply_Implementation(UAnimSequence* Sequence) override;
 
 private:
-	static void CopyCurve(UAnimSequence* SourceSequence, UAnimSequence* TargetSequence, const FName& CurveName);
+	static void CopyCurve(UAnimSequence* SourceSequence, UAnimSequence* TargetSequence, FName CurveName);
 };

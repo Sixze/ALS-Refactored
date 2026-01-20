@@ -136,7 +136,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);
 }
 
-void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor HeaderColor,
                                        const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
@@ -175,7 +175,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	TArray<FName> CurveNames;
 	GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetCurveMetaDataNames(CurveNames);
 
-	CurveNames.Sort([](const FName& A, const FName& B)
+	CurveNames.Sort([](const FName A, const FName B)
 	{
 		return A.LexicalLess(B);
 	});

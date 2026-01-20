@@ -16,11 +16,32 @@ UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
 
 FString UAlsAnimNotify_CameraShake::GetNotifyName_Implementation() const
 {
-	TStringBuilder<256> NotifyNameBuilder{InPlace, TEXTVIEW("Als Camera Shake: ")};
+	TStringBuilder<128> NotifyNameBuilder{InPlace, TEXTVIEW("Als Camera Shake: ")};
 
 	if (IsValid(CameraShakeClass))
 	{
-		NotifyNameBuilder << CameraShakeClass->GetFName();
+#if WITH_EDITORONLY_DATA
+		const auto* ClassGeneratedBy{CameraShakeClass->ClassGeneratedBy.Get()};
+		if (IsValid(ClassGeneratedBy))
+		{
+			// ClassGeneratedBy is valid for blueprint types and gives a name without the _C suffix.
+			NotifyNameBuilder << ClassGeneratedBy->GetFName();
+		}
+		else
+#endif
+		{
+			// Native classes do not contain the _C suffix.
+			NotifyNameBuilder << CameraShakeClass->GetFName();
+		}
+
+		// For some reason editor cuts off some characters at the end of the string, so to avoid this we insert a bunch of spaces.
+		// TODO Check the need for this hack in future engine versions.
+
+		NotifyNameBuilder << TEXTVIEW("                ");
+	}
+	else
+	{
+		NotifyNameBuilder << TEXTVIEW("    ");
 	}
 
 	return FString{NotifyNameBuilder};

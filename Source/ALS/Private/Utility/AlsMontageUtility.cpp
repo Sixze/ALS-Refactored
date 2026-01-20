@@ -93,7 +93,7 @@ FTransform UAlsMontageUtility::ExtractRootMotionFromMontage(const UAnimMontage* 
 	return RootMotionAccumulator.GetRootMotionTransform();
 }
 
-void UAlsMontageUtility::StopMontagesWithSlot(UAnimInstance* AnimationInstance, const FName& SlotName, const float BlendOutDuration)
+void UAlsMontageUtility::StopMontagesWithSlot(UAnimInstance* AnimationInstance, const FName SlotName, const float BlendOutDuration)
 {
 	if (!ALS_ENSURE(IsValid(AnimationInstance)) || !ALS_ENSURE(!SlotName.IsNone()))
 	{

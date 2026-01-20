@@ -58,7 +58,12 @@ void UAlsFootstepEffectsSettings::PostEditChangeProperty(FPropertyChangedEvent& 
 
 FString UAlsAnimNotify_FootstepEffects::GetNotifyName_Implementation() const
 {
-	TStringBuilder<64> NotifyNameBuilder{InPlace, TEXTVIEW("Als Footstep Effects: "), AlsEnumUtility::GetNameStringByValue(FootBone)};
+	// For some reason editor cuts off some characters at the end of the string, so to avoid this we insert a bunch of spaces.
+	// TODO Check the need for this hack in future engine versions.
+
+	TStringBuilder<64> NotifyNameBuilder{
+		InPlace, TEXTVIEW("Als Footstep Effects: "), AlsEnumUtility::GetNameStringByValue(FootBone), TEXTVIEW("        ")
+	};
 
 	return FString{NotifyNameBuilder};
 }
@@ -99,7 +104,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 	const auto& FootBoneName{FootBone == EAlsFootBone::Left ? UAlsConstants::FootLeftBoneName() : UAlsConstants::FootRightBoneName()};
 	const auto FootTransform{Mesh->GetSocketTransform(FootBoneName)};
 
-	const auto FootZAxis{
+	const auto FootUpAxis{
 		FootTransform.TransformVectorNoScale(FootBone == EAlsFootBone::Left
 			                                     ? FVector{FootstepEffectsSettings->FootLeftZAxis}
 			                                     : FVector{FootstepEffectsSettings->FootRightZAxis})
@@ -110,7 +115,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	FHitResult FootstepHit;
 	if (!World->LineTraceSingleByChannel(FootstepHit, FootTransform.GetLocation(),
-	                                     FootTransform.GetLocation() - FootZAxis *
+	                                     FootTransform.GetLocation() - FootUpAxis *
 	                                     (FootstepEffectsSettings->SurfaceTraceDistance * MeshScale),
 	                                     FootstepEffectsSettings->SurfaceTraceChannel, QueryParameters))
 	{
@@ -176,7 +181,7 @@ void UAlsAnimNotify_FootstepEffects::Notify(USkeletalMeshComponent* Mesh, UAnimS
 
 	if (bSpawnDecal)
 	{
-		SpawnDecal(Mesh, EffectSettings->Decal, FootstepLocation, FootstepRotation, FootstepHit, FootZAxis);
+		SpawnDecal(Mesh, EffectSettings->Decal, FootstepLocation, FootstepRotation, FootstepHit, FootUpAxis);
 	}
 
 	if (bSpawnParticleSystem)
@@ -237,9 +242,9 @@ void UAlsAnimNotify_FootstepEffects::SpawnSound(USkeletalMeshComponent* Mesh, co
 
 void UAlsAnimNotify_FootstepEffects::SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,
                                                 const FVector& FootstepLocation, const FQuat& FootstepRotation,
-                                                const FHitResult& FootstepHit, const FVector& FootZAxis) const
+                                                const FHitResult& FootstepHit, const FVector& FootUpAxis) const
 {
-	if ((FootstepHit.ImpactNormal | FootZAxis) < FootstepEffectsSettings->DecalSpawnAngleThresholdCos)
+	if ((FootstepHit.ImpactNormal | FootUpAxis) < FootstepEffectsSettings->DecalSpawnAngleThresholdCos)
 	{
 		return;
 	}

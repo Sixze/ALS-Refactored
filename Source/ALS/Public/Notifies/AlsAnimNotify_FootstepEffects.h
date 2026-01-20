@@ -249,7 +249,7 @@ private:
 
 	void SpawnDecal(USkeletalMeshComponent* Mesh, const FAlsFootstepDecalSettings& DecalSettings,
 	                const FVector& FootstepLocation, const FQuat& FootstepRotation,
-	                const FHitResult& FootstepHit, const FVector& FootZAxis) const;
+	                const FHitResult& FootstepHit, const FVector& FootUpAxis) const;
 
 	void SpawnParticleSystem(USkeletalMeshComponent* Mesh, const FAlsFootstepParticleSystemSettings& ParticleSystemSettings,
 	                         const FVector& FootstepLocation, const FQuat& FootstepRotation) const;

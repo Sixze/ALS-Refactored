@@ -150,7 +150,7 @@ public:
 	void DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const;
 
 private:
-	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, FLinearColor HeaderColor,
 	                               float Scale, float HorizontalLocation, float& VerticalLocation);
 
 	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;

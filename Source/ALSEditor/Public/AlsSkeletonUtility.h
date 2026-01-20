@@ -30,19 +30,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility")
 	static void AddOrReplaceSlot(USkeleton* Skeleton, FName SlotName, FName GroupName);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility", Meta = (AutoCreateRefTerm = "SourceBoneName, TargetBoneName"))
-	static void AddOrReplaceVirtualBone(USkeleton* Skeleton, const FName& SourceBoneName,
-	                                    const FName& TargetBoneName, FName VirtualBoneName);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility")
+	static void AddOrReplaceVirtualBone(USkeleton* Skeleton, FName SourceBoneName, FName TargetBoneName, FName VirtualBoneName);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility",
-		Meta = (AutoCreateRefTerm = "BoneName, RelativeLocation, RelativeRotation"))
-	static void AddOrReplaceSocket(USkeleton* Skeleton, FName SocketName, const FName& BoneName,
+	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility", Meta = (AutoCreateRefTerm = "RelativeLocation, RelativeRotation"))
+	static void AddOrReplaceSocket(USkeleton* Skeleton, FName SocketName, FName BoneName,
 	                               const FVector& RelativeLocation, const FRotator& RelativeRotation);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility")
 	static void AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FName BlendProfileName, const TArray<FAlsBlendProfileEntry>& Entries);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility", Meta = (AutoCreateRefTerm = "BoneName"))
-	static void SetBoneRetargetingMode(USkeleton* Skeleton, const FName& BoneName,
+	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility")
+	static void SetBoneRetargetingMode(USkeleton* Skeleton, FName BoneName,
 	                                   EBoneTranslationRetargetingMode::Type RetargetingMode, bool bIncludeDescendants);
 };

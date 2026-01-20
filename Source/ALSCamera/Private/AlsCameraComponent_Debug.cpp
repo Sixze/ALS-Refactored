@@ -85,7 +85,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 	VerticalLocation = MaxVerticalLocation;
 }
 
-void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor HeaderColor,
                                              const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
@@ -124,7 +124,7 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	TArray<FName> CurveNames;
 	GetAnimInstance()->GetAllCurveNames(CurveNames);
 
-	CurveNames.Sort([](const FName& A, const FName& B)
+	CurveNames.Sort([](const FName A, const FName B)
 	{
 		return A.LexicalLess(B);
 	});

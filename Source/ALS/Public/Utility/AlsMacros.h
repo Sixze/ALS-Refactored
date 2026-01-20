@@ -23,8 +23,7 @@ namespace AlsEnsure
 		uint8 bEnsureAlways : 1 {false};
 	};
 
-	ALS_API bool UE_COLD UE_DEBUG_SECTION VARARGS
-	Execute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo);
+	ALS_API bool UE_COLD UE_DEBUG_SECTION Execute(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo);
 
 	ALS_API bool UE_COLD UE_DEBUG_SECTION VARARGS
 	ExecuteFormat(std::atomic<uint8>& bExecuted, const FAlsEnsureInfo& EnsureInfo, const TCHAR* Format, ...);

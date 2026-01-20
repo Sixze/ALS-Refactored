@@ -13,7 +13,7 @@
 
 namespace
 {
-	void LogMissingBoneWarning(const USkeleton* Skeleton, const FName& BoneName, const FString& FunctionName)
+	void LogMissingBoneWarning(const USkeleton* Skeleton, const FName BoneName, const FString& FunctionName)
 	{
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 
@@ -102,8 +102,8 @@ void UAlsSkeletonUtility::AddOrReplaceSlot(USkeleton* Skeleton, FName SlotName, 
 	}
 }
 
-void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FName& SourceBoneName,
-                                                  const FName& TargetBoneName, FName VirtualBoneName)
+void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FName SourceBoneName,
+                                                  const FName TargetBoneName, FName VirtualBoneName)
 {
 	if (!ALS_ENSURE(IsValid(Skeleton)))
 	{
@@ -181,7 +181,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 	Skeleton->RenameVirtualBone(TempVirtualBoneName, VirtualBoneName);
 }
 
-void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketName, const FName& BoneName,
+void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketName, const FName BoneName,
                                              const FVector& RelativeLocation, const FRotator& RelativeRotation)
 {
 	if (!ALS_ENSURE(IsValid(Skeleton)))
@@ -293,7 +293,7 @@ void UAlsSkeletonUtility::AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FN
 	}
 }
 
-void UAlsSkeletonUtility::SetBoneRetargetingMode(USkeleton* Skeleton, const FName& BoneName,
+void UAlsSkeletonUtility::SetBoneRetargetingMode(USkeleton* Skeleton, const FName BoneName,
                                                  const EBoneTranslationRetargetingMode::Type RetargetingMode,
                                                  const bool bIncludeDescendants)
 {

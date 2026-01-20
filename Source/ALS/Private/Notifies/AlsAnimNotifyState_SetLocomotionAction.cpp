@@ -2,7 +2,6 @@
 
 #include "AlsCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotifyState_SetLocomotionAction)
 
@@ -13,9 +12,11 @@ UAlsAnimNotifyState_SetLocomotionAction::UAlsAnimNotifyState_SetLocomotionAction
 
 FString UAlsAnimNotifyState_SetLocomotionAction::GetNotifyName_Implementation() const
 {
-	TStringBuilder<256> NotifyNameBuilder{
-		InPlace, TEXTVIEW("Als Set Locomotion Action: "),
-		FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(LocomotionAction).ToString(), false)
+	// For some reason editor cuts off some characters at the end of the string, so to avoid this we insert a bunch of spaces.
+	// TODO Check the need for this hack in future engine versions.
+
+	TStringBuilder<128> NotifyNameBuilder{
+		InPlace, TEXTVIEW("Als Set Locomotion Action: "), LocomotionAction.GetTagName(), TEXTVIEW("                ")
 	};
 
 	return FString{NotifyNameBuilder};

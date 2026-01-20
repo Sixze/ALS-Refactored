@@ -48,7 +48,7 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 		const auto PelvisBoneIndex{ReferenceSkeleton.FindBoneIndex(UAlsConstants::PelvisBoneName())};
 
 		static const auto GetThighAxis{
-			[](const FReferenceSkeleton& ReferenceSkeleton, const int32 PelvisBoneIndex, const FName& FootBoneName, FVector3f& ThighAxis)
+			[](const FReferenceSkeleton& ReferenceSkeleton, const int32 PelvisBoneIndex, const FName FootBoneName, FVector3f& ThighAxis)
 			{
 				auto ParentBoneIndex{ReferenceSkeleton.FindBoneIndex(FootBoneName)};
 				if (ParentBoneIndex < 0)
@@ -277,7 +277,7 @@ void UAlsAnimationInstance::RefreshLayering()
 	};
 
 	static const auto GetCurveValue{
-		[](const TMap<FName, float>& Curves, const FName& CurveName) -> float
+		[](const TMap<FName, float>& Curves, const FName CurveName) -> float
 		{
 			const auto* Value{Curves.Find(CurveName)};
 
@@ -326,7 +326,7 @@ void UAlsAnimationInstance::RefreshPose()
 	};
 
 	static const auto GetCurveValue{
-		[](const TMap<FName, float>& Curves, const FName& CurveName) -> float
+		[](const TMap<FName, float>& Curves, const FName CurveName) -> float
 		{
 			const auto* Value{Curves.Find(CurveName)};
 
@@ -1450,7 +1450,7 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 	if (FMath::Abs(LockAngle) > Settings->Feet.FootLockAngleLimit + UE_KINDA_SMALL_NUMBER)
 	{
 		const auto ConstrainedLockAngle{FMath::Clamp(LockAngle, -Settings->Feet.FootLockAngleLimit, Settings->Feet.FootLockAngleLimit)};
-		const FQuat4f OffsetRotation{FVector3f::ZAxisVector, FMath::DegreesToRadians(ConstrainedLockAngle - LockAngle)};
+		const FQuat4f OffsetRotation{FVector3f::UpVector, FMath::DegreesToRadians(ConstrainedLockAngle - LockAngle)};
 
 		FootState.LockComponentRelativeLocation = OffsetRotation.RotateVector(FootState.LockComponentRelativeLocation);
 		FootState.LockComponentRelativeRotation = OffsetRotation * FootState.LockComponentRelativeRotation;
@@ -1967,7 +1967,7 @@ FPoseSnapshot& UAlsAnimationInstance::SnapshotFinalRagdollPose()
 	return RagdollingState.FinalRagdollPose;
 }
 
-float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const
+float UAlsAnimationInstance::GetCurveValueClamped01(const FName CurveName) const
 {
 	return UAlsMath::Clamp01(GetCurveValue(CurveName));
 }

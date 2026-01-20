@@ -10,12 +10,12 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsUtility)
 
-FString UAlsUtility::NameToDisplayString(const FName& Name, const bool bNameIsBool)
+FString UAlsUtility::NameToDisplayString(const FName Name, const bool bNameIsBool)
 {
 	return FName::NameToDisplayString(Name.ToString(), bNameIsBool);
 }
 
-float UAlsUtility::GetAnimationCurveValueFromCharacter(const ACharacter* Character, const FName& CurveName)
+float UAlsUtility::GetAnimationCurveValueFromCharacter(const ACharacter* Character, const FName CurveName)
 {
 	const auto* Mesh{IsValid(Character) ? Character->GetMesh() : nullptr};
 	const auto* AnimationInstance{IsValid(Mesh) ? Mesh->GetAnimInstance() : nullptr};
@@ -23,12 +23,12 @@ float UAlsUtility::GetAnimationCurveValueFromCharacter(const ACharacter* Charact
 	return ALS_ENSURE(IsValid(AnimationInstance)) ? AnimationInstance->GetCurveValue(CurveName) : 0.0f;
 }
 
-FGameplayTagContainer UAlsUtility::GetChildTags(const FGameplayTag& Tag)
+FGameplayTagContainer UAlsUtility::GetChildTags(const FGameplayTag Tag)
 {
 	return UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
 }
 
-FName UAlsUtility::GetSimpleTagName(const FGameplayTag& Tag)
+FName UAlsUtility::GetSimpleTagName(const FGameplayTag Tag)
 {
 	const auto TagNode{UGameplayTagsManager::Get().FindTagNode(Tag)};
 

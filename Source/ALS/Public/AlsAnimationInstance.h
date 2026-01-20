@@ -25,6 +25,7 @@
 #include "AlsAnimationInstance.generated.h"
 
 class UAlsLinkedAnimationInstance;
+class UAlsAnimationInstanceSettings;
 class AAlsCharacter;
 
 UCLASS()
@@ -206,7 +207,7 @@ protected:
 	// Grounded
 
 public:
-	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode);
+	void SetGroundedEntryMode(FGameplayTag NewGroundedEntryMode);
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
@@ -352,7 +353,7 @@ public:
 	// Utility
 
 public:
-	float GetCurveValueClamped01(const FName& CurveName) const;
+	float GetCurveValueClamped01(FName CurveName) const;
 };
 
 inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe() const
@@ -370,7 +371,7 @@ inline void UAlsAnimationInstance::MarkTeleported()
 	TeleportedTime = GetWorld()->GetTimeSeconds();
 }
 
-inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode)
+inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag NewGroundedEntryMode)
 {
 	GroundedEntryMode = NewGroundedEntryMode;
 }

@@ -910,7 +910,7 @@ void UAlsCharacterMovementComponent::RefreshGaitSettings()
 	GaitSettings = ALS_ENSURE(NewGaitSettings != nullptr) ? *NewGaitSettings : FAlsMovementGaitSettings{};
 }
 
-void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewRotationMode)
+void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag NewRotationMode)
 {
 	if (RotationMode != NewRotationMode)
 	{
@@ -920,7 +920,7 @@ void UAlsCharacterMovementComponent::SetRotationMode(const FGameplayTag& NewRota
 	}
 }
 
-void UAlsCharacterMovementComponent::SetStance(const FGameplayTag& NewStance)
+void UAlsCharacterMovementComponent::SetStance(const FGameplayTag NewStance)
 {
 	if (Stance != NewStance)
 	{

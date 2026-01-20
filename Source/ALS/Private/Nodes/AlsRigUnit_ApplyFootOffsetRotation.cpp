@@ -40,7 +40,7 @@ FAlsRigUnit_ApplyFootOffsetRotation_Execute()
 	OffsetNormal = UAlsMath::DamperExact(OffsetNormal, FootOffsetNormal,
 	                                     UE_REAL_TO_FLOAT(ExecuteContext.GetDeltaTime()), OffsetInterpolationHalfLife);
 
-	const auto OffsetRotation{FQuat::FindBetweenVectors(FVector::ZAxisVector, OffsetNormal)};
+	const auto OffsetRotation{FQuat::FindBetweenVectors(FVector::UpVector, OffsetNormal)};
 
 	// Convert the global offset to a local offset.
 
@@ -58,9 +58,6 @@ FAlsRigUnit_ApplyFootOffsetRotation_Execute()
 	const auto TargetLocalRotation{
 		CurrentCalfRotation.Inverse() * (OffsetRotation * FootTargetRotation) * FootReferenceLocalRotation.Inverse()
 	};
-
-	// We intentionally use FVector::XAxisVector here so that the twist is stored in the
-	// X component of the quaternion, and the swing is stored in the Y and Z components.
 
 	const FRotator InitialLocalRotator{InitialLocalRotation.Rotator()};
 	const FRotator TargetLocalRotator{TargetLocalRotation.Rotator()};

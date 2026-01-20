@@ -156,19 +156,19 @@ private:
 	// View Mode
 
 public:
-	const FGameplayTag& GetViewMode() const;
+	FGameplayTag GetViewMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewViewMode"))
-	void SetViewMode(const FGameplayTag& NewViewMode);
+	void SetViewMode(FGameplayTag NewViewMode);
 
 private:
-	void SetViewMode(const FGameplayTag& NewViewMode, bool bSendRpc);
+	void SetViewMode(FGameplayTag NewViewMode, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetViewMode(const FGameplayTag& NewViewMode);
+	void ClientSetViewMode(FGameplayTag NewViewMode);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetViewMode(const FGameplayTag& NewViewMode);
+	void ServerSetViewMode(FGameplayTag NewViewMode);
 
 	// Locomotion Mode
 
@@ -176,15 +176,15 @@ public:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode = 0) override;
 
 public:
-	const FGameplayTag& GetLocomotionMode() const;
+	FGameplayTag GetLocomotionMode() const;
 
 protected:
-	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
+	void SetLocomotionMode(FGameplayTag NewLocomotionMode);
 
-	virtual void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
+	virtual void NotifyLocomotionModeChanged(FGameplayTag PreviousLocomotionMode);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Als Character")
-	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
+	void OnLocomotionModeChanged(FGameplayTag PreviousLocomotionMode);
 
 	// Desired Aiming
 
@@ -213,51 +213,51 @@ protected:
 	// Desired Rotation Mode
 
 public:
-	const FGameplayTag& GetDesiredRotationMode() const;
+	FGameplayTag GetDesiredRotationMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
-	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
+	void SetDesiredRotationMode(FGameplayTag NewDesiredRotationMode);
 
 private:
-	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode, bool bSendRpc);
+	void SetDesiredRotationMode(FGameplayTag NewDesiredRotationMode, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
+	void ClientSetDesiredRotationMode(FGameplayTag NewDesiredRotationMode);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
+	void ServerSetDesiredRotationMode(FGameplayTag NewDesiredRotationMode);
 
 	// Rotation Mode
 
 public:
-	const FGameplayTag& GetRotationMode() const;
+	FGameplayTag GetRotationMode() const;
 
 protected:
-	void SetRotationMode(const FGameplayTag& NewRotationMode);
+	void SetRotationMode(FGameplayTag NewRotationMode);
 
-	virtual void NotifyRotationModeChanged(const FGameplayTag& PreviousRotationMode);
+	virtual void NotifyRotationModeChanged(FGameplayTag PreviousRotationMode);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Als Character")
-	void OnRotationModeChanged(const FGameplayTag& PreviousRotationMode);
+	void OnRotationModeChanged(FGameplayTag PreviousRotationMode);
 
 	void RefreshRotationMode();
 
 	// Desired Stance
 
 public:
-	const FGameplayTag& GetDesiredStance() const;
+	FGameplayTag GetDesiredStance() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
-	void SetDesiredStance(const FGameplayTag& NewDesiredStance);
+	void SetDesiredStance(FGameplayTag NewDesiredStance);
 
 private:
-	void SetDesiredStance(const FGameplayTag& NewDesiredStance, bool bSendRpc);
+	void SetDesiredStance(FGameplayTag NewDesiredStance, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetDesiredStance(const FGameplayTag& NewDesiredStance);
+	void ClientSetDesiredStance(FGameplayTag NewDesiredStance);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredStance(const FGameplayTag& NewDesiredStance);
+	void ServerSetDesiredStance(FGameplayTag NewDesiredStance);
 
 protected:
 	virtual void ApplyDesiredStance();
@@ -272,87 +272,87 @@ public:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 public:
-	const FGameplayTag& GetStance() const;
+	FGameplayTag GetStance() const;
 
 protected:
-	void SetStance(const FGameplayTag& NewStance);
+	void SetStance(FGameplayTag NewStance);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnStanceChanged(const FGameplayTag& PreviousStance);
+	void OnStanceChanged(FGameplayTag PreviousStance);
 
 	// Desired Gait
 
 public:
-	const FGameplayTag& GetDesiredGait() const;
+	FGameplayTag GetDesiredGait() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
-	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
+	void SetDesiredGait(FGameplayTag NewDesiredGait);
 
 private:
-	void SetDesiredGait(const FGameplayTag& NewDesiredGait, bool bSendRpc);
+	void SetDesiredGait(FGameplayTag NewDesiredGait, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetDesiredGait(const FGameplayTag& NewDesiredGait);
+	void ClientSetDesiredGait(FGameplayTag NewDesiredGait);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredGait(const FGameplayTag& NewDesiredGait);
+	void ServerSetDesiredGait(FGameplayTag NewDesiredGait);
 
 	// Gait
 
 public:
-	const FGameplayTag& GetGait() const;
+	FGameplayTag GetGait() const;
 
 protected:
-	void SetGait(const FGameplayTag& NewGait);
+	void SetGait(FGameplayTag NewGait);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnGaitChanged(const FGameplayTag& PreviousGait);
+	void OnGaitChanged(FGameplayTag PreviousGait);
 
 private:
 	void RefreshGait();
 
 	FGameplayTag CalculateMaxAllowedGait() const;
 
-	FGameplayTag CalculateActualGait(const FGameplayTag& MaxAllowedGait) const;
+	FGameplayTag CalculateActualGait(FGameplayTag MaxAllowedGait) const;
 
 	bool CanSprint() const;
 
 	// Overlay Mode
 
 public:
-	const FGameplayTag& GetOverlayMode() const;
+	FGameplayTag GetOverlayMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewOverlayMode"))
-	void SetOverlayMode(const FGameplayTag& NewOverlayMode);
+	void SetOverlayMode(FGameplayTag NewOverlayMode);
 
 private:
-	void SetOverlayMode(const FGameplayTag& NewOverlayMode, bool bSendRpc);
+	void SetOverlayMode(FGameplayTag NewOverlayMode, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetOverlayMode(const FGameplayTag& NewOverlayMode);
+	void ClientSetOverlayMode(FGameplayTag NewOverlayMode);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetOverlayMode(const FGameplayTag& NewOverlayMode);
+	void ServerSetOverlayMode(FGameplayTag NewOverlayMode);
 
 	UFUNCTION()
-	void OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode);
+	void OnReplicated_OverlayMode(FGameplayTag PreviousOverlayMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnOverlayModeChanged(const FGameplayTag& PreviousOverlayMode);
+	void OnOverlayModeChanged(FGameplayTag PreviousOverlayMode);
 
 	// Locomotion Action
 
 public:
-	const FGameplayTag& GetLocomotionAction() const;
+	FGameplayTag GetLocomotionAction() const;
 
-	void SetLocomotionAction(const FGameplayTag& NewLocomotionAction);
+	void SetLocomotionAction(FGameplayTag NewLocomotionAction);
 
 protected:
-	virtual void NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
+	virtual void NotifyLocomotionActionChanged(FGameplayTag PreviousLocomotionAction);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Als Character")
-	void OnLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
+	void OnLocomotionActionChanged(FGameplayTag PreviousLocomotionAction);
 
 	// Input
 
@@ -596,7 +596,7 @@ public:
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation) override;
 
 private:
-	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, FLinearColor HeaderColor,
 	                               float Scale, float HorizontalLocation, float& VerticalLocation);
 
 	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
@@ -615,12 +615,12 @@ inline const UAlsCharacterSettings* AAlsCharacter::GetSettings() const
 	return Settings;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetViewMode() const
+inline FGameplayTag AAlsCharacter::GetViewMode() const
 {
 	return ViewMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetLocomotionMode() const
+inline FGameplayTag AAlsCharacter::GetLocomotionMode() const
 {
 	return LocomotionMode;
 }
@@ -630,42 +630,42 @@ inline bool AAlsCharacter::IsDesiredAiming() const
 	return bDesiredAiming;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetDesiredRotationMode() const
+inline FGameplayTag AAlsCharacter::GetDesiredRotationMode() const
 {
 	return DesiredRotationMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetRotationMode() const
+inline FGameplayTag AAlsCharacter::GetRotationMode() const
 {
 	return RotationMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetDesiredStance() const
+inline FGameplayTag AAlsCharacter::GetDesiredStance() const
 {
 	return DesiredStance;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetStance() const
+inline FGameplayTag AAlsCharacter::GetStance() const
 {
 	return Stance;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetDesiredGait() const
+inline FGameplayTag AAlsCharacter::GetDesiredGait() const
 {
 	return DesiredGait;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetGait() const
+inline FGameplayTag AAlsCharacter::GetGait() const
 {
 	return Gait;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetOverlayMode() const
+inline FGameplayTag AAlsCharacter::GetOverlayMode() const
 {
 	return OverlayMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetLocomotionAction() const
+inline FGameplayTag AAlsCharacter::GetLocomotionAction() const
 {
 	return LocomotionAction;
 }

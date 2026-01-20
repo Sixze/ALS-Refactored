@@ -106,7 +106,7 @@ public:
 	FVector ItemBProjectionLocation{ForceInit};
 
 	UPROPERTY(Transient, Meta = (Output))
-	FVector PoleDirection{FVector::XAxisVector};
+	FVector PoleDirection{FVector::ForwardVector};
 
 	UPROPERTY(Transient)
 	FCachedRigElement CachedItemA;
