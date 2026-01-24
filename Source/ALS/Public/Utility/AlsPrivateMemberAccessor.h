@@ -30,7 +30,7 @@ namespace AlsPrivateMemberAccessor
 	{
 		if constexpr (UE::CPointer<std::remove_reference_t<ThisType>>)
 		{
-			if constexpr (sizeof...(ArgumentsType) > 0)
+			if constexpr (std::is_member_function_pointer_v<typename AccessorName::MemberType>)
 			{
 				return (Forward<ThisType>(This)->*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
 			}
@@ -41,7 +41,7 @@ namespace AlsPrivateMemberAccessor
 		}
 		else
 		{
-			if constexpr (sizeof...(ArgumentsType) > 0)
+			if constexpr (std::is_member_function_pointer_v<typename AccessorName::MemberType>)
 			{
 				return (Forward<ThisType>(This).*TMemberPointer<AccessorName>)(Forward<ArgumentsType>(Arguments)...);
 			}
