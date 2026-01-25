@@ -103,13 +103,6 @@ void AAlsCharacter::PreRegisterAllComponents()
 	Stance = DesiredStance;
 	Gait = DesiredGait;
 
-	Super::PreRegisterAllComponents();
-}
-
-void AAlsCharacter::PostRegisterAllComponents()
-{
-	Super::PostRegisterAllComponents();
-
 	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), false);
 
 	ViewState.NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
@@ -125,6 +118,8 @@ void AAlsCharacter::PostRegisterAllComponents()
 
 	LocomotionState.InputYawAngle = YawAngle;
 	LocomotionState.VelocityYawAngle = YawAngle;
+
+	Super::PreRegisterAllComponents();
 }
 
 void AAlsCharacter::PostInitializeComponents()

@@ -63,6 +63,12 @@ struct ALS_API FAlsFeetState
 	float FeetCrossingAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bValid : 1 {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bBecameValid : 1 {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsFootState Left{
 		.ThighAxis = -FVector3f::ZAxisVector
 	};

@@ -21,9 +21,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
-ALS_DEFINE_PRIVATE_MEMBER_ACCESSOR(AlsGetAnimationCurvesAccessor, &FAnimInstanceProxy::GetAnimationCurves,
-                                   const TMap<FName, float>& (FAnimInstanceProxy::*)(EAnimCurveType) const)
-
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -113,7 +110,9 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		// Manually synchronize mesh rotation with character rotation.
 
-		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
+		const auto MeshRelativeRotation{Mesh->GetRelativeRotationCache().RotatorToQuat(Mesh->GetRelativeRotation())};
+
+		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * MeshRelativeRotation, false);
 
 		// Re-cache proxy transforms to match the modified mesh transform.
 
@@ -211,7 +210,10 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	DisplayDebugTracesQueue.Reset();
 #endif
 
-	bPendingUpdate = false;
+	// Кreset bPendingUpdate only when all components have been registered to
+	// ensure that all data the animation instance depends on is up to date.
+
+	bPendingUpdate = !Character->HasActorRegisteredAllComponents();
 }
 
 FAnimInstanceProxy* UAlsAnimationInstance::CreateAnimInstanceProxy()
@@ -231,6 +233,7 @@ FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 	return {
 		.bUseHandIkBones = !IsValid(Settings) || Settings->General.bUseHandIkBones,
 		.bUseFootIkBones = !IsValid(Settings) || Settings->General.bUseFootIkBones,
+		.bFootTransformsValid = static_cast<bool>(FeetState.bValid),
 		.VelocityBlendForwardAmount = GroundedState.VelocityBlend.ForwardAmount,
 		.VelocityBlendBackwardAmount = GroundedState.VelocityBlend.BackwardAmount,
 		.SpineYawAngle = SpineState.YawAngle,
@@ -269,6 +272,9 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 		                             ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator()
 		                             : FRotator::ZeroRotator;
 }
+
+ALS_DEFINE_PRIVATE_MEMBER_ACCESSOR(AlsGetAnimationCurvesAccessor, &FAnimInstanceProxy::GetAnimationCurves,
+                                   const TMap<FName, float>& (FAnimInstanceProxy::*)(EAnimCurveType) const)
 
 void UAlsAnimationInstance::RefreshLayering()
 {
@@ -701,6 +707,8 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	};
 	check(EnableListenServerSmoothingConsoleVariable != nullptr)
 
+	const auto* Mesh{GetSkelMeshComponent()};
+
 	if (Movement->NetworkSmoothingMode == ENetworkSmoothingMode::Disabled ||
 	    (Character->GetLocalRole() != ROLE_SimulatedProxy &&
 	     !(Character->IsNetMode(NM_ListenServer) && EnableListenServerSmoothingConsoleVariable->GetBool())))
@@ -711,20 +719,25 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 		LocomotionState.Rotation = ActorTransform.Rotator();
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 	}
-	else if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
+	else if (Mesh->IsUsingAbsoluteRotation())
 	{
 		LocomotionState.Location = ActorTransform.TransformPosition(
-			MeshRelativeTransform.GetLocation() - Character->GetBaseTranslationOffset());
+			MeshRelativeTransform.GetLocation() - Mesh->GetRelativeLocation());
 
 		LocomotionState.Rotation = ActorTransform.Rotator();
 		LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
 	}
 	else
 	{
+		// Can't use ACharacter::GetBaseTranslationOffset() and ACharacter::GetBaseRotationOffset() below, as they
+		// may not be set yet if the character has just spawned, so instead get them directly from the mesh component.
+
+		const auto MeshRelativeRotation{Mesh->GetRelativeRotationCache().RotatorToQuat(Mesh->GetRelativeRotation())};
+
 		const auto SmoothTransform{
 			ActorTransform * FTransform{
-				MeshRelativeTransform.GetRotation() * Character->GetBaseRotationOffset().Inverse(),
-				MeshRelativeTransform.GetLocation() - Character->GetBaseTranslationOffset()
+				MeshRelativeTransform.GetRotation() * MeshRelativeRotation.Inverse(),
+				MeshRelativeTransform.GetLocation() - Mesh->GetRelativeLocation()
 			}
 		};
 
@@ -1207,8 +1220,33 @@ void UAlsAnimationInstance::RefreshFeetOnGameThread()
 	check(IsInGameThread())
 
 	const auto* Mesh{GetSkelMeshComponent()};
+	const auto PelvisTransform{Mesh->GetSocketTransform(UAlsConstants::PelvisBoneName(), RTS_Component)};
 
-	FeetState.PelvisRotation = FQuat4f{Mesh->GetSocketTransform(UAlsConstants::PelvisBoneName(), RTS_Component).GetRotation()};
+	if (bPendingUpdate)
+	{
+		FeetState.bValid = false;
+		FeetState.bBecameValid = false;
+	}
+	else if (!FeetState.bValid)
+	{
+		// USkinnedMeshComponent::GetSocketTransform() can return an invalid transform in some cases, so we need to check this.
+		// Ideally, we should use USkinnedMeshComponent.::bHasValidBoneTransform here instead, but it can't be accessed.
+		// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/14322 to be merged into the engine.
+
+		if (PelvisTransform.EqualsNoScale(FTransform::Identity))
+		{
+			return;
+		}
+
+		FeetState.bValid = true;
+		FeetState.bBecameValid = true;
+	}
+	else
+	{
+		FeetState.bBecameValid = false;
+	}
+
+	FeetState.PelvisRotation = FQuat4f{PelvisTransform.GetRotation()};
 
 	const auto FootLeftTargetTransform{
 		Mesh->GetSocketTransform(Settings->General.bUseFootIkBones
@@ -1231,6 +1269,11 @@ void UAlsAnimationInstance::RefreshFeetOnGameThread()
 
 void UAlsAnimationInstance::RefreshFeet(const float DeltaTime)
 {
+	if (!FeetState.bValid)
+	{
+		return;
+	}
+
 	FeetState.FootPlantedAmount = FMath::Clamp(GetCurveValue(UAlsConstants::FootPlantedCurveName()), -1.0f, 1.0f);
 	FeetState.FeetCrossingAmount = GetCurveValueClamped01(UAlsConstants::FeetCrossingCurveName());
 
@@ -1267,7 +1310,7 @@ void UAlsAnimationInstance::ProcessFootLockTeleport(const FAlsFootUpdateContext&
 	// in one frame, since after accepting the teleportation event, the character can still be moved for
 	// some indefinite time, and this must be taken into account in order to avoid foot lock glitches.
 
-	if (bPendingUpdate || GetWorld()->TimeSince(TeleportedTime) > 0.2f ||
+	if (FeetState.bBecameValid || GetWorld()->TimeSince(TeleportedTime) > 0.2f ||
 	    !FAnimWeight::IsRelevant(Context.IkAmount * FootState.LockAmount))
 	{
 		return;
@@ -1291,13 +1334,13 @@ void UAlsAnimationInstance::ProcessFootLockBaseChange(const FAlsFootUpdateContex
 {
 	auto& FootState{*Context.FootState};
 
-	if ((!bPendingUpdate && !MovementBase.bBaseChanged) ||
+	if ((!FeetState.bBecameValid && !MovementBase.bBaseChanged) ||
 	    !FAnimWeight::IsRelevant(Context.IkAmount * FootState.LockAmount))
 	{
 		return;
 	}
 
-	if (bPendingUpdate)
+	if (FeetState.bBecameValid)
 	{
 		FootState.LockLocation = FootState.TargetLocation;
 		FootState.LockRotation = FootState.TargetRotation;
@@ -1335,7 +1378,7 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 		static constexpr auto MovingDecreaseSpeed{5.0f};
 		static constexpr auto NotGroundedDecreaseSpeed{0.6f};
 
-		NewLockAmount = bPendingUpdate
+		NewLockAmount = FeetState.bBecameValid
 			                ? 0.0f
 			                : FMath::Max(0.0f, FMath::Min(
 				                             NewLockAmount,
@@ -1379,7 +1422,7 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 			FVector TargetLocation;
 			FQuat TargetRotation;
 
-			if (bPendingUpdate)
+			if (FeetState.bBecameValid)
 			{
 				TargetLocation = FootState.TargetLocation;
 				TargetRotation = FootState.TargetRotation;
