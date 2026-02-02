@@ -11,7 +11,7 @@ FText UAlsAnimGraphNode_CurvesBlend::GetNodeTitle(const ENodeTitleType::Type Tit
 
 FLinearColor UAlsAnimGraphNode_CurvesBlend::GetNodeTitleColor() const
 {
-	return {0.2f, 0.8f, 0.2f};
+	return {0.1f, 0.4f, 0.8f};
 }
 
 FText UAlsAnimGraphNode_CurvesBlend::GetTooltipText() const

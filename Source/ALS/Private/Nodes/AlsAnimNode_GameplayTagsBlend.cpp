@@ -4,16 +4,9 @@
 
 int32 FAlsAnimNode_GameplayTagsBlend::GetActiveChildIndex()
 {
-	const auto& CurrentActiveTag{GetActiveTag()};
-
-	return CurrentActiveTag.IsValid()
-		       ? GetTags().Find(CurrentActiveTag) + 1
+	return ActiveTag.IsValid()
+		       ? GetTags().Find(ActiveTag) + 1
 		       : 0;
-}
-
-const FGameplayTag& FAlsAnimNode_GameplayTagsBlend::GetActiveTag() const
-{
-	return GET_ANIM_NODE_DATA(FGameplayTag, ActiveTag);
 }
 
 const TArray<FGameplayTag>& FAlsAnimNode_GameplayTagsBlend::GetTags() const

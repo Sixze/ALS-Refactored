@@ -14,10 +14,10 @@ struct ALS_API FAlsAnimNode_GameplayTagsBlend : public FAnimNode_BlendListBase
 	friend UAlsAnimGraphNode_GameplayTagsBlend;
 
 protected:
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty, PinShownByDefault))
+	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (PinShownByDefault))
 	FGameplayTag ActiveTag;
 
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty))
 	TArray<FGameplayTag> Tags;
 #endif
@@ -26,8 +26,6 @@ protected:
 	virtual int32 GetActiveChildIndex() override;
 
 public:
-	const FGameplayTag& GetActiveTag() const;
-
 	const TArray<FGameplayTag>& GetTags() const;
 
 #if WITH_EDITOR

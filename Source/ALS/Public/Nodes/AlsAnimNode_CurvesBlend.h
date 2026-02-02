@@ -6,17 +6,21 @@
 UENUM(BlueprintType)
 enum class EAlsCurvesBlendMode : uint8
 {
-	// Blend poses using blend amount. Same as ECurveBlendOption::BlendByWeight.
-	BlendByAmount,
-	// Only set the value if the curves pose has the curve value. Same as ECurveBlendOption::Override.
+	// Use the base pose. Same as ECurveBlendOption::UseBasePose.
+	DoNotBlend,
+	// Add curves from the curve pose, multiplied by the blend amount, to curves from the base pose. Same as ECurveBlendOption::BlendByWeight.
+	Accumulate,
+	// Interpolate curves between the base pose and the curve pose the using blend amount as alpha.
+	Lerp,
+	// Curves from the curve pose will take precedence over the same curves from the base bose. Same as ECurveBlendOption::Override.
 	Combine,
-	// Only set the value if the source pose doesn't have the curve value. Same as ECurveBlendOption::DoNotOverride.
+	// Curves from the base pose will take precedence over the same curves from the curve pose. Same as ECurveBlendOption::DoNotOverride.
 	CombinePreserved,
-	// Find the highest curve value from multiple poses and use that. Same as ECurveBlendOption::UseMaxValue.
+	// Find the highest curve values from poses and use them. Same as ECurveBlendOption::UseMaxValue.
 	UseMaxValue,
-	// Find the lowest curve value from multiple poses and use that. Same as  ECurveBlendOption::UseMinValue.
+	// Find the lowest curve values from poses and use them. Same as  ECurveBlendOption::UseMinValue.
 	UseMinValue,
-	// Completely override source pose. Same as ECurveBlendOption::UseBasePose.
+	// Completely override curves from the base pose with curves from the curve pose, multiplied by the blend amount.
 	Override
 };
 
@@ -27,19 +31,17 @@ struct ALS_API FAlsAnimNode_CurvesBlend : public FAnimNode_Base
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	FPoseLink SourcePose;
+	FPoseLink BasePose;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	FPoseLink CurvesPose;
+	FPoseLink CurvePose;
 
 protected:
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1, FoldProperty, PinShownByDefault))
+	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1, PinShownByDefault))
 	float BlendAmount{1.0f};
 
-	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty))
-	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::BlendByAmount};
-#endif
+	UPROPERTY(EditAnywhere, Category = "Settings")
+	EAlsCurvesBlendMode BlendMode{EAlsCurvesBlendMode::Accumulate};
 
 public:
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
@@ -51,9 +53,4 @@ public:
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 
 	virtual void GatherDebugData(FNodeDebugData& DebugData) override;
-
-public:
-	float GetBlendAmount() const;
-
-	EAlsCurvesBlendMode GetBlendMode() const;
 };
