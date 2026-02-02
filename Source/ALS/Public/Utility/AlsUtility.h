@@ -32,7 +32,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Utility", Meta = (WorldContext = "WorldContext", ReturnDisplayName = "Ping"))
 	static float GetFirstPlayerPingSeconds(const UObject* WorldContext);
 
-	static bool TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& BasedMovement, FRotator& RotationSpeed);
+	static bool TryGetMovementBaseAngularVelocity(const FBasedMovementInfo& BasedMovement, FVector& AngularVelocity);
 };
 
 constexpr FStringView UAlsUtility::BoolToString(const bool bValue)

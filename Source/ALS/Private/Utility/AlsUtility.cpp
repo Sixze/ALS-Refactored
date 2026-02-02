@@ -44,31 +44,21 @@ float UAlsUtility::GetFirstPlayerPingSeconds(const UObject* WorldContext)
 	return IsValid(PlayerState) ? PlayerState->GetPingInMilliseconds() * 0.001f : 0.0f;
 }
 
-bool UAlsUtility::TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& BasedMovement, FRotator& RotationSpeed)
+bool UAlsUtility::TryGetMovementBaseAngularVelocity(const FBasedMovementInfo& BasedMovement, FVector& AngularVelocity)
 {
 	if (!MovementBaseUtility::IsDynamicBase(BasedMovement.MovementBase))
 	{
-		RotationSpeed = FRotator::ZeroRotator;
+		AngularVelocity = FVector::ZeroVector;
 		return false;
 	}
 
 	const auto* Body{BasedMovement.MovementBase->GetBodyInstance(BasedMovement.BoneName)};
 	if (Body == nullptr)
 	{
-		RotationSpeed = FRotator::ZeroRotator;
+		AngularVelocity = FVector::ZeroVector;
 		return false;
 	}
 
-	const auto AngularVelocityVector{Body->GetUnrealWorldAngularVelocityInRadians()};
-	if (AngularVelocityVector.IsNearlyZero())
-	{
-		RotationSpeed = FRotator::ZeroRotator;
-		return false;
-	}
-
-	RotationSpeed.Roll = FMath::RadiansToDegrees(AngularVelocityVector.X);
-	RotationSpeed.Pitch = FMath::RadiansToDegrees(AngularVelocityVector.Y);
-	RotationSpeed.Yaw = FMath::RadiansToDegrees(AngularVelocityVector.Z);
-
+	AngularVelocity = Body->GetUnrealWorldAngularVelocityInRadians();
 	return true;
 }

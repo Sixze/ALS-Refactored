@@ -205,14 +205,15 @@ FVector UAlsCharacterMovementComponent::ConsumeInputVector()
 
 	if (bInputBlocked)
 	{
-		return FVector::ZeroVector;
+		InputVector = FVector::ZeroVector;
+		return InputVector;
 	}
 
-	FRotator BaseRotationSpeed;
-	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
+	FVector AngularVelocity;
+	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseAngularVelocity(CharacterOwner->GetBasedMovement(), AngularVelocity))
 	{
 		// Offset the input vector to keep it relative to the movement base.
-		InputVector = (BaseRotationSpeed * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
+		InputVector = FQuat::MakeFromRotationVector(AngularVelocity * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
 	}
 
 	return InputVector;
@@ -278,11 +279,11 @@ bool UAlsCharacterMovementComponent::ApplyRequestedMove(const float DeltaTime, c
 void UAlsCharacterMovementComponent::CalcVelocity(const float DeltaTime, const float Friction,
                                                   const bool bFluid, const float BrakingDeceleration)
 {
-	FRotator BaseRotationSpeed;
-	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
+	FVector AngularVelocity;
+	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseAngularVelocity(CharacterOwner->GetBasedMovement(), AngularVelocity))
 	{
 		// Offset the velocity to keep it relative to the movement base.
-		Velocity = (BaseRotationSpeed * DeltaTime).RotateVector(Velocity);
+		Velocity = FQuat::MakeFromRotationVector(AngularVelocity * DeltaTime).RotateVector(Velocity);
 	}
 
 	Super::CalcVelocity(DeltaTime, Friction, bFluid, BrakingDeceleration);
