@@ -1,5 +1,6 @@
-#include "ALSModule.h"
+#include "AlsModule.h"
 
+#include "Modules/ModuleManager.h"
 #include "Utility/AlsLog.h"
 
 #if ALLOW_CONSOLE
@@ -10,16 +11,16 @@
 #include "MessageLogModule.h"
 #endif
 
-IMPLEMENT_MODULE(FALSModule, ALS)
+IMPLEMENT_MODULE(FAlsModule, ALS)
 
 #define LOCTEXT_NAMESPACE "ALSModule"
 
-void FALSModule::StartupModule()
+void FAlsModule::StartupModule()
 {
-	FDefaultModuleImpl::StartupModule();
+	IModuleInterface::StartupModule();
 
 #if ALLOW_CONSOLE
-	UConsole::RegisterConsoleAutoCompleteEntries.AddRaw(this, &FALSModule::Console_OnRegisterAutoCompleteEntries);
+	UConsole::RegisterConsoleAutoCompleteEntries.AddRaw(this, &FAlsModule::Console_OnRegisterAutoCompleteEntries);
 #endif
 
 #if WITH_EDITOR
@@ -34,18 +35,18 @@ void FALSModule::StartupModule()
 #endif
 }
 
-void FALSModule::ShutdownModule()
+void FAlsModule::ShutdownModule()
 {
 #if ALLOW_CONSOLE
 	UConsole::RegisterConsoleAutoCompleteEntries.RemoveAll(this);
 #endif
 
-	FDefaultModuleImpl::ShutdownModule();
+	IModuleInterface::ShutdownModule();
 }
 
 #if ALLOW_CONSOLE
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void FALSModule::Console_OnRegisterAutoCompleteEntries(TArray<FAutoCompleteCommand>& AutoCompleteCommands)
+void FAlsModule::Console_OnRegisterAutoCompleteEntries(TArray<FAutoCompleteCommand>& AutoCompleteCommands)
 {
 	const auto CommandColor{GetDefault<UConsoleSettings>()->AutoCompleteCommandColor};
 

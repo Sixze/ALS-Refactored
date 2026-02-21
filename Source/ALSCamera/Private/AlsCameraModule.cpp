@@ -1,32 +1,34 @@
-#include "ALSCameraModule.h"
+#include "AlsCameraModule.h"
+
+#include "Modules/ModuleManager.h"
 
 #if ALLOW_CONSOLE
 #include "Engine/Console.h"
 #endif
 
-IMPLEMENT_MODULE(FALSCameraModule, ALSCamera)
+IMPLEMENT_MODULE(FAlsCameraModule, ALSCamera)
 
-void FALSCameraModule::StartupModule()
+void FAlsCameraModule::StartupModule()
 {
-	FDefaultModuleImpl::StartupModule();
+	IModuleInterface::StartupModule();
 
 #if ALLOW_CONSOLE
-	UConsole::RegisterConsoleAutoCompleteEntries.AddRaw(this, &FALSCameraModule::Console_OnRegisterAutoCompleteEntries);
+	UConsole::RegisterConsoleAutoCompleteEntries.AddRaw(this, &FAlsCameraModule::Console_OnRegisterAutoCompleteEntries);
 #endif
 }
 
-void FALSCameraModule::ShutdownModule()
+void FAlsCameraModule::ShutdownModule()
 {
 #if ALLOW_CONSOLE
 	UConsole::RegisterConsoleAutoCompleteEntries.RemoveAll(this);
 #endif
 
-	FDefaultModuleImpl::ShutdownModule();
+	IModuleInterface::ShutdownModule();
 }
 
 #if ALLOW_CONSOLE
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void FALSCameraModule::Console_OnRegisterAutoCompleteEntries(TArray<FAutoCompleteCommand>& AutoCompleteCommands)
+void FAlsCameraModule::Console_OnRegisterAutoCompleteEntries(TArray<FAutoCompleteCommand>& AutoCompleteCommands)
 {
 	const auto CommandColor{GetDefault<UConsoleSettings>()->AutoCompleteCommandColor};
 

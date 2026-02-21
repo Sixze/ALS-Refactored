@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "Containers/Array.h"
+#include "Modules/ModuleInterface.h"
 
 struct FAutoCompleteCommand;
 
-class ALSCAMERA_API FALSCameraModule : public FDefaultModuleImpl
+class ALSCAMERA_API FAlsCameraModule : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;

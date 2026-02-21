@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "Containers/Array.h"
+#include "Modules/ModuleInterface.h"
 
 struct FAutoCompleteCommand;
 
-class ALS_API FALSModule : public FDefaultModuleImpl
+class ALS_API FAlsModule : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
