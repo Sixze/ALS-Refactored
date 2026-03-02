@@ -51,7 +51,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 
 	const auto InitialVerticalLocation{VerticalLocation};
 
-	static const auto CurvesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.Curves (Shift + 1)")})};
+	static const auto CurvesHeaderText{INVTEXT("Als.Curves (Shift + 1)")};
 
 	if (DisplayInfo.IsDisplayOn(UAlsConstants::CurvesDebugDisplayName()))
 	{
@@ -71,7 +71,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto StateHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.State (Shift + 2)")})};
+	static const auto StateHeaderText{INVTEXT("Als.State (Shift + 2)")};
 
 	if (DisplayInfo.IsDisplayOn(UAlsConstants::StateDebugDisplayName()))
 	{
@@ -86,7 +86,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto ShapesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.Shapes (Shift + 3)")})};
+	static const auto ShapesHeaderText{INVTEXT("Als.Shapes (Shift + 3)")};
 
 	if (DisplayInfo.IsDisplayOn(UAlsConstants::ShapesDebugDisplayName()))
 	{
@@ -101,7 +101,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto TracesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.Traces (Shift + 4)")})};
+	static const auto TracesHeaderText{INVTEXT("Als.Traces (Shift + 4)")};
 
 	if (DisplayInfo.IsDisplayOn(UAlsConstants::TracesDebugDisplayName()))
 	{
@@ -116,7 +116,7 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto MantlingHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.Mantling (Shift + 5)")})};
+	static const auto MantlingHeaderText{INVTEXT("Als.Mantling (Shift + 5)")};
 
 	if (DisplayInfo.IsDisplayOn(UAlsConstants::MantlingDebugDisplayName()))
 	{
@@ -193,7 +193,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 
 		CurveValueBuilder.Appendf(TEXT("%.2f"), CurveValue);
 
-		Text.Text = FText::AsCultureInvariant(FString{CurveValueBuilder});
+		Text.Text = FText::AsCultureInvariant(CurveValueBuilder);
 		Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 		CurveValueBuilder.Reset();
@@ -403,7 +403,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DebugStringBuilder << TEXTVIEW("Y: ");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), ViewState.Rotation.Yaw);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
@@ -429,7 +429,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	DebugStringBuilder.Appendf(TEXT("%.2f"), LocomotionState.InputYawAngle);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
@@ -461,14 +461,14 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	DebugStringBuilder.Appendf(TEXT("%.2f"), LocomotionState.Speed);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
 
 	VerticalLocation += RowOffset;
 
-	static const auto VelocityDirectionText{FText::AsCultureInvariant(FString{TEXTVIEW("Velocity Direction")})};
+	static const auto VelocityDirectionText{INVTEXT("Velocity Direction")};
 
 	const auto VelocityDirection{LocomotionState.Velocity.GetSafeNormal()};
 
@@ -482,7 +482,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DebugStringBuilder << TEXTVIEW("Z: ");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), VelocityDirection.Z);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
@@ -499,7 +499,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	DebugStringBuilder.Appendf(TEXT("%.2f"), LocomotionState.VelocityYawAngle);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
@@ -529,7 +529,7 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 
 	DebugStringBuilder.Appendf(TEXT("%.2f"), LocomotionState.SmoothTargetYawAngle);
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder);
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	DebugStringBuilder.Reset();
