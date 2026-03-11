@@ -776,7 +776,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	GetMesh()->SetSimulatePhysics(true);
 
 	// This is required for the ragdoll to behave properly when any body instance is set to simulated in a physics asset.
-	// TODO Check the need for this in future engine versions.
+	// TODO Check the need for this hack in future engine versions.
 	GetMesh()->ResetAllBodiesSimulatePhysics();
 
 	const auto* PelvisBody{GetMesh()->GetBodyInstance(UAlsConstants::PelvisBoneName())};

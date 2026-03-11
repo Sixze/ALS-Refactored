@@ -132,7 +132,7 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 		FMessageLog MessageLog{AlsLog::MessageLogName};
 
 		MessageLog.Warning(FText::Format(
-			LOCTEXT("NoVirtualBonePrefixWarning", "{FunctionName}: Virtual bone {VirtualBoneName} must contain the \"VB \" prefix!"),
+			LOCTEXT("NoVirtualBonePrefixWarning", "{FunctionName}: Virtual bone {VirtualBoneName} must contain the 'VB ' prefix!"),
 			{
 				{FString{TEXTVIEW("FunctionName")}, FText::AsCultureInvariant(__FUNCTION__)},
 				{FString{TEXTVIEW("VirtualBoneName")}, FText::AsCultureInvariant(VirtualBoneString)}
