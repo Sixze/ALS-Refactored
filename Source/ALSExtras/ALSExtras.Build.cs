@@ -4,8 +4,15 @@ public class ALSExtras : ModuleRules
 {
 	public ALSExtras(ReadOnlyTargetRules target) : base(target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+
+		// if (Target.bBuildEditor)
+		// {
+		// 	// Verify that all source files include all required dependencies.
+		//
+		// 	bUseUnity = false;
+		// 	PCHUsage = PCHUsageMode.NoPCHs;
+		// }
 
 		// CppCompileWarningSettings.UnsafeTypeCastWarningLevel = WarningLevel.Warning;
 		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;

@@ -4,8 +4,15 @@ public class ALSEditor : ModuleRules
 {
 	public ALSEditor(ReadOnlyTargetRules target) : base(target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+
+		// if (Target.bBuildEditor)
+		// {
+		// 	// Verify that all source files include all required dependencies.
+		//
+		// 	bUseUnity = false;
+		// 	PCHUsage = PCHUsageMode.NoPCHs;
+		// }
 
 		// CppCompileWarningSettings.UnsafeTypeCastWarningLevel = WarningLevel.Warning;
 		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
@@ -14,7 +21,7 @@ public class ALSEditor : ModuleRules
 			"Core", "CoreUObject", "Engine", "AnimGraphRuntime", "AnimationModifiers", "AnimationBlueprintLibrary", "ALS"
 		]);
 
-		if (target.bBuildEditor)
+		if (Target.bBuildEditor)
 		{
 			PublicDependencyModuleNames.AddRange([
 				"AnimGraph"
