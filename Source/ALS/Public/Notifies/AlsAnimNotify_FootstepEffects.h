@@ -180,7 +180,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Foot Right Z Axis")
 	FVector3f FootRightZAxis{-1.0f, 0.0f, 0.0f};
 
-	// Prevents footstep decals from spawning if the angle between the foot's Z axis and the surface normal exceeds this value.
+	/// Prevents footstep decals from spawning if the angle between the up
+	/// axis of the foot and the surface normal is greater than this value.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
 	float DecalSpawnAngleThreshold{35.0f};
 

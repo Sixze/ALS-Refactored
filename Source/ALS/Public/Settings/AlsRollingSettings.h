@@ -18,14 +18,14 @@ struct ALS_API FAlsRollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bRotateToInputOnStart : 1 {true};
 
-	// The lower the value, the faster the interpolation. A zero value results in instant interpolation.
+	/// The lower the value, the faster the interpolation. A zero value means instant interpolation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float RotationInterpolationHalfLife{0.1f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bStartRollingOnLand : 1 {true};
 
-	// Rolling will start if the character lands with a speed greater than the specified value.
+	/// Character will roll if they land at a speed that exceeds this value.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
 		Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand", ForceUnits = "cm/s"))
 	float RollingOnLandSpeedThreshold{700.0f};

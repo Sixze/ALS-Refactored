@@ -10,15 +10,15 @@ struct ALS_API FAlsViewNetworkSmoothingState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bEnabled : 1 {false};
 
-	// Used to track the time of the last server move.
+	/// Time of the last server move.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ServerTime{0.0f};
 
-	// Used to track client time as we try to match the server.
+	/// Used to track client time as we try to match the server.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ClientTime{0.0f};
 
-	// Used for remembering how much time passed between server corrections.
+	/// Indicates how much time has passed between server corrections.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float Duration{0.0f};
 

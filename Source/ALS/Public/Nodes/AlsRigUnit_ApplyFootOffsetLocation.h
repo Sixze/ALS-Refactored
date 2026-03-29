@@ -28,27 +28,27 @@ public:
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "cm"))
 	float LegLength{0.0f};
 
-	// This limits how high the foot offset can raise the foot relative to the pelvis.
+	/// Limits how high the foot can be raised relative to the pelvis.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "cm"))
 	float MinPelvisToFootDistanceZ{50.0f};
 
-	// Used to prevent the leg from being fully straightened.
+	/// Prevents legs from being fully straightened.
 	UPROPERTY(Meta = (Input, ClampMin = 0.01, ForceUnits = "x"))
 	float MaxLegStretchRatio{0.99f};
 
-	// Determines how hard the spring pulls towards the target. The value
-	// represents the frequency at which it oscillates when there is no damping.
+	/// Determines how hard the spring pulls towards the target. This value represents
+	/// the frequency at which the spring oscillates when there is no damping.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "hz"))
 	float OffsetInterpolationFrequency{12.0};
 
-	// If the value is less than 1, the spring will oscillate before stabilizing on the target.
-	// If the value is equal to 1, the spring will reach the target without overshooting.
-	// If the value is greater than 1, the spring will take longer to reach the target.
+	/// If less than 1, the spring will oscillate before settling on the target.
+	/// If equal to 1, the spring will reach the target without overshooting.
+	/// If greater than 1, the spring will take longer to reach the target.
 	UPROPERTY(Meta = (Input, ClampMin = 0))
 	float OffsetInterpolationDampingRatio{2.0f};
 
-	// The amount of velocity that will be passed to the spring. A value of 1 will result in a more responsive output, but
-	// if the input is noisy or has step changes, these discontinuities will be more noticeable than with a lower value.
+	/// Amount of velocity passed to the spring. A value of 1 results in a more responsive output. However, if the input
+	/// is noisy or has step changes, these discontinuities will be more noticeable than they would be with a lower value.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ClampMax = 1))
 	float OffsetInterpolationTargetVelocityAmount{0.0f};
 

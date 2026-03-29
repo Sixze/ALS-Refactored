@@ -78,8 +78,8 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 	friend FAlsSavedMove;
 
 public:
-	// If checked, improves the response to interaction from moving kinematic physical
-	// bodies, but may cause some issues when interacting with simulated physical bodies.
+	/// While this improves the response to interactions with moving kinematic physical
+	/// bodies, it may cause some issues when interacting with simulated bodies.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	uint8 bAllowImprovedPenetrationAdjustment : 1 {true};
 
@@ -110,11 +110,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bMovementModeLocked : 1 {false};
 
-	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
+	/// Temporarily prevents the player from moving their character. This also works for AI-controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bInputBlocked : 1 {false};
 
-	// Valid only on locally controlled characters.
+	/// Valid only for locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FRotator PreviousControlRotation{ForceInit};
 
@@ -206,8 +206,8 @@ public:
 
 	void SetMaxAllowedGait(FGameplayTag NewMaxAllowedGait);
 
-	// Returns the character's current speed, mapped to the speed ranges from the movement settings.
-	// Varies from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	/// Returns the current speed of the character, mapped to the speed ranges specified in the movement settings.
+	/// The value can range from 0 to 3, where 0 is standing still, 1 is walking, 2 is running, and 3 is sprinting.
 	float GetGaitAmount() const;
 
 private:

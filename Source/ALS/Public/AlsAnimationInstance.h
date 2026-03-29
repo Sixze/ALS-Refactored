@@ -42,12 +42,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<AAlsCharacter> Character;
 
-	// Used to indicate that the animation instance has not been updated for a long time
-	// and its current state may not be correct (such as foot location used in foot lock).
+	/// Indicates that the animation instance has not been updated in a long time, so
+	/// its current state may not be correct (such as foot location used in foot lock).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPendingUpdate : 1 {true};
 
-	// Time of the last teleportation event.
+	/// Time of the last teleportation event.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0))
 	double TeleportedTime{0.0f};
 

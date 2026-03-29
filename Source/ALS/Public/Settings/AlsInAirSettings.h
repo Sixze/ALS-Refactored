@@ -11,11 +11,11 @@ struct ALS_API FAlsInAirSettings
 	GENERATED_BODY()
 
 public:
-	// Vertical velocity to lean amount curve.
+	/// Vertical velocity to lean amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UCurveFloat> LeanAmountCurve;
 
-	// Ground prediction sweep hit time to ground prediction amount curve.
+	/// Ground prediction sweep hit time to ground prediction amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UCurveFloat> GroundPredictionAmountCurve;
 

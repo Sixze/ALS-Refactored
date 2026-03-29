@@ -38,7 +38,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Alpha"))
 	static float DamperExactAlpha(float DeltaTime, float HalfLife);
 
-	// HalfLife is the time it takes for the distance to the target to be reduced by half.
+	/// HalfLife is the time it takes for the distance to the target to be reduced by half.
 	template <typename ValueType>
 	static ValueType DamperExact(const ValueType& Current, const ValueType& Target, float DeltaTime, float HalfLife);
 
@@ -53,7 +53,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Math Utility", Meta = (ReturnDisplayName = "Direction"))
 	static EAlsMovementDirection CalculateMovementDirection(float Angle, float ForwardHalfAngle, float AngleThreshold);
 
-	// Calculates the projection location and direction of the perpendicular to AC through B.
+	/// Calculates the projection location and direction of the perpendicular to AC through B.
 	UFUNCTION(BlueprintCallable, Category = "ALS|Math Utility",
 		Meta = (AutoCreateRefTerm = "ALocation, BLocation, CLocation", ExpandBoolAsExecs = "ReturnValue"))
 	static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,

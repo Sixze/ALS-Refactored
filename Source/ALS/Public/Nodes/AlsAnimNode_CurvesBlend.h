@@ -6,21 +6,21 @@
 UENUM(BlueprintType)
 enum class EAlsCurvesBlendMode : uint8
 {
-	// Use the base pose. Same as ECurveBlendOption::UseBasePose.
+	/// Use the base pose. Same as ECurveBlendOption::UseBasePose.
 	DoNotBlend,
-	// Add curves from the curve pose, multiplied by the blend amount, to curves from the base pose. Same as ECurveBlendOption::BlendByWeight.
+	/// Add curves from the curve pose, multiplied by the blend amount, to curves from the base pose. Same as ECurveBlendOption::BlendByWeight.
 	Accumulate,
-	// Interpolate curves between the base pose and the curve pose the using blend amount as alpha.
+	/// Interpolate curves between the base pose and the curve pose using the blend amount as alpha.
 	Lerp,
-	// Curves from the curve pose will take precedence over the same curves from the base bose. Same as ECurveBlendOption::Override.
+	/// Curves from the curve pose take precedence over curves from the base pose with the same name. Same as ECurveBlendOption::Override.
 	Combine,
-	// Curves from the base pose will take precedence over the same curves from the curve pose. Same as ECurveBlendOption::DoNotOverride.
+	/// Curves from the base pose take precedence over curves from the curve pose with the same name. Same as ECurveBlendOption::DoNotOverride.
 	CombinePreserved,
-	// Find the highest curve values from poses and use them. Same as ECurveBlendOption::UseMaxValue.
+	/// Find the highest curve values from the poses and use them. Same as ECurveBlendOption::UseMaxValue.
 	UseMaxValue,
-	// Find the lowest curve values from poses and use them. Same as  ECurveBlendOption::UseMinValue.
+	/// Find the lowest curve values from the poses and use them. Same as  ECurveBlendOption::UseMinValue.
 	UseMinValue,
-	// Completely override curves from the base pose with curves from the curve pose, multiplied by the blend amount.
+	/// Completely override curves from the base pose with curves from the curve pose, multiplied by the blend amount.
 	Override
 };
 

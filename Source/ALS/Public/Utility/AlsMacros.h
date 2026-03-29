@@ -5,8 +5,8 @@
 #define ALS_GET_TYPE_STRING(Type) \
 	((void) sizeof UEAsserts_Private::GetMemberNameCheckedJunk(static_cast<Type*>(nullptr)), TEXTVIEW(#Type))
 
-// A lightweight version of the ensure() macro that doesn't generate a C++ call stack and doesn't send a
-// crash report, because it doesn't happen instantly and causes the editor to freeze, which can be annoying.
+/// Lightweight version of the ensure() macro. It doesn't generate a C++ call stack or send a crash report
+/// because those things do not happen instantly and cause the editor to freeze, which can be annoying.
 
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 

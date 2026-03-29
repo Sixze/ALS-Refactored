@@ -24,7 +24,7 @@ public:
 	UPROPERTY(Meta = (Input, ExpandByDefault))
 	TArray<FRigElementKey> ItemsToMove;
 
-	// Which hand to favor. 0.5 is equal weight for both, 1 - right hand, 0 - left hand.
+	/// Which hand to favor. 0.5 means equal weight for both hands, 0 means left hand, andf 1 means right hand.
 	UPROPERTY(Meta = (Input))
 	float RetargetingWeight{0.5f};
 

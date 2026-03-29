@@ -34,14 +34,14 @@ struct ALS_API FAlsLocomotionState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float TargetYawAngle{0.0f};
 
-	// Used for extra smooth actor rotation, in other cases equal to the regular target yaw angle.
+	/// Used for extra-smooth actor rotation and is equal to the regular target yaw angle in other cases.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float SmoothTargetYawAngle{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float ViewRelativeTargetYawAngle{0.0f};
 
-	// Specifies the maximum angle by which the actor's rotation can differ from the view rotation when aiming.
+	/// Maximum angle by which the actor's rotation can differ from the view rotation when aiming.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	float AimingYawAngleLimit{180.0f};
 

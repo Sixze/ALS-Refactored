@@ -13,7 +13,7 @@ struct ALS_API FAlsMovementGaitSettings
 	GENERATED_BODY()
 
 public:
-	// Currently, the direction-dependent movement speed can cause some jitter in multiplayer, so enable it at your own risk.
+	/// Enabling direction-dependent movement speed can cause jitter in multiplayer, so do so at your own risk.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
 	uint8 bAllowDirectionDependentMovementSpeed : 1 {false};
 
@@ -34,13 +34,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float SprintSpeed{650.0f};
 
-	// Gait amount to acceleration, deceleration, and ground friction curve.
-	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	/// Gait amount to acceleration, deceleration, and ground friction curve.
+	/// Gait amount ranges from 0 to 3, where 0 is standing still, 1 is walking, 2 is running, and 3 is sprinting.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UCurveVector> AccelerationAndDecelerationAndGroundFrictionCurve;
 
-	// Gait amount to rotation interpolation speed curve.
-	// Gait amount ranges from 0 to 3, where 0 is stopped, 1 is walking, 2 is running, and 3 is sprinting.
+	/// Gait amount to rotation interpolation speed curve.
+	/// Gait amount ranges from 0 to 3, where 0 is standing still, 1 is walking, 2 is running, and 3 is sprinting.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TObjectPtr<UCurveFloat> RotationInterpolationSpeedCurve;
 
@@ -69,8 +69,7 @@ class ALS_API UAlsMovementSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	// Range of velocity angle relative to the view direction at which
-	// interpolation from forward speed to backward speed will take place.
+	/// Range of velocity angles relative to the viewing direction at which the speed is interpolated from forward to backward.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	FFloatInterval VelocityAngleToSpeedInterpolationRange{100.0f, 125.0f};
 

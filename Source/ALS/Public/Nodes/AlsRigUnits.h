@@ -32,7 +32,7 @@ public:
 	UPROPERTY(Meta = (Input))
 	FVector Target{ForceInit};
 
-	// HalfLife is the time it takes for the distance to the target to be reduced by half.
+	/// HalfLife is the time it takes for the distance to the target to be reduced by half.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))
 	float HalfLife{1.0f};
 
@@ -59,7 +59,7 @@ public:
 	UPROPERTY(Meta = (Input))
 	FQuat Target{ForceInit};
 
-	// HalfLife is the time it takes for the distance to the target to be reduced by half.
+	/// HalfLife is the time it takes for the distance to the target to be reduced by half.
 	UPROPERTY(Meta = (Input, ClampMin = 0, ForceUnits = "s"))
 	float HalfLife{1.0f};
 
@@ -77,7 +77,7 @@ public:
 	virtual void Execute() override;
 };
 
-// Calculates the projection location and direction of the perpendicular to AC through B.
+/// Calculates the projection location and direction of the perpendicular to AC through B.
 USTRUCT(DisplayName = "Calculate Pole Vector", Meta = (Category = "ALS", NodeColor = "0.05 0.25 0.05"))
 struct ALS_API FAlsRigUnit_CalculatePoleVector : public FRigUnit
 {

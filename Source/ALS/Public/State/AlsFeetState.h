@@ -52,10 +52,9 @@ struct ALS_API FAlsFeetState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat4f PelvisRotation{ForceInit};
 
-	// Choose whether a foot is planted or about to plant when stopping using the foot planted animation
-	// curve. A value less than 0.5 means the foot is planted and a value more than 0.5 means the
-	// foot is still in the air. The foot planted curve also determines which foot is planted (or
-	// about to plant). Positive values mean the right foot is planted, negative values mean the left.
+	/// Indicates whether a foot is planted or about to be planted during a stop. A value less than 0.5 means the foot is planted,
+	/// while a value greater than 0.5 means the foot is still in the air. It also determines which foot is planted (or about to be
+	/// planted). Positive values indicate that the right foot is planted and negative values indicate that the left foot is planted.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -1, ClampMax = 1))
 	float FootPlantedAmount{0.0f};
 
