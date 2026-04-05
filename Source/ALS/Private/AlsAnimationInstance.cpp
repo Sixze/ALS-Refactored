@@ -110,9 +110,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		// Manually synchronize mesh rotation with character rotation.
 
-		const auto MeshRelativeRotation{Mesh->GetRelativeRotationCache().RotatorToQuat(Mesh->GetRelativeRotation())};
-
-		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * MeshRelativeRotation, false);
+		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
 
 		// Re-cache proxy transforms to match the modified mesh transform.
 
@@ -210,7 +208,7 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	DisplayDebugTracesQueue.Reset();
 #endif
 
-	// Кreset bPendingUpdate only when all components have been registered to
+	// Reset bPendingUpdate only when all components have been registered to
 	// ensure that all data the animation instance depends on is up to date.
 
 	bPendingUpdate = !Character->HasActorRegisteredAllComponents();
