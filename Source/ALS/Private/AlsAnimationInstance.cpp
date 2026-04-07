@@ -651,10 +651,8 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 {
 	check(IsInGameThread())
 
-	const auto* World{GetWorld()};
-
-	const auto ActorDeltaTime{IsValid(World) ? World->GetDeltaSeconds() * Character->CustomTimeDilation : 0.0f};
-	const auto bCanCalculateRateOfChange{!bPendingUpdate && ActorDeltaTime > UE_SMALL_NUMBER};
+	const auto DeltaTime{GetDeltaSeconds()};
+	const auto bCanCalculateRateOfChange{!bPendingUpdate && DeltaTime > UE_SMALL_NUMBER};
 
 	const auto& Locomotion{Character->GetLocomotionState()};
 
@@ -672,7 +670,7 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 	LocomotionState.VelocityYawAngle = Locomotion.VelocityYawAngle;
 
 	LocomotionState.Acceleration = bCanCalculateRateOfChange
-		                               ? (LocomotionState.Velocity - PreviousVelocity) / ActorDeltaTime
+		                               ? (LocomotionState.Velocity - PreviousVelocity) / DeltaTime
 		                               : FVector::ZeroVector;
 
 	const auto* Movement{Character->GetCharacterMovement()};
@@ -746,7 +744,7 @@ void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 
 	LocomotionState.YawVelocity = bCanCalculateRateOfChange
 		                              ? FMath::UnwindDegrees(UE_REAL_TO_FLOAT(
-			                                LocomotionState.Rotation.Yaw - PreviousYawAngle)) / ActorDeltaTime
+			                                LocomotionState.Rotation.Yaw - PreviousYawAngle)) / DeltaTime
 		                              : 0.0f;
 
 	LocomotionState.Scale = UE_REAL_TO_FLOAT(Proxy.GetComponentTransform().GetScale3D().Z);
