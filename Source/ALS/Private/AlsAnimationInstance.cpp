@@ -3,11 +3,13 @@
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Animation/SpringMath.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/WorldSettings.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
@@ -101,6 +103,13 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	{
 		return;
 	}
+
+	// Use the previous global time dilation because this frame's delta time may not yet be affected
+	// by the current global time dilation, so unscaling it would produce an incorrect result.
+
+	const auto TimeDilation{PreviousGlobalTimeDilation * Character->CustomTimeDilation};
+	DeltaTimeWithoutTimeDilation = TimeDilation > UE_SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
+	PreviousGlobalTimeDilation = GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation();
 
 	auto* Mesh{GetSkelMeshComponent()};
 
@@ -393,7 +402,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
-	return RotationMode == AlsRotationModeTags::Aiming;
+	return RotationMode == AlsRotationModeTags::Aiming || ViewMode == AlsViewModeTags::FirstPerson;
 }
 
 void UAlsAnimationInstance::RefreshSpine(const float SpineBlendAmount, const float DeltaTime)
@@ -526,6 +535,7 @@ void UAlsAnimationInstance::RefreshHead()
 	}
 
 	const auto DeltaTime{GetDeltaSeconds()};
+	const auto bFirstPerson{ViewMode == AlsViewModeTags::FirstPerson};
 
 	if (MovementBase.bHasRelativeRotation)
 	{
@@ -576,9 +586,6 @@ void UAlsAnimationInstance::RefreshHead()
 		TargetPitchAngle = ViewState.PitchAngle;
 		TargetYawAngle = ViewState.YawAngle;
 
-		static constexpr auto SwitchSidesCurrentYawAngleThreshold{90.0f};
-		static constexpr auto SwitchSidesTargetYawAngleThreshold{160.0f};
-
 		// Keep the target angle in the [-175, 175] range, as the character often
 		// tends to break his neck when the target angle is close to 180 degrees.
 
@@ -586,8 +593,11 @@ void UAlsAnimationInstance::RefreshHead()
 		                              -180.0f + UAlsRotation::CounterClockwiseRotationAngleThreshold,
 		                              180.0f - UAlsRotation::CounterClockwiseRotationAngleThreshold);
 
-		if (ViewMode != AlsViewModeTags::FirstPerson)
+		if (!bFirstPerson)
 		{
+			static constexpr auto SwitchSidesCurrentYawAngleThreshold{90.0f};
+			static constexpr auto SwitchSidesTargetYawAngleThreshold{160.0f};
+
 			if (HeadState.YawAngle >= SwitchSidesCurrentYawAngleThreshold &&
 			    TargetYawAngle <= -SwitchSidesTargetYawAngleThreshold)
 			{
@@ -617,8 +627,15 @@ void UAlsAnimationInstance::RefreshHead()
 	}
 	else
 	{
-		HeadState.PitchAngle = UAlsRotation::DamperExactAngle(HeadState.PitchAngle, TargetPitchAngle, DeltaTime,
-		                                                      Settings->Head.PitchAngleInterpolationHalfLife);
+		// Use real-time delta time in first-person mode. Otherwise, if slow motion is active
+		// and the player quickly rotates the camera, it may intersect the skeletal mesh.
+
+		const auto EffectiveDeltaTime{bFirstPerson ? DeltaTimeWithoutTimeDilation : DeltaTime};
+
+		HeadState.PitchAngle = UAlsRotation::DamperExactAngle(HeadState.PitchAngle, TargetPitchAngle, EffectiveDeltaTime,
+		                                                      bFirstPerson
+			                                                      ? Settings->Head.FirstPersonPitchAngleInterpolationHalfLife
+			                                                      : Settings->Head.PitchAngleInterpolationHalfLife);
 
 		if (bReadyToSwitchLookSides)
 		{
@@ -638,10 +655,16 @@ void UAlsAnimationInstance::RefreshHead()
 		// different smoothing time when switching sides for even smoother head rotation.
 		// https://theorangeduck.com/page/spring-roll-call#critical
 
-		FMath::CriticallyDampedSmoothing(HeadState.YawAngle, HeadState.YawVelocity, TargetYawAngle, 0.0f, DeltaTime,
-		                                 HeadState.bSwitchingLookSides
-			                                 ? Settings->Head.SwitchLookSidesYawAngleInterpolationSmoothingTime
-			                                 : Settings->Head.YawAngleInterpolationSmoothingTime);
+		const auto SmoothingTime{
+			SpringMath::HalfLifeToSmoothingTime(HeadState.bSwitchingLookSides
+				                                    ? Settings->Head.SwitchLookSidesYawAngleInterpolationHalfLife
+				                                    : bFirstPerson
+				                                    ? Settings->Head.FirstPersonYawAngleInterpolationHalfLife
+				                                    : Settings->Head.YawAngleInterpolationHalfLife)
+		};
+
+		FMath::CriticallyDampedSmoothing(HeadState.YawAngle, HeadState.YawVelocity, TargetYawAngle,
+		                                 0.0f, EffectiveDeltaTime, SmoothingTime);
 	}
 
 	HeadState.YawAmount = HeadState.YawAngle / 360.0f + 0.5f;
@@ -1793,10 +1816,18 @@ void UAlsAnimationInstance::RefreshRotateInPlace()
 	}
 	else
 	{
+		const auto bFirstPerson{ViewMode == AlsViewModeTags::FirstPerson && RotationMode != AlsRotationModeTags::Aiming};
+
+		const auto ViewYawAngleThreshold{
+			bFirstPerson
+				? Settings->RotateInPlace.FirstPersonViewYawAngleThreshold
+				: Settings->RotateInPlace.ViewYawAngleThreshold
+		};
+
 		// Check if the character should rotate left or right by checking if the view yaw angle exceeds the threshold.
 
-		RotateInPlaceState.bRotatingLeft = ViewState.YawAngle < -Settings->RotateInPlace.ViewYawAngleThreshold;
-		RotateInPlaceState.bRotatingRight = ViewState.YawAngle > Settings->RotateInPlace.ViewYawAngleThreshold;
+		RotateInPlaceState.bRotatingLeft = ViewState.YawAngle < -ViewYawAngleThreshold;
+		RotateInPlaceState.bRotatingRight = ViewState.YawAngle > ViewYawAngleThreshold;
 	}
 
 	static constexpr auto PlayRateInterpolationHalfLife{0.15f};

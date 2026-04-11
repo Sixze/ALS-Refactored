@@ -78,11 +78,10 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 {
 	if (IsValid(Settings) && Settings->bIgnoreTimeDilation)
 	{
-		// Use the previous global time dilation, as this frame's delta time may not yet be affected
-		// by the current global time dilation, and thus unscaling will produce the wrong delta time.
+		// Use the previous global time dilation because this frame's delta time may not yet be affected
+		// by the current global time dilation, so unscaling it would produce an incorrect result.
 
 		const auto TimeDilation{PreviousGlobalTimeDilation * GetOwner()->CustomTimeDilation};
-
 		DeltaTime = TimeDilation > UE_SMALL_NUMBER ? DeltaTime / TimeDilation : GetWorld()->DeltaRealTimeSeconds;
 	}
 

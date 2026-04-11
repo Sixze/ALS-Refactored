@@ -46,6 +46,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bAutoRotateOnAnyInputWhileNotMovingInViewDirectionRotationMode : 1 {true};
 
+	/// Indicates how much the character's yaw angle can differ from the view yaw angle when
+	/// aiming or in first-person mode. Use it to prevent the lower body from noticeably failing
+	/// to keep up with the rotation of the upper body when the camera rotates very quickly.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	float AimingYawAngleLimit{70.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
