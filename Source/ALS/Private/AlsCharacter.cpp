@@ -1141,13 +1141,19 @@ void AAlsCharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation, c
 	}
 }
 
-void AAlsCharacter::ServerSetReplicatedViewRotation_Implementation(const FRotator& NewViewRotation)
+void AAlsCharacter::ServerSetReplicatedViewRotation_Implementation(FRotator NewViewRotation)
 {
+	// FRotator replicates angles in the [0, 360) range, so we have to re-normalize them to the [-180, 180) range before use.
+	NewViewRotation.Normalize();
+
 	SetReplicatedViewRotation(NewViewRotation, false);
 }
 
 void AAlsCharacter::OnReplicated_ReplicatedViewRotation()
 {
+	// FRotator replicates angles in the [0, 360) range, so we have to re-normalize them to the [-180, 180) range before use.
+	ReplicatedViewRotation.Normalize();
+
 	CorrectViewNetworkSmoothing(ReplicatedViewRotation, MovementBase.bHasRelativeRotation);
 }
 

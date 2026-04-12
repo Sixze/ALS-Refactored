@@ -371,7 +371,7 @@ private:
 	void SetReplicatedViewRotation(const FRotator& NewViewRotation, bool bSendRpc);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerSetReplicatedViewRotation(const FRotator& NewViewRotation);
+	void ServerSetReplicatedViewRotation(FRotator NewViewRotation);
 
 	UFUNCTION()
 	void OnReplicated_ReplicatedViewRotation();
