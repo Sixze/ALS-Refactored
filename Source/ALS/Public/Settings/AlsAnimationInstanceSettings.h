@@ -2,7 +2,7 @@
 
 #include "AlsCrouchingSettings.h"
 #include "AlsDynamicTransitionsSettings.h"
-#include "AlsFeetSettings.h"
+#include "AlsFootLockSettings.h"
 #include "AlsGeneralAnimationSettings.h"
 #include "AlsGroundedSettings.h"
 #include "AlsHeadSettings.h"
@@ -39,7 +39,7 @@ public:
 	FAlsInAirSettings InAir;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsFeetSettings Feet;
+	FAlsFootLockSettings FootLock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsTransitionsSettings Transitions;

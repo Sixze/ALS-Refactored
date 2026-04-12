@@ -1405,7 +1405,7 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 				                             (LocomotionState.bMovingSmooth ? MovingDecreaseSpeed : NotGroundedDecreaseSpeed)));
 	}
 
-	if (Settings->Feet.bDisableFootLock || !FAnimWeight::IsRelevant(Context.IkAmount * NewLockAmount))
+	if (!Settings->FootLock.bAllowFootLock || !FAnimWeight::IsRelevant(Context.IkAmount * NewLockAmount))
 	{
 		if (FootState.LockAmount > 0.0f)
 		{
@@ -1504,15 +1504,28 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 	FootState.LockComponentRelativeLocation = FVector3f{Context.ComponentTransformInverse.TransformPosition(FootState.LockLocation)};
 	FootState.LockComponentRelativeRotation = FQuat4f{Context.ComponentTransformInverse.TransformRotation(FootState.LockRotation)};
 
-	// Limit the foot lock location so that legs do not twist into a spiral when the actor rotates quickly.
+	ConstrainFootLock(FootState);
 
-	const auto ComponentRelativeThighAxis{FeetState.PelvisRotation.RotateVector(FootState.ThighAxis)};
-	const auto LockAngle{UAlsVector::AngleBetweenSignedXY(ComponentRelativeThighAxis, FootState.LockComponentRelativeLocation)};
+	const auto FinalLocation{FMath::Lerp(FootState.TargetLocation, FootState.LockLocation, FootState.LockAmount)};
 
-	if (FMath::Abs(LockAngle) > Settings->Feet.FootLockAngleLimit + UE_KINDA_SMALL_NUMBER)
+	auto FinalRotation{FQuat::FastLerp(FootState.TargetRotation, FootState.LockRotation, FootState.LockAmount)};
+	FinalRotation.Normalize();
+
+	FootState.FinalLocation = FVector3f{Context.ComponentTransformInverse.TransformPosition(FinalLocation)};
+	FootState.FinalRotation = FQuat4f{Context.ComponentTransformInverse.TransformRotation(FinalRotation)};
+}
+
+void UAlsAnimationInstance::ConstrainFootLock(FAlsFootState& FootState) const
+{
+	// Limit the location of the locked foot to prevent legs from twisting into a spiral when the character rotates quickly.
+
+	const auto ThighAxisComponentSpace{FeetState.PelvisRotation.RotateVector(FootState.ThighAxis)};
+	const auto ThighDeltaAngle{UAlsVector::AngleBetweenSignedXY(ThighAxisComponentSpace, FootState.LockComponentRelativeLocation)};
+
+	if (FMath::Abs(ThighDeltaAngle) > Settings->FootLock.ThighAngleLimit + UE_KINDA_SMALL_NUMBER)
 	{
-		const auto ConstrainedLockAngle{FMath::Clamp(LockAngle, -Settings->Feet.FootLockAngleLimit, Settings->Feet.FootLockAngleLimit)};
-		const FQuat4f OffsetRotation{FVector3f::UpVector, FMath::DegreesToRadians(ConstrainedLockAngle - LockAngle)};
+		const auto ClampedAngle{FMath::Clamp(ThighDeltaAngle, -Settings->FootLock.ThighAngleLimit, Settings->FootLock.ThighAngleLimit)};
+		const FQuat4f OffsetRotation{FVector3f::UpVector, FMath::DegreesToRadians(ClampedAngle - ThighDeltaAngle)};
 
 		FootState.LockComponentRelativeLocation = OffsetRotation.RotateVector(FootState.LockComponentRelativeLocation);
 		FootState.LockComponentRelativeRotation = OffsetRotation * FootState.LockComponentRelativeRotation;
@@ -1534,13 +1547,19 @@ void UAlsAnimationInstance::RefreshFootLock(const FAlsFootUpdateContext& Context
 		}
 	}
 
-	const auto FinalLocation{FMath::Lerp(FootState.TargetLocation, FootState.LockLocation, FootState.LockAmount)};
+	// Limit the rotation of the locked foot.
 
-	auto FinalRotation{FQuat::FastLerp(FootState.TargetRotation, FootState.LockRotation, FootState.LockAmount)};
-	FinalRotation.Normalize();
+	const auto FootDeltaAngle{
+		FMath::RadiansToDegrees(FQuat4f{FootState.LockRotation * FootState.TargetRotation.Inverse()}.GetTwistAngle(FVector3f::UpVector))
+	};
 
-	FootState.FinalLocation = FVector3f{Context.ComponentTransformInverse.TransformPosition(FinalLocation)};
-	FootState.FinalRotation = FQuat4f{Context.ComponentTransformInverse.TransformRotation(FinalRotation)};
+	if (FMath::Abs(FootDeltaAngle) > Settings->FootLock.FootAngleLimit + UE_KINDA_SMALL_NUMBER)
+	{
+		const auto ClampedAngle{FMath::Clamp(FootDeltaAngle, -Settings->FootLock.FootAngleLimit, Settings->FootLock.FootAngleLimit)};
+		const FQuat4f OffsetRotation{FVector3f::UpVector, FMath::DegreesToRadians(ClampedAngle - FootDeltaAngle)};
+
+		FootState.LockRotation = FQuat{OffsetRotation} * FootState.LockRotation;
+	}
 }
 
 void UAlsAnimationInstance::PlayQuickStopAnimation()

@@ -292,6 +292,8 @@ private:
 
 	void RefreshFootLock(const FAlsFootUpdateContext& Context) const;
 
+	void ConstrainFootLock(FAlsFootState& FootState) const;
+
 	// Transitions
 
 public:
