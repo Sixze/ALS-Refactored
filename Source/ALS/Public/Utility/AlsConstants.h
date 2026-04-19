@@ -55,7 +55,6 @@ protected:
 	inline static FName HandLeftIkCurve{TEXTVIEW("HandLeftIk")};
 	inline static FName HandRightIkCurve{TEXTVIEW("HandRightIk")};
 	inline static FName ViewBlockCurve{TEXTVIEW("ViewBlock")};
-	inline static FName AllowAimingCurve{TEXTVIEW("AllowAiming")};
 	inline static FName HipsDirectionLockCurve{TEXTVIEW("HipsDirectionLock")};
 
 	// Pose Animation Curves
@@ -66,6 +65,7 @@ protected:
 	inline static FName PoseCrouchingCurve{TEXTVIEW("PoseCrouching")};
 	inline static FName PoseGroundedCurve{TEXTVIEW("PoseGrounded")};
 	inline static FName PoseInAirCurve{TEXTVIEW("PoseInAir")};
+	inline static FName PoseAimingCurve{TEXTVIEW("PoseAiming")};
 
 	// Feet Animation Curves
 
@@ -215,9 +215,6 @@ public:
 	static FName ViewBlockCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
-	static FName AllowAimingCurveName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static FName HipsDirectionLockCurveName();
 
 	// Pose Animation Curves
@@ -239,6 +236,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
 	static FName PoseInAirCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Animation Curves", Meta = (ReturnDisplayName = "Curve Name"))
+	static FName PoseAimingCurveName();
 
 	// Feet Animation Curves
 
@@ -488,11 +488,6 @@ inline FName UAlsConstants::ViewBlockCurveName()
 	return ViewBlockCurve;
 }
 
-inline FName UAlsConstants::AllowAimingCurveName()
-{
-	return AllowAimingCurve;
-}
-
 inline FName UAlsConstants::HipsDirectionLockCurveName()
 {
 	return HipsDirectionLockCurve;
@@ -526,6 +521,11 @@ inline FName UAlsConstants::PoseGroundedCurveName()
 inline FName UAlsConstants::PoseInAirCurveName()
 {
 	return PoseInAirCurve;
+}
+
+inline FName UAlsConstants::PoseAimingCurveName()
+{
+	return PoseAimingCurve;
 }
 
 inline FName UAlsConstants::FootLeftIkCurveName()

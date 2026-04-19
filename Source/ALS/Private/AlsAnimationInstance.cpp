@@ -393,7 +393,7 @@ void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 	}
 
 	const auto ViewAmount{1.0f - GetCurveValueClamped01(UAlsConstants::ViewBlockCurveName())};
-	const auto AimingAmount{GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName())};
+	const auto AimingAmount{GetCurveValueClamped01(UAlsConstants::PoseAimingCurveName())};
 
 	ViewState.HeadBlendAmount = ViewAmount * (1.0f - AimingAmount);
 

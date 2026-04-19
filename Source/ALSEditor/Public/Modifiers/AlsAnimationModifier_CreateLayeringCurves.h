@@ -41,7 +41,7 @@ protected:
 		UAlsConstants::HandRightIkCurveName(),
 
 		UAlsConstants::ViewBlockCurveName(),
-		UAlsConstants::AllowAimingCurveName(),
+		UAlsConstants::PoseAimingCurveName(),
 
 		UAlsConstants::HipsDirectionLockCurveName(),
 	};
