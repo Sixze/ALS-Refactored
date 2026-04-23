@@ -12,12 +12,15 @@ class ALS_API UAlsMontageUtility : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	/// This function returns a transform in component space.
 	UFUNCTION(BlueprintPure, Category = "ALS|Montage Utility", Meta = (ReturnDisplayName = "Transform"))
 	static FTransform ExtractRootTransformFromMontage(const UAnimMontage* Montage, float Time);
 
+	/// This function returns a transform in component space.
 	UFUNCTION(BlueprintPure, Category = "ALS|Montage Utility", Meta = (ReturnDisplayName = "Transform"))
 	static FTransform ExtractLastRootTransformFromMontage(const UAnimMontage* Montage);
 
+	/// This function returns a transform in component space.
 	UFUNCTION(BlueprintPure, Category = "ALS|Montage Utility", Meta = (ReturnDisplayName = "Transform"))
 	static FTransform ExtractRootMotionFromMontage(const UAnimMontage* Montage, float StartTime, float EndTime);
 

@@ -8,7 +8,7 @@ struct ALS_API FAlsViewAnimationState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator Rotation{ForceInit};
+	FRotator RotationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float YawAngle{0.0f};

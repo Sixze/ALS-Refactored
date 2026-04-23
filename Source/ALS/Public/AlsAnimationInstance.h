@@ -227,9 +227,9 @@ protected:
 	void RefreshGrounded();
 
 private:
-	FVector3f GetRelativeVelocity() const;
+	FVector3f GetVelocity() const;
 
-	FVector2f GetRelativeAccelerationAmount() const;
+	FVector2f GetAccelerationAmount() const;
 
 	void RefreshVelocityBlend();
 
@@ -243,9 +243,9 @@ protected:
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
 private:
-	void RefreshMovementDirection(float ViewRelativeVelocityYawAngle);
+	void RefreshMovementDirection(float VelocityYawAngleViewSpace);
 
-	void RefreshRotationYawOffsets(float ViewRelativeVelocityYawAngle);
+	void RefreshRotationYawOffsets(float VelocityYawAngleViewSpace);
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))

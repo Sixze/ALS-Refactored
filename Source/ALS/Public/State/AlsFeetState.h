@@ -11,31 +11,31 @@ struct ALS_API FAlsFootState
 	float LockAmount{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f ThighAxis{ForceInit};
+	FVector3f ThighAxisPelvisSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector TargetLocation{ForceInit};
+	FVector TargetLocationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat TargetRotation{ForceInit};
+	FQuat TargetRotationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector LockLocation{ForceInit};
+	FVector LockLocationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat LockRotation{ForceInit};
+	FQuat LockRotationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f LockComponentRelativeLocation{ForceInit};
+	FVector3f LockLocationMovementBaseSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat4f LockComponentRelativeRotation{ForceInit};
+	FQuat4f LockRotationMovementBaseSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f LockMovementBaseRelativeLocation{ForceInit};
+	FVector3f LockLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat4f LockMovementBaseRelativeRotation{ForceInit};
+	FQuat4f LockRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FVector3f FinalLocation{ForceInit};
@@ -69,12 +69,12 @@ struct ALS_API FAlsFeetState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsFootState Left{
-		.ThighAxis = -FVector3f::ZAxisVector
+		.ThighAxisPelvisSpace = -FVector3f::ZAxisVector
 	};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FAlsFootState Right{
-		.ThighAxis = FVector3f::ZAxisVector
+		.ThighAxisPelvisSpace = FVector3f::ZAxisVector
 	};
 };
 

@@ -69,7 +69,7 @@ class ALS_API UAlsMovementSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	/// Range of velocity angles relative to the viewing direction at which the speed is interpolated from forward to backward.
+	/// Range of velocity angles in view space at which speed interpolation occurs from forward to backward.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
 	FFloatInterval VelocityAngleToSpeedInterpolationRange{100.0f, 125.0f};
 

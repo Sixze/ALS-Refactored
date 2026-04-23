@@ -77,13 +77,13 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		                                                MantlingSettings->MotionWarpingRotationCustomBlendCurve)
 	};
 
-	// Calculate the start and target transforms based on the stored relative transforms to follow moving objects.
-
 	FTransform StartTransform{StartRotation, StartLocation};
 	FTransform TargetTransform{TargetRotation, TargetLocation};
 
 	if (MovementBaseUtility::UseRelativeLocation(TargetPrimitive.Get()))
 	{
+		// Convert the start and target transforms from target primitive space to world space.
+
 		StartTransform *= TargetPrimitive->GetComponentTransform();
 		StartTransform.SetScale3D(FVector::OneVector);
 
@@ -91,7 +91,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		TargetTransform.SetScale3D(FVector::OneVector);
 	}
 
-	// Interpolate the start and target transform to obtain the warped transform.
+	// Interpolate the start and target transforms to obtain the warped transform.
 
 	const auto WarpLocation{FMath::Lerp(StartTransform.GetLocation(), TargetTransform.GetLocation(), LocationWarpAmount)};
 
@@ -104,7 +104,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	const FTransform WarpTransform{WarpRotation, WarpLocation};
 
-	// Extract the current root transform, convert from the mesh space to the actor space.
+	// Extract the current root transform and convert it from component space to actor space.
 
 	auto RootTransform{UAlsMontageUtility::ExtractRootTransformFromMontage(Montage, MontageTime)};
 	RootTransform.SetScale3D(FVector::OneVector);

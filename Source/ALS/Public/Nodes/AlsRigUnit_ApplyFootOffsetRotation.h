@@ -50,7 +50,7 @@ public:
 	FQuat FootRotation{ForceInit};
 
 	UPROPERTY(Transient)
-	FQuat FootReferenceLocalRotation{ForceInit};
+	FQuat FootInitialRotationCalfSpace{ForceInit};
 
 public:
 	virtual void Initialize() override;

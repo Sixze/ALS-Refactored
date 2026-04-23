@@ -21,7 +21,7 @@ public:
 	float MovingSpeedThreshold{50.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	EAlsInAirRotationMode InAirRotationMode{EAlsInAirRotationMode::RotateToVelocityOnJump};
+	EAlsInAirRotationMode InAirRotationMode{EAlsInAirRotationMode::RotateToVelocity};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bAllowAimingWhenInAir : 1 {true};

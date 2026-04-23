@@ -377,7 +377,7 @@ private:
 	void OnReplicated_ReplicatedViewRotation();
 
 public:
-	void CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation, bool bRotationIsBaseRelative);
+	void CorrectViewNetworkSmoothing(const FRotator& TargetRotation);
 
 public:
 	const FAlsViewState& GetViewState() const;
@@ -463,7 +463,7 @@ protected:
 
 	void SetTargetYawAngleSmooth(float TargetYawAngle, float DeltaTime, float RotationSpeed);
 
-	void RefreshViewRelativeTargetYawAngle();
+	void RefreshTargetYawAngleViewSpace();
 
 	// Rolling
 

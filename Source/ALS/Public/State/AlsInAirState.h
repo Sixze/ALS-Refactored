@@ -8,7 +8,7 @@ struct ALS_API FAlsInAirState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "cm/s"))
-	float VerticalVelocity{0.0f};
+	float VerticalVelocityWorldSpace{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bJumpRequested : 1 {false};

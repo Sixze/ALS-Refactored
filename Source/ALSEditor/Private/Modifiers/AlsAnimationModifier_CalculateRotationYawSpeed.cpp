@@ -23,17 +23,19 @@ void UAlsAnimationModifier_CalculateRotationYawSpeed::OnApply_Implementation(UAn
 
 	for (auto i{1}; i < Sequence->GetNumberOfSampledKeys(); i++)
 	{
-		auto CurrentPoseTransform{
-			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? -1 : 0))
+		const auto RootBoneRotation{
+			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? -1 : 0)).GetRotation()
 		};
 
-		auto NextPoseTransform{
-			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? 0 : -1))
+		const auto NextRootBoneRotation{
+			DataModel->GetBoneTrackTransform(UAlsConstants::RootBoneName(), i + (Sequence->RateScale >= 0.0f ? 0 : -1)).GetRotation()
+		};
+
+		const auto DeltaYawAngle{
+			FMath::RadiansToDegrees((NextRootBoneRotation * RootBoneRotation.Inverse()).GetTwistAngle(FVector::UpVector))
 		};
 
 		UAnimationBlueprintLibrary::AddFloatCurveKey(Sequence, UAlsConstants::RotationYawSpeedCurveName(), Sequence->GetTimeAtFrame(i),
-		                                             UE_REAL_TO_FLOAT(
-			                                             (NextPoseTransform.Rotator().Yaw - CurrentPoseTransform.Rotator().Yaw) *
-			                                             FMath::Abs(Sequence->RateScale) * FrameRate));
+		                                             UE_REAL_TO_FLOAT(DeltaYawAngle * FMath::Abs(Sequence->RateScale) * FrameRate));
 	}
 }

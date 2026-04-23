@@ -212,7 +212,7 @@ FVector UAlsCharacterMovementComponent::ConsumeInputVector()
 	FVector AngularVelocity;
 	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseAngularVelocity(CharacterOwner->GetBasedMovement(), AngularVelocity))
 	{
-		// Offset the input vector to keep it relative to the movement base.
+		// Offset the input to keep it in the movement base space.
 		InputVector = FQuat::MakeFromRotationVector(AngularVelocity * GetWorld()->GetDeltaSeconds()).RotateVector(InputVector);
 	}
 
@@ -282,7 +282,7 @@ void UAlsCharacterMovementComponent::CalcVelocity(const float DeltaTime, const f
 	FVector AngularVelocity;
 	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseAngularVelocity(CharacterOwner->GetBasedMovement(), AngularVelocity))
 	{
-		// Offset the velocity to keep it relative to the movement base.
+		// Offset the velocity to keep it in the movement base space.
 		Velocity = FQuat::MakeFromRotationVector(AngularVelocity * DeltaTime).RotateVector(Velocity);
 	}
 
@@ -882,7 +882,7 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 		auto* Character{Cast<AAlsCharacter>(CharacterOwner)};
 		if (IsValid(Character))
 		{
-			Character->CorrectViewNetworkSmoothing(NewControlRotation, false);
+			Character->CorrectViewNetworkSmoothing(NewControlRotation);
 		}
 
 		PreviousControlRotation = NewControlRotation;
@@ -951,14 +951,14 @@ void UAlsCharacterMovementComponent::RefreshGroundedMovementSettings()
 		// Ideally we should use actor rotation here instead of view rotation, but we can't do that because ALS has
 		// full control over actor rotation and it is not synchronized over the network, so it would cause jitter.
 
-		const auto RelativeViewRotation{UAlsRotation::GetTwist(ViewRotation.Quaternion(), -GetGravityDirection())};
+		const auto ViewRotationGravitySpace{UAlsRotation::GetTwist(ViewRotation.Quaternion(), -GetGravityDirection())};
 
-		const FVector2D RelativeVelocity{RelativeViewRotation.UnrotateVector(Velocity)};
-		const auto VelocityAngle{UAlsVector::DirectionToAngle(RelativeVelocity)};
+		const FVector2D VelocityViewSpace{ViewRotationGravitySpace.UnrotateVector(Velocity)};
+		const auto VelocityYawAngleViewSpace{UAlsVector::DirectionToAngle(VelocityViewSpace)};
 
 		const auto ForwardSpeedAmount{
 			1.0f - UAlsMath::Clamp01(MovementSettings->VelocityAngleToSpeedInterpolationRange
-			                                         .GetRangePct(static_cast<float>(FMath::Abs(VelocityAngle))))
+			                                         .GetRangePct(static_cast<float>(FMath::Abs(VelocityYawAngleViewSpace))))
 		};
 
 		WalkSpeed = FMath::Lerp(GaitSettings.WalkBackwardSpeed, GaitSettings.WalkForwardSpeed, ForwardSpeedAmount);

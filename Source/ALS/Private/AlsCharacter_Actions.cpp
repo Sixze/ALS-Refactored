@@ -404,17 +404,16 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 		                          ? EAlsMantlingType::High
 		                          : EAlsMantlingType::Low;
 
-	// If the target primitive can't move, then use world coordinates to save
-	// some performance by skipping some coordinate space transformations later.
+	// If the target primitive cannot move, use world space to improve performance by skipping coordinate space transformations.
 
 	if (MovementBaseUtility::UseRelativeLocation(TargetPrimitive))
 	{
-		const auto TargetRelativeTransform{
+		const auto TargetTransform{
 			FTransform{TargetRotation, TargetCapsuleLocation}.GetRelativeTransform(TargetPrimitive->GetComponentTransform())
 		};
 
-		Parameters.TargetLocation = TargetRelativeTransform.GetLocation();
-		Parameters.TargetRotation = TargetRelativeTransform.Rotator();
+		Parameters.TargetLocation = TargetTransform.GetLocation();
+		Parameters.TargetRotation = TargetTransform.Rotator();
 	}
 	else
 	{
@@ -495,10 +494,10 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	RootMotionSource->Duration = Duration / PlayRate;
 	RootMotionSource->MontageStartTime = StartTime;
 
-	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
+	const auto bUseTargetPrimitiveSpace{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
 	const FTransform MeshTransform{GetBaseRotationOffset()};
 
-	// Extract the initial root transform, invert it, convert from the mesh space to the actor space, and apply it to the actor's transform.
+	// Extract the initial root transform, invert it, convert it from component space to actor space, and apply it to the actor transform.
 
 	const auto ActorTransform{GetActorTransform()};
 
@@ -508,20 +507,20 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	const auto StartRootTransformInverse{StartRootTransform.GetRelativeTransformReverse(MeshTransform)};
 	auto StartTransform{StartRootTransformInverse * ActorTransform};
 
-	if (bUseRelativeLocation)
+	if (bUseTargetPrimitiveSpace)
 	{
-		// Convert the actor's transform to be relative to the target primitive.
+		// Convert the start transform to the target primitive space.
 		StartTransform.SetToRelativeTransform(Parameters.TargetPrimitive->GetComponentTransform());
 	}
 
 	RootMotionSource->StartRotation = StartTransform.Rotator();
 	RootMotionSource->StartLocation = StartTransform.GetLocation();
 
-	// Extract the final root transform, invert it, convert from the mesh space to the actor space, and apply it to the target transform.
+	// Extract the final root transform, invert it, convert it from component space to actor space, and apply it to the target transform.
 
 	FTransform TargetTransform{Parameters.TargetRotation.GetNormalized(), Parameters.TargetLocation};
 
-	if (bUseRelativeLocation)
+	if (bUseTargetPrimitiveSpace)
 	{
 		// Convert the relative target transform back to world space.
 		TargetTransform *= Parameters.TargetPrimitive->GetComponentTransform();
@@ -534,7 +533,7 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 	const auto EndRootTransformInverse{EndRootTransform.GetRelativeTransformReverse(MeshTransform)};
 	auto NewTargetTransform{EndRootTransformInverse * TargetTransform};
 
-	if (bUseRelativeLocation)
+	if (bUseTargetPrimitiveSpace)
 	{
 		// Convert the target transform to be relative to the target primitive.
 		NewTargetTransform.SetToRelativeTransform(Parameters.TargetPrimitive->GetComponentTransform());

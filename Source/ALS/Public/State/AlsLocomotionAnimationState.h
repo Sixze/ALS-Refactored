@@ -11,19 +11,19 @@ struct ALS_API FAlsLocomotionAnimationState
 	uint8 bHasInput : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float InputYawAngle{0.0f};
+	float InputYawAngleWorldSpace{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float Speed{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector Velocity{ForceInit};
+	FVector VelocityWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float VelocityYawAngle{0.0f};
+	float VelocityYawAngleWorldSpace{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector Acceleration{ForceInit};
+	FVector AccelerationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm/s^2"))
 	float MaxAcceleration{0.0f};
@@ -41,22 +41,22 @@ struct ALS_API FAlsLocomotionAnimationState
 	uint8 bMovingSmooth : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float TargetYawAngle{0.0f};
+	float TargetYawAngleWorldSpace{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector Location{ForceInit};
+	FVector LocationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator Rotation{ForceInit};
+	FRotator RotationWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FQuat RotationQuaternion{ForceInit};
+	FQuat RotationQuaternionWorldSpace{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "deg/s"))
-	float YawVelocity{0.0f};
+	float YawVelocityWorldSpace{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "x"))
-	float Scale{1.0f};
+	float ScaleWorldSpace{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float CapsuleRadius{0.0f};
