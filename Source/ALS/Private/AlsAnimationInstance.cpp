@@ -120,7 +120,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 		// Manually synchronize mesh rotation with character rotation.
 
-		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
+		Mesh->SetRelativeRotation(ParentTransform.GetRotation() * Character->GetBaseRotationOffset());
 
 		// Re-cache proxy transforms to match the modified mesh transform.
 
