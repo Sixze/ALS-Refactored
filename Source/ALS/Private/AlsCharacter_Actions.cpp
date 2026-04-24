@@ -457,6 +457,13 @@ void AAlsCharacter::StartMantlingImplementation(const FAlsMantlingParameters& Pa
 		return;
 	}
 
+	if (!Parameters.TargetPrimitive.IsValid())
+	{
+		// Target primitive may be invalid on clients if the actor that the character is
+		// mantling onto is not network relevant. In this case, simply do not start mantling.
+		return;
+	}
+
 	const auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
 
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) || !ALS_ENSURE(IsValid(MantlingSettings->Montage)))
