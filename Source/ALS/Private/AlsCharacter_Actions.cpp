@@ -137,16 +137,25 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 	}
 }
 
-bool AAlsCharacter::StartMantlingGrounded()
+bool AAlsCharacter::StartMantling()
 {
-	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	       StartMantling(Settings->Mantling.GroundedTrace);
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+	{
+		return StartMantling(Settings->Mantling.GroundedTrace);
+	}
+
+	if (LocomotionMode == AlsLocomotionModeTags::InAir)
+	{
+		return StartMantling(Settings->Mantling.InAirTrace);
+	}
+
+	return false;
 }
 
-bool AAlsCharacter::StartMantlingInAir()
+bool AAlsCharacter::AutoStartMantling()
 {
-	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
-	       StartMantling(Settings->Mantling.InAirTrace);
+	return Settings->Mantling.bAutoStartMantlingInAir && LocomotionMode == AlsLocomotionModeTags::InAir &&
+	       IsLocallyControlled() && StartMantling(Settings->Mantling.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const

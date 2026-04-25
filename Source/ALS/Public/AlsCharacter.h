@@ -498,10 +498,10 @@ public:
 	bool IsMantlingAllowedToStart() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
-	bool StartMantlingGrounded();
+	bool StartMantling();
 
 private:
-	bool StartMantlingInAir();
+	bool AutoStartMantling();
 
 	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 

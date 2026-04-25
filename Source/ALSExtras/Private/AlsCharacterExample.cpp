@@ -162,7 +162,7 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 			return;
 		}
 
-		if (StartMantlingGrounded())
+		if (StartMantling())
 		{
 			return;
 		}
