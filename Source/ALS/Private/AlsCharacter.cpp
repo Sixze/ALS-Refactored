@@ -519,9 +519,10 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag PreviousLocom
 		{
 			static constexpr auto PlayRate{1.3f};
 
-			StartRolling(PlayRate, LocomotionState.bHasVelocity
-				                       ? LocomotionState.VelocityYawAngle
-				                       : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(GetActorRotation().Yaw)));
+			StartRolling(LocomotionState.bHasVelocity
+				             ? LocomotionState.VelocityYawAngle
+				             : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(GetActorRotation().Yaw)),
+			             PlayRate);
 		}
 		else
 		{

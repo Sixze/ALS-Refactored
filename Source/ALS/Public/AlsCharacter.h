@@ -468,17 +468,18 @@ protected:
 	// Rolling
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
-	void StartRolling(float PlayRate = 1.0f);
-
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	UAnimMontage* SelectRollMontage();
 
 	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
 
-private:
-	void StartRolling(float PlayRate, float TargetYawAngle);
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
+	void StartRollingGrounded(float PlayRate = 1.0f);
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
+	void StartRolling(float TargetYawAngle, float PlayRate = 1.0f);
+
+private:
 	UFUNCTION(Server, Reliable)
 	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float InitialYawAngle, float TargetYawAngle);
 

@@ -198,7 +198,7 @@ void AAlsCharacterExample::Input_OnRoll()
 {
 	static constexpr auto PlayRate{1.3f};
 
-	StartRolling(PlayRate);
+	StartRollingGrounded(PlayRate);
 }
 
 void AAlsCharacterExample::Input_OnRotationMode()

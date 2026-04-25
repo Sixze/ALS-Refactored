@@ -19,14 +19,9 @@
 #include "Utility/AlsRotation.h"
 #include "Utility/AlsVector.h"
 
-void AAlsCharacter::StartRolling(const float PlayRate)
+UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
 {
-	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
-	{
-		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
-			                       ? LocomotionState.InputYawAngle
-			                       : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(GetActorRotation().Yaw)));
-	}
+	return Settings->Rolling.Montage;
 }
 
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
@@ -36,7 +31,18 @@ bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
 
-void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngle)
+void AAlsCharacter::StartRollingGrounded(const float PlayRate)
+{
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+	{
+		StartRolling(Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
+			             ? LocomotionState.InputYawAngle
+			             : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(GetActorRotation().Yaw)),
+		             PlayRate);
+	}
+}
+
+void AAlsCharacter::StartRolling(const float TargetYawAngle, const float PlayRate)
 {
 	if (GetLocalRole() <= ROLE_SimulatedProxy)
 	{
@@ -63,11 +69,6 @@ void AAlsCharacter::StartRolling(const float PlayRate, const float TargetYawAngl
 		StartRollingImplementation(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 		ServerStartRolling(Montage, PlayRate, InitialYawAngle, TargetYawAngle);
 	}
-}
-
-UAnimMontage* AAlsCharacter::SelectRollMontage_Implementation()
-{
-	return Settings->Rolling.Montage;
 }
 
 void AAlsCharacter::ServerStartRolling_Implementation(UAnimMontage* Montage, const float PlayRate,
