@@ -385,13 +385,13 @@ void AAlsCharacter::RefreshMeshProperties() const
 
 		if (bUseAbsoluteRotation || !IsValid(GetMesh()->GetAttachParent()))
 		{
-			GetMesh()->SetRelativeRotation_Direct(
-				GetMesh()->GetRelativeRotationCache().QuatToRotator(GetMesh()->GetComponentQuat()));
+			GetMesh()->SetRelativeRotation_Direct(GetMesh()->GetRelativeRotationCache().QuatToRotator(
+				GetMesh()->GetComponentQuat()));
 		}
 		else
 		{
-			GetMesh()->SetRelativeRotation_Direct(
-				GetMesh()->GetRelativeRotationCache().QuatToRotator(GetActorQuat().Inverse() * GetMesh()->GetComponentQuat()));
+			GetMesh()->SetRelativeRotation_Direct(GetMesh()->GetRelativeRotationCache().QuatToRotator(
+				GetMesh()->GetAttachParent()->GetComponentQuat().Inverse() * GetMesh()->GetComponentQuat()));
 		}
 	}
 

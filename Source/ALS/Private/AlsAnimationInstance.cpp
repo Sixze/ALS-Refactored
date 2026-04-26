@@ -23,6 +23,9 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
+ALS_DEFINE_PRIVATE_MEMBER_ACCESSOR(AlsGetAnimationCurvesAccessor, &FAnimInstanceProxy::GetAnimationCurves,
+                                   const TMap<FName, float>& (FAnimInstanceProxy::*)(EAnimCurveType) const)
+
 void UAlsAnimationInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -280,9 +283,6 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 		                             ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator()
 		                             : FRotator::ZeroRotator;
 }
-
-ALS_DEFINE_PRIVATE_MEMBER_ACCESSOR(AlsGetAnimationCurvesAccessor, &FAnimInstanceProxy::GetAnimationCurves,
-                                   const TMap<FName, float>& (FAnimInstanceProxy::*)(EAnimCurveType) const)
 
 void UAlsAnimationInstance::RefreshLayering()
 {
@@ -664,6 +664,7 @@ void UAlsAnimationInstance::RefreshHead()
 		// https://theorangeduck.com/page/spring-roll-call#critical
 
 		const auto SmoothingTime{
+#pragma warning(suppress : 4996) // TODO Check the need for this pragma in future engine versions.
 			SpringMath::HalfLifeToSmoothingTime(HeadState.bSwitchingLookSides
 				                                    ? Settings->Head.SwitchLookSidesYawAngleInterpolationHalfLife
 				                                    : bFirstPerson
