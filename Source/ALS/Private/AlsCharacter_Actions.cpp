@@ -1066,6 +1066,11 @@ void AAlsCharacter::StopRagdollingImplementation()
 		return;
 	}
 
+	if (!AnimationInstance.IsValid() || GetMesh()->GetComponentSpaceTransforms().IsEmpty())
+	{
+		return;
+	}
+
 	auto& FinalRagdollPose{AnimationInstance->SnapshotFinalRagdollPose()};
 
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBoneName())};
