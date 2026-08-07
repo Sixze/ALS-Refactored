@@ -244,7 +244,7 @@ public:
 	virtual void Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
 	                    const FAnimNotifyEventReference& NotifyEventReference) override;
 
-private:
+protected:
 	void SpawnSound(USkeletalMeshComponent* Mesh, const FAlsFootstepSoundSettings& SoundSettings,
 	                const FVector& FootstepLocation, const FQuat& FootstepRotation) const;
 

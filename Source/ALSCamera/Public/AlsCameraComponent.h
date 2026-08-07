@@ -78,6 +78,10 @@ protected:
 public:
 	UAlsCameraComponent();
 
+	#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+	#endif
+
 	virtual void PostLoad() override;
 
 	virtual void OnRegister() override;

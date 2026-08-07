@@ -6,6 +6,7 @@
 #include "Engine/OverlapResult.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
+#include "Misc/DataValidation.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
@@ -22,6 +23,20 @@ UAlsCameraComponent::UAlsCameraComponent()
 	bTickInEditor = false;
 	bHiddenInGame = true;
 }
+
+#if WITH_EDITOR
+EDataValidationResult UAlsCameraComponent::IsDataValid(class FDataValidationContext& Context) const {
+	auto Res = Super::IsDataValid(Context);
+
+	// Ensure camera settings are in place.
+	if (!IsValid(Settings)) {
+		Context.AddError(INVTEXT("Camera.Settings must be set"));
+		Res = EDataValidationResult::Invalid;
+	}
+
+	return Res;
+}
+#endif
 
 void UAlsCameraComponent::PostLoad()
 {
