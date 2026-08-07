@@ -6,6 +6,8 @@
 #include "Engine/OverlapResult.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
+#include "Misc/DataValidation.h"
+#include "Misc/UObjectToken.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsDebugUtility.h"
 #include "Utility/AlsMacros.h"
@@ -13,6 +15,8 @@
 #include "Utility/AlsUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
+
+#define LOCTEXT_NAMESPACE "AlsCameraComponent"
 
 UAlsCameraComponent::UAlsCameraComponent()
 {
@@ -22,6 +26,28 @@ UAlsCameraComponent::UAlsCameraComponent()
 	bTickInEditor = false;
 	bHiddenInGame = true;
 }
+
+#if WITH_EDITOR
+EDataValidationResult UAlsCameraComponent::IsDataValid(FDataValidationContext& Context) const
+{
+	auto Result{Super::IsDataValid(Context)};
+
+	if (!IsValid(Settings))
+	{
+		Context.AddMessage(EMessageSeverity::Warning)
+		       ->AddToken(FUObjectToken::Create(this))
+		       ->AddText(FText::Format(
+			       LOCTEXT("MissingCameraSettingWarning", "({ComponentName}): Camera settings must be set!"),
+			       {
+				       {FString{ANSITEXTVIEW("ComponentName")}, FText::AsCultureInvariant(GetName())}
+			       }));
+
+		Result = EDataValidationResult::Invalid;
+	}
+
+	return Result;
+}
+#endif
 
 void UAlsCameraComponent::PostLoad()
 {
@@ -559,3 +585,5 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
+
+#undef LOCTEXT_NAMESPACE
