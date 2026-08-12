@@ -431,6 +431,13 @@ private:
 	void RefreshGroundedRotation(float DeltaTime);
 
 protected:
+	/// Refresh rotation according to the current locomotion mode.
+	///
+	/// Overrides should typically call super, as it already encapsulates and handles Grounded & InAir
+	/// rotation. Subclasses which implement support for other locomotion modes, such as flying or
+	/// swimming, can override this method to implement rotation refresh for such locomotion modes.
+	virtual void RefreshRotation(float DeltaTime);
+
 	virtual bool RefreshCustomGroundedMovingRotation(float DeltaTime);
 
 	virtual bool RefreshCustomGroundedNotMovingRotation(float DeltaTime);

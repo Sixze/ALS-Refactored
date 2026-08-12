@@ -287,8 +287,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshGait();
 	RefreshRotationMode();
 
-	RefreshGroundedRotation(DeltaTime);
-	RefreshInAirRotation(DeltaTime);
+	RefreshRotation(DeltaTime);
 
 	AutoStartMantling();
 	RefreshMantling();
@@ -1660,6 +1659,12 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 	}
 
 	RefreshTargetYawAngleUsingActorRotation();
+}
+
+void AAlsCharacter::RefreshRotation(const float DeltaTime)
+{
+	RefreshGroundedRotation(DeltaTime);
+	RefreshInAirRotation(DeltaTime);
 }
 
 bool AAlsCharacter::RefreshCustomGroundedMovingRotation(const float DeltaTime)
