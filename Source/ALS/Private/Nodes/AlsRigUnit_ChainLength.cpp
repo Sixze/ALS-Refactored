@@ -35,27 +35,19 @@ namespace AlsChainLengthRigUnit
 		float ChainLength{-1.0};
 		FRigTransformElement* ParentElement{nullptr};
 
-		const auto* SingleParentElement{Cast<FRigSingleParentElement>(DescendantElement)};
-		if (SingleParentElement != nullptr)
+		// GetParents covers single-parent and multi-parent elements on UE 5.8 and 5.9.
+		for (FRigBaseElement* Parent : Hierarchy->GetParents(DescendantElement, false))
 		{
-			ParentElement = SingleParentElement->ParentElement;
-			ChainLength = CalculateChainLength(AncestorElement, ParentElement, Hierarchy, TransformType, VisitedElements);
-		}
-		else
-		{
-			const auto* MultiParentElement{Cast<FRigMultiParentElement>(DescendantElement)};
-			if (MultiParentElement != nullptr)
+			ParentElement = Cast<FRigTransformElement>(Parent);
+			if (ParentElement == nullptr)
 			{
-				for (const auto& ParentConstraint : MultiParentElement->ParentConstraints)
-				{
-					ParentElement = ParentConstraint.ParentElement;
-					ChainLength = CalculateChainLength(AncestorElement, ParentElement, Hierarchy, TransformType, VisitedElements);
+				continue;
+			}
 
-					if (ChainLength >= 0.0f)
-					{
-						break;
-					}
-				}
+			ChainLength = CalculateChainLength(AncestorElement, ParentElement, Hierarchy, TransformType, VisitedElements);
+			if (ChainLength >= 0.0f)
+			{
+				break;
 			}
 		}
 
